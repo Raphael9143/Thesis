@@ -1,0 +1,50 @@
+const express = require('express');
+const cors = require('cors');
+const authRoutes = require('./auth');
+const { sequelize, testConnection } = require('../config/database');
+const { specs, swaggerUi } = require('../config/swagger')
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// swagger ui
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+    explorer: true,
+    customSiteTitle: 'Thesis API Document'
+}))
+
+// Test database connection
+testConnection();
+
+// Sync database (tạo bảng nếu chưa có)
+sequelize.sync({ force: false }) // force: true sẽ xóa và tạo lại bảng
+    .then(() => {
+        console.log('✅ Database synced successfully!');
+    })
+    .catch((error) => {
+        console.error('❌ Database sync failed:', error.message);
+    });
+
+// Routes
+app.get('/', (req, res) => {
+    res.json({
+        success: true,
+        message: 'API Server is running!',
+        database: 'MySQL with Sequelize',
+        endpoints: {
+            auth: {
+                register: 'POST /api/auth/register',
+                login: 'POST /api/auth/login',
+                profile: 'GET /api/auth/profile (requires token)'
+            }
+        }
+    });
+});
+
+// Auth routes
+app.use('/api/auth', authRoutes);
+
+module.exports = app
