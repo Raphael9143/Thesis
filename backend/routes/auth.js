@@ -20,6 +20,10 @@ const auth = require('../middlewares/auth');
  *         password:
  *           type: string
  *           example: "password123"
+ *         role:
+ *           type: string
+ *           enum: [admin, teacher, student]
+ *           example: "student"
  *     LoginRequest:
  *       type: object
  *       required:
@@ -40,6 +44,9 @@ const auth = require('../middlewares/auth');
  *           type: integer
  *         email:
  *           type: string
+ *         role:
+ *           type: string
+ *           enum: [admin, teacher, student]
  *         createdAt:
  *           type: string
  *           format: date-time

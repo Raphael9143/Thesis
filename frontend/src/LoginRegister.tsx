@@ -69,12 +69,6 @@ export default function LoginRegister() {
         {isLogin ? 'No account? Register' : 'Have account? Login'}
       </button>
       {message && <div className="message">{message}</div>}
-      {token && (
-        <div className="token-box">
-          <strong>JWT Token:</strong>
-          <textarea readOnly value={token} rows={3} style={{ width: '100%' }} />
-        </div>
-      )}
     </div>
   );
 }

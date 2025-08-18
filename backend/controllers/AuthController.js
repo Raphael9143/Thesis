@@ -7,15 +7,16 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const AuthController = {
     // Đăng ký
+
     register: async (req, res) => {
         try {
-            const { email, password } = req.body;
+            const { email, password, role } = req.body;
 
             // Validation
             if (!email || !password) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Vui lòng điền đầy đủ thông tin'
+                    message: 'Vui lòng điền đầy đủ thông tin (email, password)'
                 });
             }
 
@@ -35,7 +36,8 @@ const AuthController = {
             // Tạo user mới
             const newUser = await User.create({
                 email,
-                password: hashedPassword
+                password: hashedPassword,
+                role: role && ['admin','teacher','student'].includes(role) ? role : 'student'
             });
 
             // Tạo JWT token
@@ -43,9 +45,10 @@ const AuthController = {
                 {
                     userId: newUser.id,
                     email: newUser.email,
+                    role: newUser.role
                 },
                 JWT_SECRET,
-                { expiresIn: '24h' }
+                { expiresIn: '72h' }
             );
 
             res.status(201).json({
@@ -55,6 +58,7 @@ const AuthController = {
                     user: {
                         id: newUser.id,
                         email: newUser.email,
+                        role: newUser.role,
                         createdAt: newUser.createdAt
                     },
                     token
@@ -118,11 +122,13 @@ const AuthController = {
                 });
             }
 
+
             // Tạo JWT token
             const token = jwt.sign(
                 {
                     userId: user.id,
                     email: user.email,
+                    role: user.role
                 },
                 JWT_SECRET,
                 { expiresIn: '24h' }
@@ -135,6 +141,7 @@ const AuthController = {
                     user: {
                         id: user.id,
                         email: user.email,
+                        role: user.role,
                         createdAt: user.createdAt
                     },
                     token
@@ -170,6 +177,7 @@ const AuthController = {
                     user: {
                         id: user.id,
                         email: user.email,
+                        role: user.role,
                         createdAt: user.createdAt,
                         updatedAt: user.updatedAt
                     }

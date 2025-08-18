@@ -2,12 +2,14 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 // Định nghĩa User model
+
 const User = sequelize.define('User', {
     id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
+    // Không dùng username nữa
     email: {
         type: DataTypes.STRING(100),
         allowNull: false,
@@ -24,6 +26,11 @@ const User = sequelize.define('User', {
             len: [6, 255],
             notEmpty: true
         }
+    },
+    role: {
+        type: DataTypes.ENUM('admin', 'teacher', 'student'),
+        allowNull: false,
+        defaultValue: 'student',
     }
 }, {
     tableName: 'users',
