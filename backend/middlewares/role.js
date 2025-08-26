@@ -1,0 +1,12 @@
+// Middleware kiểm tra quyền truy cập theo role
+module.exports = function requireRole(...roles) {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: insufficient permissions'
+      });
+    }
+    next();
+  };
+};

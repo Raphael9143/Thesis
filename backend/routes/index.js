@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./auth');
+
 const { sequelize, testConnection } = require('../config/database');
 const { specs, swaggerUi } = require('../config/swagger')
 
@@ -44,7 +45,12 @@ app.get('/', (req, res) => {
     });
 });
 
+
+
+const classRoutes = require('./class');
 // Auth routes
 app.use('/api/auth', authRoutes);
+// Class routes
+app.use('/api/class', classRoutes);
 
 module.exports = app

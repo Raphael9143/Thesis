@@ -33,11 +33,17 @@ const AuthController = {
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-            // Tạo user mới
+
+            // Chỉ cho phép đăng ký role là 'student' hoặc 'teacher'
+            let regRole = 'student';
+            if (role && ['student', 'teacher'].includes(role)) {
+                regRole = role;
+            }
+
             const newUser = await User.create({
                 email,
                 password: hashedPassword,
-                role: role && ['admin','teacher','student'].includes(role) ? role : 'student'
+                role: regRole
             });
 
             // Tạo JWT token

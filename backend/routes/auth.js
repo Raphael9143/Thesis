@@ -22,7 +22,7 @@ const auth = require('../middlewares/auth');
  *           example: "password123"
  *         role:
  *           type: string
- *           enum: [admin, teacher, student]
+ *           enum: [teacher, student]
  *           example: "student"
  *     LoginRequest:
  *       type: object
