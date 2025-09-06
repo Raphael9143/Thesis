@@ -24,11 +24,11 @@ const requireRole = require('../middlewares/role');
  *               name:
  *                 type: string
  *                 example: "Lớp Toán 1"
- *               studentIds:
+ *               studentEmails:
  *                 type: array
  *                 items:
- *                   type: integer
- *                 example: [2, 3, 4]
+ *                   type: string
+ *                 example: ["student1@gmail.com", "student2@gmail.com"]
  *     responses:
  *       201:
  *         description: Class created
