@@ -9,7 +9,6 @@ const User = sequelize.define('User', {
         primaryKey: true,
         autoIncrement: true
     },
-    // Không dùng username nữa
     email: {
         type: DataTypes.STRING(100),
         allowNull: false,
