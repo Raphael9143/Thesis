@@ -1,3 +1,44 @@
+// Xóa nhiều học sinh khỏi lớp học
+exports.removeStudentFromClass = async (req, res) => {
+  try {
+    const classId = req.params.id;
+    const userId = req.user.userId;
+    const userRole = req.user.role;
+    const { studentIds } = req.body;
+
+    if (!Array.isArray(studentIds) || studentIds.length === 0) {
+      return res.status(400).json({ success: false, message: 'studentIds (array) is required.' });
+    }
+
+    // Tìm lớp học
+    const foundClass = await Class.findByPk(classId);
+    if (!foundClass) {
+      return res.status(404).json({ success: false, message: 'Class not found.' });
+    }
+
+    // Chỉ admin hoặc giáo viên chủ nhiệm mới được xóa học sinh
+    if (userRole !== 'admin' && foundClass.teacherId !== userId) {
+      return res.status(403).json({ success: false, message: 'You do not have permission to remove students from this class.' });
+    }
+
+    // Xóa các học sinh khỏi lớp
+    const deleted = await ClassStudent.destroy({
+      where: {
+        classId,
+        studentId: studentIds
+      }
+    });
+
+    if (deleted === 0) {
+      return res.status(404).json({ success: false, message: 'No students were removed (not found in class).' });
+    }
+
+    res.json({ success: true, message: 'Students removed from class.', count: deleted });
+  } catch (error) {
+    console.error('Remove student from class error:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
 // Sửa trạng thái lớp học
 exports.updateClassStatus = async (req, res) => {
   try {

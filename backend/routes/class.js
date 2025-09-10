@@ -7,6 +7,49 @@ const requireRole = require('../middlewares/role');
 
 /**
  * @swagger
+ * /api/class/{id}/students:
+ *   delete:
+ *     summary: Xóa học sinh khỏi lớp học (chỉ teacher chủ nhiệm hoặc admin)
+ *     tags: [Class]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID lớp học
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - studentIds
+ *             properties:
+ *               studentIds:
+ *                 type: array
+ *                 items:
+ *                   type: integer
+ *                 example: [4, 5, 6]
+ *     responses:
+ *       200:
+ *         description: Student removed from class
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.delete('/:id/students', auth, requireRole('teacher', 'admin'), ClassController.removeStudentFromClass);
+
+/**
+ * @swagger
  * /api/class/{id}/status:
  *   patch:
  *     summary: Sửa trạng thái lớp học (chỉ teacher chủ nhiệm hoặc admin)
