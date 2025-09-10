@@ -1,3 +1,47 @@
+// Sửa trạng thái lớp học
+exports.updateClassStatus = async (req, res) => {
+  try {
+    const classId = req.params.id;
+    const userId = req.user.userId;
+    const userRole = req.user.role;
+    const { status } = req.body;
+
+    // Danh sách status hợp lệ
+    const validStatus = ['draft', 'active', 'in_progress', 'closed', 'archived', 'cancelled'];
+    if (!status || !validStatus.includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid or missing status.' });
+    }
+
+    // Tìm lớp học
+    const foundClass = await Class.findByPk(classId);
+    if (!foundClass) {
+      return res.status(404).json({ success: false, message: 'Class not found.' });
+    }
+
+    // Chỉ admin hoặc giáo viên chủ nhiệm mới được sửa
+    if (userRole !== 'admin' && foundClass.teacherId !== userId) {
+      return res.status(403).json({ success: false, message: 'You do not have permission to update this class.' });
+    }
+
+    foundClass.status = status;
+    await foundClass.save();
+
+    res.json({
+      success: true,
+      message: 'Class status updated!',
+      data: {
+        class: {
+          id: foundClass.id,
+          status: foundClass.status,
+          updatedAt: foundClass.updatedAt
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Update class status error:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
 // Thêm học sinh vào lớp học
 exports.addStudentToClass = async (req, res) => {
   try {

@@ -7,6 +7,55 @@ const requireRole = require('../middlewares/role');
 
 /**
  * @swagger
+ * /api/class/{id}/status:
+ *   patch:
+ *     summary: Sửa trạng thái lớp học (chỉ teacher chủ nhiệm hoặc admin)
+ *     tags: [Class]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID lớp học
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [draft, active, in_progress, closed, archived, cancelled]
+ *                 description: |
+ *                   - **draft (Nháp):** Lớp học mới được tạo, chưa công bố. Giảng viên có thể chỉnh sửa thông tin, thêm bài tập trước khi công bố.
+ *                   - **active (Đang mở):** Lớp đã công bố và sinh viên có thể tham gia. Giảng viên có thể đăng bài tập, sinh viên có thể nộp bài.
+ *                   - **in_progress (Đang diễn ra):** Lớp đã bắt đầu theo lịch, có hoạt động học tập đang diễn ra.
+ *                   - **closed (Đã đóng):** Lớp đã kết thúc, sinh viên không thể nộp bài mới. Giảng viên vẫn có thể chấm bài và sinh viên có thể xem kết quả.
+ *                   - **archived (Lưu trữ):** Lớp cũ được lưu trữ để tham khảo nhưng không còn hoạt động.
+ *                   - **cancelled (Hủy):** Lớp bị hủy trước khi bắt đầu hoặc khi đang mở.
+ *                 example: draft
+ *     responses:
+ *       200:
+ *         description: Class status updated
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch('/:id/status', auth, requireRole('teacher', 'admin'), ClassController.updateClassStatus);
+
+/**
+ * @swagger
  * /api/class/{id}/students:
  *   post:
  *     summary: Thêm học sinh vào lớp học (chỉ teacher chủ nhiệm hoặc admin)

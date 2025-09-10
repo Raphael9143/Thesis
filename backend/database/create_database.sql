@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS classes (
 	teacher_id BIGINT UNSIGNED NOT NULL,
 	semester VARCHAR(50),
 	year INT,
-	status ENUM('active','archived') NOT NULL DEFAULT 'active',
+	status ENUM('draft','active','in_progress','closed','archived','cancelled') NOT NULL DEFAULT 'draft',
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT fk_teacher FOREIGN KEY (teacher_id) REFERENCES users(id)
