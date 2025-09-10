@@ -43,3 +43,12 @@ const User = sequelize.define('User', {
 });
 
 module.exports = User;
+
+// Associations (foreign key)
+const Class = require('./Class');
+const ClassStudent = require('./ClassStudent');
+
+// Một user có thể là giáo viên của nhiều lớp
+User.hasMany(Class, { foreignKey: 'teacher_id', as: 'teachingClasses', onDelete: 'CASCADE' });
+// Một user có thể là học sinh của nhiều lớp (qua ClassStudent)
+User.hasMany(ClassStudent, { foreignKey: 'student_id', as: 'studentClasses', onDelete: 'CASCADE' });

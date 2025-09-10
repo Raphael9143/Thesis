@@ -57,3 +57,12 @@ const Class = sequelize.define('Class', {
 });
 
 module.exports = Class;
+
+// Associations (foreign key)
+const ClassStudent = require('./ClassStudent');
+const User = require('./User');
+
+// Một lớp có nhiều học sinh (ClassStudent)
+Class.hasMany(ClassStudent, { foreignKey: 'class_id', onDelete: 'CASCADE' });
+// Một lớp thuộc về một giáo viên
+Class.belongsTo(User, { foreignKey: 'teacher_id', as: 'teacher', onDelete: 'CASCADE' });

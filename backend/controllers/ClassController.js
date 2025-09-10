@@ -1,3 +1,26 @@
+// Xóa lớp học (chỉ admin)
+exports.deleteClass = async (req, res) => {
+  try {
+    const classId = req.params.id;
+    const userRole = req.user.role;
+
+    if (userRole !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Only admin can delete class. Teachers can only set status to cancelled or closed.' });
+    }
+
+    const foundClass = await Class.findByPk(classId);
+    if (!foundClass) {
+      return res.status(404).json({ success: false, message: 'Class not found.' });
+    }
+
+    await foundClass.destroy();
+
+    res.json({ success: true, message: 'Class deleted.' });
+  } catch (error) {
+    console.error('Delete class error:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
 // Xóa nhiều học sinh khỏi lớp học
 exports.removeStudentFromClass = async (req, res) => {
   try {

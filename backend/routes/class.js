@@ -1,9 +1,34 @@
-
 const express = require('express');
 const router = express.Router();
 const ClassController = require('../controllers/ClassController');
 const auth = require('../middlewares/auth');
 const requireRole = require('../middlewares/role');
+/**
+ * @swagger
+ * /api/class/{id}:
+ *   delete:
+ *     summary: Xóa lớp học (chỉ admin được xóa, teacher chỉ được chuyển trạng thái cancelled/closed)
+ *     tags: [Class]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID lớp học
+ *     responses:
+ *       200:
+ *         description: Class deleted
+ *       403:
+ *         description: Only admin can delete class. Teachers can only set status to cancelled or closed.
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.delete('/:id', auth, requireRole('admin'), ClassController.deleteClass);
 
 /**
  * @swagger

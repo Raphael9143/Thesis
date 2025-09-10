@@ -3,9 +3,9 @@ DROP TABLE IF EXISTS class_students;
 
 -- Tạo bảng class_students với các trường đúng chuẩn N-N
 CREATE TABLE IF NOT EXISTS class_students (
-	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-	class_id BIGINT UNSIGNED NOT NULL,
-	student_id BIGINT UNSIGNED NOT NULL,
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	class_id INT NOT NULL,
+	student_id INT NOT NULL,
 	role ENUM('student','leader') DEFAULT 'student',
 	joined_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	CONSTRAINT fk_class FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
@@ -21,11 +21,11 @@ SHOW TABLES;
 
 -- Tạo bảng classes với các trường theo yêu cầu API
 CREATE TABLE IF NOT EXISTS classes (
-	id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+	id INT AUTO_INCREMENT PRIMARY KEY,
 	name VARCHAR(100) NOT NULL,
 	code VARCHAR(50) NOT NULL UNIQUE,
 	description TEXT,
-	teacher_id BIGINT UNSIGNED NOT NULL,
+	teacher_id INT NOT NULL,
 	semester VARCHAR(50),
 	year INT,
 	status ENUM('draft','active','in_progress','closed','archived','cancelled') NOT NULL DEFAULT 'draft',
