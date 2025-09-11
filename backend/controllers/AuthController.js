@@ -11,13 +11,14 @@ const AuthController = {
     register: async (req, res) => {
         try {
 
-            const { email, password, role, name, dob, gender } = req.body;
+
+            const { email, password, role, full_name, gender, dob } = req.body;
 
             // Validation
-            if (!email || !password || !name) {
+            if (!email || !password || !full_name) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Vui lòng điền đầy đủ thông tin (email, password, name)'
+                    message: 'Vui lòng điền đầy đủ thông tin (email, password, full_name)'
                 });
             }
 
@@ -35,20 +36,26 @@ const AuthController = {
             const hashedPassword = await bcrypt.hash(password, saltRounds);
 
 
-            // Chỉ cho phép đăng ký role là 'student' hoặc 'teacher'
-            let regRole = 'student';
-            if (role && ['student', 'teacher'].includes(role)) {
-                regRole = role;
+
+            // Chỉ cho phép đăng ký role là 'STUDENT' hoặc 'TEACHER'
+            let regRole = 'STUDENT';
+            if (role && ['STUDENT', 'TEACHER'].includes(role.toUpperCase())) {
+                regRole = role.toUpperCase();
             }
 
+            // Chuẩn hóa gender
+            let regGender = null;
+            if (gender && ['MALE', 'FEMALE', 'OTHER'].includes(gender.toUpperCase())) {
+                regGender = gender.toUpperCase();
+            }
 
             const newUser = await User.create({
                 email,
                 password: hashedPassword,
                 role: regRole,
-                name,
-                dob,
-                gender
+                full_name,
+                gender: regGender,
+                dob
             });
 
             // Tạo JWT token
@@ -62,14 +69,22 @@ const AuthController = {
                 { expiresIn: '72h' }
             );
 
+
             res.status(201).json({
                 success: true,
                 message: 'Successfully Registered!',
                 data: {
                     user: {
                         id: newUser.id,
+                        full_name: newUser.full_name,
                         email: newUser.email,
                         role: newUser.role,
+                        avatar_url: newUser.avatar_url,
+                        gender: newUser.gender,
+                        dob: newUser.dob,
+                        phone_number: newUser.phone_number,
+                        address: newUser.address,
+                        status: newUser.status,
                         createdAt: newUser.createdAt
                     },
                     token

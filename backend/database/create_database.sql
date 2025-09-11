@@ -11,10 +11,26 @@ CREATE TABLE IF NOT EXISTS class_students (
 	CONSTRAINT fk_class FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
 	CONSTRAINT fk_student FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
 );
--- Tạo database thesis_db
+-- Tạo bảng users với các trường chuẩn hóa
+DROP TABLE IF EXISTS users;
+CREATE TABLE IF NOT EXISTS users (
+	id INT AUTO_INCREMENT PRIMARY KEY,
+	full_name VARCHAR(100) NOT NULL,
+	email VARCHAR(100) NOT NULL UNIQUE,
+	password VARCHAR(255) NOT NULL,
+	role ENUM('STUDENT', 'TEACHER', 'ADMIN') NOT NULL DEFAULT 'STUDENT',
+	avatar_url VARCHAR(255),
+	gender ENUM('MALE', 'FEMALE', 'OTHER'),
+	dob DATE,
+	phone_number VARCHAR(20),
+	address VARCHAR(255),
+	status ENUM('ACTIVE', 'INACTIVE', 'BANNED', 'PENDING_VERIFICATION') NOT NULL DEFAULT 'ACTIVE',
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+);
+
 CREATE DATABASE IF NOT EXISTS thesis_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Sử dụng database
 USE thesis_db;
 
 SHOW TABLES;

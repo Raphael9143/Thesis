@@ -10,11 +10,11 @@ const auth = require('../middlewares/auth');
  *     RegisterRequest:
  *       type: object
  *       required:
- *         - name
+ *         - full_name
  *         - email
  *         - password
  *       properties:
- *         name:
+ *         full_name:
  *           type: string
  *           example: "Nguyen Van A"
  *         email:
@@ -30,12 +30,12 @@ const auth = require('../middlewares/auth');
  *           example: "2000-01-01"
  *         gender:
  *           type: string
- *           enum: [male, female, other]
- *           example: "male"
+ *           enum: [MALE, FEMALE, OTHER]
+ *           example: "MALE"
  *         role:
  *           type: string
- *           enum: [teacher, student]
- *           example: "student"
+ *           enum: [TEACHER, STUDENT]
+ *           example: "STUDENT"
  *     LoginRequest:
  *       type: object
  *       required:
@@ -53,12 +53,30 @@ const auth = require('../middlewares/auth');
  *       type: object
  *       properties:
  *         id:
- *           type: integer
+ *           type: string
+ *           format: uuid
+ *         full_name:
+ *           type: string
  *         email:
  *           type: string
  *         role:
  *           type: string
- *           enum: [admin, teacher, student]
+ *           enum: [ADMIN, TEACHER, STUDENT]
+ *         avatar_url:
+ *           type: string
+ *         gender:
+ *           type: string
+ *           enum: [MALE, FEMALE, OTHER]
+ *         dob:
+ *           type: string
+ *           format: date
+ *         phone_number:
+ *           type: string
+ *         address:
+ *           type: string
+ *         status:
+ *           type: string
+ *           enum: [ACTIVE, INACTIVE, BANNED, PENDING_VERIFICATION]
  *         createdAt:
  *           type: string
  *           format: date-time

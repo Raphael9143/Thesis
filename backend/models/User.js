@@ -9,6 +9,10 @@ const User = sequelize.define('User', {
         primaryKey: true,
         autoIncrement: true
     },
+    full_name: {
+        type: DataTypes.STRING(100),
+        allowNull: false
+    },
     email: {
         type: DataTypes.STRING(100),
         allowNull: false,
@@ -27,20 +31,34 @@ const User = sequelize.define('User', {
         }
     },
     role: {
-        type: DataTypes.ENUM('admin', 'teacher', 'student'),
+        type: DataTypes.ENUM('STUDENT', 'TEACHER', 'ADMIN'),
         allowNull: false,
-            name: {
-                type: DataTypes.STRING(100),
-                allowNull: false
-            },
-            dob: {
-                type: DataTypes.DATEONLY,
-                allowNull: true
-            },
-            gender: {
-                type: DataTypes.ENUM('male', 'female', 'other'),
-                allowNull: true
-            },
+        defaultValue: 'STUDENT',
+    },
+    avatar_url: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    gender: {
+        type: DataTypes.ENUM('MALE', 'FEMALE', 'OTHER'),
+        allowNull: true
+    },
+    dob: {
+        type: DataTypes.DATEONLY,
+        allowNull: true
+    },
+    phone_number: {
+        type: DataTypes.STRING(20),
+        allowNull: true
+    },
+    address: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    status: {
+        type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'BANNED', 'PENDING_VERIFICATION'),
+        allowNull: false,
+        defaultValue: 'ACTIVE'
     }
 }, {
     tableName: 'users',
