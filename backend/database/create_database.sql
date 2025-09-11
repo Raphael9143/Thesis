@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS classes (
 	teacher_id INT NOT NULL,
 	semester VARCHAR(50),
 	year INT,
+	max_students INT DEFAULT NULL,
 	status ENUM('draft','active','in_progress','closed','archived','cancelled') NOT NULL DEFAULT 'draft',
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,

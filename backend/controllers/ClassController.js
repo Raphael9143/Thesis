@@ -1,3 +1,52 @@
+// Lấy số lượng học sinh của lớp
+exports.getStudentCountOfClass = async (req, res) => {
+  try {
+    const classId = req.params.id;
+    // Kiểm tra lớp tồn tại
+    const foundClass = await Class.findByPk(classId);
+    if (!foundClass) {
+      return res.status(404).json({ success: false, message: 'Class not found.' });
+    }
+    // Đếm số lượng học sinh
+    const count = await ClassStudent.count({ where: { classId } });
+    res.json({ success: true, classId, studentCount: count });
+  } catch (error) {
+    console.error('Get student count of class error:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+// Lấy danh sách sinh viên của lớp
+exports.getStudentsOfClass = async (req, res) => {
+  try {
+    const classId = req.params.id;
+
+    // Kiểm tra lớp tồn tại
+    const foundClass = await Class.findByPk(classId);
+    if (!foundClass) {
+      return res.status(404).json({ success: false, message: 'Class not found.' });
+    }
+
+    // Lấy danh sách sinh viên
+    const students = await ClassStudent.findAll({
+      where: { classId },
+      include: [{ model: User, as: 'student', attributes: ['id', 'email', 'role', 'createdAt', 'updatedAt'] }]
+    });
+
+    res.json({
+      success: true,
+      data: students.map(cs => ({
+        id: cs.student.id,
+        email: cs.student.email,
+        role: cs.student.role,
+        joinedAt: cs.joinedAt,
+        classStudentId: cs.id
+      }))
+    });
+  } catch (error) {
+    console.error('Get students of class error:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
 // Xóa lớp học (chỉ admin)
 exports.deleteClass = async (req, res) => {
   try {
@@ -148,9 +197,21 @@ exports.addStudentToClass = async (req, res) => {
       }
     });
     const existedIds = existed.map(e => e.studentId);
-    const newStudents = students.filter(s => !existedIds.includes(s.id));
+    let newStudents = students.filter(s => !existedIds.includes(s.id));
     if (newStudents.length === 0) {
       return res.status(400).json({ success: false, message: 'Tất cả học sinh đã có trong lớp.' });
+    }
+
+    // Kiểm tra giới hạn max_students
+    if (foundClass.max_students !== null && foundClass.max_students > 0) {
+      const currentCount = await ClassStudent.count({ where: { classId } });
+      const availableSlots = foundClass.max_students - currentCount;
+      if (availableSlots <= 0) {
+        return res.status(400).json({ success: false, message: 'Lớp đã đủ số lượng học sinh.' });
+      }
+      if (newStudents.length > availableSlots) {
+        newStudents = newStudents.slice(0, availableSlots);
+      }
     }
 
     // Thêm vào bảng class_students

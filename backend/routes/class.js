@@ -5,6 +5,89 @@ const auth = require('../middlewares/auth');
 const requireRole = require('../middlewares/role');
 /**
  * @swagger
+ * /api/class/{id}/student-count:
+ *   get:
+ *     summary: Lấy số lượng học sinh của lớp
+ *     tags: [Class]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID lớp học
+ *     responses:
+ *       200:
+ *         description: Số lượng học sinh
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 classId:
+ *                   type: integer
+ *                 studentCount:
+ *                   type: integer
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/:id/student-count', auth, ClassController.getStudentCountOfClass);
+/**
+ * @swagger
+ * /api/class/{id}/students:
+ *   get:
+ *     summary: Lấy danh sách sinh viên của lớp
+ *     tags: [Class]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID lớp học
+ *     responses:
+ *       200:
+ *         description: Danh sách sinh viên
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       email:
+ *                         type: string
+ *                       role:
+ *                         type: string
+ *                       joinedAt:
+ *                         type: string
+ *                         format: date-time
+ *                       classStudentId:
+ *                         type: integer
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/:id/students', auth, ClassController.getStudentsOfClass);
+
+/**
+ * @swagger
  * /api/class/{id}:
  *   delete:
  *     summary: Xóa lớp học (chỉ admin được xóa, teacher chỉ được chuyển trạng thái cancelled/closed)
@@ -197,6 +280,9 @@ router.post('/:id/students', auth, requireRole('teacher', 'admin'), ClassControl
  *                 type: string
  *               year:
  *                 type: integer
+ *               max_students:
+ *                 type: integer
+ *                 description: "Giới hạn số lượng học sinh có thể tham gia lớp."
  *               status:
  *                 type: string
  *                 enum: [active, archived]
@@ -247,6 +333,10 @@ router.put('/:id', auth, requireRole('teacher', 'admin'), ClassController.update
  *               year:
  *                 type: integer
  *                 example: 2025
+ *               max_students:
+ *                 type: integer
+ *                 example: 50
+ *                 description: "Giới hạn số lượng học sinh có thể tham gia lớp."
  *               status:
  *                 type: string
  *                 enum: [active, archived]
