@@ -154,7 +154,7 @@ router.delete('/:id', auth, requireRole('admin'), ClassController.deleteClass);
  *       500:
  *         description: Internal server error
  */
-router.delete('/:id/students', auth, requireRole('teacher', 'admin'), ClassController.removeStudentFromClass);
+router.delete('/:id/students', auth, requireRole('TEACHER', 'ADMIN'), ClassController.removeStudentFromClass);
 
 /**
  * @swagger
@@ -203,7 +203,7 @@ router.delete('/:id/students', auth, requireRole('teacher', 'admin'), ClassContr
  *       500:
  *         description: Internal server error
  */
-router.patch('/:id/status', auth, requireRole('teacher', 'admin'), ClassController.updateClassStatus);
+router.patch('/:id/status', auth, requireRole('TEACHER', 'ADMIN'), ClassController.updateClassStatus);
 
 /**
  * @swagger
@@ -246,7 +246,7 @@ router.patch('/:id/status', auth, requireRole('teacher', 'admin'), ClassControll
  *       500:
  *         description: Internal server error
  */
-router.post('/:id/students', auth, requireRole('teacher', 'admin'), ClassController.addStudentToClass);
+router.post('/:id/students', auth, requireRole('TEACHER', 'ADMIN'), ClassController.addStudentToClass);
 
 /**
  * @swagger
@@ -298,7 +298,7 @@ router.post('/:id/students', auth, requireRole('teacher', 'admin'), ClassControl
  *       500:
  *         description: Internal server error
  */
-router.put('/:id', auth, requireRole('teacher', 'admin'), ClassController.updateClass);
+router.put('/:id', auth, requireRole('TEACHER', 'ADMIN'), ClassController.updateClass);
 
 /**
  * @swagger
@@ -356,6 +356,6 @@ router.put('/:id', auth, requireRole('teacher', 'admin'), ClassController.update
  *       500:
  *         description: Internal server error
  */
-router.post('/', auth, requireRole('teacher'), ClassController.createClass);
+router.post('/', auth, requireRole('TEACHER'), ClassController.createClass);
 
 module.exports = router;

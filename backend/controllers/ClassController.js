@@ -181,8 +181,13 @@ exports.addStudentToClass = async (req, res) => {
       return res.status(403).json({ success: false, message: 'You do not have permission to add students to this class.' });
     }
 
-    // Tìm tất cả học sinh theo email
-    const students = await User.findAll({ where: { email: studentEmails, role: 'student' } });
+
+    // Tìm tất cả học sinh theo email, role STUDENT và đã có bản ghi students
+    const Student = require('../models/Student');
+    const students = await User.findAll({
+      where: { email: studentEmails, role: 'STUDENT' },
+      include: [{ model: Student, as: 'studentProfile', required: true }]
+    });
     const foundEmails = students.map(s => s.email);
     const notFound = studentEmails.filter(e => !foundEmails.includes(e));
     if (notFound.length > 0) {
@@ -304,7 +309,7 @@ const User = require('../models/User');
 // Tạo lớp học (chỉ teacher)
 exports.createClass = async (req, res) => {
   try {
-    if (req.user.role !== 'teacher') {
+    if (req.user.role !== 'TEACHER') {
       return res.status(403).json({ success: false, message: 'Only teachers can create classes.' });
     }
     const { name, code, description, semester, year, status, studentEmails } = req.body;
@@ -323,8 +328,12 @@ exports.createClass = async (req, res) => {
     });
     // Thêm học sinh vào lớp nếu có
     if (Array.isArray(studentEmails) && studentEmails.length > 0) {
-      // Tìm các user có email trong danh sách và role là student
-      const students = await User.findAll({ where: { email: studentEmails, role: 'student' } });
+      // Tìm các user có email trong danh sách, role STUDENT và đã có bản ghi students
+      const Student = require('../models/Student');
+      const students = await User.findAll({
+        where: { email: studentEmails, role: 'STUDENT' },
+        include: [{ model: Student, as: 'studentProfile', required: true }]
+      });
       if (students.length !== studentEmails.length) {
         const foundEmails = students.map(s => s.email);
         const notFound = studentEmails.filter(e => !foundEmails.includes(e));

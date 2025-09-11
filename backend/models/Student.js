@@ -41,8 +41,6 @@ const Student = sequelize.define('Student', {
 
 // Associations
 const ClassStudent = require('./ClassStudent');
-const User = require('./User');
-Student.hasMany(ClassStudent, { foreignKey: 'student_id', onDelete: 'CASCADE' });
-Student.belongsTo(User, { foreignKey: 'student_id', as: 'user', onDelete: 'CASCADE' });
+Student.hasMany(ClassStudent, { foreignKey: 'student_id', as: 'classEnrollments', onDelete: 'CASCADE' });
 
 module.exports = Student;

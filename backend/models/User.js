@@ -81,3 +81,7 @@ const ClassStudent = require('./ClassStudent');
 User.hasMany(Class, { foreignKey: 'teacher_id', as: 'teachingClasses', onDelete: 'CASCADE' });
 // Một user có thể là học sinh của nhiều lớp (qua ClassStudent)
 User.hasMany(ClassStudent, { foreignKey: 'student_id', as: 'studentClasses', onDelete: 'CASCADE' });
+
+// Một user có thể có một profile sinh viên (1-1)
+const Student = require('./Student');
+User.hasOne(Student, { foreignKey: 'student_id', as: 'studentProfile', onDelete: 'CASCADE' });

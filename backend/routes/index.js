@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+
+const classRoutes = require('./class');
 const authRoutes = require('./auth');
 
 const { sequelize, testConnection } = require('../config/database');
@@ -47,10 +49,13 @@ app.get('/', (req, res) => {
 
 
 
-const classRoutes = require('./class');
+
+const studentRoutes = require('./student');
 // Auth routes
 app.use('/api/auth', authRoutes);
 // Class routes
 app.use('/api/class', classRoutes);
+// Student routes
+app.use('/api/student', studentRoutes);
 
 module.exports = app
