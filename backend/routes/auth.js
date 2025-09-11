@@ -197,4 +197,65 @@ router.post('/login', AuthController.login);
  */
 router.get('/profile', auth, AuthController.getProfile);
 
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   patch:
+ *     summary: Update user profile
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               full_name:
+ *                 type: string
+ *                 example: "Nguyen Van A"
+ *               dob:
+ *                 type: string
+ *                 format: date
+ *                 example: "2000-01-01"
+ *               gender:
+ *                 type: string
+ *                 enum: [MALE, FEMALE, OTHER]
+ *                 example: "MALE"
+ *               avatar_url:
+ *                 type: string
+ *                 example: "https://example.com/avatar.jpg"
+ *               phone_number:
+ *                 type: string
+ *                 example: "0123456789"
+ *               address:
+ *                 type: string
+ *                 example: "123 Đường ABC, Quận 1, TP.HCM"
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ */
+router.patch('/profile', auth, AuthController.updateProfile);
+
 module.exports = router;

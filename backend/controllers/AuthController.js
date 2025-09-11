@@ -49,6 +49,7 @@ const AuthController = {
                 regGender = gender.toUpperCase();
             }
 
+
             const newUser = await User.create({
                 email,
                 password: hashedPassword,
@@ -57,6 +58,15 @@ const AuthController = {
                 gender: regGender,
                 dob
             });
+
+            // Nếu là student thì tạo luôn bản ghi students
+            if (regRole === 'STUDENT') {
+                const Student = require('../models/Student');
+                await Student.create({
+                    student_id: newUser.id,
+                    student_code: '', // Có thể sinh mã tự động hoặc cập nhật sau
+                });
+            }
 
             // Tạo JWT token
             const token = jwt.sign(
@@ -215,6 +225,33 @@ const AuthController = {
                 success: false,
                 message: 'Server error'
             });
+        }
+    },
+
+    // Cập nhật thông tin cá nhân
+    updateProfile: async (req, res) => {
+        try {
+            const userId = req.user.userId;
+            const { full_name, dob, gender, avatar_url, phone_number, address } = req.body;
+
+            // Chỉ cho phép cập nhật các trường này
+            const updateData = {};
+            if (full_name !== undefined) updateData.full_name = full_name;
+            if (dob !== undefined) updateData.dob = dob;
+            if (gender !== undefined && ['MALE','FEMALE','OTHER'].includes(gender.toUpperCase())) updateData.gender = gender.toUpperCase();
+            if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
+            if (phone_number !== undefined) updateData.phone_number = phone_number;
+            if (address !== undefined) updateData.address = address;
+
+            const [updated] = await User.update(updateData, { where: { id: userId } });
+            if (!updated) {
+                return res.status(404).json({ success: false, message: 'User not found!' });
+            }
+            const user = await User.findByPk(userId, { attributes: { exclude: ['password'] } });
+            res.json({ success: true, message: 'Profile updated successfully', data: { user } });
+        } catch (error) {
+            console.error('Update profile error:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
         }
     }
 };

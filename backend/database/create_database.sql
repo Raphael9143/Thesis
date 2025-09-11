@@ -1,3 +1,16 @@
+-- Tạo bảng students
+DROP TABLE IF EXISTS students;
+CREATE TABLE IF NOT EXISTS students (
+	student_id INT PRIMARY KEY,
+	student_code VARCHAR(50) NOT NULL UNIQUE,
+	major VARCHAR(100),
+	year INT,
+	completed_assignments INT DEFAULT 0,
+	gpa FLOAT,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT fk_student_user FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
 -- Xóa bảng class_students nếu đã tồn tại (chỉ dùng khi không cần giữ dữ liệu)
 DROP TABLE IF EXISTS class_students;
 

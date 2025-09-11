@@ -38,9 +38,9 @@ module.exports = ClassStudent;
 
 // Associations (foreign key)
 const Class = require('./Class');
-const User = require('./User');
+const Student = require('./Student');
 
 // Một bản ghi ClassStudent thuộc về một lớp
 ClassStudent.belongsTo(Class, { foreignKey: 'class_id', onDelete: 'CASCADE' });
-// Một bản ghi ClassStudent thuộc về một học sinh
-ClassStudent.belongsTo(User, { foreignKey: 'student_id', as: 'student', onDelete: 'CASCADE' });
+// Một bản ghi ClassStudent thuộc về một sinh viên
+ClassStudent.belongsTo(Student, { foreignKey: 'student_id', as: 'student', onDelete: 'CASCADE' });
