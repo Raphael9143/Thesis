@@ -10,13 +10,14 @@ const AuthController = {
 
     register: async (req, res) => {
         try {
-            const { email, password, role } = req.body;
+
+            const { email, password, role, name, dob, gender } = req.body;
 
             // Validation
-            if (!email || !password) {
+            if (!email || !password || !name) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Vui lòng điền đầy đủ thông tin (email, password)'
+                    message: 'Vui lòng điền đầy đủ thông tin (email, password, name)'
                 });
             }
 
@@ -40,10 +41,14 @@ const AuthController = {
                 regRole = role;
             }
 
+
             const newUser = await User.create({
                 email,
                 password: hashedPassword,
-                role: regRole
+                role: regRole,
+                name,
+                dob,
+                gender
             });
 
             // Tạo JWT token

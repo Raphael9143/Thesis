@@ -10,9 +10,13 @@ const auth = require('../middlewares/auth');
  *     RegisterRequest:
  *       type: object
  *       required:
+ *         - name
  *         - email
  *         - password
  *       properties:
+ *         name:
+ *           type: string
+ *           example: "Nguyen Van A"
  *         email:
  *           type: string
  *           format: email
@@ -20,6 +24,14 @@ const auth = require('../middlewares/auth');
  *         password:
  *           type: string
  *           example: "password123"
+ *         dob:
+ *           type: string
+ *           format: date
+ *           example: "2000-01-01"
+ *         gender:
+ *           type: string
+ *           enum: [male, female, other]
+ *           example: "male"
  *         role:
  *           type: string
  *           enum: [teacher, student]

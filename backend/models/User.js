@@ -29,7 +29,18 @@ const User = sequelize.define('User', {
     role: {
         type: DataTypes.ENUM('admin', 'teacher', 'student'),
         allowNull: false,
-        defaultValue: 'student',
+            name: {
+                type: DataTypes.STRING(100),
+                allowNull: false
+            },
+            dob: {
+                type: DataTypes.DATEONLY,
+                allowNull: true
+            },
+            gender: {
+                type: DataTypes.ENUM('male', 'female', 'other'),
+                allowNull: true
+            },
     }
 }, {
     tableName: 'users',
