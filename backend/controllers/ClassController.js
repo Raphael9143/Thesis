@@ -312,7 +312,7 @@ exports.createClass = async (req, res) => {
     if (req.user.role !== 'TEACHER') {
       return res.status(403).json({ success: false, message: 'Only teachers can create classes.' });
     }
-    const { name, code, description, semester, year, status, studentEmails } = req.body;
+  const { name, code, description, semester, year, status, studentEmails, max_students } = req.body;
     if (!name || !code) {
       return res.status(400).json({ success: false, message: 'Class name and code are required.' });
     }
@@ -324,7 +324,8 @@ exports.createClass = async (req, res) => {
       semester,
       year,
       status: status || 'active',
-      teacherId: req.user.userId
+      teacherId: req.user.userId,
+      max_students
     });
     // Thêm học sinh vào lớp nếu có
     if (Array.isArray(studentEmails) && studentEmails.length > 0) {
