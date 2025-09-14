@@ -78,3 +78,17 @@ CREATE TABLE IF NOT EXISTS teachers (
 -- Thêm ràng buộc teacher_id trong bảng classes
 ALTER TABLE classes
 	ADD CONSTRAINT fk_teacher_profile FOREIGN KEY (teacher_id) REFERENCES teachers(teacher_id) ON DELETE CASCADE ON UPDATE CASCADE;
+-- Bảng ánh xạ N-N giữa classes và courses
+DROP TABLE IF EXISTS class_courses;
+CREATE TABLE IF NOT EXISTS class_courses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    class_id INT NOT NULL,
+    course_id INT NOT NULL,
+    start_week INT,
+    end_week INT,
+    status ENUM('ACTIVE','INACTIVE','ARCHIVED') NOT NULL DEFAULT 'ACTIVE',
+    created_at TIMESTAMP NULL DEFAULT NULL,
+    updated_at TIMESTAMP NULL DEFAULT NULL,
+    CONSTRAINT fk_class_courses_class FOREIGN KEY (class_id) REFERENCES classes(id) ON DELETE CASCADE,
+    CONSTRAINT fk_class_courses_course FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
+);

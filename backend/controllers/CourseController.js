@@ -31,6 +31,10 @@ const CourseController = {
             if (!foundClass) {
                 return res.status(404).json({ success: false, message: 'Class không tồn tại.' });
             }
+            // Kiểm tra giáo viên đứng lớp có đúng không
+            if (foundClass.teacherId !== user.id) {
+                return res.status(403).json({ success: false, message: 'Bạn không phải giáo viên chủ nhiệm của lớp này.' });
+            }
             const created_by = req.user.userId;
             const newCourse = await Course.create({
                 course_name,
@@ -51,6 +55,23 @@ const CourseController = {
             res.status(201).json({ success: true, data: { ...newCourse.toJSON(), class_course: classCourse } });
         } catch (error) {
             console.error('Create course error:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
+    },
+    // Lấy danh sách môn học theo lớp
+    getCoursesByClass: async (req, res) => {
+        try {
+            const classId = req.params.classId;
+            // Kiểm tra class tồn tại
+            const foundClass = await Class.findByPk(classId);
+            if (!foundClass) {
+                return res.status(404).json({ success: false, message: 'Class not found.' });
+            }
+            // Lấy danh sách courses qua quan hệ N-N
+            const courses = await foundClass.getCourses();
+            res.json({ success: true, data: courses });
+        } catch (error) {
+            console.error('Get courses by class error:', error);
             res.status(500).json({ success: false, message: 'Server error' });
         }
     }

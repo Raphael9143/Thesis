@@ -112,4 +112,38 @@ const CourseController = require('../controllers/CourseController');
 router.get('/', auth, CourseController.getAllCourses);
 router.post('/', auth, CourseController.createCourse);
 
+/**
+ * @swagger
+ * /api/courses/by-class/{classId}:
+ *   get:
+ *     summary: Lấy danh sách môn học theo lớp
+ *     tags: [Course]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: classId
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID lớp học
+ *     responses:
+ *       200:
+ *         description: Danh sách môn học của lớp
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Course'
+ *       404:
+ *         description: Class not found
+ */
+router.get('/by-class/:classId', auth, CourseController.getCoursesByClass);
+
 module.exports = router;
