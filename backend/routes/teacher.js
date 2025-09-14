@@ -51,6 +51,63 @@ const TeacherController = require('../controllers/TeacherController');
  *           format: date-time
  */
 
+
+/**
+ * @swagger
+ * /api/teacher/classes:
+ *   get:
+ *     summary: Lấy danh sách các lớp mà giáo viên quản lý
+ *     tags: [Teacher]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Danh sách lớp mà giáo viên quản lý
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       name:
+ *                         type: string
+ *                       code:
+ *                         type: string
+ *                       description:
+ *                         type: string
+ *                       semester:
+ *                         type: string
+ *                       year:
+ *                         type: integer
+ *                       status:
+ *                         type: string
+ *                       max_students:
+ *                         type: integer
+ *                       current_students:
+ *                         type: integer
+ *                       createdAt:
+ *                         type: string
+ *                         format: date-time
+ *                       updatedAt:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Only teachers can view their managed classes.
+ *       500:
+ *         description: Server error
+ */
+router.get('/classes', auth, TeacherController.getManagedClasses);
+
 /**
  * @swagger
  * /api/teacher/profile:

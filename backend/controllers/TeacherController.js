@@ -52,6 +52,30 @@ const TeacherController = {
             console.error('Update teacher profile error:', error);
             res.status(500).json({ success: false, message: 'Server error' });
         }
+    },
+
+    // Lấy danh sách các lớp mà giáo viên quản lý
+    getManagedClasses: async (req, res) => {
+        try {
+            const userId = req.user.userId;
+            // Kiểm tra role
+            const user = await User.findByPk(userId);
+            if (!user || user.role !== 'TEACHER') {
+                return res.status(403).json({ success: false, message: 'Only teachers can view their managed classes.' });
+            }
+            // Lấy danh sách lớp
+            const classes = await Class.findAll({
+                where: { teacherId: userId },
+                attributes: ['id', 'name', 'code', 'description', 'semester', 'year', 'status', 'max_students', 'current_students', 'createdAt', 'updatedAt']
+            });
+            res.json({
+                success: true,
+                data: classes
+            });
+        } catch (error) {
+            console.error('Get managed classes error:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
     }
 };
 
