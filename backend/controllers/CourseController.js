@@ -36,21 +36,26 @@ const CourseController = {
                 return res.status(403).json({ success: false, message: 'Bạn không phải giáo viên chủ nhiệm của lớp này.' });
             }
             const created_by = req.user.userId;
+            // Validate status cho Course
+            let courseStatus = status || 'ACTIVE';
+            if (!['ACTIVE', 'INACTIVE'].includes(courseStatus)) {
+                return res.status(400).json({ success: false, message: 'Chỉ cho phép status là ACTIVE hoặc INACTIVE.' });
+            }
             const newCourse = await Course.create({
                 course_name,
                 course_code,
                 description,
                 semester,
+                start_week,
+                end_week,
+                status: courseStatus,
                 created_by,
                 created_at: new Date()
             });
-            // Tạo mapping vào class_courses
+            // Tạo mapping vào class_courses (chỉ id, class_id, course_id)
             const classCourse = await ClassCourse.create({
                 class_id,
-                course_id: newCourse.course_id,
-                start_week,
-                end_week,
-                status: status || 'ACTIVE'
+                course_id: newCourse.course_id
             });
             res.status(201).json({ success: true, data: { ...newCourse.toJSON(), class_course: classCourse } });
         } catch (error) {
@@ -96,26 +101,54 @@ const CourseController = {
             if (userRole !== 'ADMIN' && foundClass.teacherId !== userId) {
                 return res.status(403).json({ success: false, message: 'Bạn không có quyền cập nhật lớp môn học này.' });
             }
-            // Cập nhật các trường cho phép
-            if (start_week !== undefined) classCourse.start_week = start_week;
-            if (end_week !== undefined) classCourse.end_week = end_week;
-            if (status !== undefined) classCourse.status = status;
-            // Nếu có cập nhật name hoặc description thì cập nhật vào Course
-            let updatedCourse = null;
-            if (name !== undefined || description !== undefined) {
-                const course = await require('../models/Course').findByPk(classCourse.course_id);
-                if (!course) {
-                    return res.status(404).json({ success: false, message: 'Course not found.' });
-                }
-                if (name !== undefined) course.course_name = name;
-                if (description !== undefined) course.description = description;
-                await course.save();
-                updatedCourse = course;
+            // Cập nhật vào Course
+            const course = await Course.findByPk(classCourse.course_id);
+            if (!course) {
+                return res.status(404).json({ success: false, message: 'Course not found.' });
             }
-            await classCourse.save();
-            res.json({ success: true, message: 'Cập nhật thành công!', data: { classCourse, course: updatedCourse } });
+            let updated = false;
+            if (start_week !== undefined) { course.start_week = start_week; updated = true; }
+            if (end_week !== undefined) { course.end_week = end_week; updated = true; }
+            if (status !== undefined) {
+                if (!['ACTIVE', 'INACTIVE'].includes(status)) {
+                    return res.status(400).json({ success: false, message: 'Chỉ cho phép status là ACTIVE hoặc INACTIVE.' });
+                }
+                course.status = status;
+                updated = true;
+            }
+            if (name !== undefined) { course.course_name = name; updated = true; }
+            if (description !== undefined) { course.description = description; updated = true; }
+            if (updated) await course.save();
+            res.json({ success: true, message: 'Cập nhật thành công!', data: { course } });
         } catch (error) {
             console.error('Update class_course error:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
+    },  // Cập nhật status của course
+    updateCourseStatus: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { status } = req.body;
+            if (!status) {
+                return res.status(400).json({ success: false, message: 'Trường status là bắt buộc.' });
+            }
+            if (!['ACTIVE', 'INACTIVE'].includes(status)) {
+                return res.status(400).json({ success: false, message: 'Chỉ cho phép status là ACTIVE hoặc INACTIVE.' });
+            }
+            const course = await Course.findByPk(id);
+            if (!course) {
+                return res.status(404).json({ success: false, message: 'Course not found.' });
+            }
+            // Chỉ cho phép ADMIN hoặc người tạo course cập nhật status
+            const user = req.user;
+            if (user.role !== 'ADMIN' && course.created_by !== user.userId) {
+                return res.status(403).json({ success: false, message: 'Bạn không có quyền cập nhật status của course này.' });
+            }
+            course.status = status;
+            await course.save();
+            res.json({ success: true, message: 'Cập nhật status thành công!', data: course });
+        } catch (error) {
+            console.error('Update course status error:', error);
             res.status(500).json({ success: false, message: 'Server error' });
         }
     },

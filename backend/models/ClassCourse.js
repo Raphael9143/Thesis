@@ -15,19 +15,6 @@ const ClassCourse = sequelize.define('ClassCourse', {
         type: DataTypes.INTEGER,
         allowNull: false
     },
-    start_week: {
-        type: DataTypes.INTEGER,
-        allowNull: true
-    },
-    end_week: {
-        type: DataTypes.INTEGER,
-        allowNull: true
-    },
-    status: {
-        type: DataTypes.ENUM('ACTIVE', 'INACTIVE', 'ARCHIVED'),
-        allowNull: false,
-        defaultValue: 'ACTIVE'
-    }
 }, {
     tableName: 'class_courses',
     timestamps: false

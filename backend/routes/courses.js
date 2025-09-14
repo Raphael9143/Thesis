@@ -22,6 +22,13 @@ const CourseController = require('../controllers/CourseController');
  *           type: integer
  *         semester:
  *           type: string
+ *         start_week:
+ *           type: integer
+ *         end_week:
+ *           type: integer
+ *         status:
+ *           type: string
+ *           enum: [ACTIVE, INACTIVE]
  *         created_at:
  *           type: string
  *           format: date-time
@@ -45,14 +52,14 @@ const CourseController = require('../controllers/CourseController');
  *           application/json:
  *             schema:
  *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Course'
- *   post:
+ *             properties:
+ *               start_week:
+ *                 type: integer
+ *               end_week:
+ *                 type: integer
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVE, INACTIVE]
  *     summary: Tạo môn học mới và ánh xạ với lớp học
  *     tags: [Course]
  *     security:
@@ -84,7 +91,7 @@ const CourseController = require('../controllers/CourseController');
  *                 type: integer
  *               status:
  *                 type: string
- *                 enum: [ACTIVE, INACTIVE, ARCHIVED]
+ *                 enum: [ACTIVE, INACTIVE]
  *     responses:
  *       201:
  *         description: Môn học đã được tạo và ánh xạ với lớp học
@@ -178,7 +185,7 @@ router.get('/by-class/:classId', auth, CourseController.getCoursesByClass);
  *                 example: 15
  *               status:
  *                 type: string
- *                 enum: [ACTIVE, INACTIVE, ARCHIVED]
+ *                 enum: [ACTIVE, INACTIVE]
  *                 example: ACTIVE
  *               name:
  *                 type: string
@@ -202,7 +209,7 @@ router.get('/by-class/:classId', auth, CourseController.getCoursesByClass);
  *                   type: string
  *                 data:
  *                   type: object
- *                   $ref: '#/components/schemas/ClassCourse'
+ *                   $ref: '#/components/schemas/Course'
  *       400:
  *         description: Bad request
  *       403:
@@ -212,5 +219,57 @@ router.get('/by-class/:classId', auth, CourseController.getCoursesByClass);
  */
 // PATCH /api/courses/:id
 router.patch('/:id', auth, CourseController.updateClassCourse);
+
+/**
+ * @swagger
+ * /api/courses/{id}/status:
+ *   patch:
+ *     summary: Cập nhật trạng thái (status) của môn học
+ *     tags: [Course]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID của môn học (course)
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVE, INACTIVE]
+ *                 example: ACTIVE
+ *     responses:
+ *       200:
+ *         description: Cập nhật status thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/Course'
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not found
+ */
+// PATCH /api/courses/:id/status - cập nhật trạng thái course
+router.patch('/:id/status', auth, CourseController.updateCourseStatus);
 
 module.exports = router;
