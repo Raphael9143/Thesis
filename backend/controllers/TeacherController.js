@@ -31,6 +31,27 @@ const TeacherController = {
             console.error('Get teacher profile error:', error);
             res.status(500).json({ success: false, message: 'Server error' });
         }
+    },
+    // Sửa thông tin profile giảng viên hiện tại
+    updateProfile: async (req, res) => {
+        try {
+            const teacherId = req.user.userId;
+            const { teacher_code, department, expertise, research_papers } = req.body;
+            const teacher = await Teacher.findByPk(teacherId);
+            if (!teacher) {
+                return res.status(404).json({ success: false, message: 'Teacher not found!' });
+            }
+            // Cập nhật các trường cho phép
+            if (teacher_code !== undefined) teacher.teacher_code = teacher_code;
+            if (department !== undefined) teacher.department = department;
+            if (expertise !== undefined) teacher.expertise = expertise;
+            if (research_papers !== undefined) teacher.research_papers = research_papers;
+            await teacher.save();
+            res.json({ success: true, message: 'Teacher profile updated!', data: teacher });
+        } catch (error) {
+            console.error('Update teacher profile error:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
     }
 };
 

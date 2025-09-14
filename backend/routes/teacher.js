@@ -82,4 +82,54 @@ const TeacherController = require('../controllers/TeacherController');
  */
 router.get('/profile', auth, TeacherController.getProfile);
 
+/**
+ * @swagger
+ * /api/teacher/profile:
+ *   patch:
+ *     summary: Sửa thông tin profile giảng viên hiện tại
+ *     tags: [Teacher]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               teacher_code:
+ *                 type: string
+ *               department:
+ *                 type: string
+ *               expertise:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               research_papers:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Teacher profile updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/Teacher'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Teacher not found
+ */
+router.patch('/profile', auth, TeacherController.updateProfile);
+
 module.exports = router;
