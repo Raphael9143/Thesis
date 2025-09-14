@@ -152,6 +152,26 @@ const CourseController = {
             res.status(500).json({ success: false, message: 'Server error' });
         }
     },
+    // Xóa môn học
+    deleteCourse: async (req, res) => {
+        try {
+            const courseId = req.params.id;
+            const user = req.user;
+            const course = await Course.findByPk(courseId);
+            if (!course) {
+                return res.status(404).json({ success: false, message: 'Course not found.' });
+            }
+            // Chỉ admin hoặc người tạo course mới được xóa
+            if (user.role !== 'ADMIN' && course.created_by !== user.userId) {
+                return res.status(403).json({ success: false, message: 'Bạn không có quyền xóa môn học này.' });
+            }
+            await course.destroy();
+            res.json({ success: true, message: 'Course deleted.' });
+        } catch (error) {
+            console.error('Delete course error:', error);
+            res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
+    }
 };
 
 module.exports = CourseController;

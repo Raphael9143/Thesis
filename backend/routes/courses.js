@@ -5,40 +5,6 @@ const CourseController = require('../controllers/CourseController');
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     Course:
- *       type: object
- *       properties:
- *         course_id:
- *           type: integer
- *         course_name:
- *           type: string
- *         course_code:
- *           type: string
- *         description:
- *           type: string
- *         created_by:
- *           type: integer
- *         semester:
- *           type: string
- *         start_week:
- *           type: integer
- *         end_week:
- *           type: integer
- *         status:
- *           type: string
- *           enum: [ACTIVE, INACTIVE]
- *         created_at:
- *           type: string
- *           format: date-time
- *         updated_at:
- *           type: string
- *           format: date-time
- */
-
-/**
- * @swagger
  * /api/courses:
  *   get:
  *     summary: Lấy danh sách tất cả môn học
@@ -117,6 +83,75 @@ const CourseController = require('../controllers/CourseController');
  *         description: Class not found
  */
 router.get('/', auth, CourseController.getAllCourses);
+
+/**
+ * @swagger
+ * /api/courses:
+ *   post:
+ *     summary: Tạo môn học mới và ánh xạ với lớp học
+ *     tags: [Course]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - course_name
+ *               - course_code
+ *               - class_id
+ *             properties:
+ *               course_name:
+ *                 type: string
+ *                 example: "Lập trình nâng cao"
+ *               course_code:
+ *                 type: string
+ *                 example: "CS2025"
+ *               description:
+ *                 type: string
+ *                 example: "Môn học về các kỹ thuật lập trình nâng cao."
+ *               semester:
+ *                 type: string
+ *                 example: "Spring 2025"
+ *               class_id:
+ *                 type: integer
+ *                 example: 1
+ *               start_week:
+ *                 type: integer
+ *                 example: 1
+ *               end_week:
+ *                 type: integer
+ *                 example: 15
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVE, INACTIVE]
+ *                 example: ACTIVE
+ *     responses:
+ *       201:
+ *         description: Môn học đã được tạo và ánh xạ với lớp học
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     course:
+ *                       $ref: '#/components/schemas/Course'
+ *                     class_course:
+ *                       type: object
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Class not found
+ */
 router.post('/', auth, CourseController.createCourse);
 
 /**
@@ -153,8 +188,6 @@ router.post('/', auth, CourseController.createCourse);
  */
 router.get('/by-class/:classId', auth, CourseController.getCoursesByClass);
 
-/**
- * @swagger
 /**
  * @swagger
  * /api/courses/{id}:
@@ -271,5 +304,39 @@ router.patch('/:id', auth, CourseController.updateClassCourse);
  */
 // PATCH /api/courses/:id/status - cập nhật trạng thái course
 router.patch('/:id/status', auth, CourseController.updateCourseStatus);
+
+/**
+ * @swagger
+ * /api/courses/{id}:
+ *   delete:
+ *     summary: Xóa môn học
+ *     tags: [Course]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID của môn học (course)
+ *     responses:
+ *       200:
+ *         description: Course deleted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not found
+ */
+router.delete('/:id', auth, CourseController.deleteCourse);
 
 module.exports = router;
