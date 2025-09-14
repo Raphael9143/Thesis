@@ -171,6 +171,36 @@ const CourseController = {
             console.error('Delete course error:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
+    },
+
+    // Lấy thông tin môn học theo id
+    getCourseById: async (req, res) => {
+        try {
+            const id = req.params.id;
+            const course = await Course.findByPk(id);
+            if (!course) {
+                return res.status(404).json({ success: false, message: 'Course not found.' });
+            }
+            res.json({ success: true, data: course });
+        } catch (error) {
+            console.error('Get course by id error:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
+    },
+
+    // Lấy thông tin môn học theo code
+    getCourseByCode: async (req, res) => {
+        try {
+            const code = req.params.code;
+            const course = await Course.findOne({ where: { course_code: code } });
+            if (!course) {
+                return res.status(404).json({ success: false, message: 'Course not found.' });
+            }
+            res.json({ success: true, data: course });
+        } catch (error) {
+            console.error('Get course by code error:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
     }
 };
 

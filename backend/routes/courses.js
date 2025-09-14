@@ -339,4 +339,72 @@ router.patch('/:id/status', auth, CourseController.updateCourseStatus);
  */
 router.delete('/:id', auth, CourseController.deleteCourse);
 
+/**
+ * @swagger
+ * /api/courses/{id}:
+ *   get:
+ *     summary: Lấy thông tin môn học theo id
+ *     tags: [Course]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID của môn học (course)
+ *     responses:
+ *       200:
+ *         description: Thông tin môn học
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Course'
+ *       404:
+ *         description: Course not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/:id', auth, CourseController.getCourseById);
+
+/**
+ * @swagger
+ * /api/courses/by-code/{code}:
+ *   get:
+ *     summary: Lấy thông tin môn học theo mã code
+ *     tags: [Course]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: code
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Mã code của môn học (course_code)
+ *     responses:
+ *       200:
+ *         description: Thông tin môn học
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Course'
+ *       404:
+ *         description: Course not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/by-code/:code', auth, CourseController.getCourseByCode);
+
 module.exports = router;
