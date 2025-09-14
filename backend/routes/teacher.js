@@ -123,5 +123,4 @@ router.get('/profile', auth, TeacherController.getProfile);
  *         description: Teacher not found
  */
 router.patch('/profile', auth, TeacherController.updateProfile);
-
 module.exports = router;

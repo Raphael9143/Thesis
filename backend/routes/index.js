@@ -3,6 +3,7 @@ const cors = require('cors');
 
 const classRoutes = require('./class');
 const authRoutes = require('./auth');
+const courseRoutes = require('./courses');
 
 const { sequelize, testConnection } = require('../config/database');
 const { specs, swaggerUi } = require('../config/swagger')
@@ -47,15 +48,15 @@ app.get('/', (req, res) => {
     });
 });
 
-
-
-
-const studentRoutes = require('./student');
-const teacherRoutes = require('./teacher');
 // Auth routes
 app.use('/api/auth', authRoutes);
 // Class routes
 app.use('/api/class', classRoutes);
+// Course routes
+app.use('/api/courses', courseRoutes);
+
+const studentRoutes = require('./student');
+const teacherRoutes = require('./teacher');
 // Student routes
 app.use('/api/student', studentRoutes);
 // Teacher routes
