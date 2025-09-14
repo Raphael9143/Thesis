@@ -63,3 +63,18 @@ CREATE TABLE IF NOT EXISTS classes (
 	updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 	CONSTRAINT fk_teacher FOREIGN KEY (teacher_id) REFERENCES users(id)
 );
+-- Tạo bảng teachers
+DROP TABLE IF EXISTS teachers;
+CREATE TABLE IF NOT EXISTS teachers (
+	teacher_id INT PRIMARY KEY,
+	teacher_code VARCHAR(50) NOT NULL UNIQUE,
+	department VARCHAR(100),
+	expertise JSON,
+	research_papers JSON,
+	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT fk_teacher_user FOREIGN KEY (teacher_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+-- Thêm ràng buộc teacher_id trong bảng classes
+ALTER TABLE classes
+	ADD CONSTRAINT fk_teacher_profile FOREIGN KEY (teacher_id) REFERENCES teachers(teacher_id) ON DELETE CASCADE ON UPDATE CASCADE;

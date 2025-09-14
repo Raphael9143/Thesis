@@ -68,6 +68,15 @@ const AuthController = {
                 });
             }
 
+            // Nếu là teacher thì tạo luôn bản ghi teachers
+            if (regRole === 'TEACHER') {
+                const Teacher = require('../models/Teacher');
+                await Teacher.create({
+                    teacher_id: newUser.id,
+                    teacher_code: '', // Có thể sinh mã tự động hoặc cập nhật sau
+                });
+            }
+
             // Tạo JWT token
             const token = jwt.sign(
                 {

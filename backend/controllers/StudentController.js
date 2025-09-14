@@ -2,6 +2,7 @@ const Student = require('../models/Student');
 const ClassStudent = require('../models/ClassStudent');
 const Class = require('../models/Class');
 
+
 const StudentController = {
     // Lấy danh sách các lớp đã enrolled của sinh viên hiện tại
     getEnrolledClasses: async (req, res) => {
@@ -21,6 +22,21 @@ const StudentController = {
             res.json({ success: true, data: { classes } });
         } catch (error) {
             console.error('Get enrolled classes error:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
+    },
+
+    // Lấy thông tin profile sinh viên hiện tại
+    getProfile: async (req, res) => {
+        try {
+            const studentId = req.user.userId;
+            const student = await Student.findByPk(studentId);
+            if (!student) {
+                return res.status(404).json({ success: false, message: 'Student not found!' });
+            }
+            res.json({ success: true, data: student });
+        } catch (error) {
+            console.error('Get student profile error:', error);
             res.status(500).json({ success: false, message: 'Server error' });
         }
     }

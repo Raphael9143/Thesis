@@ -51,11 +51,14 @@ app.get('/', (req, res) => {
 
 
 const studentRoutes = require('./student');
+const teacherRoutes = require('./teacher');
 // Auth routes
 app.use('/api/auth', authRoutes);
 // Class routes
 app.use('/api/class', classRoutes);
 // Student routes
 app.use('/api/student', studentRoutes);
+// Teacher routes
+app.use('/api/teacher', teacherRoutes);
 
 module.exports = app
