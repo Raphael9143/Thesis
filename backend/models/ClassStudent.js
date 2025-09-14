@@ -18,11 +18,6 @@ const ClassStudent = sequelize.define('ClassStudent', {
     allowNull: false,
     field: 'student_id'
   },
-  role: {
-    type: DataTypes.ENUM('student', 'leader'),
-    allowNull: true,
-    defaultValue: 'student'
-  },
   joinedAt: {
     type: DataTypes.DATE,
     allowNull: false,
