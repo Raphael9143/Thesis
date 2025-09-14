@@ -92,8 +92,59 @@ const StudentController = require('../controllers/StudentController');
  *           format: date-time
  */
 
+/**
+ * @swagger
+ * /api/student/profile:
+ *   patch:
+ *     summary: Sửa thông tin profile sinh viên hiện tại
+ *     tags: [Student]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               student_code:
+ *                 type: string
+ *               major:
+ *                 type: string
+ *               year:
+ *                 type: integer
+ *               completed_assignments:
+ *                 type: integer
+ *               gpa:
+ *                 type: number
+ *                 format: float
+ *     responses:
+ *       200:
+ *         description: Student profile updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/Student'
+ *       400:
+ *         description: Bad request
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Student not found
+ */
+
 // Lấy profile sinh viên hiện tại
 router.get('/profile', auth, StudentController.getProfile);
+
+// Sửa thông tin profile sinh viên
+router.patch('/profile', auth, StudentController.updateProfile);
 
 router.get('/enrolled-classes', auth, StudentController.getEnrolledClasses);
 
