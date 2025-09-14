@@ -75,6 +75,50 @@ const CourseController = {
             res.status(500).json({ success: false, message: 'Server error' });
         }
     }
+    , // Cập nhật thông tin lớp môn học (class_courses)
+    updateClassCourse: async (req, res) => {
+        try {
+            const { id } = req.params; // id của class_course
+            const { start_week, end_week, status, name, description } = req.body;
+            const userId = req.user.userId;
+            const userRole = req.user.role;
+            // Tìm class_course
+            const classCourse = await ClassCourse.findByPk(id);
+            if (!classCourse) {
+                return res.status(404).json({ success: false, message: 'ClassCourse not found.' });
+            }
+            // Lấy thông tin lớp để kiểm tra quyền
+            const foundClass = await Class.findByPk(classCourse.class_id);
+            if (!foundClass) {
+                return res.status(404).json({ success: false, message: 'Class not found.' });
+            }
+            // Chỉ giáo viên chủ nhiệm hoặc admin mới được sửa
+            if (userRole !== 'ADMIN' && foundClass.teacherId !== userId) {
+                return res.status(403).json({ success: false, message: 'Bạn không có quyền cập nhật lớp môn học này.' });
+            }
+            // Cập nhật các trường cho phép
+            if (start_week !== undefined) classCourse.start_week = start_week;
+            if (end_week !== undefined) classCourse.end_week = end_week;
+            if (status !== undefined) classCourse.status = status;
+            // Nếu có cập nhật name hoặc description thì cập nhật vào Course
+            let updatedCourse = null;
+            if (name !== undefined || description !== undefined) {
+                const course = await require('../models/Course').findByPk(classCourse.course_id);
+                if (!course) {
+                    return res.status(404).json({ success: false, message: 'Course not found.' });
+                }
+                if (name !== undefined) course.course_name = name;
+                if (description !== undefined) course.description = description;
+                await course.save();
+                updatedCourse = course;
+            }
+            await classCourse.save();
+            res.json({ success: true, message: 'Cập nhật thành công!', data: { classCourse, course: updatedCourse } });
+        } catch (error) {
+            console.error('Update class_course error:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
+    },
 };
 
 module.exports = CourseController;

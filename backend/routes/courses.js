@@ -146,4 +146,71 @@ router.post('/', auth, CourseController.createCourse);
  */
 router.get('/by-class/:classId', auth, CourseController.getCoursesByClass);
 
+/**
+ * @swagger
+/**
+ * @swagger
+ * /api/courses/{id}:
+ *   patch:
+ *     summary: Cập nhật thông tin lớp môn học (class_courses)
+ *     tags: [Course]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID của bản ghi class_course
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               start_week:
+ *                 type: integer
+ *                 example: 1
+ *               end_week:
+ *                 type: integer
+ *                 example: 15
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVE, INACTIVE, ARCHIVED]
+ *                 example: ACTIVE
+ *               name:
+ *                 type: string
+ *                 description: Tên môn học (course_name)
+ *                 example: "Lập trình nâng cao"
+ *               description:
+ *                 type: string
+ *                 description: Mô tả môn học
+ *                 example: "Môn học về các kỹ thuật lập trình nâng cao."
+ *     responses:
+ *       200:
+ *         description: Cập nhật thành công
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   $ref: '#/components/schemas/ClassCourse'
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not found
+ */
+// PATCH /api/courses/:id
+router.patch('/:id', auth, CourseController.updateClassCourse);
+
 module.exports = router;

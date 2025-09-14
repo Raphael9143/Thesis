@@ -28,18 +28,21 @@ const Course = sequelize.define('Course', {
         type: DataTypes.STRING(50),
         allowNull: true
     },
-    created_at: {
+    createdAt: {
         type: DataTypes.DATE,
         allowNull: false,
+        field: 'created_at',
         defaultValue: DataTypes.NOW
     },
-    updated_at: {
+    updatedAt: {
         type: DataTypes.DATE,
-        allowNull: true
+        allowNull: true,
+        field: 'updated_at'
     }
 }, {
     tableName: 'courses',
-    timestamps: false
+    timestamps: true,
+    underscored: true
 });
 
 module.exports = Course;
