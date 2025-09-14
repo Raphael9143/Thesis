@@ -35,10 +35,6 @@ const TeacherController = require('../controllers/TeacherController');
  *           type: string
  *         department:
  *           type: string
- *         expertise:
- *           type: array
- *           items:
- *             type: string
  *         courses_taught:
  *           type: array
  *           items:
@@ -101,10 +97,6 @@ router.get('/profile', auth, TeacherController.getProfile);
  *                 type: string
  *               department:
  *                 type: string
- *               expertise:
- *                 type: array
- *                 items:
- *                   type: string
  *               research_papers:
  *                 type: array
  *                 items:

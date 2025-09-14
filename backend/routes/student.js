@@ -80,10 +80,6 @@ const StudentController = require('../controllers/StudentController');
  *           nullable: true
  *         completed_assignments:
  *           type: integer
- *         gpa:
- *           type: number
- *           format: float
- *           nullable: true
  *         createdAt:
  *           type: string
  *           format: date-time
@@ -115,9 +111,6 @@ const StudentController = require('../controllers/StudentController');
  *                 type: integer
  *               completed_assignments:
  *                 type: integer
- *               gpa:
- *                 type: number
- *                 format: float
  *     responses:
  *       200:
  *         description: Student profile updated

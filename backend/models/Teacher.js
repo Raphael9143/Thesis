@@ -21,10 +21,6 @@ const Teacher = sequelize.define('Teacher', {
         type: DataTypes.STRING(100),
         allowNull: true
     },
-    expertise: {
-        type: DataTypes.JSON,
-        allowNull: true
-    },
     research_papers: {
         type: DataTypes.JSON,
         allowNull: true

@@ -29,10 +29,6 @@ const Student = sequelize.define('Student', {
         type: DataTypes.INTEGER,
         allowNull: true,
         defaultValue: 0
-    },
-    gpa: {
-        type: DataTypes.FLOAT,
-        allowNull: true
     }
 }, {
     tableName: 'students',
