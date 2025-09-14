@@ -39,6 +39,11 @@ const Class = sequelize.define('Class', {
     allowNull: true,
     defaultValue: null
   },
+  current_students: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 0
+  },
   status: {
     type: DataTypes.ENUM('draft', 'active', 'in_progress', 'closed', 'archived', 'cancelled'),
     allowNull: false,

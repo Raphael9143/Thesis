@@ -62,9 +62,18 @@ const AuthController = {
             // Nếu là student thì tạo luôn bản ghi students
             if (regRole === 'STUDENT') {
                 const Student = require('../models/Student');
+                // Sinh student_code tự động dạng OCL0001, OCL0002...
+                const lastStudent = await Student.findOne({
+                    order: [['student_id', 'DESC']]
+                });
+                let nextNumber = 1;
+                if (lastStudent && lastStudent.student_code && /^OCL\d{4}$/.test(lastStudent.student_code)) {
+                    nextNumber = parseInt(lastStudent.student_code.slice(3)) + 1;
+                }
+                const student_code = `OCL${String(nextNumber).padStart(4, '0')}`;
                 await Student.create({
                     student_id: newUser.id,
-                    student_code: '', // Có thể sinh mã tự động hoặc cập nhật sau
+                    student_code
                 });
             }
 

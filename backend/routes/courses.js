@@ -53,7 +53,7 @@ const CourseController = require('../controllers/CourseController');
  *                   items:
  *                     $ref: '#/components/schemas/Course'
  *   post:
- *     summary: Tạo môn học mới
+ *     summary: Tạo môn học mới và ánh xạ với lớp học
  *     tags: [Course]
  *     security:
  *       - bearerAuth: []
@@ -66,6 +66,7 @@ const CourseController = require('../controllers/CourseController');
  *             required:
  *               - course_name
  *               - course_code
+ *               - class_id
  *             properties:
  *               course_name:
  *                 type: string
@@ -75,9 +76,18 @@ const CourseController = require('../controllers/CourseController');
  *                 type: string
  *               semester:
  *                 type: string
+ *               class_id:
+ *                 type: integer
+ *               start_week:
+ *                 type: integer
+ *               end_week:
+ *                 type: integer
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVE, INACTIVE, ARCHIVED]
  *     responses:
  *       201:
- *         description: Môn học đã được tạo
+ *         description: Môn học đã được tạo và ánh xạ với lớp học
  *         content:
  *           application/json:
  *             schema:
@@ -86,7 +96,18 @@ const CourseController = require('../controllers/CourseController');
  *                 success:
  *                   type: boolean
  *                 data:
- *                   $ref: '#/components/schemas/Course'
+ *                   type: object
+ *                   properties:
+ *                     course:
+ *                       $ref: '#/components/schemas/Course'
+ *                     class_course:
+ *                       type: object
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Class not found
  */
 router.get('/', auth, CourseController.getAllCourses);
 router.post('/', auth, CourseController.createCourse);

@@ -229,6 +229,11 @@ exports.addStudentToClass = async (req, res) => {
     }));
     const created = await ClassStudent.bulkCreate(classStudents);
 
+    // Sau khi thêm học sinh, cập nhật current_students
+    const updatedCount = await ClassStudent.count({ where: { classId } });
+    foundClass.current_students = updatedCount;
+    await foundClass.save();
+
     res.status(201).json({
       success: true,
       message: 'Students added to class!',
