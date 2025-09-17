@@ -60,9 +60,12 @@ app.use('/api/courses', courseRoutes);
 
 const studentRoutes = require('./student');
 const teacherRoutes = require('./teacher');
+const assignmentRoutes = require('./assignment');
 // Student routes
 app.use('/api/student', studentRoutes);
 // Teacher routes
 app.use('/api/teacher', teacherRoutes);
+// Assignment routes
+app.use('/api/assignments', assignmentRoutes);
 
 module.exports = app
