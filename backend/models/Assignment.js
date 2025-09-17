@@ -7,10 +7,6 @@ const Assignment = sequelize.define('Assignment', {
         primaryKey: true,
         autoIncrement: true
     },
-    course_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
     title: {
         type: DataTypes.STRING(255),
         allowNull: false

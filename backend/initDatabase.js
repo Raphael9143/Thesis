@@ -85,14 +85,19 @@ async function initDatabase() {
     });
 
     // 8. Assignment mẫu
-    await Assignment.create({
-        course_id: course.course_id,
+    const assignment = await Assignment.create({
         title: 'Bài tập 1: HTML cơ bản',
         description: 'Tạo một trang web HTML đơn giản.',
         type: 'EXERCISE',
         created_by: teacherUser.id,
         difficulty: 'EASY',
         file: null
+    });
+    // Ánh xạ assignment với course
+    const AssignmentCourse = require('./models/AssignmentCourse');
+    await AssignmentCourse.create({
+        assignment_id: assignment.assignment_id,
+        course_id: course.course_id
     });
 
     console.log('✅ Đã seed dữ liệu mẫu!');

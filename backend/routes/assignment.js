@@ -203,4 +203,38 @@ router.put('/:id', auth, upload.single('file'), (req, res, next) => {
 	next();
 }, AssignmentController.updateAssignment);
 
+/**
+ * @swagger
+ * /api/assignments/remove-from-course/{assignmentId}:
+ *   patch:
+ *     summary: Xoá assignment khỏi course (không xoá khỏi assignments)
+ *     tags: [Assignment]
+ *     parameters:
+ *       - in: path
+ *         name: assignmentId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID của assignment
+ *     responses:
+ *       200:
+ *         description: Đã xoá assignment khỏi course
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/Assignment'
+ *       404:
+ *         description: Assignment không tồn tại
+ *       500:
+ *         description: Internal Server Error
+ */
+router.patch('/remove-from-course/:assignmentId', auth, AssignmentController.removeAssignmentFromCourse);
+
 module.exports = router;
