@@ -83,4 +83,27 @@ router.post('/', auth, upload.single('file'), (req, res, next) => {
 	next();
 }, AssignmentController.createAssignment);
 
+/**
+ * @swagger
+ * /api/assignments:
+ *   get:
+ *     summary: Lấy tất cả bài tập
+ *     tags: [Assignment]
+ *     responses:
+ *       200:
+ *         description: Danh sách bài tập
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Assignment'
+ */
+router.get('/', AssignmentController.getAllAssignments);
+
 module.exports = router;

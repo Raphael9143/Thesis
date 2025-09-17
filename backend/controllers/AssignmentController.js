@@ -41,6 +41,23 @@ const AssignmentController = {
             console.error('Create assignment error:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
+    },
+
+    // Lấy tất cả bài tập
+    getAllAssignments: async (req, res) => {
+        try {
+            const assignments = await Assignment.findAll({
+                include: [
+                    { model: Course, as: 'course', attributes: ['course_id', 'course_name', 'course_code'] },
+                    { model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
+                ],
+                order: [['created_at', 'DESC']]
+            });
+            res.json({ success: true, data: assignments });
+        } catch (error) {
+            console.error('Get all assignments error:', error);
+            res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
     }
 };
 
