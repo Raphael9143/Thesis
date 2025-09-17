@@ -4,6 +4,7 @@ const cors = require('cors');
 const classRoutes = require('./class');
 const authRoutes = require('./auth');
 const courseRoutes = require('./courses');
+const userRoutes = require('./user');
 
 const { sequelize, testConnection } = require('../config/database');
 const { specs, swaggerUi } = require('../config/swagger')
@@ -50,6 +51,8 @@ app.get('/', (req, res) => {
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+// User routes
+app.use('/api/users', userRoutes);
 // Class routes
 app.use('/api/class', classRoutes);
 // Course routes
