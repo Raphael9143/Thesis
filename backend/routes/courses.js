@@ -18,14 +18,15 @@ const CourseController = require('../controllers/CourseController');
  *           application/json:
  *             schema:
  *               type: object
- *             properties:
- *               start_week:
- *                 type: integer
- *               end_week:
- *                 type: integer
- *               status:
- *                 type: string
- *                 enum: [ACTIVE, INACTIVE]
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Course'
+ *
+ *   post:
  *     summary: Tạo môn học mới và ánh xạ với lớp học
  *     tags: [Course]
  *     security:
@@ -43,21 +44,29 @@ const CourseController = require('../controllers/CourseController');
  *             properties:
  *               course_name:
  *                 type: string
+ *                 example: "Lập trình nâng cao"
  *               course_code:
  *                 type: string
+ *                 example: "CS2025"
  *               description:
  *                 type: string
+ *                 example: "Môn học về các kỹ thuật lập trình nâng cao."
  *               semester:
  *                 type: string
+ *                 example: "Spring 2025"
  *               class_id:
  *                 type: integer
+ *                 example: 1
  *               start_week:
  *                 type: integer
+ *                 example: 1
  *               end_week:
  *                 type: integer
+ *                 example: 15
  *               status:
  *                 type: string
  *                 enum: [ACTIVE, INACTIVE]
+ *                 example: ACTIVE
  *     responses:
  *       201:
  *         description: Môn học đã được tạo và ánh xạ với lớp học
