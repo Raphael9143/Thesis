@@ -136,4 +136,71 @@ router.get('/', AssignmentController.getAllAssignments);
  */
 router.get('/class/:classId', AssignmentController.getAssignmentsByClass);
 
+/**
+ * @swagger
+ * /api/assignments/{id}:
+ *   put:
+ *     summary: Sửa bài tập (chỉ giảng viên đứng lớp chứa bài tập đó)
+ *     tags: [Assignment]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID của bài tập
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [LECTURE, EXERCISE, EXAM]
+ *               constraints:
+ *                 type: string
+ *               difficulty:
+ *                 type: string
+ *                 enum: [EASY, MEDIUM, HARD]
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Assignment updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Assignment'
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal Server Error
+ */
+router.put('/:id', auth, upload.single('file'), (req, res, next) => {
+	if (req.body.constraints && typeof req.body.constraints === 'string') {
+		try {
+			req.body.constraints = JSON.parse(req.body.constraints);
+		} catch (e) {
+			return res.status(400).json({ success: false, message: 'constraints phải là JSON hợp lệ.' });
+		}
+	}
+	next();
+}, AssignmentController.updateAssignment);
+
 module.exports = router;

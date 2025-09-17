@@ -1,3 +1,4 @@
+const Class = require('../models/Class');
 const Assignment = require('../models/Assignment');
 const Course = require('../models/Course');
 const User = require('../models/User');
@@ -87,7 +88,48 @@ const AssignmentController = {
             console.error('Get assignments by class error:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
-    }
+    },
+    // Sửa bài tập (chỉ giảng viên đứng lớp chứa bài tập đó)
+    updateAssignment: async (req, res) => {
+        try {
+            if (req.user.role !== 'TEACHER') {
+                return res.status(403).json({ success: false, message: 'Chỉ giáo viên mới được sửa bài tập.' });
+            }
+            const { id } = req.params;
+            const assignment = await Assignment.findByPk(id);
+            if (!assignment) {
+                return res.status(404).json({ success: false, message: 'Assignment không tồn tại.' });
+            }
+            // Tìm class chứa course này
+            const classCourse = await ClassCourse.findOne({ where: { course_id: assignment.course_id } });
+            if (!classCourse) {
+                return res.status(404).json({ success: false, message: 'Không tìm thấy lớp chứa bài tập này.' });
+            }
+            const classObj = await Class.findByPk(classCourse.class_id);
+            if (!classObj) {
+                return res.status(404).json({ success: false, message: 'Lớp không tồn tại.' });
+            }
+            if (classObj.teacherId !== req.user.userId) {
+                return res.status(403).json({ success: false, message: 'Bạn không có quyền sửa bài tập này.' });
+            }
+            // Xử lý file upload nếu có
+            let filePath = assignment.file;
+            if (req.file) {
+                filePath = 'uploads/assignments/' + req.file.filename;
+            }
+            // Cập nhật assignment
+            const fields = ['title', 'description', 'type', 'constraints', 'difficulty'];
+            fields.forEach(f => {
+                if (req.body[f] !== undefined) assignment[f] = req.body[f];
+            });
+            assignment.file = filePath;
+            await assignment.save();
+            res.json({ success: true, data: assignment });
+        } catch (error) {
+            console.error('Update assignment error:', error);
+            res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
+    },
 };
 
 module.exports = AssignmentController;
