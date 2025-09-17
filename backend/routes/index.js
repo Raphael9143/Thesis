@@ -24,10 +24,12 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
 // Test database connection
 testConnection();
 
-// Sync database (tạo bảng nếu chưa có)
-sequelize.sync({ force: false }) // force: true sẽ xóa và tạo lại bảng
-    .then(() => {
-        console.log('✅ Database synced successfully!');
+// Sync database (drop & create lại), sau đó seed dữ liệu mẫu bằng file riêng
+sequelize.sync({ force: true })
+    .then(async () => {
+        console.log('✅ Database dropped & synced successfully!');
+        const initDatabase = require('../initDatabase');
+        await initDatabase();
     })
     .catch((error) => {
         console.error('❌ Database sync failed:', error.message);
