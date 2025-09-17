@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middlewares/auth');
+
+const upload = require('../middlewares/assignmentUpload');
 const AssignmentController = require('../controllers/AssignmentController');
 
 /**
@@ -14,7 +16,7 @@ const AssignmentController = require('../controllers/AssignmentController');
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
+ *         multipart/form-data:
  *           schema:
  *             type: object
  *             required:
@@ -37,27 +39,17 @@ const AssignmentController = require('../controllers/AssignmentController');
  *                 enum: [LECTURE, EXERCISE, EXAM]
  *                 example: EXERCISE
  *               constraints:
- *                 type: array
- *                 items:
- *                   type: object
- *                   properties:
- *                     type:
- *                       type: string
- *                       example: "OCL"
- *                     rule:
- *                       type: array
- *                       items:
- *                         type: string
- *                       example: ["context Student inv: self.age > 18"]
- *                 example:
- *                   - type: "OCL"
- *                     rule: ["context Student inv: self.age > 18"]
- *                   - type: "UML"
- *                     rule: ["Sơ đồ UML phải có ít nhất 3 lớp"]
+ *                 type: string
+ *                 description: JSON.stringify(array) dạng constraints như yêu cầu
+ *                 example: '[{"type":"OCL","rule":["context Student inv: self.age > 18"]}]'
  *               difficulty:
  *                 type: string
  *                 enum: [EASY, MEDIUM, HARD]
  *                 example: MEDIUM
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *                 description: File OCL/UML/hình ảnh đính kèm
  *     responses:
  *       201:
  *         description: Assignment created
@@ -79,6 +71,16 @@ const AssignmentController = require('../controllers/AssignmentController');
  *       500:
  *         description: Internal Server Error
  */
-router.post('/', auth, AssignmentController.createAssignment);
+router.post('/', auth, upload.single('file'), (req, res, next) => {
+	// Nếu có trường constraints là string, parse sang object
+	if (req.body.constraints && typeof req.body.constraints === 'string') {
+		try {
+			req.body.constraints = JSON.parse(req.body.constraints);
+		} catch (e) {
+			return res.status(400).json({ success: false, message: 'constraints phải là JSON hợp lệ.' });
+		}
+	}
+	next();
+}, AssignmentController.createAssignment);
 
 module.exports = router;

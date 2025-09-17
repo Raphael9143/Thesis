@@ -35,6 +35,10 @@ const Assignment = sequelize.define('Assignment', {
         type: DataTypes.ENUM('EASY', 'MEDIUM', 'HARD'),
         allowNull: false
     },
+    file: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
     created_at: {
         type: DataTypes.DATE,
         allowNull: false,
