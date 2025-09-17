@@ -106,4 +106,34 @@ router.post('/', auth, upload.single('file'), (req, res, next) => {
  */
 router.get('/', AssignmentController.getAllAssignments);
 
+/**
+ * @swagger
+ * /api/assignments/class/{classId}:
+ *   get:
+ *     summary: Lấy tất cả bài tập theo lớp
+ *     tags: [Assignment]
+ *     parameters:
+ *       - in: path
+ *         name: classId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID của lớp
+ *     responses:
+ *       200:
+ *         description: Danh sách bài tập theo lớp
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Assignment'
+ */
+router.get('/class/:classId', AssignmentController.getAssignmentsByClass);
+
 module.exports = router;

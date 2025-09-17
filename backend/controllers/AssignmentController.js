@@ -1,6 +1,7 @@
 const Assignment = require('../models/Assignment');
 const Course = require('../models/Course');
 const User = require('../models/User');
+const ClassCourse = require('../models/ClassCourse');
 
 const AssignmentController = {
     // Tạo bài tập mới (chỉ giáo viên)
@@ -56,6 +57,34 @@ const AssignmentController = {
             res.json({ success: true, data: assignments });
         } catch (error) {
             console.error('Get all assignments error:', error);
+            res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
+    },
+    // Lấy tất cả bài tập theo lớp
+    getAssignmentsByClass: async (req, res) => {
+        try {
+            const { classId } = req.params;
+            if (!classId) {
+                return res.status(400).json({ success: false, message: 'Thiếu classId.' });
+            }
+            // Lấy tất cả course_id thuộc class này
+            const classCourses = await ClassCourse.findAll({ where: { class_id: classId } });
+            const courseIds = classCourses.map(cc => cc.course_id);
+            if (courseIds.length === 0) {
+                return res.json({ success: true, data: [] });
+            }
+            // Lấy assignment theo các course_id này
+            const assignments = await Assignment.findAll({
+                where: { course_id: courseIds },
+                include: [
+                    { model: Course, as: 'course', attributes: ['course_id', 'course_name', 'course_code'] },
+                    { model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
+                ],
+                order: [['created_at', 'DESC']]
+            });
+            res.json({ success: true, data: assignments });
+        } catch (error) {
+            console.error('Get assignments by class error:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     }
