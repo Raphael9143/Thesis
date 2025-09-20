@@ -58,14 +58,28 @@ const AssignmentController = {
                     {
                         model: Course,
                         as: 'courses',
-                        through: { attributes: ['due_date', 'week'] },
+                        through: { attributes: ['due_date', 'start_date', 'week'] },
                         attributes: ['course_id', 'course_name', 'course_code']
                     },
                     { model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
                 ],
                 order: [['created_at', 'DESC']]
             });
-            res.json({ success: true, data: assignments });
+            // Convert AssignmentCourse to assignment_course in response
+            const data = assignments.map(a => {
+                const obj = a.toJSON();
+                if (obj.courses) {
+                    obj.courses = obj.courses.map(c => {
+                        if (c.AssignmentCourse) {
+                            c.assignment_course = c.AssignmentCourse;
+                            delete c.AssignmentCourse;
+                        }
+                        return c;
+                    });
+                }
+                return obj;
+            });
+            res.json({ success: true, data });
         } catch (error) {
             console.error('Get all assignments error:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });
@@ -96,14 +110,28 @@ const AssignmentController = {
                     {
                         model: Course,
                         as: 'courses',
-                        through: { attributes: ['due_date', 'week'] },
+                        through: { attributes: ['due_date', 'start_date', 'week'] },
                         attributes: ['course_id', 'course_name', 'course_code']
                     },
                     { model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
                 ],
                 order: [['created_at', 'DESC']]
             });
-            res.json({ success: true, data: assignments });
+            // Convert AssignmentCourse to assignment_course in response
+            const data = assignments.map(a => {
+                const obj = a.toJSON();
+                if (obj.courses) {
+                    obj.courses = obj.courses.map(c => {
+                        if (c.AssignmentCourse) {
+                            c.assignment_course = c.AssignmentCourse;
+                            delete c.AssignmentCourse;
+                        }
+                        return c;
+                    });
+                }
+                return obj;
+            });
+            res.json({ success: true, data });
         } catch (error) {
             console.error('Get assignments by class error:', error);
             res.status(500).json({ success: false, message: 'Internal Server Error' });

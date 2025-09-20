@@ -97,7 +97,10 @@ async function initDatabase() {
     const AssignmentCourse = require('./models/AssignmentCourse');
     await AssignmentCourse.create({
         assignment_id: assignment.assignment_id,
-        course_id: course.course_id
+        course_id: course.course_id,
+        start_date: new Date('2025-09-20T08:00:00Z'),
+        due_date: new Date('2025-10-01T23:59:00Z'),
+        week: 2
     });
 
     console.log('✅ Đã seed dữ liệu mẫu!');
