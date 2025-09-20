@@ -1,4 +1,3 @@
-
 const Class = require('../models/Class');
 const ClassStudent = require('../models/ClassStudent');
 const User = require('../models/User');
@@ -393,7 +392,37 @@ const ClassController = {
       }
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
-  }
+  },
+    // Lấy thông tin lớp học theo id
+  getClassById: async (req, res) => {
+    try {
+      const classId = req.params.id;
+      const user = req.user;
+      const foundClass = await Class.findByPk(classId, {
+        include: [
+          { model: User, as: 'teacher', attributes: ['id', 'full_name', 'email'] }
+        ]
+      });
+      if (!foundClass) {
+        return res.status(404).json({ success: false, message: 'Class not found.' });
+      }
+      // Chỉ admin, giáo viên chủ nhiệm, hoặc sinh viên thuộc lớp mới được lấy
+      if (user.role === 'admin' || (user.role === 'TEACHER' && foundClass.teacherId === user.userId)) {
+        return res.json({ success: true, data: foundClass });
+      }
+      if (user.role === 'STUDENT') {
+        // Kiểm tra sinh viên có trong lớp không
+        const isMember = await ClassStudent.findOne({ where: { classId, studentId: user.userId } });
+        if (isMember) {
+          return res.json({ success: true, data: foundClass });
+        }
+      }
+      return res.status(403).json({ success: false, message: 'Bạn không có quyền truy cập lớp này.' });
+    } catch (error) {
+      console.error('Get class by id error:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
 };
 
 module.exports = ClassController;

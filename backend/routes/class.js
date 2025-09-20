@@ -387,4 +387,38 @@ router.post('/', auth, requireRole('TEACHER'), ClassController.createClass);
  */
 router.get('/', auth, ClassController.getAllClasses);
 
+/**
+ * @swagger
+ * /api/class/{id}:
+ *   get:
+ *     summary: Lấy thông tin lớp học theo id
+ *     tags: [Class]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID lớp học
+ *     responses:
+ *       200:
+ *         description: Thông tin lớp học
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Class'
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get('/:id', auth, ClassController.getClassById);
+
 module.exports = router;
