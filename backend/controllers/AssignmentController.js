@@ -187,6 +187,30 @@ const AssignmentController = {
             res.status(500).json({ success: false, message: 'Internal Server Error' });
         }
     },
+    // Thêm assignment đã có vào lớp (qua course)
+    addAssignmentToClass: async (req, res) => {
+        try {
+            const { assignment_id, course_id } = req.body;
+            const assignment = await Assignment.findByPk(assignment_id);
+            if (!assignment) {
+                return res.status(404).json({ success: false, message: 'Assignment không tồn tại.' });
+            }
+            const course = await Course.findByPk(course_id);
+            if (!course) {
+                return res.status(404).json({ success: false, message: 'Course không tồn tại.' });
+            }
+            // Kiểm tra đã ánh xạ chưa
+            const exist = await AssignmentCourse.findOne({ where: { assignment_id, course_id } });
+            if (exist) {
+                return res.status(400).json({ success: false, message: 'Assignment đã có trong course này.' });
+            }
+            await AssignmentCourse.create({ assignment_id, course_id });
+            res.json({ success: true, data: assignment });
+        } catch (error) {
+            console.error('Add assignment to class error:', error);
+            res.status(500).json({ success: false, message: 'Server error' });
+        }
+    },
 };
 
 module.exports = AssignmentController;

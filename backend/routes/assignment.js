@@ -237,4 +237,49 @@ router.put('/:id', auth, upload.single('file'), (req, res, next) => {
  */
 router.patch('/remove-from-course/:assignmentId', auth, AssignmentController.removeAssignmentFromCourse);
 
+/**
+ * @swagger
+ * /api/assignments/add-to-class:
+ *   post:
+ *     summary: Thêm assignment đã có trong database vào lớp (qua course)
+ *     tags: [Assignment]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - assignment_id
+ *               - course_id
+ *             properties:
+ *               assignment_id:
+ *                 type: integer
+ *                 example: 1
+ *               course_id:
+ *                 type: integer
+ *                 example: 1
+ *     responses:
+ *       200:
+ *         description: Assignment đã được thêm vào lớp (qua course)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Assignment'
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Assignment hoặc Course không tồn tại
+ *       500:
+ *         description: Internal Server Error
+ */
+router.post('/add-to-class', auth, AssignmentController.addAssignmentToClass);
+
 module.exports = router;
