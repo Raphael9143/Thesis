@@ -358,4 +358,33 @@ router.put('/:id', auth, requireRole('TEACHER', 'ADMIN'), ClassController.update
  */
 router.post('/', auth, requireRole('TEACHER'), ClassController.createClass);
 
+/**
+ * @swagger
+ * /api/class:
+ *   get:
+ *     summary: Lấy tất cả các lớp (chỉ admin)
+ *     tags: [Class]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Danh sách lớp học
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Class'
+ *       403:
+ *         description: Only admin can view all classes
+ *       500:
+ *         description: Internal Server Error
+ */
+router.get('/', auth, ClassController.getAllClasses);
+
 module.exports = router;
