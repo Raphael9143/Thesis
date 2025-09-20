@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middlewares/auth');
 const submissionUpload = require('../middlewares/submissionUpload');
-const AssignmentController = require('../controllers/AssignmentController');
+const SubmissionController = require('../controllers/SubmissionController');
 
 /**
  * @swagger
@@ -45,6 +45,6 @@ const AssignmentController = require('../controllers/AssignmentController');
  *       500:
  *         description: Internal Server Error
  */
-router.post('/', auth, submissionUpload.single('file'), AssignmentController.submitAssignment);
+router.post('/', auth, submissionUpload.single('file'), SubmissionController.submitAssignment);
 
 module.exports = router;

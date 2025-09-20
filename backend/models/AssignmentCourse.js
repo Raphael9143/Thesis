@@ -41,4 +41,6 @@ Course.belongsToMany(Assignment, { through: AssignmentCourse, foreignKey: 'cours
 AssignmentCourse.belongsTo(Assignment, { foreignKey: 'assignment_id', as: 'assignment' });
 AssignmentCourse.belongsTo(Course, { foreignKey: 'course_id', as: 'course' });
 
+
+
 module.exports = AssignmentCourse;

@@ -8,11 +8,11 @@ const Submission = sequelize.define('Submission', {
     autoIncrement: true
   },
   class_assignment_id: {
-    type: DataTypes.BIGINT.UNSIGNED,
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   student_id: {
-    type: DataTypes.BIGINT.UNSIGNED,
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   submission_time: {
@@ -67,5 +67,7 @@ const Submission = sequelize.define('Submission', {
   tableName: 'submissions',
   timestamps: false
 });
+
+
 
 module.exports = Submission;

@@ -39,4 +39,6 @@ const Student = sequelize.define('Student', {
 const ClassStudent = require('./ClassStudent');
 Student.hasMany(ClassStudent, { foreignKey: 'student_id', as: 'classEnrollments', onDelete: 'CASCADE' });
 
+
+
 module.exports = Student;
