@@ -1,3 +1,4 @@
+const submissionRoutes = require('./submission');
 const express = require('express');
 const cors = require('cors');
 
@@ -5,6 +6,9 @@ const classRoutes = require('./class');
 const authRoutes = require('./auth');
 const courseRoutes = require('./courses');
 const userRoutes = require('./user');
+const studentRoutes = require('./student');
+const teacherRoutes = require('./teacher');
+const assignmentRoutes = require('./assignment');
 
 const { sequelize, testConnection } = require('../config/database');
 const { specs, swaggerUi } = require('../config/swagger')
@@ -59,15 +63,13 @@ app.use('/api/users', userRoutes);
 app.use('/api/class', classRoutes);
 // Course routes
 app.use('/api/courses', courseRoutes);
-
-const studentRoutes = require('./student');
-const teacherRoutes = require('./teacher');
-const assignmentRoutes = require('./assignment');
 // Student routes
 app.use('/api/student', studentRoutes);
 // Teacher routes
 app.use('/api/teacher', teacherRoutes);
 // Assignment routes
 app.use('/api/assignments', assignmentRoutes);
+// Submission routes
+app.use('/api/submissions', submissionRoutes);
 
 module.exports = app
