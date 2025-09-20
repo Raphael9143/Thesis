@@ -68,6 +68,8 @@ const Submission = sequelize.define('Submission', {
   timestamps: false
 });
 
-
+// Associations (khai báo sau khi đã import đầy đủ các model ở file trung tâm, ví dụ models/index.js)
+Submission.belongsTo(require('./AssignmentCourse'), { foreignKey: 'class_assignment_id', as: 'assignmentCourse' });
+Submission.belongsTo(require('./Student'), { foreignKey: 'student_id', as: 'student' });
 
 module.exports = Submission;
