@@ -307,4 +307,63 @@ router.patch('/remove-from-course/:assignmentId', auth, AssignmentController.rem
  */
 router.post('/add-to-class', auth, AssignmentController.addAssignmentToClass);
 
+/**
+ * @swagger
+ * /api/assignments/{id}:
+ *   delete:
+ *     summary: Xoá assignment khỏi database (chỉ admin)
+ *     tags: [Assignment]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: Assignment ID
+ *     responses:
+ *       200:
+ *         description: Đã xoá assignment khỏi database
+ *       403:
+ *         description: Chỉ admin mới được xoá assignment
+ *       404:
+ *         description: Assignment không tồn tại
+ *       500:
+ *         description: Internal Server Error
+ */
+router.delete('/:id', auth, AssignmentController.deleteAssignment);
+
+/**
+ * @swagger
+ * /api/assignments/{id}:
+ *   get:
+ *     summary: Lấy bài tập theo id
+ *     tags: [Assignment]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID của bài tập
+ *     responses:
+ *       200:
+ *         description: Thông tin bài tập
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Assignment'
+ *       404:
+ *         description: Assignment không tồn tại
+ *       500:
+ *         description: Internal Server Error
+ */
+router.get('/:id', auth, AssignmentController.getAssignmentById);
+
 module.exports = router;

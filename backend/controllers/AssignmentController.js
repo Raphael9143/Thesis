@@ -249,6 +249,65 @@ const AssignmentController = {
             res.status(500).json({ success: false, message: 'Server error' });
         }
     },
+        // Xoá assignment khỏi database (chỉ admin)
+    deleteAssignment: async (req, res) => {
+        try {
+            if (req.user.role !== 'ADMIN') {
+                return res.status(403).json({ success: false, message: 'Chỉ admin mới được xoá assignment.' });
+            }
+            const { id } = req.params;
+            const assignment = await Assignment.findByPk(id);
+            if (!assignment) {
+                return res.status(404).json({ success: false, message: 'Assignment không tồn tại.' });
+            }
+            // Xoá tất cả ánh xạ assignment_courses trước
+            await AssignmentCourse.destroy({ where: { assignment_id: id } });
+            // Xoá assignment
+            await assignment.destroy();
+            res.json({ success: true, message: 'Đã xoá assignment khỏi database.' });
+        } catch (error) {
+            console.error('Delete assignment error:', error);
+            res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
+    },
+        // Lấy bài tập theo id
+    getAssignmentById: async (req, res) => {
+        try {
+            if (!req.user || (req.user.role !== 'ADMIN' && req.user.role !== 'TEACHER')) {
+                return res.status(403).json({ success: false, message: 'Chỉ admin hoặc giáo viên mới được truy cập.' });
+            }
+            const { id } = req.params;
+            const assignment = await Assignment.findByPk(id, {
+                include: [
+                    {
+                        model: Course,
+                        as: 'courses',
+                        through: { attributes: ['due_date', 'start_date', 'week'] },
+                        attributes: ['course_id', 'course_name', 'course_code']
+                    },
+                    { model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
+                ]
+            });
+            if (!assignment) {
+                return res.status(404).json({ success: false, message: 'Assignment không tồn tại.' });
+            }
+            // Convert AssignmentCourse to assignment_course in response
+            const obj = assignment.toJSON();
+            if (obj.courses) {
+                obj.courses = obj.courses.map(c => {
+                    if (c.AssignmentCourse) {
+                        c.assignment_course = c.AssignmentCourse;
+                        delete c.AssignmentCourse;
+                    }
+                    return c;
+                });
+            }
+            res.json({ success: true, data: obj });
+        } catch (error) {
+            console.error('Get assignment by id error:', error);
+            res.status(500).json({ success: false, message: 'Internal Server Error' });
+        }
+    },
 };
 
 module.exports = AssignmentController;
