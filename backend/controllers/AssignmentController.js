@@ -58,7 +58,7 @@ const AssignmentController = {
                     {
                         model: Course,
                         as: 'courses',
-                        through: { attributes: [] },
+                        through: { attributes: ['due_date', 'week'] },
                         attributes: ['course_id', 'course_name', 'course_code']
                     },
                     { model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
@@ -96,7 +96,7 @@ const AssignmentController = {
                     {
                         model: Course,
                         as: 'courses',
-                        through: { attributes: [] },
+                        through: { attributes: ['due_date', 'week'] },
                         attributes: ['course_id', 'course_name', 'course_code']
                     },
                     { model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
@@ -144,6 +144,16 @@ const AssignmentController = {
             });
             assignment.file = filePath;
             await assignment.save();
+            // Cập nhật due_date, week nếu có
+            if (req.body.due_date !== undefined || req.body.week !== undefined) {
+                // Tìm assignment_courses
+                const assignmentCourse = await AssignmentCourse.findOne({ where: { assignment_id: assignment.assignment_id } });
+                if (assignmentCourse) {
+                    if (req.body.due_date !== undefined) assignmentCourse.due_date = req.body.due_date;
+                    if (req.body.week !== undefined) assignmentCourse.week = req.body.week;
+                    await assignmentCourse.save();
+                }
+            }
             res.json({ success: true, data: assignment });
         } catch (error) {
             console.error('Update assignment error:', error);
@@ -190,7 +200,7 @@ const AssignmentController = {
     // Thêm assignment đã có vào lớp (qua course)
     addAssignmentToClass: async (req, res) => {
         try {
-            const { assignment_id, course_id } = req.body;
+            const { assignment_id, course_id, due_date, week } = req.body;
             const assignment = await Assignment.findByPk(assignment_id);
             if (!assignment) {
                 return res.status(404).json({ success: false, message: 'Assignment không tồn tại.' });
@@ -204,7 +214,7 @@ const AssignmentController = {
             if (exist) {
                 return res.status(400).json({ success: false, message: 'Assignment đã có trong course này.' });
             }
-            await AssignmentCourse.create({ assignment_id, course_id });
+            await AssignmentCourse.create({ assignment_id, course_id, due_date, week });
             res.json({ success: true, data: assignment });
         } catch (error) {
             console.error('Add assignment to class error:', error);

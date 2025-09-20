@@ -14,6 +14,18 @@ const AssignmentCourse = sequelize.define('AssignmentCourse', {
     course_id: {
         type: DataTypes.INTEGER,
         allowNull: false
+    },
+    due_date: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    start_date: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    week: {
+        type: DataTypes.INTEGER,
+        allowNull: true
     }
 }, {
     tableName: 'assignment_courses',

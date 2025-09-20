@@ -28,6 +28,17 @@ const AssignmentController = require('../controllers/AssignmentController');
  *               course_id:
  *                 type: integer
  *                 example: 1
+ *               due_date:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2025-10-01T23:59:00Z"
+ *               start_date:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2025-09-20T08:00:00Z"
+ *               week:
+ *                 type: integer
+ *                 example: 5
  *               title:
  *                 type: string
  *                 example: "Bài tập OCL số 1"
@@ -173,6 +184,13 @@ router.get('/class/:classId', AssignmentController.getAssignmentsByClass);
  *               file:
  *                 type: string
  *                 format: binary
+ *               due_date:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2025-10-01T23:59:00Z"
+ *               week:
+ *                 type: integer
+ *                 example: 5
  *     responses:
  *       200:
  *         description: Assignment updated
@@ -261,6 +279,13 @@ router.patch('/remove-from-course/:assignmentId', auth, AssignmentController.rem
  *               course_id:
  *                 type: integer
  *                 example: 1
+ *               due_date:
+ *                 type: string
+ *                 format: date-time
+ *                 example: "2025-10-01T23:59:00Z"
+ *               week:
+ *                 type: integer
+ *                 example: 5
  *     responses:
  *       200:
  *         description: Assignment đã được thêm vào lớp (qua course)
