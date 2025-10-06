@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const User = require('./models/User');
 const Teacher = require('./models/Teacher');
 const Student = require('./models/Student');
+const Researcher = require('./models/Researcher');
 const Course = require('./models/Course');
 const Class = require('./models/Class');
 const ClassCourse = require('./models/ClassCourse');
@@ -47,7 +48,27 @@ async function initDatabase() {
         year: 3
     });
 
-    // 4. Course
+    // 4. Researcher
+    const researcherUser = await User.create({
+        full_name: 'Dr. Tran Van C',
+        email: 'researcher1@example.com',
+        password: await bcrypt.hash('researcher123', 10),
+        role: 'RESEARCHER',
+        status: 'ACTIVE'
+    });
+    const researcher = await Researcher.create({
+        researcher_id: researcherUser.id,
+        researcher_code: 'RES001',
+        department: 'Khoa học máy tính',
+        field_of_study: 'Artificial Intelligence',
+        research_interests: ['Machine Learning', 'Deep Learning', 'Computer Vision'],
+        publications: ['AI in Education: A Survey', 'Deep Learning for Image Recognition'],
+        current_projects: ['Smart Learning Platform', 'AI-powered Assessment System'],
+        academic_rank: 'SENIOR_RESEARCHER',
+        years_of_experience: 8
+    });
+
+    // 5. Course
     const course = await Course.create({
         course_name: 'Lập trình Web',
         course_code: 'WEB101',
@@ -59,7 +80,7 @@ async function initDatabase() {
         status: 'ACTIVE'
     });
 
-    // 5. Class
+    // 6. Class
     const class1 = await Class.create({
         name: 'Web 2025 Nhóm 1',
         code: 'WEB2025-1',
@@ -71,20 +92,20 @@ async function initDatabase() {
         status: 'active'
     });
 
-    // 6. Gán course vào class (ClassCourse)
+    // 7. Gán course vào class (ClassCourse)
     await ClassCourse.create({
         class_id: class1.id,
         course_id: course.course_id
     });
 
-    // 7. Thêm sinh viên vào lớp (ClassStudent)
+    // 8. Thêm sinh viên vào lớp (ClassStudent)
     await ClassStudent.create({
         classId: class1.id,
         studentId: studentUser.id,
         joinedAt: new Date()
     });
 
-    // 8. Assignment mẫu
+    // 9. Assignment mẫu
     const assignment = await Assignment.create({
         title: 'Bài tập 1: HTML cơ bản',
         description: 'Tạo một trang web HTML đơn giản.',

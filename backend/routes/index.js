@@ -8,6 +8,7 @@ const courseRoutes = require('./courses');
 const userRoutes = require('./user');
 const studentRoutes = require('./student');
 const teacherRoutes = require('./teacher');
+const researcherRoutes = require('./researcher');
 const assignmentRoutes = require('./assignment');
 
 const { sequelize, testConnection } = require('../config/database');
@@ -67,6 +68,8 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/student', studentRoutes);
 // Teacher routes
 app.use('/api/teacher', teacherRoutes);
+// Researcher routes
+app.use('/api/researcher', researcherRoutes);
 // Assignment routes
 app.use('/api/assignments', assignmentRoutes);
 // Submission routes

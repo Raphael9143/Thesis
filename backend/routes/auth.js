@@ -34,7 +34,7 @@ const auth = require('../middlewares/auth');
  *           example: "MALE"
  *         role:
  *           type: string
- *           enum: [TEACHER, STUDENT]
+ *           enum: [TEACHER, STUDENT, RESEARCHER]
  *           example: "STUDENT"
  *     LoginRequest:
  *       type: object
@@ -61,7 +61,7 @@ const auth = require('../middlewares/auth');
  *           type: string
  *         role:
  *           type: string
- *           enum: [ADMIN, TEACHER, STUDENT]
+ *           enum: [ADMIN, TEACHER, STUDENT, RESEARCHER]
  *         avatar_url:
  *           type: string
  *         gender:

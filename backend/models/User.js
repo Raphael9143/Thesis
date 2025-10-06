@@ -31,7 +31,7 @@ const User = sequelize.define('User', {
         }
     },
     role: {
-        type: DataTypes.ENUM('STUDENT', 'TEACHER', 'ADMIN'),
+        type: DataTypes.ENUM('STUDENT', 'TEACHER', 'ADMIN', 'RESEARCHER'),
         allowNull: false,
         defaultValue: 'STUDENT',
     },
@@ -85,3 +85,7 @@ User.hasMany(ClassStudent, { foreignKey: 'student_id', as: 'studentClasses', onD
 // Một user có thể có một profile sinh viên (1-1)
 const Student = require('./Student');
 User.hasOne(Student, { foreignKey: 'student_id', as: 'studentProfile', onDelete: 'CASCADE' });
+
+// Một user có thể có một profile researcher (1-1)
+const Researcher = require('./Researcher');
+User.hasOne(Researcher, { foreignKey: 'researcher_id', as: 'researcherProfile', onDelete: 'CASCADE' });
