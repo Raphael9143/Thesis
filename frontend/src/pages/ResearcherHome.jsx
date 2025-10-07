@@ -22,11 +22,9 @@ export default function ResearcherHome() {
     try {
       const data = await userAPI.login({ email, password });
       if (!data.success) { setMessage(data.message || 'Wrong email or password!'); return; }
-      // Optionally enforce researcher role if backend supports it
-      // if (data.data?.user?.role !== 'researcher') { setMessage('Không phải tài khoản Researcher'); return; }
       sessionStorage.setItem('isLogin', 'true');
       sessionStorage.setItem('token', data.data.token);
-      setMessage('Đăng nhập thành công!');
+      setMessage('Successfully Logging in!');
     } catch (err) {
       setMessage(err?.response?.data?.message || 'Server error!');
     } finally {
@@ -102,7 +100,7 @@ export default function ResearcherHome() {
       </Modal>
 
       <div className="sections">
-        <Section title="Featured Collections" subtitle="Tuyển chọn các bộ dữ liệu và mô hình phổ biến">
+        <Section title="Featured Collections">
           <div className="grid grid--3">
             <Card title="Projects">
               <div className="feature-card">
@@ -125,7 +123,7 @@ export default function ResearcherHome() {
           </div>
         </Section>
 
-        <Section title="Latest Publications" subtitle="Các công bố gần đây có dữ liệu đi kèm">
+        <Section title="Latest Publications">
           <div className="grid grid--3">
             <Card title="Constraint Inference">
               <p>Inferring OCL constraints from examples.</p>

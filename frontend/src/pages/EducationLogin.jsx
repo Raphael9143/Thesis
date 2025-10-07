@@ -19,21 +19,21 @@ export default function EducationLogin() {
     try {
       const data = await userAPI.login({ email, password });
       if (!data.success) {
-        setMessage(data.message || 'Sai tài khoản hoặc mật khẩu!');
+        setMessage(data.message || 'Wrong email or password!');
         return;
       }
       const userRole = data.data?.user?.role;
       if (role === 'student' && userRole !== 'student') {
-        setMessage('Tài khoản này không phải học sinh!');
+        setMessage('This account isn\'t a student account!');
         return;
       }
       if (role === 'teacher' && userRole !== 'teacher' && userRole !== 'admin') {
-        setMessage('Tài khoản này không phải giáo viên hoặc admin!');
+        setMessage('This account isn\'t a teacher account!');
         return;
       }
       sessionStorage.setItem('isLogin', 'true');
       sessionStorage.setItem('token', data.data.token);
-      setMessage('Đăng nhập thành công!');
+      setMessage('Successfully login!');
     } catch (err) {
       setMessage(err?.response?.data?.message || 'Server error!');
     } finally {
@@ -50,9 +50,6 @@ export default function EducationLogin() {
           <p>
             <span>Research Portal</span> helps you collaborate, analyze, and validate models.
           </p>
-        </div>
-        <div className="auth-logo">
-          <div className="logo-circle">R</div>
         </div>
       </div>
 
@@ -83,13 +80,13 @@ export default function EducationLogin() {
               required
             />
             <button type="submit" className="auth-line-btn" disabled={loading}>
-              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+              {loading ? 'Logging in...' : 'Login'}
             </button>
             <p className="switch">
-              Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
+              Don't have any accounts? <Link to="/register">Register</Link>
             </p>
             <p className="switch">
-              Muốn khám phá ngay? <Link to="/">Đi đến Community</Link>
+              Want to contribute to real-world projects? Join in our <Link to="/">Community</Link>
             </p>
           </form>
           {message && <div className="message">{message}</div>}

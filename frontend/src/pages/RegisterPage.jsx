@@ -19,9 +19,9 @@ export default function RegisterPage() {
     try {
       const data = await userAPI.register({ email, password, role });
       if (data.success) {
-        setMessage('Đăng ký thành công! Bạn có thể đăng nhập ngay.');
+        setMessage('Successfully registering.');
       } else {
-        setMessage(data.message || 'Đăng ký thất bại!');
+        setMessage(data.message || 'Failed to register, please try again!');
       }
     } catch (err) {
       setMessage(err?.response?.data?.message || 'Server error!');
@@ -47,7 +47,7 @@ export default function RegisterPage() {
 
       <div className="auth-2col-right">
         <div className="form-container">
-          <h3>Tạo tài khoản</h3>
+          <h3>Register</h3>
           <RoleTabs
             role={role}
             onChange={setRole}
@@ -72,13 +72,13 @@ export default function RegisterPage() {
               required
             />
             <button type="submit" className="auth-line-btn" disabled={loading}>
-              {loading ? 'Đang đăng ký...' : 'Tạo tài khoản'}
+              {loading ? 'Registering...' : 'Register'}
             </button>
             <p className="switch">
-              Đã có tài khoản? <Link to="/education">Đăng nhập</Link>
+              Already have an account? <Link to="/education">Login</Link>
             </p>
             <p className="switch">
-              Muốn khám phá ngay? <Link to="/">Đi đến Community</Link>
+              Want to contribute to real-world projects? Join in our <Link to="/">Community</Link>
             </p>
           </form>
           {message && <div className="message">{message}</div>}
