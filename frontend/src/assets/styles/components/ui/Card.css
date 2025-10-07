@@ -1,0 +1,29 @@
+.card-ui {
+	background: var(--surface);
+	border: 1px solid var(--border);
+	border-radius: 16px;
+	box-shadow: 0 8px 28px rgba(109, 40, 217, 0.1);
+	padding: 20px;
+}
+
+.card-ui__head h3 {
+	margin: 0 0 4px;
+	color: #000;
+}
+
+.card-ui__head p {
+	margin: 0;
+	color: var(--muted);
+}
+
+.card-ui__body {
+	margin-top: 8px;
+}
+
+.card-ui__body p {
+	color: var(--muted);
+}
+
+.card-ui__body h4 {
+	color: #000;
+}

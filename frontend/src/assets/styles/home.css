@@ -1,0 +1,18 @@
+/* Researcher home styles */
+.home {
+	margin: 0 auto;
+	padding: 0 16px
+}
+
+.home .sections {
+	margin-top: 20px
+}
+
+.feature-card h4 {
+	margin: 0 0 6px
+}
+
+.feature-card p {
+	margin: 0;
+	color: #555
+}

@@ -1,59 +1,190 @@
 /* Styles for login/register forms */
 .login-register-container {
-  max-width: 350px;
-  margin: 40px auto;
-  padding: 32px 24px;
+  max-width: 420px;
+  margin: 56px auto 32px;
+  padding: 28px 24px;
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
+
+.login-register-container h2 {
+  font-size: 24px;
+  margin: 0 0 4px;
+  color: var(--brand, #6d28d9);
+}
+
 .login-register-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
 }
+
 .login-register-form input {
-  padding: 10px 12px;
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
   font-size: 16px;
+  background: #fff;
 }
-.login-register-form button {
-  padding: 10px;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
+
+.login-register-form input:focus {
+  outline: none;
+  border-color: var(--accent, #2563eb);
+  box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
+}
+
+/* Two-column auth layout inspired by provided design */
+.auth-2col {
+  display: flex;
+  width: 950px;
+  max-width: 95vw;
+  height: 600px;
+  margin: 32px auto;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.auth-2col-left {
+  background-color: #028f76;
+  color: white;
+  flex: 1;
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.auth-left-content h2 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.auth-left-content p {
   font-size: 16px;
-  cursor: pointer;
-  transition: background 0.2s;
+  line-height: 1.5;
 }
-.login-register-form button:hover {
-  background: #1e40af;
+
+.auth-left-content span {
+  font-weight: 600;
+  color: #a6f4e4;
 }
-.tab-nav {
+
+.auth-logo {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 24px;
 }
-.tab-nav button {
-  padding: 8px 20px;
-  border: none;
-  background: #f3f4f6;
-  color: #222;
-  border-radius: 6px 6px 0 0;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.2s;
+
+.logo-circle {
+  background-color: white;
+  color: #028f76;
+  font-size: 48px;
+  font-weight: 700;
+  width: 90px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.3);
 }
-.tab-nav button.active {
-  background: #2563eb;
-  color: #fff;
+
+.auth-2col-right {
+  flex: 1.2;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  background-color: #f8faf9;
 }
-.message {
-  margin-top: 16px;
-  color: #d32f2f;
+
+.form-container {
+  width: 100%;
+  max-width: 360px;
   text-align: center;
+}
+
+.form-container h3 {
+  font-size: 22px;
+  margin-bottom: 18px;
+  font-weight: 600;
+  color: #111;
+}
+
+/* Underline-style auth inputs */
+.auth-line-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.auth-line-input {
+  width: 100%;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 2px solid #ccc;
+  background: transparent;
+  outline: none;
+  font-size: 15px;
+  transition: border-color 0.3s ease;
+}
+
+.auth-line-input:focus {
+  border-color: #028f76;
+}
+
+.auth-line-btn {
+  width: 100%;
+  margin-top: 16px;
+  background-color: #028f76;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 15px;
   font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.auth-line-btn:hover {
+  background-color: #03a98b;
+}
+
+.switch {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #555;
+}
+
+.switch a {
+  color: #028f76;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.switch a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  .auth-2col {
+    height: auto;
+    flex-direction: column;
+  }
+  .auth-2col-left,
+  .auth-2col-right {
+    padding: 24px;
+  }
+}
+
+/* Viewport centering wrapper for auth pages */
+.auth-viewport {
+  min-height: calc(100vh - 32px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
 }

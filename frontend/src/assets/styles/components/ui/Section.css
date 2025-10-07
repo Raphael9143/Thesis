@@ -1,0 +1,13 @@
+.section {
+	padding: 28px 0;
+}
+
+.section__head h2 {
+	margin: 0 0 6px;
+    color: #000;
+}
+
+.section__head p {
+	margin: 0;
+    color: var(--muted);
+}

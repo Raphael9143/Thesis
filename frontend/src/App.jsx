@@ -1,22 +1,23 @@
-import { useState } from 'react';
-import LoginPage from './pages/LoginPage';
+import React from 'react';
+import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
+import MainLayout from './layouts/MainLayout';
+import EducationLogin from './pages/EducationLogin';
+import ResearcherHome from './pages/ResearcherHome';
 import RegisterPage from './pages/RegisterPage';
+import NotFound from './pages/NotFound';
 import './App.css';
 
-function App() {
-  const [tab, setTab] = useState('login');
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <Route element={<MainLayout />}> 
+      <Route path="/" element={<ResearcherHome />} />
+      <Route path="/education" element={<EducationLogin />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="*" element={<NotFound />} />
+    </Route>
+  )
+);
 
-  return (
-    <div className="app-container">
-      <div className="tab-nav">
-        <button className={tab === 'login' ? 'active' : ''} onClick={() => setTab('login')}>Đăng nhập</button>
-        <button className={tab === 'register' ? 'active' : ''} onClick={() => setTab('register')}>Đăng ký</button>
-      </div>
-      <div className="tab-content">
-        {tab === 'login' ? <LoginPage /> : <RegisterPage />}
-      </div>
-    </div>
-  );
+export default function App() {
+  return <RouterProvider router={router} />;
 }
-
-export default App;

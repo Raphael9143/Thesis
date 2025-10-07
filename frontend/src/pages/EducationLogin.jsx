@@ -5,7 +5,7 @@ import RoleTabs from '../components/auth/RoleTabs';
 import '../assets/styles/auth.css';
 import '../assets/styles/ui.css';
 
-export default function RegisterPage() {
+export default function EducationLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('student');
@@ -17,12 +17,23 @@ export default function RegisterPage() {
     setMessage('');
     setLoading(true);
     try {
-      const data = await userAPI.register({ email, password, role });
-      if (data.success) {
-        setMessage('Đăng ký thành công! Bạn có thể đăng nhập ngay.');
-      } else {
-        setMessage(data.message || 'Đăng ký thất bại!');
+      const data = await userAPI.login({ email, password });
+      if (!data.success) {
+        setMessage(data.message || 'Sai tài khoản hoặc mật khẩu!');
+        return;
       }
+      const userRole = data.data?.user?.role;
+      if (role === 'student' && userRole !== 'student') {
+        setMessage('Tài khoản này không phải học sinh!');
+        return;
+      }
+      if (role === 'teacher' && userRole !== 'teacher' && userRole !== 'admin') {
+        setMessage('Tài khoản này không phải giáo viên hoặc admin!');
+        return;
+      }
+      sessionStorage.setItem('isLogin', 'true');
+      sessionStorage.setItem('token', data.data.token);
+      setMessage('Đăng nhập thành công!');
     } catch (err) {
       setMessage(err?.response?.data?.message || 'Server error!');
     } finally {
@@ -47,7 +58,7 @@ export default function RegisterPage() {
 
       <div className="auth-2col-right">
         <div className="form-container">
-          <h3>Tạo tài khoản</h3>
+          <h3>Education Login</h3>
           <RoleTabs
             role={role}
             onChange={setRole}
@@ -72,10 +83,10 @@ export default function RegisterPage() {
               required
             />
             <button type="submit" className="auth-line-btn" disabled={loading}>
-              {loading ? 'Đang đăng ký...' : 'Tạo tài khoản'}
+              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
             <p className="switch">
-              Đã có tài khoản? <Link to="/education">Đăng nhập</Link>
+              Chưa có tài khoản? <Link to="/register">Đăng ký</Link>
             </p>
             <p className="switch">
               Muốn khám phá ngay? <Link to="/">Đi đến Community</Link>
