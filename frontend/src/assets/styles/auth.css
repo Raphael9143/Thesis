@@ -37,8 +37,6 @@
 /* Two-column auth layout inspired by provided design */
 .auth-2col {
   display: flex;
-  width: 950px;
-  max-width: 95vw;
   height: 600px;
   margin: 32px auto;
   background: #fff;
@@ -187,4 +185,14 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
+}
+
+.navigate-community {
+  font-weight: 600;
+  color: #a6f4e4;
+  text-decoration: none;
+
+  &:hover {
+    color: #5eead4;
+  }
 }

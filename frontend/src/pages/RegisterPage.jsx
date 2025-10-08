@@ -37,7 +37,7 @@ export default function RegisterPage() {
         <div className="auth-left-content">
           <h2>Exploring OCL & UML?</h2>
           <p>
-            <span>Research Portal</span> helps you collaborate, analyze, and validate models.
+            <span><Link to="/" className="navigate-community">Research Portal</Link></span> helps you collaborate, analyze, and validate models.
           </p>
         </div>
         <div className="auth-logo">
@@ -76,9 +76,6 @@ export default function RegisterPage() {
             </button>
             <p className="switch">
               Already have an account? <Link to="/education">Login</Link>
-            </p>
-            <p className="switch">
-              Want to contribute to real-world projects? Join in our <Link to="/">Community</Link>
             </p>
           </form>
           {message && <div className="message">{message}</div>}
