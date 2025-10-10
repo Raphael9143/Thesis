@@ -1,35 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import userAPI from '../../services/userAPI';
-import RoleTabs from '../components/auth/RoleTabs';
+import AuthForm from '../components/auth/AuthForm';
 import '../assets/styles/auth.css';
 import '../assets/styles/ui.css';
 
 export default function RegisterPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('student');
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage('');
-    setLoading(true);
-    try {
-      const data = await userAPI.register({ email, password, role });
-      if (data.success) {
-        setMessage('Successfully registering.');
-      } else {
-        setMessage(data.message || 'Failed to register, please try again!');
-      }
-    } catch (err) {
-      setMessage(err?.response?.data?.message || 'Server error!');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="auth-viewport">
       <div className="auth-2col">
@@ -40,46 +15,14 @@ export default function RegisterPage() {
             <span><Link to="/" className="navigate-community">Research Portal</Link></span> helps you collaborate, analyze, and validate models.
           </p>
         </div>
-        <div className="auth-logo">
-          <div className="logo-circle">R</div>
-        </div>
       </div>
 
       <div className="auth-2col-right">
-        <div className="form-container">
-          <h3>Register</h3>
-          <RoleTabs
-            role={role}
-            onChange={setRole}
-            options={[{ value: 'student', label: 'Student' }, { value: 'teacher', label: 'Teacher' }]}
-          />
-          <form onSubmit={handleSubmit} className="auth-line-form">
-            <input
-              className="auth-line-input"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoFocus
-            />
-            <input
-              className="auth-line-input"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-            <button type="submit" className="auth-line-btn" disabled={loading}>
-              {loading ? 'Registering...' : 'Register'}
-            </button>
-            <p className="switch">
-              Already have an account? <Link to="/education">Login</Link>
-            </p>
-          </form>
-          {message && <div className="message">{message}</div>}
-        </div>
+        <AuthForm
+          type="register"
+          roles={[{ value: 'student', label: 'Student' }, { value: 'teacher', label: 'Teacher' }]}
+          title="Register"
+        />
       </div>
       </div>
     </div>

@@ -6,9 +6,9 @@ const userAPI = {
   login: ({ email, password }) =>
     axiosClient.post("auth/login", { email, password }),
 
-  // Đăng ký: nhận email, password, role
-  register: ({ email, password, role }) =>
-    axiosClient.post("auth/register", { email, password, role }),
+  // Đăng ký: nhận email, password, role (UPPER), full_name, dob, gender (UPPER)
+  register: ({ email, password, role, full_name, dob, gender }) =>
+    axiosClient.post("auth/register", { email, password, role, full_name, dob, gender }),
   getProfile: () => axiosClient.get("auth/profile"),
 
   // User management (add more as needed)

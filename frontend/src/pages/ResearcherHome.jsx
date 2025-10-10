@@ -1,39 +1,18 @@
 import React, { useState } from 'react';
 import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
-import Input from '../components/auth/Input';
-import PasswordInput from '../components/auth/PasswordInput';
 import Modal from '../components/ui/Modal';
-import userAPI from '../../services/userAPI';
-import '../assets/styles/ui.css';
+import AuthForm from '../components/auth/AuthForm';
 import '../assets/styles/home.css';
+import '../assets/styles/ui.css';
 
 export default function ResearcherHome() {
-  const [showLogin, setShowLogin] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setMessage('');
-    setLoading(true);
-    try {
-      const data = await userAPI.login({ email, password });
-      if (!data.success) { setMessage(data.message || 'Wrong email or password!'); return; }
-      sessionStorage.setItem('isLogin', 'true');
-      sessionStorage.setItem('token', data.data.token);
-      setMessage('Successfully Logging in!');
-    } catch (err) {
-      setMessage(err?.response?.data?.message || 'Server error!');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [showAuth, setShowAuth] = useState(false);
+  const [authType, setAuthType] = useState('login');
 
   return (
     <div className="home">
+      {/* Main hero section */}
       <section className="hero">
         <div className="hero-content">
           <h1 className="hero__title">
@@ -45,13 +24,13 @@ export default function ResearcherHome() {
           <div className="hero-buttons">
             <button
               className="btn btn-primary"
-              onClick={() => setShowLogin(true)}
+              onClick={() => { setAuthType('login'); setShowAuth(true); }}
             >
               Explore Research
             </button>
             <button
               className="btn btn-signin"
-              onClick={() => setShowLogin(true)}
+              onClick={() => { setAuthType('register'); setShowAuth(true); }}
             >
               Get Started
             </button>
@@ -79,26 +58,35 @@ export default function ResearcherHome() {
         </div>
       </section>
 
-      <Modal open={showLogin} onClose={() => setShowLogin(false)} title="Researcher Sign-in">
-        <form onSubmit={handleLogin} className="login-register-form">
-          <Input
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@lab.org"
-          />
-          <PasswordInput
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
-        {message && <div className="message">{message}</div>}
+      <Modal open={showAuth} onClose={() => setShowAuth(false)} title={authType === 'login' ? 'Sign in to Research Hub' : 'Register for Research Hub'}>
+        <AuthForm
+          type={authType}
+          roles={[
+            { value: 'student', label: 'Student' },
+            { value: 'teacher', label: 'Teacher' },
+            { value: 'researcher', label: 'Researcher' },
+          ]}
+          title={authType === 'login' ? 'Sign in to Research Hub' : 'Register for Research Hub'}
+          showSwitch={false}
+          showCommunity={false}
+          onSuccess={() => setShowAuth(false)}
+        />
+        <div style={{ textAlign: 'center', marginTop: 12 }}>
+          {authType === 'login' ? (
+            <>
+              Don't have any account?{' '}
+              <button className="btn btn-signin" style={{ padding: '4px 12px', fontSize: 15 }} onClick={() => setAuthType('register')}>Register</button>
+            </>
+          ) : (
+            <>
+              Already have an account?{' '}
+              <button className="btn btn-signin" style={{ padding: '4px 12px', fontSize: 15 }} onClick={() => setAuthType('login')}>Login</button>
+            </>
+          )}
+        </div>
       </Modal>
 
+      {/* Sections below hero */}
       <div className="sections">
         <Section title="Featured Collections">
           <div className="grid grid--3">
