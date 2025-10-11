@@ -19,8 +19,8 @@ export default function ResearcherHome() {
 
   const onSuccessAuth = () => {
     setShowAuth(false);
-    // Redirect to role-based home
-    navigate('/home');
+    // Redirect to community home
+    navigate('/community/home');
   }
 
   return (

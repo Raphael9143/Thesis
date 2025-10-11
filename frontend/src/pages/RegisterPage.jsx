@@ -12,8 +12,8 @@ export default function RegisterPage() {
   const [notifyType, setNotifyType] = useState('info');
 
   const handleSuccess = () => {
-    // Redirect to role-based home
-    navigate('/home');
+    // Redirect to education home
+    navigate('/education/home');
   };
 
   return (

@@ -13,7 +13,7 @@ export default function EducationLogin() {
 
   const handleSuccess = () => {
     // Redirect to role-based home
-    navigate('/home');
+    navigate('/education/home');
   };
 
   return (
