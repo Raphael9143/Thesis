@@ -64,7 +64,6 @@ export default function AuthForm({
       }
       sessionStorage.setItem('isLogin', 'true');
       sessionStorage.setItem('token', data.data.token);
-      setMessage(type === 'login' ? 'Successfully login!' : 'Successfully registering.');
       if (onSuccess) onSuccess(data);
     } catch (err) {
       setMessage(err?.response?.data?.message || 'Server error!');

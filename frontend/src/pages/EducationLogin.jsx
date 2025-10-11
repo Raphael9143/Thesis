@@ -1,10 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
+import NotificationPopup from '../components/ui/NotificationPopup';
 import '../assets/styles/auth.css';
 import '../assets/styles/ui.css';
 
 export default function EducationLogin() {
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [notifyMsg, setNotifyMsg] = useState('');
+  const [notifyType, setNotifyType] = useState('info');
+
+  const handleSuccess = () => {
+    setNotifyMsg('Logged in successfully!');
+    setNotifyType('success');
+    setNotifyOpen(true);
+  };
+
   return (
     <div className="auth-viewport">
       <div className="auth-2col">
@@ -22,9 +33,17 @@ export default function EducationLogin() {
           type="login"
           roles={[{ value: 'student', label: 'Student' }, { value: 'teacher', label: 'Teacher' }]}
           title="Education Login"
+          onSuccess={handleSuccess}
         />
       </div>
       </div>
+      <NotificationPopup
+        message={notifyMsg}
+        open={notifyOpen}
+        type={notifyType}
+        duration={3000}
+        onClose={() => setNotifyOpen(false)}
+      />
     </div>
   );
 }
