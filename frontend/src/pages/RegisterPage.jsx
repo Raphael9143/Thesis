@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
 import NotificationPopup from '../components/ui/NotificationPopup';
 import '../assets/styles/auth.css';
 import '../assets/styles/ui.css';
 
 export default function RegisterPage() {
+  const navigate = useNavigate();
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyMsg, setNotifyMsg] = useState('');
   const [notifyType, setNotifyType] = useState('info');
 
   const handleSuccess = () => {
-    setNotifyMsg('Registered successfully!');
-    setNotifyType('success');
-    setNotifyOpen(true);
+    // Redirect to role-based home
+    navigate('/home');
   };
 
   return (

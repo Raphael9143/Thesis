@@ -64,6 +64,8 @@ export default function AuthForm({
       }
       sessionStorage.setItem('isLogin', 'true');
       sessionStorage.setItem('token', data.data.token);
+      const resolvedRole = (data.data?.user?.role ?? role ?? '').toString().toLowerCase();
+      if (resolvedRole) sessionStorage.setItem('role', resolvedRole);
       if (onSuccess) onSuccess(data);
     } catch (err) {
       setMessage(err?.response?.data?.message || 'Server error!');

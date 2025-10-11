@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
 import Modal from '../components/ui/Modal';
@@ -9,6 +10,7 @@ import '../assets/styles/ui.css';
 import '../assets/styles/pages/ResearcherHome.css'
 
 export default function ResearcherHome() {
+  const navigate = useNavigate();
   const [showAuth, setShowAuth] = useState(false);
   const [authType, setAuthType] = useState('login');
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -17,9 +19,8 @@ export default function ResearcherHome() {
 
   const onSuccessAuth = () => {
     setShowAuth(false);
-    setNotifyMessage(authType === 'login' ? 'Successfully login!' : 'Successfully registered!');
-    setNotifyType('success');
-    setNotifyOpen(true);
+    // Redirect to role-based home
+    navigate('/home');
   }
 
   return (

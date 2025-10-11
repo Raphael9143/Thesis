@@ -3,6 +3,7 @@ import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } 
 import MainLayout from './layouts/MainLayout';
 import EducationLogin from './pages/EducationLogin';
 import ResearcherHome from './pages/ResearcherHome';
+import Home from './pages/Home';
 import RegisterPage from './pages/RegisterPage';
 import NotFound from './pages/NotFound';
 import './App.css';
@@ -13,6 +14,7 @@ const router = createBrowserRouter(
       <Route path="/" element={<ResearcherHome />} />
       <Route path="/education" element={<EducationLogin />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/home" element={<Home />} />
       <Route path="*" element={<NotFound />} />
     </Route>
   )
