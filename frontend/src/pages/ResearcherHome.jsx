@@ -3,14 +3,27 @@ import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
 import Modal from '../components/ui/Modal';
 import AuthForm from '../components/auth/AuthForm';
+import NotificationPopup from '../components/ui/NotificationPopup';
 import '../assets/styles/home.css';
 import '../assets/styles/ui.css';
+import '../assets/styles/pages/ResearcherHome.css'
 
 export default function ResearcherHome() {
   const [showAuth, setShowAuth] = useState(false);
   const [authType, setAuthType] = useState('login');
+  const [notifyOpen, setNotifyOpen] = useState(false);
+  const [notifyMessage, setNotifyMessage] = useState('');
+  const [notifyType, setNotifyType] = useState('success');
+
+  const onSuccessAuth = () => {
+    setShowAuth(false);
+    setNotifyMessage(authType === 'login' ? 'Successfully login!' : 'Successfully registered!');
+    setNotifyType('success');
+    setNotifyOpen(true);
+  }
 
   return (
+    <>
     <div className="home">
       {/* Main hero section */}
       <section className="hero">
@@ -58,7 +71,15 @@ export default function ResearcherHome() {
         </div>
       </section>
 
-      <Modal open={showAuth} onClose={() => setShowAuth(false)} title={authType === 'login' ? 'Sign in to Research Hub' : 'Register for Research Hub'}>
+      <Modal
+        open={showAuth}
+        onClose={() => setShowAuth(false)}
+        title={
+          authType === 'login' ?
+            'Sign in to Research Hub' :
+            'Register for Research Hub'
+        }
+      >
         <AuthForm
           type={authType}
           roles={[
@@ -66,22 +87,21 @@ export default function ResearcherHome() {
             { value: 'teacher', label: 'Teacher' },
             { value: 'researcher', label: 'Researcher' },
           ]}
-          title={authType === 'login' ? 'Sign in to Research Hub' : 'Register for Research Hub'}
           showSwitch={false}
           showCommunity={false}
-          onSuccess={() => setShowAuth(false)}
+          onSuccess={onSuccessAuth}
         />
-        <div style={{ textAlign: 'center', marginTop: 12 }}>
+        <div className='researcher-auth-switch'>
           {authType === 'login' ? (
-            <>
+            <p>
               Don't have any account?{' '}
-              <button className="btn btn-signin" style={{ padding: '4px 12px', fontSize: 15 }} onClick={() => setAuthType('register')}>Register</button>
-            </>
+              <a className="researcher-auth-switch-button" onClick={() => setAuthType('register')}>Register</a>
+            </p>
           ) : (
-            <>
+            <p>
               Already have an account?{' '}
-              <button className="btn btn-signin" style={{ padding: '4px 12px', fontSize: 15 }} onClick={() => setAuthType('login')}>Login</button>
-            </>
+              <a className="researcher-auth-switch-button" onClick={() => setAuthType('login')}>Login</a>
+            </p>
           )}
         </div>
       </Modal>
@@ -126,5 +146,12 @@ export default function ResearcherHome() {
         </Section>
       </div>
     </div>
+    <NotificationPopup
+      message={notifyMessage}
+      open={notifyOpen}
+      type={notifyType}
+      onClose={() => setNotifyOpen(false)}
+    />
+    </>
   );
 }

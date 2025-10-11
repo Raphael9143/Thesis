@@ -19,7 +19,6 @@ export default function Modal({ open, onClose, title, children }) {
 			<div className="modal-container" onClick={stop}>
 				<div className="modal-header">
 					{title && <h3 className="modal-title">{title}</h3>}
-					<button className="modal-close" aria-label="Close" onClick={onClose}>✕</button>
 				</div>
 				<div className="modal-body">
 					{children}

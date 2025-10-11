@@ -1,0 +1,12 @@
+.researcher-auth-switch > p {
+	color: var(--black);
+}
+
+.researcher-auth-switch-button {
+	cursor: pointer;
+	color: var(--brand);
+
+	&:hover {
+		color: var(--brand-strong);
+	}
+}
