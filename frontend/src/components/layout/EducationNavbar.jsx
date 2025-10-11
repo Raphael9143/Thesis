@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../assets/styles/ui.css';
 
-export default function EducationNavbar({ onNavigate }) {
+export default function EducationNavbar({ onNavigate, onLogout, isLoggedIn = false }) {
   return (
     <header className="nav">
       <div className="nav__brand" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -17,6 +17,9 @@ export default function EducationNavbar({ onNavigate }) {
       <div className="nav__links" style={{ alignItems: 'center' }}>
   <button className="btn" onClick={() => onNavigate('researcher')}>Research Hub</button>
   <button className="btn btn-primary" onClick={() => onNavigate('home')}>My Home</button>
+        {isLoggedIn && (
+          <button className="btn" onClick={onLogout}>Logout</button>
+        )}
       </div>
     </header>
   );

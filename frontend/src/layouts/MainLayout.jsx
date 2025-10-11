@@ -8,10 +8,21 @@ export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const isEducationRoute = location.pathname.startsWith('/education') || location.pathname.startsWith('/register');
+  const isLoggedIn = sessionStorage.getItem('isLogin') === 'true';
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('isLogin');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('role');
+    // send to landing page of current context
+    if (isEducationRoute) navigate('/education'); else navigate('/');
+  };
   return (
     <div className="app-bg">
       {isEducationRoute ? (
         <EducationNavbar
+          isLoggedIn={isLoggedIn}
+          onLogout={handleLogout}
           onNavigate={(tab) => {
             if (tab === 'researcher') navigate('/');
             if (tab === 'home') navigate('/education/home');
@@ -19,6 +30,8 @@ export default function MainLayout() {
         />
       ) : (
         <Navbar
+          isLoggedIn={isLoggedIn}
+          onLogout={handleLogout}
           current={location.pathname === '/' ? 'researcher' : 'other'}
           onNavigate={(tab) => {
             if (tab === 'researcher') navigate('/');

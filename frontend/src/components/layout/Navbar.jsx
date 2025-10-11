@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../assets/styles/ui.css';
 
-export default function Navbar({ current, onNavigate }) {
+export default function Navbar({ current, onNavigate, onLogout, isLoggedIn = false }) {
   return (
     <header className="nav">
       <div className="nav__brand" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -19,6 +19,9 @@ export default function Navbar({ current, onNavigate }) {
       <div className="nav__links" style={{ alignItems: 'center' }}>
         <button className="btn btn-signin" onClick={() => onNavigate('education')}>Education</button>
         <button className="btn btn-primary" onClick={() => onNavigate('researcher')}>Community</button>
+        {isLoggedIn && (
+          <button className="btn" onClick={onLogout}>Logout</button>
+        )}
       </div>
     </header>
   );
