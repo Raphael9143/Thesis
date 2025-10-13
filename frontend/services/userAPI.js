@@ -10,6 +10,7 @@ const userAPI = {
   register: ({ email, password, role, full_name, dob, gender }) =>
     axiosClient.post("auth/register", { email, password, role, full_name, dob, gender }),
   getProfile: () => axiosClient.get("auth/profile"),
+  updateProfile: (data) => axiosClient.patch("auth/profile", data),
   // Teacher
   getTeacherProfile: () => axiosClient.get("teacher/profile"),
 
@@ -27,6 +28,7 @@ const userAPI = {
   deleteClass: (id) => axiosClient.delete(`classes/${id}`),
 
   // Add more API endpoints as needed for your thesis project
+  updateTeacherProfile: (data) => axiosClient.patch("teacher/profile", data),
 };
 
 export default userAPI;
