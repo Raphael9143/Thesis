@@ -1,0 +1,59 @@
+.edu-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.edu-nav__links {
+  align-items: center;
+}
+
+.edu-nav__links--right {
+  align-items: center;
+  gap: 12px;
+}
+
+.edu-nav__menuWrap {
+  position: relative;
+}
+
+.edu-nav__avatarBtn {
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.edu-nav__avatarImg {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.edu-nav__menu {
+  position: absolute;
+  right: 0;
+  top: 40px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  min-width: 160px;
+  z-index: 1000;
+}
+
+.edu-nav__menuItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+}
+
+.edu-nav__menuItem--danger {
+  color: #ef4444;
+}
+
+.edu-nav__divider {
+  height: 1px;
+  background: #e2e8f0;
+}

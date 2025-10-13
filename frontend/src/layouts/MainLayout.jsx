@@ -26,6 +26,7 @@ export default function MainLayout() {
           onNavigate={(tab) => {
             if (tab === 'researcher') navigate('/');
             if (tab === 'home') navigate('/education/home');
+            if (tab === 'teacher-profile') navigate('/education/teacher/profile');
           }}
         />
       ) : (

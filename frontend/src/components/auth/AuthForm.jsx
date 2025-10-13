@@ -66,6 +66,14 @@ export default function AuthForm({
       sessionStorage.setItem('token', data.data.token);
       const resolvedRole = (data.data?.user?.role ?? role ?? '').toString().toLowerCase();
       if (resolvedRole) sessionStorage.setItem('role', resolvedRole);
+      const serverUser = data.data?.user || {};
+      // Persist basic profile info for navbar/avatar usage
+      if (serverUser.full_name || (type === 'register' && fullName)) {
+        sessionStorage.setItem('full_name', serverUser.full_name || fullName);
+      }
+      if (serverUser.avatar_url) {
+        sessionStorage.setItem('avatar_url', serverUser.avatar_url);
+      }
       if (onSuccess) onSuccess(data);
     } catch (err) {
       setMessage(err?.response?.data?.message || 'Server error!');

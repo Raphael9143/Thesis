@@ -1,0 +1,21 @@
+.teacher-profile__header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.teacher-profile__avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.teacher-profile__meta p {
+  margin: 4px 0;
+}
+
+.teacher-profile__courses ul {
+  margin: 0;
+  padding-left: 18px;
+}
