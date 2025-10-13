@@ -11,12 +11,12 @@ import TeacherProfile from './pages/teacher/Profile';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route element={<MainLayout />}> 
+    <Route element={<MainLayout />}>
       <Route path="/" element={<ResearcherHome />} />
       <Route path="/education" element={<EducationLogin />} />
       <Route path="/register" element={<RegisterPage />} />
-  <Route path="/education/home" element={<Home />} />
-  <Route path="/education/teacher/profile" element={<TeacherProfile />} />
+      <Route path="/education/home" element={<Home />} />
+      <Route path="/education/teacher/profile" element={<TeacherProfile />} />
       <Route path="/community/home" element={<Home />} />
       <Route path="*" element={<NotFound />} />
     </Route>
