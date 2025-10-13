@@ -110,6 +110,37 @@ router.get('/classes', auth, TeacherController.getManagedClasses);
 
 /**
  * @swagger
+ * /api/teacher/courses:
+ *   get:
+ *     summary: Lấy danh sách môn học giáo viên đã dạy (từ các lớp giáo viên làm chủ nhiệm)
+ *     tags: [Teacher]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Danh sách môn học (unique)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Course'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Only teachers can view their taught courses.
+ *       500:
+ *         description: Server error
+ */
+router.get('/courses', auth, TeacherController.getTaughtCourses);
+
+/**
+ * @swagger
  * /api/teacher/profile:
  *   get:
  *     summary: Lấy thông tin profile giảng viên hiện tại

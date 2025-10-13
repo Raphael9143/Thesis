@@ -77,6 +77,53 @@ const TeacherController = {
 			res.status(500).json({ success: false, message: 'Server error' });
 		}
 	}
+	,
+
+	// Lấy danh sách môn học giáo viên đã dạy (từ các lớp giáo viên làm chủ nhiệm)
+	getTaughtCourses: async (req, res) => {
+		try {
+			const userId = req.user.userId;
+			// Kiểm tra role
+			const user = await User.findByPk(userId);
+			if (!user || user.role !== 'TEACHER') {
+				return res.status(403).json({ success: false, message: 'Only teachers can view their taught courses.' });
+			}
+
+			// Lấy danh sách các lớp do giáo viên làm chủ nhiệm (đã và đang)
+			const classes = await Class.findAll({
+				where: { teacherId: userId },
+				attributes: ['id']
+			});
+			const classIds = classes.map(c => c.id);
+
+			if (classIds.length === 0) {
+				return res.json({ success: true, data: [] });
+			}
+
+			// Lấy các bản ghi class_courses và include Course
+			const ClassCourse = require('../models/ClassCourse');
+			const Course = require('../models/Course');
+			const links = await ClassCourse.findAll({
+				where: { class_id: classIds },
+				include: [{ model: Course, as: 'course' }]
+			});
+
+			// Lọc unique courses theo course_id
+			const uniqueMap = new Map();
+			for (const link of links) {
+				const course = link.course;
+				if (course && !uniqueMap.has(course.course_id)) {
+					uniqueMap.set(course.course_id, course);
+				}
+			}
+			const courses = Array.from(uniqueMap.values());
+
+			res.json({ success: true, data: courses });
+		} catch (error) {
+			console.error('Get taught courses error:', error);
+			res.status(500).json({ success: false, message: 'Server error' });
+		}
+	}
 };
 
 module.exports = TeacherController;
