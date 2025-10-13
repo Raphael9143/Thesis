@@ -26,7 +26,6 @@ export default function TeacherProfile() {
 	const [address, setAddress] = useState('');
 	const [teacherCode, setTeacherCode] = useState('');
 	const [department, setDepartment] = useState('');
-	const [researchPapers, setResearchPapers] = useState(''); // multiline textarea, comma or newline separated
 
 	useEffect(() => {
 		const load = async () => {
@@ -45,8 +44,6 @@ export default function TeacherProfile() {
 					setAddress(p.address || '');
 					setTeacherCode(p.teacher_code || '');
 					setDepartment(p.department || '');
-					const papers = Array.isArray(p.research_papers) ? p.research_papers.join('\n') : '';
-					setResearchPapers(papers);
 				} else {
 					setError(res?.message || 'Failed to load profile');
 				}
@@ -76,14 +73,9 @@ export default function TeacherProfile() {
 				phone_number: phoneNumber,
 				address,
 			});
-			const paperList = researchPapers
-				.split(/\r?\n/)
-				.map(s => s.trim())
-				.filter(Boolean);
 			// Do not allow updating teacher_code from UI; keep it immutable
 			await userAPI.updateTeacherProfile({
 				department,
-				research_papers: paperList,
 			});
 			const res = await userAPI.getTeacherProfile();
 			if (res?.success) {
@@ -148,7 +140,6 @@ export default function TeacherProfile() {
 											setAddress(profile.address || '');
 											setTeacherCode(profile.teacher_code || '');
 											setDepartment(profile.department || '');
-											setResearchPapers(Array.isArray(profile.research_papers) ? profile.research_papers.join('\n') : '');
 										}}>Cancel</button>
 										<button className="btn btn-primary save-btn" onClick={onSave}>Save</button>
 									</div>
