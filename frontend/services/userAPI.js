@@ -10,6 +10,8 @@ const userAPI = {
   register: ({ email, password, role, full_name, dob, gender }) =>
     axiosClient.post("auth/register", { email, password, role, full_name, dob, gender }),
   getProfile: () => axiosClient.get("auth/profile"),
+  // Teacher
+  getTeacherProfile: () => axiosClient.get("teacher/profile"),
 
   // User management (add more as needed)
   getAllUsers: () => axiosClient.get("users"),
