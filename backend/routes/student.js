@@ -159,8 +159,6 @@ const StudentController = require('../controllers/StudentController');
  *                 type: string
  *               year:
  *                 type: integer
- *               completed_assignments:
- *                 type: integer
  *     responses:
  *       200:
  *         description: Student profile updated

@@ -68,7 +68,11 @@ const StudentController = {
 	updateProfile: async (req, res) => {
 		try {
 			const studentId = req.user.userId;
-			const { student_code, major, year, completed_assignments, gpa } = req.body;
+			const { student_code, major, year } = req.body;
+			// Không cho phép cập nhật completed_assignments từ API
+			if (Object.prototype.hasOwnProperty.call(req.body, 'completed_assignments')) {
+				return res.status(400).json({ success: false, message: 'Field completed_assignments is read-only and cannot be updated.' });
+			}
 			const student = await Student.findByPk(studentId);
 			if (!student) {
 				return res.status(404).json({ success: false, message: 'Student not found!' });
@@ -77,8 +81,6 @@ const StudentController = {
 			if (student_code !== undefined) student.student_code = student_code;
 			if (major !== undefined) student.major = major;
 			if (year !== undefined) student.year = year;
-			if (completed_assignments !== undefined) student.completed_assignments = completed_assignments;
-			if (gpa !== undefined) student.gpa = gpa;
 			await student.save();
 			res.json({ success: true, message: 'Student profile updated!', data: student });
 		} catch (error) {
