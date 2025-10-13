@@ -11,6 +11,7 @@ export default function TeacherProfile() {
 	const [error, setError] = useState('');
 	const [profile, setProfile] = useState(null);
 	const [editing, setEditing] = useState(false);
+    const [courses, setCourses] = useState([]);
 
 	// notifications
 	const [notifyOpen, setNotifyOpen] = useState(false);
@@ -44,6 +45,17 @@ export default function TeacherProfile() {
 					setAddress(p.address || '');
 					setTeacherCode(p.teacher_code || '');
 					setDepartment(p.department || '');
+					// Load courses taught
+					try {
+						const coursesRes = await userAPI.getTeacherCourses();
+						if (coursesRes?.success && Array.isArray(coursesRes.data)) {
+							setCourses(coursesRes.data);
+						} else {
+							setCourses([]);
+						}
+					} catch (_) {
+						setCourses([]);
+					}
 				} else {
 					setError(res?.message || 'Failed to load profile');
 				}
@@ -100,12 +112,22 @@ export default function TeacherProfile() {
 			{profile && !loading && (
 				<div className="profile teacher-profile">
 					<Card title="Courses taught" className="teacher-profile__courses">
-						{Array.isArray(profile.courses_taught) && profile.courses_taught.length > 0 ? (
-							<ul>
-								{profile.courses_taught.map((c) => (
-									<li key={c}>Course #{c}</li>
-								))}
-							</ul>
+						{Array.isArray(courses) && courses.length > 0 ? (
+							<div className="courses-grid">
+								{courses.map((course) => {
+									const status = String(course.status || '').toUpperCase();
+									const statusClass = status === 'ACTIVE' ? 'status-active' : 'status-inactive';
+									return (
+										<div key={course.id || course.code} className={`course-card ${statusClass}`}>
+											<div className="course-title">{course.name || course.course_name || `Course ${course.id || course.code}`}</div>
+											<div className="course-meta">
+												<span className="semester">{course.semester ? `Semester ${course.semester}` : (course.term || '')}</span>
+												<span className={`status ${statusClass}`}>{status || 'UNKNOWN'}</span>
+											</div>
+										</div>
+									);
+								})}
+							</div>
 						) : (
 							<p>No courses yet.</p>
 						)}

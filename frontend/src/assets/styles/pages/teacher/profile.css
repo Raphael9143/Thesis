@@ -28,6 +28,57 @@
 	padding-left: 18px;
 }
 
+/* Courses grid */
+.courses-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+	gap: 12px;
+}
+
+.course-card {
+	border: 2px solid #e5e7eb;
+	/* default gray-200 */
+	border-radius: 12px;
+	padding: 12px;
+	background: #fff;
+}
+
+.course-card .course-title {
+	font-weight: 600;
+	margin-bottom: 8px;
+}
+
+.course-card .course-meta {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-size: 12px;
+	color: #6b7280;
+	/* gray-500 */
+}
+
+.course-card.status-active {
+	border-color: #10b981;
+	/* emerald-500 */
+}
+
+.course-card.status-inactive {
+	border-color: #ef4444;
+	/* red-500 */
+}
+
+.course-title {
+	color: var(--black);
+}
+
+.status.status-active {
+	color: #065f46;
+}
+
+.status.status-inactive {
+	color: #7f1d1d;
+}
+
 /* Profile page layout (based on provided HTML/CSS) */
 .profile-card {
 	background: #fff;
@@ -63,9 +114,11 @@
 	margin-bottom: 5px;
 }
 
-.profile-info p, .profile-info h3 {
+.profile-info p,
+.profile-info h3 {
 	color: var(--black);
 }
+
 .profile-info-section {
 	display: flex;
 	align-items: center;

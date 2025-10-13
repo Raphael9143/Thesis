@@ -13,6 +13,7 @@ const userAPI = {
   updateProfile: (data) => axiosClient.patch("auth/profile", data),
   // Teacher
   getTeacherProfile: () => axiosClient.get("teacher/profile"),
+  getTeacherCourses: () => axiosClient.get("teacher/courses"),
   // Student
   getStudentProfile: () => axiosClient.get("student/profile"),
   updateStudentProfile: (data) => axiosClient.patch("student/profile", data),

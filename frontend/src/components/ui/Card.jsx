@@ -1,9 +1,9 @@
 import React from 'react';
 import '../../assets/styles/components/ui/Card.css'
 
-export default function Card({ title, subtitle, children, onClick }) {
+export default function Card({ title, subtitle, children, onClick, className }) {
   return (
-    <div className="card-ui" onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
+    <div className={`card-ui ${className || ''}`} onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
       {(title || subtitle) && (
         <div className="card-ui__head">
           {title && <h3>{title}</h3>}
