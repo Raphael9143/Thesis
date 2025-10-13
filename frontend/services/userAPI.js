@@ -15,6 +15,7 @@ const userAPI = {
   getTeacherProfile: () => axiosClient.get("teacher/profile"),
   // Student
   getStudentProfile: () => axiosClient.get("student/profile"),
+  updateStudentProfile: (data) => axiosClient.patch("student/profile", data),
 
   // User management (add more as needed)
   getAllUsers: () => axiosClient.get("users"),
