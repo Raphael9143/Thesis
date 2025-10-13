@@ -1,12 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/components/layout/EducationNavbar.css';
+import NotificationCenter from '../ui/NotificationCenter';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 export default function EducationNavbar({ onNavigate, onLogout, isLoggedIn = false }) {
   const [openMenu, setOpenMenu] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [openNotif, setOpenNotif] = useState(false);
   const menuRef = useRef(null);
+  const notifRef = useRef(null);
+  const { notifications } = useNotifications() || { notifications: [] };
 
   useEffect(() => {
     const role = sessionStorage.getItem('role');
@@ -18,8 +23,8 @@ export default function EducationNavbar({ onNavigate, onLogout, isLoggedIn = fal
 
   useEffect(() => {
     const onDocClick = (e) => {
-      if (!menuRef.current) return;
-      if (!menuRef.current.contains(e.target)) setOpenMenu(false);
+      if (menuRef.current && !menuRef.current.contains(e.target)) setOpenMenu(false);
+      if (notifRef.current && !notifRef.current.contains(e.target)) setOpenNotif(false);
     };
     document.addEventListener('click', onDocClick);
     return () => document.removeEventListener('click', onDocClick);
@@ -40,38 +45,62 @@ export default function EducationNavbar({ onNavigate, onLogout, isLoggedIn = fal
         <button className="btn" onClick={() => onNavigate('researcher')}>Research Hub</button>
         <button className="btn btn-primary" onClick={() => onNavigate('home')}>My Home</button>
         {isLoggedIn && (
-          <div ref={menuRef} className="edu-nav__menuWrap">
-            <button
-              className="btn edu-nav__avatarBtn"
-              onClick={(e) => { e.stopPropagation(); setOpenMenu((v) => !v); }}
-              aria-haspopup="menu"
-              aria-expanded={openMenu}
-              title={displayName || 'Account'}
-            >
-              <img
-                src={avatarUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName || 'U')}
-                alt="avatar"
-                className="edu-nav__avatarImg"
-              />
-            </button>
-            {openMenu && (
-              <div role="menu" className="edu-nav__menu">
-                <button
-                  className="link edu-nav__menuItem"
-                  onClick={() => { setOpenMenu(false); onNavigate('profile'); }}
-                >
-                  Profile
-                </button>
-                <div className="edu-nav__divider" />
-                <button
-                  className="link edu-nav__menuItem edu-nav__menuItem--danger"
-                  onClick={() => { setOpenMenu(false); onLogout?.(); }}
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
+          <>
+            <div ref={notifRef} style={{ position: 'relative', marginRight: 8 }}>
+              <button
+                className="btn"
+                onClick={(e) => { e.stopPropagation(); setOpenNotif((v) => !v); }}
+                aria-haspopup="dialog"
+                aria-expanded={openNotif}
+                title="Notifications"
+              >
+                🔔
+                {Array.isArray(notifications) && notifications.filter(n => !n.read).length > 0 && (
+                  <span style={{ marginLeft: 6, background: '#ef4444', color: '#fff', borderRadius: 10, padding: '2px 6px', fontSize: 12 }}>
+                    {notifications.filter(n => !n.read).length}
+                  </span>
+                )}
+              </button>
+              {openNotif && (
+                <div style={{ position: 'absolute', right: 0, top: 40, zIndex: 1200 }}>
+                  <NotificationCenter onClose={() => setOpenNotif(false)} />
+                </div>
+              )}
+            </div>
+
+            <div ref={menuRef} className="edu-nav__menuWrap">
+              <button
+                className="btn edu-nav__avatarBtn"
+                onClick={(e) => { e.stopPropagation(); setOpenMenu((v) => !v); }}
+                aria-haspopup="menu"
+                aria-expanded={openMenu}
+                title={displayName || 'Account'}
+              >
+                <img
+                  src={avatarUrl || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(displayName || 'U')}
+                  alt="avatar"
+                  className="edu-nav__avatarImg"
+                />
+              </button>
+              {openMenu && (
+                <div role="menu" className="edu-nav__menu">
+                  <button
+                    className="link edu-nav__menuItem"
+                    onClick={() => { setOpenMenu(false); onNavigate('profile'); }}
+                  >
+                    Profile
+                  </button>
+                  <div className="edu-nav__divider" />
+                  <button
+                    className="link edu-nav__menuItem edu-nav__menuItem--danger"
+                    onClick={() => { setOpenMenu(false); onLogout?.(); }}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </header>

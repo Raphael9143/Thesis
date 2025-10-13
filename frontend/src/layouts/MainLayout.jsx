@@ -2,6 +2,7 @@ import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/layout/Navbar';
 import EducationNavbar from '../components/layout/EducationNavbar';
+import socketClient from '../services/socketClient';
 import '../assets/styles/ui.css';
 
 export default function MainLayout() {
@@ -14,6 +15,11 @@ export default function MainLayout() {
     sessionStorage.removeItem('isLogin');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('role');
+    try {
+      socketClient.disconnectSocket();
+    } catch (err) {
+      console.error('socket disconnect error', err);
+    }
     // send to landing page of current context
     if (isEducationRoute) navigate('/education'); else navigate('/');
   };

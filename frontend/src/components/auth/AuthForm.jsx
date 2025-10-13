@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import RoleTabs from './RoleTabs';
 import { Link } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
+import socketClient from '../../services/socketClient';
+import { useNotifications } from '../../contexts/NotificationContext';
 import '../../assets/styles/auth.css';
 import '../../assets/styles/ui.css';
 
@@ -26,6 +28,8 @@ export default function AuthForm({
   const [role, setRole] = useState(initialRole || roles[0].value);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const { push } = useNotifications() || { push: () => {} };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,6 +68,14 @@ export default function AuthForm({
       }
       sessionStorage.setItem('isLogin', 'true');
       sessionStorage.setItem('token', data.data.token);
+      // initialize websocket connection immediately after login/register
+      try {
+        if (data.data?.token) {
+          socketClient.initSocket(data.data.token);
+        }
+      } catch (err) {
+        console.error('socket init after auth error', err);
+      }
       const resolvedRole = (data.data?.user?.role ?? role ?? '').toString().toLowerCase();
       if (resolvedRole) sessionStorage.setItem('role', resolvedRole);
       const serverUser = data.data?.user || {};
@@ -75,6 +87,12 @@ export default function AuthForm({
         sessionStorage.setItem('avatar_url', serverUser.avatar_url);
       }
       if (onSuccess) onSuccess(data);
+      // push an example notification: login success
+      try {
+        push({ id: `login-${Date.now()}`, title: 'Đăng nhập thành công', body: `Xin chào ${data.data?.user?.full_name || ''}`, ts: Date.now(), data: { type: 'system' } });
+      } catch (err) {
+        // ignore
+      }
     } catch (err) {
       setMessage(err?.response?.data?.message || 'Server error!');
     } finally {

@@ -9,12 +9,12 @@ export default function Navbar({ current, onNavigate, onLogout, isLoggedIn = fal
         OCL/UML Research Hub
       </div>
       <nav className="nav__links" style={{ alignItems: 'center' }}>
-        <a className="link" href="#">Home</a>
-        <a className="link" href="#">Projects</a>
-        <a className="link" href="#">Publications</a>
-        <a className="link" href="#">Community</a>
-        <a className="link" href="#">About</a>
-        <a className="link" href="#">Contact</a>
+        <button className="link" type="button">Home</button>
+        <button className="link" type="button">Projects</button>
+        <button className="link" type="button">Publications</button>
+        <button className="link" type="button">Community</button>
+        <button className="link" type="button">About</button>
+        <button className="link" type="button">Contact</button>
       </nav>
       <div className="nav__links" style={{ alignItems: 'center' }}>
         <button className="btn btn-signin" onClick={() => onNavigate('education')}>Education</button>

@@ -1,0 +1,64 @@
+.notif-center {
+  width: 360px;
+  max-height: 480px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-center__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.notif-center__body {
+  padding: 10px;
+  overflow: auto;
+}
+
+.notif-empty {
+  padding: 20px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.notif-item {
+  padding: 10px;
+  border-radius: 8px;
+  background: var(--surface-muted);
+  margin-bottom: 8px;
+}
+
+.notif-item--read {
+  opacity: 0.6;
+}
+
+.notif-item__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: baseline;
+}
+
+.notif-item__title {
+  font-weight: 600;
+}
+
+.notif-item__body {
+  margin-top: 6px;
+  color: var(--muted);
+}
+
+.notif-item__actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
