@@ -3,13 +3,13 @@ const path = require('path');
 
 // Cấu hình lưu file upload vào thư mục uploads/ với tên gốc, có thể đổi tên nếu muốn
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, path.join(__dirname, '../uploads/assignments'));
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + '-' + file.originalname);
-    }
+	destination: function (req, file, cb) {
+		cb(null, path.join(__dirname, '../uploads/assignments'));
+	},
+	filename: function (req, file, cb) {
+		const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+		cb(null, uniqueSuffix + '-' + file.originalname);
+	}
 });
 
 const upload = multer({ storage });

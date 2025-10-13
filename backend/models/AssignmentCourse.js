@@ -2,34 +2,34 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 const AssignmentCourse = sequelize.define('AssignmentCourse', {
-    id: {
-        type: DataTypes.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    assignment_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    course_id: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    due_date: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
-    start_date: {
-        type: DataTypes.DATE,
-        allowNull: true
-    },
-    week: {
-        type: DataTypes.INTEGER,
-        allowNull: true
-    }
+	id: {
+		type: DataTypes.INTEGER,
+		primaryKey: true,
+		autoIncrement: true
+	},
+	assignment_id: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	},
+	course_id: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	},
+	due_date: {
+		type: DataTypes.DATE,
+		allowNull: true
+	},
+	start_date: {
+		type: DataTypes.DATE,
+		allowNull: true
+	},
+	week: {
+		type: DataTypes.INTEGER,
+		allowNull: true
+	}
 }, {
-    tableName: 'assignment_courses',
-    timestamps: false
+	tableName: 'assignment_courses',
+	timestamps: false
 });
 
 // Associations
