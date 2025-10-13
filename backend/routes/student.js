@@ -45,7 +45,7 @@ const StudentController = require('../controllers/StudentController');
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Thông tin profile sinh viên
+ *         description: Thông tin profile sinh viên (gồm cả thông tin user)
  *         content:
  *           application/json:
  *             schema:
@@ -54,7 +54,7 @@ const StudentController = require('../controllers/StudentController');
  *                 success:
  *                   type: boolean
  *                 data:
- *                   $ref: '#/components/schemas/Student'
+ *                   $ref: '#/components/schemas/StudentProfile'
  *       401:
  *         description: Unauthorized
  *       404:
@@ -86,6 +86,56 @@ const StudentController = require('../controllers/StudentController');
  *         updatedAt:
  *           type: string
  *           format: date-time
+ *     StudentProfile:
+ *       type: object
+ *       description: Thông tin hợp nhất giữa User và Student
+ *       properties:
+ *         id:
+ *           type: integer
+ *         full_name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         role:
+ *           type: string
+ *           enum: [STUDENT]
+ *         avatar_url:
+ *           type: string
+ *         gender:
+ *           type: string
+ *           enum: [MALE, FEMALE, OTHER]
+ *         dob:
+ *           type: string
+ *           format: date
+ *         phone_number:
+ *           type: string
+ *         address:
+ *           type: string
+ *         status:
+ *           type: string
+ *           enum: [ACTIVE, INACTIVE, BANNED, PENDING_VERIFICATION]
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *         student_id:
+ *           type: integer
+ *         student_code:
+ *           type: string
+ *         major:
+ *           type: string
+ *           nullable: true
+ *         year:
+ *           type: integer
+ *           nullable: true
+ *         completed_assignments:
+ *           type: integer
+ *         enrolled_classes:
+ *           type: array
+ *           items:
+ *             type: integer
  */
 
 /**
