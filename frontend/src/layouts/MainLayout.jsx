@@ -26,7 +26,12 @@ export default function MainLayout() {
           onNavigate={(tab) => {
             if (tab === 'researcher') navigate('/');
             if (tab === 'home') navigate('/education/home');
-            if (tab === 'teacher-profile') navigate('/education/teacher/profile');
+            if (tab === 'profile') {
+              const role = sessionStorage.getItem('role');
+              console.log('role: ', role);
+              if (role === 'student') navigate('/education/student/profile');
+              else navigate('/education/teacher/profile');
+            }
           }}
         />
       ) : (

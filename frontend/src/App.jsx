@@ -8,6 +8,7 @@ import RegisterPage from './pages/RegisterPage';
 import NotFound from './pages/NotFound';
 import './App.css';
 import TeacherProfile from './pages/teacher/Profile';
+import StudentProfile from './pages/student/Profile';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -17,6 +18,7 @@ const router = createBrowserRouter(
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/education/home" element={<Home />} />
       <Route path="/education/teacher/profile" element={<TeacherProfile />} />
+      <Route path="/education/student/profile" element={<StudentProfile />} />
       <Route path="/community/home" element={<Home />} />
       <Route path="*" element={<NotFound />} />
     </Route>

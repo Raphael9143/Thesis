@@ -58,7 +58,7 @@ export default function EducationNavbar({ onNavigate, onLogout, isLoggedIn = fal
               <div role="menu" className="edu-nav__menu">
                 <button
                   className="link edu-nav__menuItem"
-                  onClick={() => { setOpenMenu(false); onNavigate('teacher-profile'); }}
+                  onClick={() => { setOpenMenu(false); onNavigate('profile'); }}
                 >
                   Profile
                 </button>
