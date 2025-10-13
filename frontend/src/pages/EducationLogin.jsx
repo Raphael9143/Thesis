@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthForm from '../components/auth/AuthForm';
 import NotificationPopup from '../components/ui/NotificationPopup';
@@ -7,6 +7,16 @@ import '../assets/styles/ui.css';
 
 export default function EducationLogin() {
   const navigate = useNavigate();
+  useEffect(() => {
+    // if already logged in, redirect to education home
+    try {
+      if (sessionStorage.getItem('isLogin') === 'true') {
+        navigate('/education/home');
+      }
+    } catch (err) {
+      // ignore
+    }
+  }, [navigate]);
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyMsg, setNotifyMsg] = useState('');
   const [notifyType, setNotifyType] = useState('info');

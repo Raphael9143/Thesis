@@ -45,7 +45,7 @@ export default function EducationNavbar({ onNavigate, onLogout, isLoggedIn = fal
         <button className="btn btn-signin" onClick={() => onNavigate('researcher')}>Research Hub</button>
         {isLoggedIn && (
           <>
-            <div ref={notifRef} style={{ position: 'relative', marginRight: 8 }}>
+            <div ref={notifRef} style={{ position: 'relative' }}>
               <span
                 className="edu-nav__notifBtn"
                 onClick={(e) => { e.stopPropagation(); setOpenNotif((v) => !v); }}
