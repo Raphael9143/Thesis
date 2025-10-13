@@ -9,10 +9,12 @@ const userRoutes = require('./user');
 const studentRoutes = require('./student');
 const teacherRoutes = require('./teacher');
 const researcherRoutes = require('./researcher');
+const notifyRoutes = require('./notify');
 const assignmentRoutes = require('./assignment');
 
 const { sequelize, testConnection } = require('../config/database');
 const { specs, swaggerUi } = require('../config/swagger')
+const { emitToUser } = require('../realtime/socket')
 
 const app = express();
 
@@ -55,6 +57,9 @@ app.get('/', (req, res) => {
         }
     });
 });
+
+// Notification routes
+app.use('/api/notify', notifyRoutes);
 
 // Auth routes
 app.use('/api/auth', authRoutes);
