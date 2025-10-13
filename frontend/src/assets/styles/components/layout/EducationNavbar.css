@@ -58,3 +58,7 @@
   height: 1px;
   background: #e2e8f0;
 }
+
+.edu-nav__notifBtn {
+  cursor: pointer;
+}

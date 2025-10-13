@@ -36,19 +36,18 @@ export default function EducationNavbar({ onNavigate, onLogout, isLoggedIn = fal
         Education Portal
       </div>
       <nav className="nav__links edu-nav__links">
-        <a className="link" href="#">Dashboard</a>
+        <a className="link" href="/education/home">Dashboard</a>
         <a className="link" href="#">Classes</a>
         <a className="link" href="#">Assignments</a>
         <a className="link" href="#">Resources</a>
       </nav>
       <div className="nav__links edu-nav__links edu-nav__links--right">
-        <button className="btn" onClick={() => onNavigate('researcher')}>Research Hub</button>
-        <button className="btn btn-primary" onClick={() => onNavigate('home')}>My Home</button>
+        <button className="btn btn-signin" onClick={() => onNavigate('researcher')}>Research Hub</button>
         {isLoggedIn && (
           <>
             <div ref={notifRef} style={{ position: 'relative', marginRight: 8 }}>
-              <button
-                className="btn"
+              <span
+                className="edu-nav__notifBtn"
                 onClick={(e) => { e.stopPropagation(); setOpenNotif((v) => !v); }}
                 aria-haspopup="dialog"
                 aria-expanded={openNotif}
@@ -56,11 +55,11 @@ export default function EducationNavbar({ onNavigate, onLogout, isLoggedIn = fal
               >
                 🔔
                 {Array.isArray(notifications) && notifications.filter(n => !n.read).length > 0 && (
-                  <span style={{ marginLeft: 6, background: '#ef4444', color: '#fff', borderRadius: 10, padding: '2px 6px', fontSize: 12 }}>
+                  <span className="notification-count-number">
                     {notifications.filter(n => !n.read).length}
                   </span>
                 )}
-              </button>
+              </span>
               {openNotif && (
                 <div style={{ position: 'absolute', right: 0, top: 40, zIndex: 1200 }}>
                   <NotificationCenter onClose={() => setOpenNotif(false)} />

@@ -9,7 +9,9 @@ export default function NotificationCenter({ onClose }) {
     <div className="notif-center" role="dialog" aria-label="Notifications">
       <div className="notif-center__head">
         <h4>Notifications</h4>
-        <button className="notif-center__close" onClick={onClose}>×</button>
+        <span className="notif-center__close" onClick={onClose}>
+          <i class="fa-solid fa-xmark"></i>
+        </span>
       </div>
       <div className="notif-center__body">
         {(!notifications || notifications.length === 0) && (
@@ -23,8 +25,14 @@ export default function NotificationCenter({ onClose }) {
             </div>
             <div className="notif-item__body">{n.body}</div>
             <div className="notif-item__actions">
-              {!n.read && (
-                <button className="btn" onClick={() => markRead(n.id)}>Mark read</button>
+              {!n.read ? (
+                <span className="mark-as-read-notification" onClick={() => markRead(n.id)}>
+                  <i class="fa-regular fa-circle-check"></i>
+                </span>
+              ) : (
+                <span className="mark-as-read-notification read">
+                  <i class="fa-solid fa-circle-check"></i>
+                </span>
               )}
             </div>
           </div>

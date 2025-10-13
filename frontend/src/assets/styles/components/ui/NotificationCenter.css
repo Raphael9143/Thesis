@@ -1,10 +1,10 @@
 .notif-center {
-  width: 360px;
+  width: 400px;
   max-height: 480px;
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 12px;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -61,4 +61,53 @@
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+}
+
+/* small badge used by the bell button in the navbar */
+.edu-nav__notifBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  /* anchor for the badge */
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.notification-count-number {
+  position: absolute;
+  top: -2px;
+  right: -6px;
+  color: var(--red);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  font-size: 16px;
+  line-height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.notif-center__close {
+  cursor: pointer;
+
+  &:hover {
+    color: var(--brand-strong);
+  }
+}
+
+.mark-as-read-notification {
+  cursor: pointer;
+  color: var(--brand);
+
+  &:hover {
+    color: var(--brand-strong);
+  }
+}
+
+.mark-as-read-notification.read {
+  cursor: default;
 }
