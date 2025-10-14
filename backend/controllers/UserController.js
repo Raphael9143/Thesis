@@ -20,6 +20,20 @@ const UserController = {
 			res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	}
+	,
+
+	// Lấy danh sách email của tất cả sinh viên
+	getStudentEmails: async (req, res) => {
+		try {
+			// Chỉ admin hoặc teacher có thể gọi endpoint này? Hiện để mọi user đã authenticated
+			const students = await User.findAll({ where: { role: 'STUDENT' }, attributes: ['email'] });
+			const emails = students.map(s => s.email);
+			res.json({ success: true, data: emails });
+		} catch (error) {
+			console.error('Get student emails error:', error);
+			res.status(500).json({ success: false, message: 'Internal Server Error' });
+		}
+	}
 };
 
 module.exports = UserController;

@@ -39,4 +39,33 @@ const UserController = require('../controllers/UserController');
  */
 router.delete('/:id', auth, UserController.deleteUser);
 
+/**
+ * @swagger
+ * /api/users/students/emails:
+ *   get:
+ *     summary: Lấy danh sách email của tất cả sinh viên
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Danh sách email
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal Server Error
+ */
+router.get('/students/emails', auth, UserController.getStudentEmails);
+
 module.exports = router;
