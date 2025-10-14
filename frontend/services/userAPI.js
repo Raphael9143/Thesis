@@ -20,19 +20,26 @@ const userAPI = {
 
   // User management (add more as needed)
   getAllUsers: () => axiosClient.get("users"),
+  // Returns a list of student emails: { success: true, data: ["student1@example.com"] }
+  getStudentEmails: () => axiosClient.get("users/students/emails"),
   getUserById: (id) => axiosClient.get(`users/${id}`),
+  // Get user by email: GET /api/users/by-email?email=...
+  getUserByEmail: (email) => axiosClient.get(`users/by-email?email=${encodeURIComponent(email)}`),
   updateUser: (id, data) => axiosClient.put(`users/${id}`, data),
   deleteUser: (id) => axiosClient.delete(`users/${id}`),
 
   // Class management
   getAllClasses: () => axiosClient.get("classes"),
   getClassById: (id) => axiosClient.get(`classes/${id}`),
-  createClass: (data) => axiosClient.post("classes", data),
+  createClass: (data) => axiosClient.post("class", data),
   updateClass: (id, data) => axiosClient.put(`classes/${id}`, data),
   deleteClass: (id) => axiosClient.delete(`classes/${id}`),
 
   // Add more API endpoints as needed for your thesis project
   updateTeacherProfile: (data) => axiosClient.patch("teacher/profile", data),
+
+  //notify
+  notify: (userId, data) => axiosClient.post(`notify/${userId}`, data),
 };
 
 export default userAPI;

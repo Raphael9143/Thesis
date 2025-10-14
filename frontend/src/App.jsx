@@ -9,6 +9,8 @@ import NotFound from './pages/NotFound';
 import './App.css';
 import TeacherProfile from './pages/teacher/Profile';
 import StudentProfile from './pages/student/Profile';
+import ClassesPage from './pages/teacher/Classes';
+import CreateClassPage from './pages/teacher/CreateClass';
 import RequireAuth from './components/routing/RequireAuth';
 import RequireRole from './components/routing/RequireRole';
 import Unauthorized from './pages/Unauthorized';
@@ -23,6 +25,8 @@ const router = createBrowserRouter(
       {/* Protected education routes */}
       <Route element={<RequireAuth><Outlet /></RequireAuth>}>
         <Route path="/education/home" element={<Home />} />
+        <Route path="/education/classes" element={<RequireRole allowed={["teacher"]}><ClassesPage /></RequireRole>} />
+        <Route path="/education/classes/create-class" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><CreateClassPage /></React.Suspense></RequireRole>} />
         <Route path="/education/teacher/profile" element={<RequireRole allowed={["teacher"]}><TeacherProfile /></RequireRole>} />
         <Route path="/education/student/profile" element={<RequireRole allowed={["student"]}><StudentProfile /></RequireRole>} />
       </Route>

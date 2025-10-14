@@ -37,7 +37,7 @@ export default function EducationNavbar({ onNavigate, onLogout, isLoggedIn = fal
       </div>
       <nav className="nav__links edu-nav__links">
         <a className="link" href="/education/home">Dashboard</a>
-        <a className="link" href="#">Classes</a>
+        <a className="link" href="/education/classes">Classes</a>
         <a className="link" href="#">Assignments</a>
         <a className="link" href="#">Resources</a>
       </nav>
