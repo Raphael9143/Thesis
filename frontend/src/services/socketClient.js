@@ -4,8 +4,20 @@ let socket = null;
 
 export function initSocket(token) {
   if (socket) return socket;
-  const url = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+  let url = import.meta.env.VITE_SOCKET_URL;
+  if (!url) {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      if (apiUrl) {
+        url = new URL(apiUrl).origin;
+      }
+    } catch (err) {
+      // ignore
+    }
+  }
+  if (!url) url = 'http://localhost:3000';
   try {
+    console.debug('[socketClient] connecting to', url);
     socket = io(url, {
       auth: {
         token,
@@ -14,7 +26,7 @@ export function initSocket(token) {
     });
 
     socket.on('connect_error', (err) => {
-      console.error('Socket connect_error', err?.message || err);
+      console.error('Socket connect_error (url=' + url + ')', err?.message || err);
     });
 
     socket.on('connect', () => {

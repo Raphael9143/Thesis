@@ -22,6 +22,11 @@ export function NotificationProvider({ children }) {
     if (!token) return;
     const sock = socketClient.initSocket(token);
     const off = socketClient.onNotification((data, ack) => {
+      // debug log incoming payload
+      try {
+        console.debug('[NotificationContext] incoming notification', data, { hasAck: typeof ack === 'function' });
+      } catch (err) {}
+
       // default push
       const notif = {
         id: data?.id || `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
