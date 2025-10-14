@@ -68,4 +68,43 @@ router.delete('/:id', auth, UserController.deleteUser);
  */
 router.get('/students/emails', auth, UserController.getStudentEmails);
 
+/**
+ * @swagger
+ * /api/users/by-email:
+ *   get:
+ *     summary: Lấy userId theo email
+ *     tags: [User]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: email
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Email cần tra cứu
+ *     responses:
+ *       200:
+ *         description: User id and email
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     email:
+ *                       type: string
+ *       400:
+ *         description: Missing email
+ *       404:
+ *         description: User not found
+ */
+router.get('/by-email', auth, UserController.getUserIdByEmail);
+
 module.exports = router;

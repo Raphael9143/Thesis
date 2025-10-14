@@ -34,6 +34,21 @@ const UserController = {
 			res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	}
+	,
+
+	// Lấy userId theo email (query param ?email=...)
+	getUserIdByEmail: async (req, res) => {
+		try {
+			const { email } = req.query;
+			if (!email) return res.status(400).json({ success: false, message: 'Missing email query parameter' });
+			const user = await User.findOne({ where: { email }, attributes: ['id', 'email'] });
+			if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+			res.json({ success: true, data: { id: user.id, email: user.email } });
+		} catch (error) {
+			console.error('Get userId by email error:', error);
+			res.status(500).json({ success: false, message: 'Internal Server Error' });
+		}
+	}
 };
 
 module.exports = UserController;
