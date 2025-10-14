@@ -10,7 +10,7 @@ export default function NotificationCenter({ onClose }) {
       <div className="notif-center__head">
         <h4>Notifications</h4>
         <span className="notif-center__close" onClick={onClose}>
-          <i class="fa-solid fa-xmark"></i>
+          <i className="fa-solid fa-xmark"></i>
         </span>
       </div>
       <div className="notif-center__body">
@@ -27,11 +27,11 @@ export default function NotificationCenter({ onClose }) {
             <div className="notif-item__actions">
               {!n.read ? (
                 <span className="mark-as-read-notification" onClick={() => markRead(n.id)}>
-                  <i class="fa-regular fa-circle-check"></i>
+                  <i className="fa-regular fa-circle-check"></i>
                 </span>
               ) : (
                 <span className="mark-as-read-notification read">
-                  <i class="fa-solid fa-circle-check"></i>
+                  <i className="fa-solid fa-circle-check"></i>
                 </span>
               )}
             </div>
