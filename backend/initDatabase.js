@@ -8,6 +8,7 @@ const Class = require('./models/Class');
 const ClassCourse = require('./models/ClassCourse');
 const ClassStudent = require('./models/ClassStudent');
 const Assignment = require('./models/Assignment');
+const Lecture = require('./models/Lecture');
 
 async function initDatabase() {
     // 1. Admin
@@ -122,6 +123,32 @@ async function initDatabase() {
         start_date: new Date('2025-09-20T08:00:00Z'),
         due_date: new Date('2025-10-01T23:59:00Z'),
         week: 2
+    });
+
+    // 10. Lecture mẫu: bài giảng gán cho lớp cụ thể
+    const lecture1 = await Lecture.create({
+        course_id: course.course_id,
+        class_id: class1.id,
+        teacher_id: teacherUser.id,
+        title: 'Bài giảng 1: Giới thiệu HTML',
+        attachments: [
+            { type: 'pdf', filename: 'test', url: '/uploads/lectures/test.docx' }
+        ],
+        publish_date: new Date('2025-09-21T08:00:00Z'),
+        status: 'published'
+    });
+
+    // 11. Lecture mẫu: bài giảng theo course (không gán lớp cụ thể)
+    const lecture2 = await Lecture.create({
+        course_id: course.course_id,
+        class_id: null,
+        teacher_id: teacherUser.id,
+        title: 'Bài giảng chung: Tài nguyên tham khảo',
+        attachments: [
+            { type: 'link', description: 'Slides mở rộng', url: 'https://example.com/web-slides' }
+        ],
+        publish_date: new Date('2025-09-22T08:00:00Z'),
+        status: 'published'
     });
 
     console.log('✅ Đã seed dữ liệu mẫu!');
