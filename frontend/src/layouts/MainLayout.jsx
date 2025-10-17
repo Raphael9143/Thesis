@@ -8,7 +8,9 @@ import '../assets/styles/ui.css';
 export default function MainLayout() {
   const location = useLocation();
   const navigate = useNavigate();
-  const isEducationRoute = location.pathname.startsWith('/education') || location.pathname.startsWith('/register');
+
+  const showEducationNavbar = location.pathname.startsWith('/education') && location.pathname !== '/education';
+  const hideAnyNavbar = location.pathname === '/education';
   const isLoggedIn = sessionStorage.getItem('isLogin') === 'true';
 
   const handleLogout = () => {
@@ -25,7 +27,7 @@ export default function MainLayout() {
   };
   return (
     <div className="app-bg">
-      {isEducationRoute ? (
+      {hideAnyNavbar ? null : showEducationNavbar ? (
         <EducationNavbar
           isLoggedIn={isLoggedIn}
           onLogout={handleLogout}
