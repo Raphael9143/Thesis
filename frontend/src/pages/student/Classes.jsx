@@ -1,0 +1,64 @@
+import React, { useEffect, useState } from 'react';
+import Section from '../../components/ui/Section';
+import Card from '../../components/ui/Card';
+import userAPI from '../../../services/userAPI';
+import '../../assets/styles/ui.css';
+
+export default function StudentClassesPage() {
+  const [classes, setClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      try {
+        const res = await userAPI.getStudentEnrolledClasses();
+        if (!mounted) return;
+        if (res?.success && res.data && Array.isArray(res.data.classes)) {
+          setClasses(res.data.classes);
+        } else {
+          setError(res?.message || 'Failed to load classes');
+        }
+      } catch (err) {
+        console.error('Failed to fetch enrolled classes', err);
+        if (!mounted) return;
+        setError(err?.response?.data?.message || err.message || 'Server error');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  return (
+    <Section title="My Classes" subtitle="Classes you are enrolled in">
+      <Card>
+        {loading && <div>Loading classes...</div>}
+        {error && <div className="text-error">{error}</div>}
+        {!loading && !error && classes.length === 0 && (
+          <div>No classes found.</div>
+        )}
+        {!loading && !error && classes.length > 0 && (
+          <div style={{ display: 'grid', gap: 12 }}>
+            {classes.map(c => (
+              <div key={c.id} style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontWeight: 700 }}>{c.name}</div>
+                    <div style={{ color: '#6b7280' }}>{c.code} • {c.semester} • {c.year}</div>
+                  </div>
+                  <div>
+                    <span className="badge">{c.status}</span>
+                  </div>
+                </div>
+                <div style={{ marginTop: 8 }}>{c.description}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+    </Section>
+  );
+}
