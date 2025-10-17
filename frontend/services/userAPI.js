@@ -34,6 +34,8 @@ const userAPI = {
   createClass: (data) => axiosClient.post("class", data),
   updateClass: (id, data) => axiosClient.put(`classes/${id}`, data),
   deleteClass: (id) => axiosClient.delete(`classes/${id}`),
+  // Student: get enrolled classes (requires student bearer token)
+  getStudentEnrolledClasses: () => axiosClient.get("student/enrolled-classes"),
 
   // Add more API endpoints as needed for your thesis project
   updateTeacherProfile: (data) => axiosClient.patch("teacher/profile", data),
