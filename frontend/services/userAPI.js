@@ -14,6 +14,8 @@ const userAPI = {
   // Teacher
   getTeacherProfile: () => axiosClient.get("teacher/profile"),
   getTeacherCourses: () => axiosClient.get("teacher/courses"),
+  // Get classes managed/taught by the teacher (requires teacher bearer token)
+  getTeacherClasses: () => axiosClient.get("teacher/classes"),
   // Student
   getStudentProfile: () => axiosClient.get("student/profile"),
   updateStudentProfile: (data) => axiosClient.patch("student/profile", data),
