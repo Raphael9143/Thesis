@@ -11,7 +11,7 @@ export default function ClassesPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h3>Classes</h3>
         <div>
-          <button type="button" className="btn btn-primary" onClick={() => navigate('/education/classes/create-class')}>Create class</button>
+          <button type="button" className="btn btn-primary" onClick={() => navigate('/education/teacher/classes/create-class')}>Create class</button>
         </div>
       </div>
 

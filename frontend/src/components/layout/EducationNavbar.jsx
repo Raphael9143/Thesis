@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/components/layout/EducationNavbar.css';
 import NotificationCenter from '../ui/NotificationCenter';
 import { useNotifications } from '../../contexts/NotificationContext';
 
 export default function EducationNavbar({ onNavigate, onLogout, isLoggedIn = false }) {
+  const navigate = useNavigate();
   const [openMenu, setOpenMenu] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [displayName, setDisplayName] = useState('');
@@ -29,6 +31,13 @@ export default function EducationNavbar({ onNavigate, onLogout, isLoggedIn = fal
     document.addEventListener('click', onDocClick);
     return () => document.removeEventListener('click', onDocClick);
   }, []);
+
+  const navigateClasses = () => {
+    const role = (sessionStorage.getItem('role') || '').toString().toLowerCase();
+    if (role === 'student') navigate('/education/student/classes');
+    else if (role === 'teacher') navigate('/education/teacher/classes');
+    else navigate('/education/classes');
+  }
   return (
     <header className="nav">
       <div className="nav__brand edu-nav__brand">
@@ -37,7 +46,7 @@ export default function EducationNavbar({ onNavigate, onLogout, isLoggedIn = fal
       </div>
       <nav className="nav__links edu-nav__links">
         <a className="link" href="/education/home">Dashboard</a>
-        <a className="link" href="/education/classes">Classes</a>
+        <a className="link" onClick={navigateClasses}>Classes</a>
         <a className="link" href="#">Assignments</a>
         <a className="link" href="#">Resources</a>
       </nav>
