@@ -12,6 +12,7 @@ const researcherRoutes = require('./researcher');
 const notifyRoutes = require('./notify');
 const assignmentRoutes = require('./assignment');
 const lectureRoutes = require('./lecture');
+const examRoutes = require('./exam');
 
 const { sequelize, testConnection } = require('../config/database');
 const { specs, swaggerUi } = require('../config/swagger')
@@ -82,5 +83,7 @@ app.use('/api/assignments', assignmentRoutes);
 app.use('/api/submissions', submissionRoutes);
 // Lecture routes
 app.use('/api/lectures', lectureRoutes);
+// Exam routes
+app.use('/api/exams', examRoutes);
 
 module.exports = app
