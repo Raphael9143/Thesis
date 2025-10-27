@@ -11,10 +11,7 @@ const Lecture = sequelize.define('Lecture', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  class_id: {
-    type: DataTypes.BIGINT.UNSIGNED,
-    allowNull: true
-  },
+  // removed class_id: lectures are now course-level and class is determined via course-class links
   teacher_id: {
     type: DataTypes.INTEGER,
     allowNull: false
@@ -59,7 +56,7 @@ const Class = require('./Class');
 const User = require('./User');
 
 Lecture.belongsTo(Course, { foreignKey: 'course_id', as: 'course' });
-Lecture.belongsTo(Class, { foreignKey: 'class_id', as: 'class' });
+// Lecture no longer directly belongsTo Class; class is determined via ClassCourse linking
 Lecture.belongsTo(User, { foreignKey: 'teacher_id', as: 'teacher' });
 
 module.exports = Lecture;

@@ -122,7 +122,6 @@ async function initDatabase() {
 
 	const lecture1 = await Lecture.create({
 		course_id: course.course_id,
-		class_id: class1.id,
 		teacher_id: teacherUser.id,
 		title: 'Lecture 1: Basics of OCL',
 		attachments: [
@@ -134,7 +133,6 @@ async function initDatabase() {
 
 	const lecture2 = await Lecture.create({
 		course_id: course.course_id,
-		class_id: null,
 		teacher_id: teacherUser.id,
 		title: 'Reference Materials for OCL',
 		attachments: [

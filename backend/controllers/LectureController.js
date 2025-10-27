@@ -15,8 +15,8 @@ const LectureController = {
       if (!req.user || req.user.role !== 'TEACHER') {
         return res.status(403).json({ success: false, message: 'Only teachers can create lectures.' });
       }
-      const teacherId = req.user.userId;
-      const { course_id, class_id, title, attachments, publish_date, status } = req.body;
+  const teacherId = req.user.userId;
+  const { course_id, title, attachments, publish_date, status } = req.body;
       if (!course_id || !title) {
         return res.status(400).json({ success: false, message: 'course_id and title are required.' });
       }
@@ -25,22 +25,12 @@ const LectureController = {
       const course = await Course.findByPk(course_id);
       if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
 
-      // If class_id provided, ensure class exists and is taught by teacher and linked to course
-      if (class_id) {
-        const cls = await Class.findByPk(class_id);
-        if (!cls) return res.status(404).json({ success: false, message: 'Class not found.' });
-        if (cls.teacherId !== teacherId) return res.status(403).json({ success: false, message: 'You are not the homeroom teacher of this class.' });
-        // Check link between class and course
-        const link = await ClassCourse.findOne({ where: { class_id: class_id, course_id } });
-        if (!link) return res.status(400).json({ success: false, message: 'This class is not linked to the specified course.' });
-      } else {
-        // No class specified: require teacher to teach at least one class that links to the course
-        const links = await ClassCourse.findAll({ where: { course_id } });
-        const classIds = links.map(l => l.class_id);
-        if (classIds.length === 0) return res.status(400).json({ success: false, message: 'No classes linked to this course.' });
-        const owned = await Class.findOne({ where: { id: classIds, teacherId } });
-        if (!owned) return res.status(403).json({ success: false, message: 'You are not the homeroom teacher for any class of this course.' });
-      }
+      // Require the teacher to be homeroom teacher for at least one class linked to this course
+      const links = await ClassCourse.findAll({ where: { course_id } });
+      const classIds = links.map(l => l.class_id);
+      if (classIds.length === 0) return res.status(400).json({ success: false, message: 'No classes linked to this course.' });
+      const owned = await Class.findOne({ where: { id: classIds, teacherId } });
+      if (!owned) return res.status(403).json({ success: false, message: 'You are not the homeroom teacher for any class of this course.' });
 
       // Build attachments array from uploaded files (req.files) or from request body
       let attachmentsArray = null;
@@ -78,7 +68,6 @@ const LectureController = {
 
       const lecture = await Lecture.create({
         course_id,
-        class_id: class_id || null,
         teacher_id: teacherId,
         title,
         attachments: attachmentsArray || null,
@@ -99,8 +88,7 @@ const LectureController = {
       const id = req.params.id;
       const lecture = await Lecture.findByPk(id, {
         include: [
-          { model: Course, as: 'course' },
-          { model: Class, as: 'class' }
+          { model: Course, as: 'course' }
         ]
       });
       if (!lecture) return res.status(404).json({ success: false, message: 'Lecture not found.' });
@@ -150,7 +138,6 @@ const LectureController = {
       const lectures = await Lecture.findAll({
         where: { course_id: courseId },
         include: [
-          { model: Class, as: 'class' },
           { model: User, as: 'teacher', attributes: ['id', 'full_name', 'email'] }
         ],
         order: [['publish_date', 'DESC']]

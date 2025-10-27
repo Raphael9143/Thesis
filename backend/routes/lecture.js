@@ -21,8 +21,6 @@ const lectureUpload = require('../middlewares/lectureUpload');
  *             properties:
  *               course_id:
  *                 type: integer
- *               class_id:
- *                 type: integer
  *               title:
  *                 type: string
  *               attachments:
