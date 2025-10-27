@@ -100,6 +100,34 @@ const LectureController = {
   }
   ,
 
+  // Update lecture status (only lecture's teacher or admin)
+  updateLectureStatus: async (req, res) => {
+    try {
+      if (!req.user) return res.status(401).json({ success: false, message: 'Unauthorized' });
+      const id = req.params.id;
+      const { status } = req.body;
+      const allowed = ['draft', 'published', 'archived'];
+      if (!status || !allowed.includes(status)) return res.status(400).json({ success: false, message: 'Invalid status' });
+
+      const lecture = await Lecture.findByPk(id);
+      if (!lecture) return res.status(404).json({ success: false, message: 'Lecture not found.' });
+
+      // Only admin or the teacher who created the lecture can change status
+      const user = req.user;
+      if (!(user.role === 'admin' || lecture.teacher_id === user.userId)) {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+
+      lecture.status = status;
+      await lecture.save();
+
+      res.json({ success: true, message: 'Lecture status updated', data: lecture });
+    } catch (error) {
+      console.error('Update lecture status error:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
   // Get all lectures for a given course id. Access allowed to admin, the class teacher(s) of linked classes, or students
   // enrolled in any class linked to the course.
   getLecturesByCourseId: async (req, res) => {

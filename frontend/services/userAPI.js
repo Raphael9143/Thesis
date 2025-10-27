@@ -47,11 +47,13 @@ const userAPI = {
 
   // Lectures
   // Create lecture: accepts FormData (for file uploads) or JSON payload
-  createLecture: (data) => axiosClient.post('lectures', data, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  }),
+  createLecture: (data, config) => axiosClient.post('lectures', data, config),
+  // Update lecture: id, data (FormData or JSON)
+  updateLecture: (id, data, config) => axiosClient.put(`lectures/${id}`, data, config),
+  // Delete lecture
+  deleteLecture: (id) => axiosClient.delete(`lectures/${id}`),
+  // patch status of lecture
+  patchLectureStatus: (id, status) => axiosClient.patch(`lectures/${id}/status`, { status }),
 
   // Add more API endpoints as needed for your thesis project
   updateTeacherProfile: (data) => axiosClient.patch("teacher/profile", data),

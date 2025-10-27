@@ -75,6 +75,41 @@ router.get('/:id', LectureController.getLectureById);
 
 /**
  * @swagger
+ * /api/lectures/{id}/status:
+ *   patch:
+ *     summary: Update lecture status (only lecture owner teacher or admin)
+ *     tags: [Lecture]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published, archived]
+ *     responses:
+ *       200:
+ *         description: Lecture status updated
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden
+ */
+router.patch('/:id/status', auth, LectureController.updateLectureStatus);
+
+
+/**
+ * @swagger
  * /api/lectures/course/{id}:
  *   get:
  *     summary: Lấy tất cả bài giảng của một môn học theo course id (admin, giáo viên liên quan, hoặc sinh viên trong lớp)
