@@ -8,7 +8,7 @@ import '../../assets/styles/pages/teacher/ClassDetail.css';
 import CreateLectureForm from '../../components/teacher/CreateLectureForm';
 
 export default function ClassDetailPage() {
-  const { id, courseId: routeCourseId } = useParams(); // class id and optional course id
+  const { id, courseId: routeCourseId } = useParams();
   const navigate = useNavigate();
   const [classInfo, setClassInfo] = useState(null);
   const [lectures, setLectures] = useState([]);
@@ -17,7 +17,8 @@ export default function ClassDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [courseIdState, setCourseIdState] = useState(routeCourseId || null);
-  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [lectureModalOpen, setLectureModalOpen] = useState(false);
+  const [editingLecture, setEditingLecture] = useState(null);
 
   useEffect(() => {
     let mounted = true;
@@ -31,9 +32,9 @@ export default function ClassDetailPage() {
           setClassInfo(cls.data);
         }
 
-    // determine course id: prefer route param, then cls.data.course_id or cls.data.courseId, else fall back to id
-  const courseId = routeCourseId || ((cls?.success && cls.data && (cls.data.course_id || cls.data.courseId || cls.data.courseId === 0 ? (cls.data.course_id || cls.data.courseId) : null)) || id);
-    setCourseIdState(courseId);
+        // determine course id: prefer route param, then cls.data.course_id or cls.data.courseId, else fall back to id
+        const courseId = routeCourseId || ((cls?.success && cls.data && (cls.data.course_id || cls.data.courseId || cls.data.courseId === 0 ? (cls.data.course_id || cls.data.courseId) : null)) || id);
+        setCourseIdState(courseId);
 
         // fetch lectures, exams, assignments in parallel
         const [lectRes, examRes, assignRes] = await Promise.all([
@@ -57,7 +58,31 @@ export default function ClassDetailPage() {
     return () => { mounted = false; };
   }, [id]);
 
-  const initials = (classInfo?.name || '').split(' ').filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase();
+  const publishLecture = async (lectureId) => {
+    try {
+      const res = await userAPI.patchLectureStatus(lectureId, 'published');
+      if (res?.success) {
+        setLectures((s) => s.map(x => x.id === lectureId ? res.data : x));
+      }
+    } catch (error) {
+      console.error('publish lecture error', error);
+    }
+  }
+
+  const cancelLecture = async (l) => {
+    if (!confirm('Delete this lecture?')) return;
+    try {
+      const res = await userAPI.deleteLecture(l.id);
+      if (res?.success) setLectures((s) => s.filter(x => x.id !== l.id));
+    } catch (err) {
+      console.error('delete error', err);
+    }
+  }
+
+  const updateLecture = async (l) => {
+    setEditingLecture(l);
+    setLectureModalOpen(true);
+  }
 
   return (
     <Section title={classInfo?.name || 'Class'} subtitle={classInfo ? `${classInfo.code} • ${classInfo.semester} ${classInfo.year}` : 'Class details'}>
@@ -68,7 +93,7 @@ export default function ClassDetailPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h4 style={{ margin: 0 }}>Lectures</h4>
                 <div>
-                  <button className="btn btn-primary btn-sm" onClick={() => setCreateModalOpen(true)}>New Lecture</button>
+                  <button className="btn btn-primary btn-sm" onClick={() => setLectureModalOpen(true)}>New Lecture</button>
                 </div>
               </div>
               {loading && <div>Loading contents...</div>}
@@ -77,9 +102,37 @@ export default function ClassDetailPage() {
               {!loading && !error && lectures.length > 0 && (
                 <ul className="class-detail__list">
                   {lectures.map(l => (
-                    <li key={l.id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/lectures/${l.id}`)}>
-                      <div style={{ fontWeight: 700 }}>{l.title}</div>
-                      <small>{l.publish_date ? new Date(l.publish_date).toLocaleString() : ''}</small>
+                    <li key={l.id} className="class-detail__list-item">
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <div style={{ cursor: 'pointer' }} onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/lectures/${l.id}`)}>
+                          <div style={{ fontWeight: 700 }}>{l.title}</div>
+                          <small>{l.publish_date ? new Date(l.publish_date).toLocaleString() : ''}</small>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, marginLeft: 12 }}>
+                          {l.status === 'draft' ? (
+                            <>
+                              <button className="btn btn-icon" title="Publish" onClick={() => publishLecture(l.id)}>
+                                <i className="fa fa-paper-plane" />
+                              </button>
+                              <button className="btn btn-icon" title="Cancel" onClick={() => cancelLecture(l)}>
+                                <i className="fa fa-times" />
+                              </button>
+                              <button className="btn btn-icon" title="Update" onClick={() => updateLecture(l)}>
+                                <i className="fa fa-edit" />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button className="btn btn-icon" title="Cancel" onClick={() => cancelLecture(l)}>
+                                <i className="fa fa-times" />
+                              </button>
+                              <button className="btn btn-icon" title="Update" onClick={() => updateLecture(l)}>
+                                <i className="fa fa-edit" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -119,12 +172,16 @@ export default function ClassDetailPage() {
         </div>
       </Card>
       <CreateLectureForm
-        open={createModalOpen}
-        onClose={() => setCreateModalOpen(false)}
+        open={lectureModalOpen}
+        onClose={() => { setLectureModalOpen(false); setEditingLecture(null); }}
         defaultCourseId={courseIdState}
         defaultClassId={id}
+        lecture={editingLecture}
         onCreated={(newLecture) => {
           if (newLecture) setLectures((s) => [newLecture, ...s]);
+        }}
+        onUpdated={(updated) => {
+          if (updated) setLectures((s) => s.map(x => x.id === updated.id ? updated : x));
         }}
       />
     </Section>

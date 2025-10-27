@@ -1,117 +1,121 @@
 /* Styles for teacher ClassDetail page */
 .class-detail {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+	display: flex;
+	flex-direction: column;
+	gap: 18px;
 }
 
 .class-detail__header {
-  display: flex;
-  gap: 18px;
-  align-items: flex-start;
+	display: flex;
+	gap: 18px;
+	align-items: flex-start;
 }
 
 .class-detail__thumb {
-  width: 240px;
-  min-width: 160px;
-  aspect-ratio: 4 / 3;
-  background: #f3f4f6;
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+	width: 240px;
+	min-width: 160px;
+	aspect-ratio: 4 / 3;
+	background: #f3f4f6;
+	border-radius: 8px;
+	overflow: hidden;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 .class-detail__thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
 }
 
 .class-detail__placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  color: #fff;
-  background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
-  font-size: 28px;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	color: #fff;
+	background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%);
+	font-size: 28px;
 }
 
 .class-detail__meta {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
 }
 
 .class-detail__title {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 800;
-  color: #0f172a;
+	margin: 0;
+	font-size: 20px;
+	font-weight: 800;
+	color: #0f172a;
 }
 
 .class-detail__subtitle {
-  color: #6b7280;
-  font-size: 13px;
+	color: #6b7280;
+	font-size: 13px;
 }
 
 .class-detail__desc {
-  margin-top: 6px;
-  color: #374151;
+	margin-top: 6px;
+	color: #374151;
 }
 
 .class-detail__actions {
-  margin-top: 6px;
+	margin-top: 6px;
 }
 
 .class-detail__sections {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 18px;
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 18px;
 }
 
 @media (min-width: 880px) {
-  .class-detail__sections {
-    grid-template-columns: repeat(3, 1fr);
-  }
+	.class-detail__sections {
+		grid-template-columns: repeat(3, 1fr);
+	}
 }
 
 .class-detail__panel {
-  background: #fff;
-  border: 1px solid #e6e9ef;
-  border-radius: 8px;
-  padding: 12px;
+	background: #fff;
+	border: 1px solid #e6e9ef;
+	border-radius: 8px;
+	padding: 12px;
 }
 
 .class-detail__panel h4 {
-  margin: 0 0 8px 0;
+	margin: 0 0 8px 0;
 }
 
 .class-detail__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
 }
 
 .class-detail__list-item {
-  padding: 10px;
-  border-radius: 6px;
-  background: #fbfdff;
-  border: 1px solid #eef2ff;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  cursor: pointer;
+	padding: 10px;
+	border-radius: 6px;
+	background: #fbfdff;
+	border: 1px solid #eef2ff;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	cursor: pointer;
 }
 
 .class-detail__list-item small {
-  color: #6b7280;
+	color: #6b7280;
+}
+
+.btn-icon {
+	color: var(--black);
 }
