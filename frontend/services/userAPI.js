@@ -47,7 +47,11 @@ const userAPI = {
 
   // Lectures
   // Create lecture: accepts FormData (for file uploads) or JSON payload
-  createLecture: (data) => axiosClient.post('lectures', data),
+  createLecture: (data) => axiosClient.post('lectures', data, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  }),
 
   // Add more API endpoints as needed for your thesis project
   updateTeacherProfile: (data) => axiosClient.patch("teacher/profile", data),

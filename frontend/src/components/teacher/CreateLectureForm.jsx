@@ -41,7 +41,7 @@ export default function CreateLectureForm({ open, onClose, defaultCourseId = nul
 			if (form.class_id) fd.append('class_id', form.class_id);
 			fd.append('title', form.title);
 			fd.append('status', status || 'draft');
-			fd.append('published_at', status === 'published' ? new Date().toISOString() : '');
+			fd.append('publish_date', status === 'published' ? new Date().toISOString() : '');
 
 			// append files if any
 			const files = fileRef.current?.files;
