@@ -147,6 +147,28 @@ router.get('/', AssignmentController.getAllAssignments);
  */
 router.get('/class/:classId', AssignmentController.getAssignmentsByClass);
 
+
+/**
+ * @swagger
+ * /api/assignments/course/{id}:
+ *   get:
+ *     summary: Lấy tất cả bài tập của một môn học theo course id
+ *     tags: [Assignment]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Course ID
+ *     responses:
+ *       200:
+ *         description: Danh sách bài tập của môn học
+ */
+router.get('/course/:id', auth, AssignmentController.getAssignmentsByCourseId);
+
 /**
  * @swagger
  * /api/assignments/{id}:

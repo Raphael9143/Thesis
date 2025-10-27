@@ -310,6 +310,81 @@ const AssignmentController = {
 			res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	},
+
+	// Lấy tất cả bài tập theo course id (admin, giáo viên liên quan, hoặc sinh viên trong lớp)
+	getAssignmentsByCourseId: async (req, res) => {
+		try {
+			const courseId = parseInt(req.params.id, 10);
+			if (isNaN(courseId)) return res.status(400).json({ success: false, message: 'Invalid course id' });
+
+			const course = await Course.findByPk(courseId);
+			if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
+
+			const user = req.user;
+			// Admin allowed
+			if (user && user.role === 'admin') {
+				// allowed
+			} else if (user && user.role === 'TEACHER') {
+				// allowed if teacher created the course or teaches at least one class linked to it
+				if (course.created_by === user.userId) {
+					// allowed
+				} else {
+					const links = await ClassCourse.findAll({ where: { course_id: courseId } });
+					const classIds = links.map(l => l.class_id);
+					const owned = await Class.findOne({ where: { id: classIds, teacherId: user.userId } });
+					if (!owned) return res.status(403).json({ success: false, message: 'Forbidden' });
+				}
+			} else if (user && user.role === 'STUDENT') {
+				// allowed if student enrolled in any class linked to this course
+				const links = await ClassCourse.findAll({ where: { course_id: courseId } });
+				const classIds = links.map(l => l.class_id);
+				if (classIds.length === 0) return res.status(403).json({ success: false, message: 'Forbidden' });
+				const member = await ClassStudent.findOne({ where: { classId: classIds, studentId: user.userId } });
+				if (!member) return res.status(403).json({ success: false, message: 'Forbidden' });
+			} else {
+				return res.status(403).json({ success: false, message: 'Forbidden' });
+			}
+
+			// find assignment ids via AssignmentCourse
+			const assignmentCourses = await AssignmentCourse.findAll({ where: { course_id: courseId } });
+			const assignmentIds = assignmentCourses.map(ac => ac.assignment_id);
+			if (assignmentIds.length === 0) return res.json({ success: true, data: [] });
+
+			const assignments = await Assignment.findAll({
+				where: { assignment_id: assignmentIds },
+				include: [
+					{
+						model: Course,
+						as: 'courses',
+						through: { attributes: ['due_date', 'start_date', 'week'] },
+						attributes: ['course_id', 'course_name', 'course_code']
+					},
+					{ model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
+				],
+				order: [['created_at', 'DESC']]
+			});
+
+			// Convert AssignmentCourse to assignment_course in response
+			const data = assignments.map(a => {
+				const obj = a.toJSON();
+				if (obj.courses) {
+					obj.courses = obj.courses.map(c => {
+						if (c.AssignmentCourse) {
+							c.assignment_course = c.AssignmentCourse;
+							delete c.AssignmentCourse;
+						}
+						return c;
+					});
+				}
+				return obj;
+			});
+
+			res.json({ success: true, data });
+		} catch (error) {
+			console.error('Get assignments by course error:', error);
+			res.status(500).json({ success: false, message: 'Internal Server Error' });
+		}
+	},
 };
 
 module.exports = AssignmentController;
