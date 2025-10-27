@@ -56,4 +56,26 @@ router.post('/', auth, ExamController.createExam);
  */
 router.get('/:id', ExamController.getExamById);
 
+
+/**
+ * @swagger
+ * /api/exams/course/{id}:
+ *   get:
+ *     summary: Lấy tất cả bài thi của một môn học theo course id (admin, giáo viên liên quan, hoặc sinh viên trong lớp)
+ *     tags: [Exam]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Course ID
+ *     responses:
+ *       200:
+ *         description: Danh sách bài thi của môn học
+ */
+router.get('/course/:id', auth, ExamController.getExamsByCourseId);
+
 module.exports = router;
