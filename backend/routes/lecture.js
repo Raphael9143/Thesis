@@ -72,6 +72,30 @@ router.post('/', auth, lectureUpload.array('attachments', 10), (req, res, next) 
  */
 router.get('/:id', LectureController.getLectureById);
 
+/**
+ * @swagger
+ * /api/lectures/{id}:
+ *   delete:
+ *     summary: Delete a lecture by id (only lecture owner teacher or admin)
+ *     tags: [Lecture]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Lecture deleted
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not found
+ */
+router.delete('/:id', auth, LectureController.deleteLecture);
+
 
 /**
  * @swagger
