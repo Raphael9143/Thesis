@@ -65,9 +65,9 @@ router.get('/:id', LectureController.getLectureById);
 
 /**
  * @swagger
- * /api/lectures/class/{id}:
+ * /api/lectures/course/{id}:
  *   get:
- *     summary: Lấy tất cả bài giảng của một lớp theo class id (admin, giáo viên chủ nhiệm hoặc sinh viên trong lớp)
+ *     summary: Lấy tất cả bài giảng của một môn học theo course id (admin, giáo viên liên quan, hoặc sinh viên trong lớp)
  *     tags: [Lecture]
  *     security:
  *       - bearerAuth: []
@@ -77,11 +77,11 @@ router.get('/:id', LectureController.getLectureById);
  *         required: true
  *         schema:
  *           type: integer
- *         description: Class ID
+ *         description: Course ID
  *     responses:
  *       200:
- *         description: Danh sách bài giảng của lớp
+ *         description: Danh sách bài giảng của môn học
  */
-router.get('/class/:id', auth, LectureController.getLecturesByClassId);
+router.get('/course/:id', auth, LectureController.getLecturesByCourseId);
 
 module.exports = router;

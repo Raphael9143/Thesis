@@ -78,31 +78,45 @@ const LectureController = {
   }
   ,
 
-  // Get all lectures for a given class id. Access allowed to admin, the class teacher, or students in the class.
-  getLecturesByClassId: async (req, res) => {
+  // Get all lectures for a given course id. Access allowed to admin, the class teacher(s) of linked classes, or students
+  // enrolled in any class linked to the course.
+  getLecturesByCourseId: async (req, res) => {
     try {
-      const classId = req.params.id;
-      // find class
-      const foundClass = await Class.findByPk(classId);
-      if (!foundClass) return res.status(404).json({ success: false, message: 'Class not found.' });
+      const courseId = parseInt(req.params.id, 10);
+      if (isNaN(courseId)) return res.status(400).json({ success: false, message: 'Invalid course id' });
+
+      const course = await Course.findByPk(courseId);
+      if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
 
       const user = req.user;
-      // allow admin
+      // Admin allowed
       if (user && user.role === 'admin') {
         // proceed
-      } else if (user && user.role === 'TEACHER' && foundClass.teacherId === user.userId) {
-        // homeroom teacher
+      } else if (user && user.role === 'TEACHER') {
+        // allowed if teacher created the course or teaches at least one class linked to it
+        if (course.created_by === user.userId) {
+          // allowed
+        } else {
+          const links = await ClassCourse.findAll({ where: { course_id: courseId } });
+          const classIds = links.map(l => l.class_id);
+          const owned = await Class.findOne({ where: { id: classIds, teacherId: user.userId } });
+          if (!owned) return res.status(403).json({ success: false, message: 'Forbidden' });
+        }
       } else if (user && user.role === 'STUDENT') {
-        const isMember = await ClassStudent.findOne({ where: { classId, studentId: user.userId } });
-        if (!isMember) return res.status(403).json({ success: false, message: 'Forbidden' });
+        // allowed if student enrolled in any class linked to this course
+        const links = await ClassCourse.findAll({ where: { course_id: courseId } });
+        const classIds = links.map(l => l.class_id);
+        if (classIds.length === 0) return res.status(403).json({ success: false, message: 'Forbidden' });
+        const member = await ClassStudent.findOne({ where: { classId: classIds, studentId: user.userId } });
+        if (!member) return res.status(403).json({ success: false, message: 'Forbidden' });
       } else {
         return res.status(403).json({ success: false, message: 'Forbidden' });
       }
 
       const lectures = await Lecture.findAll({
-        where: { class_id: classId },
+        where: { course_id: courseId },
         include: [
-          { model: Course, as: 'course' },
+          { model: Class, as: 'class' },
           { model: User, as: 'teacher', attributes: ['id', 'full_name', 'email'] }
         ],
         order: [['publish_date', 'DESC']]
@@ -110,7 +124,7 @@ const LectureController = {
 
       res.json({ success: true, data: lectures });
     } catch (error) {
-      console.error('Get lectures by class id error:', error);
+      console.error('Get lectures by course id error:', error);
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   }
