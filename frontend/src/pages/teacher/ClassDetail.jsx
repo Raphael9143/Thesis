@@ -5,6 +5,7 @@ import Card from '../../components/ui/Card';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/teacher/ClassDetail.css';
+import CreateLectureForm from '../../components/teacher/CreateLectureForm';
 
 export default function ClassDetailPage() {
   const { id, courseId: routeCourseId } = useParams(); // class id and optional course id
@@ -15,6 +16,8 @@ export default function ClassDetailPage() {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [courseIdState, setCourseIdState] = useState(routeCourseId || null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -28,8 +31,9 @@ export default function ClassDetailPage() {
           setClassInfo(cls.data);
         }
 
-  // determine course id: prefer route param, then cls.data.course_id or cls.data.courseId, else fall back to id
+    // determine course id: prefer route param, then cls.data.course_id or cls.data.courseId, else fall back to id
   const courseId = routeCourseId || ((cls?.success && cls.data && (cls.data.course_id || cls.data.courseId || cls.data.courseId === 0 ? (cls.data.course_id || cls.data.courseId) : null)) || id);
+    setCourseIdState(courseId);
 
         // fetch lectures, exams, assignments in parallel
         const [lectRes, examRes, assignRes] = await Promise.all([
@@ -61,14 +65,19 @@ export default function ClassDetailPage() {
         <div className="class-detail">
           <div className="class-detail__sections">
             <div className="class-detail__panel">
-              <h4>Lectures</h4>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 style={{ margin: 0 }}>Lectures</h4>
+                <div>
+                  <button className="btn btn-primary btn-sm" onClick={() => setCreateModalOpen(true)}>New Lecture</button>
+                </div>
+              </div>
               {loading && <div>Loading contents...</div>}
               {error && <div className="text-error">{error}</div>}
               {!loading && !error && lectures.length === 0 && <div>No lectures.</div>}
               {!loading && !error && lectures.length > 0 && (
                 <ul className="class-detail__list">
                   {lectures.map(l => (
-                    <li key={l.id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseId}/lectures/${l.id}`)}>
+                    <li key={l.id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/lectures/${l.id}`)}>
                       <div style={{ fontWeight: 700 }}>{l.title}</div>
                       <small>{l.publish_date ? new Date(l.publish_date).toLocaleString() : ''}</small>
                     </li>
@@ -83,7 +92,7 @@ export default function ClassDetailPage() {
               {!loading && !error && assignments.length > 0 && (
                 <ul className="class-detail__list">
                   {assignments.map(a => (
-                    <li key={a.assignment_id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseId}/assignments/${a.assignment_id}`)}>
+                    <li key={a.assignment_id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/assignments/${a.assignment_id}`)}>
                       <div style={{ fontWeight: 700 }}>{a.title}</div>
                       <small>{a.courses?.[0]?.assignment_course?.due_date ? `Due: ${new Date(a.courses[0].assignment_course.due_date).toLocaleString()}` : ''}</small>
                     </li>
@@ -98,7 +107,7 @@ export default function ClassDetailPage() {
               {!loading && !error && exams.length > 0 && (
                 <ul className="class-detail__list">
                   {exams.map(ex => (
-                    <li key={ex.id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseId}/exams/${ex.id}`)}>
+                    <li key={ex.id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/exams/${ex.id}`)}>
                       <div style={{ fontWeight: 700 }}>{ex.title}</div>
                       <small>{ex.start_time ? `${new Date(ex.start_time).toLocaleString()} - ${new Date(ex.end_time).toLocaleString()}` : ''}</small>
                     </li>
@@ -109,6 +118,15 @@ export default function ClassDetailPage() {
           </div>
         </div>
       </Card>
+      <CreateLectureForm
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        defaultCourseId={courseIdState}
+        defaultClassId={id}
+        onCreated={(newLecture) => {
+          if (newLecture) setLectures((s) => [newLecture, ...s]);
+        }}
+      />
     </Section>
   );
 }

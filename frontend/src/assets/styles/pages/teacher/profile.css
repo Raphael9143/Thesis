@@ -166,6 +166,7 @@
 	padding: 10px;
 	background: #f9f9f9;
 	font-size: 14px;
+	color: var(--black);
 }
 
 .form-group textarea {

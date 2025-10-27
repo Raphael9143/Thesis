@@ -45,6 +45,10 @@ const userAPI = {
   // Get courses associated with a class (fallback - adjust endpoint if your backend differs)
   getCoursesByClass: (classId) => axiosClient.get(`courses/by-class/${classId}`),
 
+  // Lectures
+  // Create lecture: accepts FormData (for file uploads) or JSON payload
+  createLecture: (data) => axiosClient.post('lectures', data),
+
   // Add more API endpoints as needed for your thesis project
   updateTeacherProfile: (data) => axiosClient.patch("teacher/profile", data),
 
