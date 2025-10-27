@@ -5,6 +5,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: transform .18s ease, box-shadow .18s ease;
+  cursor: pointer;
 }
 
 .class-card:focus {
@@ -53,25 +55,42 @@
 }
 
 .class-card__meta {
-  padding: 10px 12px;
+  padding: 10px 12px 14px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  align-items: center;
+  text-align: center;
 }
 
 .class-card__title {
   font-weight: 700;
   font-size: 15px;
   line-height: 1.2;
+  color: #111827;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .class-card__subtitle {
   color: #6b7280;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .class-card__desc {
   margin-top: 6px;
   color: #374151;
   font-size: 13px;
+}
+
+.class-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(17,24,39,0.08);
+}
+
+.class-card:active {
+  transform: translateY(-2px);
 }

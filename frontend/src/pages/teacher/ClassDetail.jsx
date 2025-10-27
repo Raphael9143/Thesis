@@ -4,6 +4,7 @@ import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
+import '../../assets/styles/pages/teacher/ClassDetail.css';
 
 export default function ClassDetailPage() {
   const { id, courseId: routeCourseId } = useParams(); // class id and optional course id
@@ -52,65 +53,60 @@ export default function ClassDetailPage() {
     return () => { mounted = false; };
   }, [id]);
 
+  const initials = (classInfo?.name || '').split(' ').filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase();
+
   return (
     <Section title={classInfo?.name || 'Class'} subtitle={classInfo ? `${classInfo.code} • ${classInfo.semester} ${classInfo.year}` : 'Class details'}>
       <Card>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3>Course contents</h3>
-          <div>
-            <button className="btn" onClick={() => navigate('/education/teacher/classes')}>Back</button>
-          </div>
-        </div>
-
-        <div style={{ marginTop: 12 }}>
-          {loading && <div>Loading contents...</div>}
-          {error && <div className="text-error">{error}</div>}
-
-          {!loading && !error && (
-            <div style={{ display: 'grid', gap: 18 }}>
-              <section>
-                <h4>Lectures</h4>
-                {lectures.length === 0 ? <div>No lectures.</div> : (
-                  <ul>
-                    {lectures.map(l => (
-                      <li key={l.id} style={{ padding: 8, borderBottom: '1px solid #eee', cursor: 'pointer' }} onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseId}/lectures/${l.id}`)}>
-                        <div style={{ fontWeight: 600 }}>{l.title}</div>
-                        <div style={{ color: '#6b7280' }}>{new Date(l.publish_date).toLocaleString()}</div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
-
-              <section>
-                <h4>Assignments</h4>
-                {assignments.length === 0 ? <div>No assignments.</div> : (
-                  <ul>
-                    {assignments.map(a => (
-                      <li key={a.assignment_id} style={{ padding: 8, borderBottom: '1px solid #eee', cursor: 'pointer' }} onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseId}/assignments/${a.assignment_id}`)}>
-                        <div style={{ fontWeight: 600 }}>{a.title}</div>
-                        <div style={{ color: '#6b7280' }}>{a.courses?.[0]?.assignment_course?.due_date ? `Due: ${new Date(a.courses[0].assignment_course.due_date).toLocaleString()}` : ''}</div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
-
-              <section>
-                <h4>Exams</h4>
-                {exams.length === 0 ? <div>No exams.</div> : (
-                  <ul>
-                    {exams.map(ex => (
-                      <li key={ex.id} style={{ padding: 8, borderBottom: '1px solid #eee', cursor: 'pointer' }} onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseId}/exams/${ex.id}`)}>
-                        <div style={{ fontWeight: 600 }}>{ex.title}</div>
-                        <div style={{ color: '#6b7280' }}>{ex.start_time ? `${new Date(ex.start_time).toLocaleString()} - ${new Date(ex.end_time).toLocaleString()}` : ''}</div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </section>
+        <div className="class-detail">
+          <div className="class-detail__sections">
+            <div className="class-detail__panel">
+              <h4>Lectures</h4>
+              {loading && <div>Loading contents...</div>}
+              {error && <div className="text-error">{error}</div>}
+              {!loading && !error && lectures.length === 0 && <div>No lectures.</div>}
+              {!loading && !error && lectures.length > 0 && (
+                <ul className="class-detail__list">
+                  {lectures.map(l => (
+                    <li key={l.id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseId}/lectures/${l.id}`)}>
+                      <div style={{ fontWeight: 700 }}>{l.title}</div>
+                      <small>{l.publish_date ? new Date(l.publish_date).toLocaleString() : ''}</small>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-          )}
+
+            <div className="class-detail__panel">
+              <h4>Assignments</h4>
+              {!loading && !error && assignments.length === 0 && <div>No assignments.</div>}
+              {!loading && !error && assignments.length > 0 && (
+                <ul className="class-detail__list">
+                  {assignments.map(a => (
+                    <li key={a.assignment_id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseId}/assignments/${a.assignment_id}`)}>
+                      <div style={{ fontWeight: 700 }}>{a.title}</div>
+                      <small>{a.courses?.[0]?.assignment_course?.due_date ? `Due: ${new Date(a.courses[0].assignment_course.due_date).toLocaleString()}` : ''}</small>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="class-detail__panel">
+              <h4>Exams</h4>
+              {!loading && !error && exams.length === 0 && <div>No exams.</div>}
+              {!loading && !error && exams.length > 0 && (
+                <ul className="class-detail__list">
+                  {exams.map(ex => (
+                    <li key={ex.id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseId}/exams/${ex.id}`)}>
+                      <div style={{ fontWeight: 700 }}>{ex.title}</div>
+                      <small>{ex.start_time ? `${new Date(ex.start_time).toLocaleString()} - ${new Date(ex.end_time).toLocaleString()}` : ''}</small>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
         </div>
       </Card>
     </Section>
