@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
+import ClassCard from '../../components/ui/ClassCard';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
 
@@ -71,13 +72,16 @@ export default function ClassCoursesPage() {
           )}
 
           {!loading && !error && courses.length > 0 && (
-            <div style={{ display: 'grid', gap: 12 }}>
+            <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
               {courses.map((course) => (
-                <div key={course.id || course.course_id} style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8, cursor: 'pointer' }} onClick={() => navigate(`/education/teacher/classes/${id}/courses/${course.id || course.course_id}`)}>
-                  <div style={{ fontWeight: 700 }}>{course.name || course.title || course.course_name}</div>
-                  <div style={{ color: '#6b7280' }}>{course.code || course.course_code || ''}</div>
-                  <div style={{ marginTop: 8 }}>{course.description || ''}</div>
-                </div>
+                <ClassCard
+                  key={course.id || course.course_id}
+                  title={course.name || course.title || course.course_name}
+                  subtitle={course.code || course.course_code || ''}
+                  image={course.image || course.thumbnail}
+                  description={course.description || ''}
+                  onClick={() => navigate(`/education/teacher/classes/${id}/courses/${course.id || course.course_id}`)}
+                />
               ))}
             </div>
           )}

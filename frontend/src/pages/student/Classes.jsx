@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
+import ClassCard from '../../components/ui/ClassCard';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
 
@@ -41,20 +42,16 @@ export default function StudentClassesPage() {
           <div>No classes found.</div>
         )}
         {!loading && !error && classes.length > 0 && (
-          <div style={{ display: 'grid', gap: 12 }}>
+          <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
             {classes.map(c => (
-              <div key={c.id} style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontWeight: 700 }}>{c.name}</div>
-                    <div style={{ color: '#6b7280' }}>{c.code} • {c.semester} • {c.year}</div>
-                  </div>
-                  <div>
-                    <span className="badge">{c.status}</span>
-                  </div>
-                </div>
-                <div style={{ marginTop: 8 }}>{c.description}</div>
-              </div>
+              <ClassCard
+                key={c.id}
+                title={c.name}
+                subtitle={`${c.code} • ${c.semester} • ${c.year}`}
+                image={c.image || c.thumbnail}
+                badge={c.status}
+                description={c.description}
+              />
             ))}
           </div>
         )}
