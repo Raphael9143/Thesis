@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middlewares/auth');
 const LectureController = require('../controllers/LectureController');
+const lectureUpload = require('../middlewares/lectureUpload');
 
 /**
  * @swagger
@@ -42,7 +43,18 @@ const LectureController = require('../controllers/LectureController');
  *       403:
  *         description: Forbidden
  */
-router.post('/', auth, LectureController.createLecture);
+// Allow multiple attachments under field name 'attachments'
+router.post('/', auth, lectureUpload.array('attachments', 10), (req, res, next) => {
+	// If the client sent attachments as a JSON string field, try to parse it
+	if (req.body.attachments && typeof req.body.attachments === 'string') {
+		try {
+			req.body.attachments = JSON.parse(req.body.attachments);
+		} catch (e) {
+			// ignore, will be overridden by uploaded files if present
+		}
+	}
+	next();
+}, LectureController.createLecture);
 
 /**
  * @swagger

@@ -42,12 +42,46 @@ const LectureController = {
         if (!owned) return res.status(403).json({ success: false, message: 'You are not the homeroom teacher for any class of this course.' });
       }
 
+      // Build attachments array from uploaded files (req.files) or from request body
+      let attachmentsArray = null;
+      if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        attachmentsArray = req.files.map(file => ({
+          filename: file.filename,
+          originalname: file.originalname,
+          url: `/uploads/lectures/${file.filename}`,
+          mimetype: file.mimetype,
+          size: file.size
+        }));
+        // If client also sent attachments in body (e.g., links), try to merge
+        if (attachments && typeof attachments !== 'object') {
+          try {
+            const parsed = JSON.parse(attachments);
+            if (Array.isArray(parsed)) attachmentsArray = attachmentsArray.concat(parsed);
+          } catch (e) {
+            // ignore parse error
+          }
+        } else if (attachments && Array.isArray(attachments)) {
+          attachmentsArray = attachmentsArray.concat(attachments);
+        }
+      } else if (attachments) {
+        // No uploaded files; use attachments from body if provided
+        if (typeof attachments === 'string') {
+          try {
+            attachmentsArray = JSON.parse(attachments);
+          } catch (e) {
+            attachmentsArray = [attachments];
+          }
+        } else {
+          attachmentsArray = attachments;
+        }
+      }
+
       const lecture = await Lecture.create({
         course_id,
         class_id: class_id || null,
         teacher_id: teacherId,
         title,
-        attachments: attachments || null,
+        attachments: attachmentsArray || null,
         publish_date: publish_date || null,
         status: status || 'draft'
       });
