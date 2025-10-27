@@ -14,33 +14,34 @@ const AssignmentController = {
 			if (req.user.role !== 'TEACHER') {
 				return res.status(403).json({ success: false, message: 'Chỉ giáo viên mới được tạo bài tập.' });
 			}
-			const { course_id, title, description, type, constraints, difficulty } = req.body;
-			if (!course_id || !title || !type || !difficulty) {
-				return res.status(400).json({ success: false, message: 'course_id, title, type, difficulty là bắt buộc.' });
+			const { course_id, title, description, start_date, end_date } = req.body;
+			if (!course_id || !title) {
+				return res.status(400).json({ success: false, message: 'course_id và title là bắt buộc.' });
 			}
 			// Kiểm tra course tồn tại
 			const course = await Course.findByPk(course_id);
 			if (!course) {
 				return res.status(404).json({ success: false, message: 'Course không tồn tại.' });
 			}
-			// Xử lý file upload nếu có
+			// Xử lý file upload (bắt buộc .use)
 			let filePath = null;
 			if (req.file) {
-				// Lưu đường dẫn file tương đối
 				filePath = 'uploads/assignments/' + req.file.filename;
+			} else {
+				return res.status(400).json({ success: false, message: 'File .use là bắt buộc.' });
 			}
 			// Tạo assignment
 			const assignment = await Assignment.create({
+				course_id,
 				title,
-				description,
-				type,
-				constraints,
+				description: description || null,
 				created_by: req.user.userId,
-				difficulty,
 				file: filePath,
+				start_date: start_date || null,
+				end_date: end_date || null,
 				created_at: new Date()
 			});
-			// Tạo ánh xạ assignment_courses
+			// Tạo ánh xạ assignment_courses for backward compatibility
 			await AssignmentCourse.create({
 				assignment_id: assignment.assignment_id,
 				course_id
@@ -168,15 +169,14 @@ const AssignmentController = {
 				filePath = 'uploads/assignments/' + req.file.filename;
 			}
 			// Cập nhật assignment
-			const fields = ['title', 'description', 'type', 'constraints', 'difficulty'];
+			const fields = ['title', 'description', 'start_date', 'end_date'];
 			fields.forEach(f => {
 				if (req.body[f] !== undefined) assignment[f] = req.body[f];
 			});
 			assignment.file = filePath;
 			await assignment.save();
-			// Cập nhật due_date, week nếu có
+			// Cập nhật due_date, week nếu có (keep existing behavior if needed)
 			if (req.body.due_date !== undefined || req.body.week !== undefined) {
-				// Tìm assignment_courses
 				const assignmentCourse = await AssignmentCourse.findOne({ where: { assignment_id: assignment.assignment_id } });
 				if (assignmentCourse) {
 					if (req.body.due_date !== undefined) assignmentCourse.due_date = req.body.due_date;

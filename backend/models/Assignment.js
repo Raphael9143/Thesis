@@ -7,6 +7,10 @@ const Assignment = sequelize.define('Assignment', {
 		primaryKey: true,
 		autoIncrement: true
 	},
+	course_id: {
+		type: DataTypes.INTEGER,
+		allowNull: false
+	},
 	title: {
 		type: DataTypes.STRING(255),
 		allowNull: false
@@ -15,24 +19,20 @@ const Assignment = sequelize.define('Assignment', {
 		type: DataTypes.TEXT,
 		allowNull: true
 	},
-	type: {
-		type: DataTypes.ENUM('LECTURE', 'EXERCISE', 'EXAM'),
-		allowNull: false
-	},
-	constraints: {
-		type: DataTypes.JSON,
-		allowNull: true
-	},
 	created_by: {
 		type: DataTypes.INTEGER,
 		allowNull: false
 	},
-	difficulty: {
-		type: DataTypes.ENUM('EASY', 'MEDIUM', 'HARD'),
-		allowNull: false
-	},
 	file: {
 		type: DataTypes.STRING(255),
+		allowNull: true
+	},
+	start_date: {
+		type: DataTypes.DATE,
+		allowNull: true
+	},
+	end_date: {
+		type: DataTypes.DATE,
 		allowNull: true
 	},
 	created_at: {

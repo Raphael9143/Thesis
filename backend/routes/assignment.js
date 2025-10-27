@@ -12,53 +12,37 @@ const AssignmentController = require('../controllers/AssignmentController');
  *     summary: Tạo bài tập mới (chỉ giáo viên)
  *     tags: [Assignment]
  *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - course_id
- *               - title
- *               - type
- *               - difficulty
- *             properties:
- *               course_id:
- *                 type: integer
- *                 example: 1
- *               due_date:
- *                 type: string
- *                 format: date-time
- *                 example: "2025-10-01T23:59:00Z"
- *               start_date:
- *                 type: string
- *                 format: date-time
- *                 example: "2025-09-20T08:00:00Z"
- *               week:
- *                 type: integer
- *                 example: 5
- *               title:
- *                 type: string
- *                 example: "Bài tập OCL số 1"
- *               description:
- *                 type: string
- *                 example: "Viết ràng buộc OCL cho mô hình lớp."
- *               type:
- *                 type: string
- *                 enum: [LECTURE, EXERCISE, EXAM]
- *                 example: EXERCISE
- *               constraints:
- *                 type: string
- *                 description: JSON.stringify(array) dạng constraints như yêu cầu
- *                 example: '[{"type":"OCL","rule":["context Student inv: self.age > 18"]}]'
- *               difficulty:
- *                 type: string
- *                 enum: [EASY, MEDIUM, HARD]
- *                 example: MEDIUM
- *               file:
- *                 type: string
+ *             required: true
+ *             content:
+ *               multipart/form-data:
+ *                 schema:
+ *                   type: object
+ *                   required:
+ *                     - course_id
+ *                     - title
+ *                     - file
+ *                   properties:
+ *                     course_id:
+ *                       type: integer
+ *                       example: 1
+ *                     start_date:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2025-09-20T08:00:00Z"
+ *                     end_date:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2025-10-01T23:59:00Z"
+ *                     title:
+ *                       type: string
+ *                       example: "Bài tập OCL số 1"
+ *                     description:
+ *                       type: string
+ *                       example: "Viết ràng buộc OCL cho mô hình lớp."
+ *                     file:
+ *                       type: string
+ *                       format: binary
+ *                       description: File .use (UML/OCL model)
  *                 format: binary
  *                 description: File OCL/UML/hình ảnh đính kèm
  *     responses:

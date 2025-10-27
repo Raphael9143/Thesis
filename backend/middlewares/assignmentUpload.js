@@ -12,6 +12,13 @@ const storage = multer.diskStorage({
 	}
 });
 
-const upload = multer({ storage });
+// Allow only .use files for assignments
+const upload = multer({ storage, fileFilter: (req, file, cb) => {
+	const ext = path.extname(file.originalname).toLowerCase();
+	if (ext !== '.use') {
+		return cb(new Error('Only .use files are allowed for assignments'));
+	}
+	cb(null, true);
+}});
 
 module.exports = upload;

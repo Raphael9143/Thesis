@@ -109,14 +109,15 @@ async function initDatabase() {
 
     // 9. Assignment mẫu
     const assignment = await Assignment.create({
+        course_id: course.course_id,
         title: 'Bài tập 1: HTML cơ bản',
         description: 'Tạo một trang web HTML đơn giản.',
-        type: 'EXERCISE',
         created_by: teacherUser.id,
-        difficulty: 'EASY',
-        file: null
+        file: null,
+        start_date: new Date('2025-09-20T08:00:00Z'),
+        end_date: new Date('2025-10-01T23:59:00Z')
     });
-    // Ánh xạ assignment với course
+    // Ánh xạ assignment với course (kept for compatibility)
     const AssignmentCourse = require('./models/AssignmentCourse');
     await AssignmentCourse.create({
         assignment_id: assignment.assignment_id,
