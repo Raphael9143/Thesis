@@ -1,0 +1,88 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import Section from '../../components/ui/Section';
+import Card from '../../components/ui/Card';
+import userAPI from '../../../services/userAPI';
+import '../../assets/styles/ui.css';
+
+export default function ClassCoursesPage() {
+  const { id } = useParams(); // class id
+  const navigate = useNavigate();
+  const [classInfo, setClassInfo] = useState(null);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      try {
+        // Try to get class details first (may include courses)
+        const clsRes = await userAPI.getClassById(id);
+        if (!mounted) return;
+        if (clsRes?.success && clsRes.data) {
+          setClassInfo(clsRes.data);
+          // try common fields that may contain courses
+          const maybeCourses = clsRes.data.courses || clsRes.data.course_list || clsRes.data.courses_taught;
+          if (Array.isArray(maybeCourses) && maybeCourses.length > 0) {
+            setCourses(maybeCourses);
+            setLoading(false);
+            return;
+          }
+        }
+
+        // Fallback: call endpoint to get courses for the class
+        const coursesRes = await userAPI.getCoursesByClass(id);
+        if (!mounted) return;
+        if (coursesRes?.success && Array.isArray(coursesRes.data)) {
+          setCourses(coursesRes.data);
+        } else {
+          setError(coursesRes?.message || 'No courses found for this class');
+        }
+      } catch (err) {
+        console.error('Failed to load courses for class', err);
+        if (!mounted) return;
+        setError(err?.response?.data?.message || err.message || 'Server error');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, [id]);
+
+  return (
+    <Section title={classInfo?.name || 'Class'} subtitle={classInfo ? `${classInfo.code} • ${classInfo.semester} ${classInfo.year}` : 'Courses'}>
+      <Card>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3>Subjects / Courses</h3>
+          <div>
+            <button className="btn" onClick={() => navigate('/education/teacher/classes')}>Back to classes</button>
+          </div>
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          {loading && <div>Loading courses...</div>}
+          {error && <div className="text-error">{error}</div>}
+
+          {!loading && !error && courses.length === 0 && (
+            <div>No courses found for this class.</div>
+          )}
+
+          {!loading && !error && courses.length > 0 && (
+            <div style={{ display: 'grid', gap: 12 }}>
+              {courses.map((course) => (
+                <div key={course.id || course.course_id} style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8, cursor: 'pointer' }} onClick={() => navigate(`/education/teacher/classes/${id}/courses/${course.id || course.course_id}`)}>
+                  <div style={{ fontWeight: 700 }}>{course.name || course.title || course.course_name}</div>
+                  <div style={{ color: '#6b7280' }}>{course.code || course.course_code || ''}</div>
+                  <div style={{ marginTop: 8 }}>{course.description || ''}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Card>
+    </Section>
+  );
+}

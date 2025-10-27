@@ -31,13 +31,19 @@ const userAPI = {
   deleteUser: (id) => axiosClient.delete(`users/${id}`),
 
   // Class management
-  getAllClasses: () => axiosClient.get("classes"),
-  getClassById: (id) => axiosClient.get(`classes/${id}`),
+  getAllClasses: () => axiosClient.get("class"),
+  getClassById: (id) => axiosClient.get(`class/${id}`),
   createClass: (data) => axiosClient.post("class", data),
-  updateClass: (id, data) => axiosClient.put(`classes/${id}`, data),
-  deleteClass: (id) => axiosClient.delete(`classes/${id}`),
+  updateClass: (id, data) => axiosClient.put(`class/${id}`, data),
+  deleteClass: (id) => axiosClient.delete(`class/${id}`),
   // Student: get enrolled classes (requires student bearer token)
   getStudentEnrolledClasses: () => axiosClient.get("student/enrolled-classes"),
+  // Course related
+  getLecturesByCourse: (courseId) => axiosClient.get(`lectures/course/${courseId}`),
+  getExamsByCourse: (courseId) => axiosClient.get(`exams/course/${courseId}`),
+  getAssignmentsByCourse: (courseId) => axiosClient.get(`assignments/course/${courseId}`),
+  // Get courses associated with a class (fallback - adjust endpoint if your backend differs)
+  getCoursesByClass: (classId) => axiosClient.get(`courses/by-class/${classId}`),
 
   // Add more API endpoints as needed for your thesis project
   updateTeacherProfile: (data) => axiosClient.patch("teacher/profile", data),

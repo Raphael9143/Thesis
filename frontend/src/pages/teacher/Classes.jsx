@@ -51,7 +51,7 @@ export default function ClassesPage() {
           {!loading && !error && classes.length > 0 && (
             <div style={{ display: 'grid', gap: 12 }}>
               {classes.map(c => (
-                <div key={c.id} style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8 }}>
+                <div key={c.id} style={{ border: '1px solid #e5e7eb', padding: 12, borderRadius: 8, cursor: 'pointer' }} onClick={() => navigate(`/education/teacher/classes/${c.id}`)}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                       <div style={{ fontWeight: 700 }}>{c.name}</div>
