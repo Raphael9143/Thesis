@@ -62,4 +62,26 @@ router.post('/', auth, LectureController.createLecture);
  */
 router.get('/:id', LectureController.getLectureById);
 
+
+/**
+ * @swagger
+ * /api/lectures/class/{id}:
+ *   get:
+ *     summary: Lấy tất cả bài giảng của một lớp theo class id (admin, giáo viên chủ nhiệm hoặc sinh viên trong lớp)
+ *     tags: [Lecture]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Class ID
+ *     responses:
+ *       200:
+ *         description: Danh sách bài giảng của lớp
+ */
+router.get('/class/:id', auth, LectureController.getLecturesByClassId);
+
 module.exports = router;

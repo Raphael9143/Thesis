@@ -2,6 +2,8 @@ const Lecture = require('../models/Lecture');
 const Course = require('../models/Course');
 const Class = require('../models/Class');
 const ClassCourse = require('../models/ClassCourse');
+const ClassStudent = require('../models/ClassStudent');
+const User = require('../models/User');
 
 const LectureController = {
   // Create a lecture. Only a teacher who is the homeroom teacher of the class linked to the course
@@ -71,6 +73,44 @@ const LectureController = {
       res.json({ success: true, data: lecture });
     } catch (error) {
       console.error('Get lecture error:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  }
+  ,
+
+  // Get all lectures for a given class id. Access allowed to admin, the class teacher, or students in the class.
+  getLecturesByClassId: async (req, res) => {
+    try {
+      const classId = req.params.id;
+      // find class
+      const foundClass = await Class.findByPk(classId);
+      if (!foundClass) return res.status(404).json({ success: false, message: 'Class not found.' });
+
+      const user = req.user;
+      // allow admin
+      if (user && user.role === 'admin') {
+        // proceed
+      } else if (user && user.role === 'TEACHER' && foundClass.teacherId === user.userId) {
+        // homeroom teacher
+      } else if (user && user.role === 'STUDENT') {
+        const isMember = await ClassStudent.findOne({ where: { classId, studentId: user.userId } });
+        if (!isMember) return res.status(403).json({ success: false, message: 'Forbidden' });
+      } else {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+
+      const lectures = await Lecture.findAll({
+        where: { class_id: classId },
+        include: [
+          { model: Course, as: 'course' },
+          { model: User, as: 'teacher', attributes: ['id', 'full_name', 'email'] }
+        ],
+        order: [['publish_date', 'DESC']]
+      });
+
+      res.json({ success: true, data: lectures });
+    } catch (error) {
+      console.error('Get lectures by class id error:', error);
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   }
