@@ -49,7 +49,7 @@ const userAPI = {
   // Create lecture: accepts FormData (for file uploads) or JSON payload
   createLecture: (data, config) => axiosClient.post('lectures', data, config),
   // Update lecture: id, data (FormData or JSON)
-  updateLecture: (id, data, config) => axiosClient.put(`lectures/${id}`, data, config),
+  updateLecture: (id, data, config) => axiosClient.patch(`lectures/${id}`, data, config),
   // Delete lecture
   deleteLecture: (id) => axiosClient.delete(`lectures/${id}`),
   // patch status of lecture

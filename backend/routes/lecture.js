@@ -130,6 +130,70 @@ router.delete('/:id', auth, LectureController.deleteLecture);
  *         description: Forbidden
  */
 router.patch('/:id/status', auth, LectureController.updateLectureStatus);
+/**
+ * @swagger
+ * /api/lectures/{id}:
+ *   patch:
+ *     summary: Update a lecture by id (only lecture owner teacher or admin)
+ *     tags: [Lecture]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               attachments:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               publish_date:
+ *                 type: string
+ *                 format: date-time
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published, archived]
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               attachments:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *               publish_date:
+ *                 type: string
+ *                 format: date-time
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published, archived]
+ *     responses:
+ *       200:
+ *         description: Lecture updated
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden
+ */
+// Allow attachments to be updated/added via multipart form-data under field 'attachments'
+router.patch('/:id', auth, lectureUpload.array('attachments', 10), (req, res, next) => {
+	if (req.body.attachments && typeof req.body.attachments === 'string') {
+		try { req.body.attachments = JSON.parse(req.body.attachments); } catch (e) { }
+	}
+	next();
+}, LectureController.updateLecture);
 
 
 /**

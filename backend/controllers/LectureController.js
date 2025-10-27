@@ -100,6 +100,63 @@ const LectureController = {
   }
   ,
 
+  // Update lecture fields (title, publish_date, status, attachments)
+  updateLecture: async (req, res) => {
+    try {
+      if (!req.user) return res.status(401).json({ success: false, message: 'Unauthorized' });
+      const id = req.params.id;
+      const lecture = await Lecture.findByPk(id);
+      if (!lecture) return res.status(404).json({ success: false, message: 'Lecture not found.' });
+
+      const user = req.user;
+      if (!(user.role === 'admin' || lecture.teacher_id === user.userId)) {
+        return res.status(403).json({ success: false, message: 'Forbidden' });
+      }
+
+      const { title, publish_date, status, attachments } = req.body;
+      const allowed = ['draft', 'published', 'archived'];
+      if (status && !allowed.includes(status)) return res.status(400).json({ success: false, message: 'Invalid status' });
+
+      // Merge uploaded files into attachments
+      let attachmentsArray = lecture.attachments && Array.isArray(lecture.attachments) ? [...lecture.attachments] : [];
+      if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+        const uploaded = req.files.map(file => ({
+          filename: file.filename,
+          originalname: file.originalname,
+          url: `/uploads/lectures/${file.filename}`,
+          mimetype: file.mimetype,
+          size: file.size
+        }));
+        attachmentsArray = attachmentsArray.concat(uploaded);
+      }
+
+      // Merge attachments from body if present
+      if (attachments) {
+        if (typeof attachments === 'string') {
+          try {
+            const parsed = JSON.parse(attachments);
+            if (Array.isArray(parsed)) attachmentsArray = attachmentsArray.concat(parsed);
+          } catch (e) {
+            attachmentsArray.push(attachments);
+          }
+        } else if (Array.isArray(attachments)) {
+          attachmentsArray = attachmentsArray.concat(attachments);
+        }
+      }
+
+      if (title) lecture.title = title;
+      if (publish_date) lecture.publish_date = publish_date;
+      if (status) lecture.status = status;
+      lecture.attachments = attachmentsArray.length > 0 ? attachmentsArray : null;
+
+      await lecture.save();
+      res.json({ success: true, message: 'Lecture updated', data: lecture });
+    } catch (error) {
+      console.error('Update lecture error:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
   // Update lecture status (only lecture's teacher or admin)
   updateLectureStatus: async (req, res) => {
     try {
