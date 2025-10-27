@@ -9,6 +9,7 @@ const ClassCourse = require('./models/ClassCourse');
 const ClassStudent = require('./models/ClassStudent');
 const Assignment = require('./models/Assignment');
 const Lecture = require('./models/Lecture');
+const Exam = require('./models/Exam');
 
 async function initDatabase() {
     // 1. Admin
@@ -149,6 +150,16 @@ async function initDatabase() {
         ],
         publish_date: new Date('2025-09-22T08:00:00Z'),
         status: 'published'
+    });
+
+    // 12. Exam mẫu
+    const exam1 = await Exam.create({
+        course_id: course.course_id,
+        title: 'Kiểm tra giữa kỳ',
+        description: 'Bài kiểm tra giữa kỳ môn Lập trình Web',
+        start_time: new Date('2025-10-15T09:00:00Z'),
+        end_time: new Date('2025-10-15T11:00:00Z'),
+        model_file: '/uploads/exams/sample.use'
     });
 
     console.log('✅ Đã seed dữ liệu mẫu!');
