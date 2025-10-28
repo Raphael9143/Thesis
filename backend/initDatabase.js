@@ -70,9 +70,9 @@ async function initDatabase() {
 	});
 
 	const course = await Course.create({
-		course_name: 'Web Programming',
-		course_code: 'WEB101',
-		description: 'A course about web programming',
+		course_name: 'OCL Fundamentals',
+		course_code: 'OCL101',
+		description: 'A course about OCL fundamentals',
 		created_by: teacherUser.id,
 		semester: 'Spring 2025',
 		start_week: 1,
@@ -81,9 +81,9 @@ async function initDatabase() {
 	});
 
 	const class1 = await Class.create({
-		name: 'Web 2025 Group 1',
-		code: 'WEB2025-1',
-		description: 'Web class for 3rd year students',
+		name: 'OCL Basic',
+		code: 'OCL2025',
+		description: 'OCL Basic class for 1st year students',
 		teacherId: teacherUser.id,
 		semester: 'Spring 2025',
 		year: 2025,
