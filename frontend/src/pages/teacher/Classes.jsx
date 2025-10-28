@@ -37,6 +37,12 @@ export default function ClassesPage() {
     return () => { mounted = false; };
   }, []);
 
+  const onCreateClass = (cls) => {
+    if (cls) {
+      setClasses(s => [cls.class, ...s]);
+    }
+  }
+
   return (
     <Section title="Classes" subtitle="Manage classes you teach">
       <Card>
@@ -68,7 +74,7 @@ export default function ClassesPage() {
           )}
         </div>
       </Card>
-      <CreateClassModal open={modalOpen} onClose={() => setModalOpen(false)} onCreated={(cls) => { if (cls) setClasses(s => [cls, ...s]); }} />
+      <CreateClassModal open={modalOpen} onClose={() => setModalOpen(false)} onCreated={(cls) => onCreateClass(cls)} />
     </Section>
   );
 }

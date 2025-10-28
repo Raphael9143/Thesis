@@ -19,7 +19,18 @@ export default function FormField({
   return (
     <div className={`form-group ${className}`.trim()}>
       {label && (
-        <label htmlFor={id}>{label}</label>
+        <label htmlFor={id} className="form-label">
+          <span>{label}</span>
+          {required && (
+            <span
+              aria-hidden="true"
+              className="required-star"
+              style={{ color: '#e53935', marginLeft: 6, fontWeight: 600 }}
+            >
+              *
+            </span>
+          )}
+        </label>
       )}
       {textarea ? (
         <textarea

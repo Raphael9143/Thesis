@@ -156,6 +156,8 @@
 	font-size: 14px;
 	color: #666;
 	margin-bottom: 8px;
+	text-align: left;
+	margin-left: 12px;
 }
 
 .form-group input,

@@ -49,6 +49,20 @@
   display: flex;
   gap: 12px;
   margin-top: 16px;
+
+  .btn {
+    width: 110px;
+  }
+}
+
+.email-chip .btn {
+  background: transparent;
+  border: none;
+}
+
+.create-class-student-emails .input-row .btn {
+    border: none;
+    font-size: 1.6rem;
 }
 
 @media (max-width: 600px) {
@@ -60,3 +74,4 @@
     align-items: stretch;
   }
 }
+
