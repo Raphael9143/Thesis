@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
 import ClassCard from '../../components/ui/ClassCard';
+import { useNavigate } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
 
 export default function StudentClassesPage() {
+  const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -51,6 +53,7 @@ export default function StudentClassesPage() {
                 image={c.image || c.thumbnail}
                 badge={c.status}
                 description={c.description}
+                onClick={() => navigate(`/education/student/classes/${c.id}`)}
               />
             ))}
           </div>

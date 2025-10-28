@@ -23,7 +23,7 @@ export default function MainLayout() {
       console.error('socket disconnect error', err);
     }
     // send to landing page of current context
-    if (isEducationRoute) navigate('/education'); else navigate('/');
+    if (showEducationNavbar) navigate('/education'); else navigate('/');
   };
   return (
     <div className="app-bg">
