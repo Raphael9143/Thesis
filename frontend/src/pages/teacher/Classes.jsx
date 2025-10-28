@@ -44,7 +44,7 @@ export default function ClassesPage() {
   }
 
   return (
-    <Section title="Classes" subtitle="Manage classes you teach">
+    <Section>
       <Card>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3>Your classes</h3>

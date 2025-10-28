@@ -85,7 +85,7 @@ export default function ClassDetailPage() {
   }
 
   return (
-    <Section title={classInfo?.name || 'Class'} subtitle={classInfo ? `${classInfo.code} • ${classInfo.semester} ${classInfo.year}` : 'Class details'}>
+    <Section title={classInfo?.name || 'Class'}>
       <Card>
         <div className="class-detail">
           <div className="class-detail__sections">
@@ -114,7 +114,7 @@ export default function ClassDetailPage() {
                               <button className="btn btn-icon" title="Publish" onClick={() => publishLecture(l.id)}>
                                 <i className="fa fa-paper-plane" />
                               </button>
-                              <button className="btn btn-icon" title="Cancel" onClick={() => cancelLecture(l)}>
+                              <button className="btn btn-icon" title="Delete" onClick={() => cancelLecture(l)}>
                                 <i className="fa fa-times" />
                               </button>
                               <button className="btn btn-icon" title="Update" onClick={() => updateLecture(l)}>
@@ -123,7 +123,7 @@ export default function ClassDetailPage() {
                             </>
                           ) : (
                             <>
-                              <button className="btn btn-icon" title="Cancel" onClick={() => cancelLecture(l)}>
+                              <button className="btn btn-icon" title="Delete" onClick={() => cancelLecture(l)}>
                                 <i className="fa fa-times" />
                               </button>
                               <button className="btn btn-icon" title="Update" onClick={() => updateLecture(l)}>

@@ -54,13 +54,10 @@ export default function ClassCoursesPage() {
   }, [id]);
 
   return (
-    <Section title={classInfo?.name || 'Class'} subtitle={classInfo ? `${classInfo.code} • ${classInfo.semester} ${classInfo.year}` : 'Courses'}>
+    <Section>
       <Card>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3>Subjects / Courses</h3>
-          <div>
-            <button className="btn" onClick={() => navigate('/education/teacher/classes')}>Back to classes</button>
-          </div>
         </div>
 
         <div style={{ marginTop: 12 }}>
