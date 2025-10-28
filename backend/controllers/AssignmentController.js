@@ -6,6 +6,7 @@ const Assignment = require('../models/Assignment');
 const Course = require('../models/Course');
 const User = require('../models/User');
 const ClassCourse = require('../models/ClassCourse');
+const ClassStudent = require('../models/ClassStudent');
 
 const AssignmentController = {
 	// Tạo bài tập mới (chỉ giáo viên)
@@ -322,7 +323,7 @@ const AssignmentController = {
 
 			const user = req.user;
 			// Admin allowed
-			if (user && user.role === 'admin') {
+			if (user && user.role === 'ADMIN') {
 				// allowed
 			} else if (user && user.role === 'TEACHER') {
 				// allowed if teacher created the course or teaches at least one class linked to it
