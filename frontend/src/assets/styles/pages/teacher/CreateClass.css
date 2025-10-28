@@ -1,3 +1,8 @@
-.create-class-form input, .create-class-form textarea {
-    color: var(--black);
+.create-class-form input,
+.create-class-form textarea {
+	color: var(--black);
+}
+
+.auth-input {
+	color: var(--black);
 }

@@ -5,12 +5,14 @@ import ClassCard from '../../components/ui/ClassCard';
 import { useNavigate } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
+import CreateClassModal from '../../components/teacher/CreateClassModal';
 
 export default function ClassesPage() {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -41,7 +43,7 @@ export default function ClassesPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3>Your classes</h3>
           <div>
-            <button type="button" className="btn btn-primary" onClick={() => navigate('/education/teacher/classes/create-class')}>Create class</button>
+            <button type="button" className="btn btn-primary" onClick={() => setModalOpen(true)}>Create class</button>
           </div>
         </div>
 
@@ -66,6 +68,7 @@ export default function ClassesPage() {
           )}
         </div>
       </Card>
+      <CreateClassModal open={modalOpen} onClose={() => setModalOpen(false)} onCreated={(cls) => { if (cls) setClasses(s => [cls, ...s]); }} />
     </Section>
   );
 }

@@ -1,0 +1,62 @@
+.create-class-modal-form {
+  margin-top: 12px;
+}
+
+.create-class-row {
+  display: flex;
+  gap: 12px;
+}
+
+.create-class-row.mt {
+  margin-top: 12px;
+}
+
+.create-class-student-emails {
+  margin-top: 12px;
+}
+
+.create-class-student-emails .input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.create-class-student-emails .suggestions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.create-class-student-emails .selected-emails {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.create-class-student-emails .email-chip {
+  padding: 6px 10px;
+  background: #f3f4f6;
+  border-radius: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.create-class-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .create-class-row {
+    flex-direction: column;
+  }
+  .create-class-student-emails .input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -11,7 +11,6 @@ import TeacherProfile from './pages/teacher/Profile';
 import StudentProfile from './pages/student/Profile';
 import StudentClassesPage from './pages/student/Classes';
 import ClassesPage from './pages/teacher/Classes';
-import CreateClassPage from './pages/teacher/CreateClass';
 import ClassDetailPage from './pages/teacher/ClassDetail';
 import ClassCoursesPage from './pages/teacher/ClassCourses';
 import RequireAuth from './components/routing/RequireAuth';
@@ -25,15 +24,11 @@ const router = createBrowserRouter(
       <Route path="/education" element={<EducationLogin />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Protected education routes */}
       <Route element={<RequireAuth><Outlet /></RequireAuth>}>
         <Route path="/education/home" element={<Home />} />
-    <Route path="/education/teacher/classes" element={<RequireRole allowed={["teacher"]}><ClassesPage /></RequireRole>} />
-  <Route path="/education/teacher/classes/create-class" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><CreateClassPage /></React.Suspense></RequireRole>} />
-  {/* Show courses (subjects) first when a class is clicked */}
-  <Route path="/education/teacher/classes/:id" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><ClassCoursesPage /></React.Suspense></RequireRole>} />
-  {/* Course detail (lectures/exams/assignments) */}
-  <Route path="/education/teacher/classes/:id/courses/:courseId" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><ClassDetailPage /></React.Suspense></RequireRole>} />
+        <Route path="/education/teacher/classes" element={<RequireRole allowed={["teacher"]}><ClassesPage /></RequireRole>} />
+        <Route path="/education/teacher/classes/:id" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><ClassCoursesPage /></React.Suspense></RequireRole>} />
+        <Route path="/education/teacher/classes/:id/courses/:courseId" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><ClassDetailPage /></React.Suspense></RequireRole>} />
         <Route path="/education/teacher/profile" element={<RequireRole allowed={["teacher"]}><TeacherProfile /></RequireRole>} />
         <Route path="/education/student/profile" element={<RequireRole allowed={["student"]}><StudentProfile /></RequireRole>} />
         <Route path="/education/student/classes" element={<RequireRole allowed={["student"]}><StudentClassesPage /></RequireRole>} />

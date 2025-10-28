@@ -1,15 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Section from '../../components/ui/Section';
-import Card from '../../components/ui/Card';
+import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
 import NotificationPopup from '../../components/ui/NotificationPopup';
 import userAPI from '../../../services/userAPI';
-import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/teacher/CreateClass.css';
+import '../../assets/styles/components/teacher/CreateClassModal.css';
 
-export default function CreateClassPage() {
-  const navigate = useNavigate();
+export default function CreateClassModal({ open, onClose, onCreated }) {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [description, setDescription] = useState('');
@@ -65,9 +62,16 @@ export default function CreateClassPage() {
 
   const removeEmail = (email) => setSelectedStudentEmails(s => s.filter(x => x !== email));
 
+  useEffect(() => {
+    if (!open) {
+      // reset when modal closes
+      setName(''); setCode(''); setDescription(''); setSemester(''); setYear(new Date().getFullYear()); setMaxStudents(30); setSelectedStudentEmails([]);
+      setStudentEmailsInput('');
+    }
+  }, [open]);
+
   const onSubmit = async (e) => {
-    e.preventDefault();
-    // basic validation
+    e?.preventDefault?.();
     if (!name || !code) {
       setNotifyMsg('Please fill in all required fields');
       setNotifyType('error');
@@ -85,20 +89,19 @@ export default function CreateClassPage() {
         status: 'active',
         studentEmails: selectedStudentEmails,
       };
-      console.log(payload)
+
       const res = await userAPI.createClass(payload);
       if (res?.success) {
         setNotifyMsg('Successfully created class');
         setNotifyType('success');
         setNotifyOpen(true);
 
-        // capture emails to notify before resetting
         const emailsToNotify = [...selectedStudentEmails];
 
         // reset form
         setName(''); setCode(''); setDescription(''); setSemester(''); setYear(new Date().getFullYear()); setMaxStudents(30); setSelectedStudentEmails([]);
 
-        // notify added students (send title & body)
+        // notify added students (async, do not block)
         (async () => {
           const failures = [];
           const teacherName = sessionStorage.getItem('full_name') || 'Your teacher';
@@ -108,7 +111,6 @@ export default function CreateClassPage() {
           for (const email of emailsToNotify) {
             try {
               const u = await userAPI.getUserByEmail(email);
-              console.log(u)
               if (u?.success && u.data && u.data.id) {
                 await userAPI.notify(u.data.id, { title, body });
               } else {
@@ -126,8 +128,8 @@ export default function CreateClassPage() {
           }
         })();
 
-        // navigate back to classes management
-        setTimeout(() => navigate('/education/classes'), 700);
+        onCreated?.(res.data);
+        onClose?.();
       } else {
         setNotifyMsg(res?.message || 'Failed to create class');
         setNotifyType('error');
@@ -141,58 +143,58 @@ export default function CreateClassPage() {
   };
 
   return (
-    <Section title="Create Class" subtitle="Create a new class and invite students">
-      <Card className="create-class-form">
-        <form onSubmit={onSubmit} style={{ marginTop: 12 }}>
-          <div style={{ display: 'flex', gap: 12 }}>
-            <FormField label="Name" value={name} onChange={e => setName(e.target.value)} />
-            <FormField label="Code" value={code} onChange={e => setCode(e.target.value)} />
-          </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-            <FormField label="Semester" value={semester} onChange={e => setSemester(e.target.value)} />
-            <FormField label="Year" type="number" value={year} onChange={e => setYear(e.target.value)} />
-          </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
-            <FormField label="Max students" type="number" value={maxStudents} onChange={e => setMaxStudents(e.target.value)} />
-          </div>
-          <div style={{ marginTop: 12 }}>
+    <Modal open={open} onClose={onClose} title="Create Class">
+      <form onSubmit={onSubmit} className="create-class-modal-form">
+        <div className="create-class-row">
+          <FormField label="Name" value={name} onChange={e => setName(e.target.value)} />
+          <FormField label="Code" value={code} onChange={e => setCode(e.target.value)} />
+        </div>
+        <div className="create-class-row mt">
+          <FormField label="Semester" value={semester} onChange={e => setSemester(e.target.value)} />
+          <FormField label="Year" type="number" value={year} onChange={e => setYear(e.target.value)} />
+        </div>
+        <div className="create-class-row mt">
+          <FormField label="Max students" type="number" value={maxStudents} onChange={e => setMaxStudents(e.target.value)} />
+        </div>
+        <div className="create-class-row mt">
+          <div style={{ flex: 1 }}>
             <FormField label="Description" value={description} onChange={e => setDescription(e.target.value)} textarea />
           </div>
+        </div>
 
-          <div style={{ marginTop: 12 }}>
-            <label style={{ fontWeight: 600 }}>Student emails (suggestions)</label>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 8 }}>
-              <input className="auth-input" value={studentEmailsInput} onChange={e => setStudentEmailsInput(e.target.value)} placeholder="Type to search student emails" />
-              <button type="button" className="btn" onClick={() => addEmail(studentEmailsInput)}>Add</button>
+        <div className="create-class-student-emails">
+          <label style={{ fontWeight: 600 }}>Student emails (suggestions)</label>
+          <div className="input-row">
+            <input className="auth-input" value={studentEmailsInput} onChange={e => setStudentEmailsInput(e.target.value)} placeholder="Type to search student emails" />
+            <button type="button" className="btn" onClick={() => addEmail(studentEmailsInput)}>Add</button>
+          </div>
+          {suggestions.length > 0 && (
+            <div className="suggestions">
+              {suggestions.map(s => (
+                <button key={s} type="button" className="btn" onClick={() => addEmail(s)}>{s}</button>
+              ))}
             </div>
-            {suggestions.length > 0 && (
-              <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {suggestions.map(s => (
-                  <button key={s} type="button" className="btn" onClick={() => addEmail(s)}>{s}</button>
-                ))}
-              </div>
-            )}
-            {selectedStudentEmails.length > 0 && (
-              <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {selectedStudentEmails.map(e => (
-                  <div key={e} style={{ padding: '6px 10px', background: '#f3f4f6', borderRadius: 8, display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <span>{e}</span>
-                    <button type="button" className="btn" onClick={() => removeEmail(e)}>x</button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          )}
+          {selectedStudentEmails.length > 0 && (
+            <div className="selected-emails">
+              {selectedStudentEmails.map(e => (
+                <div key={e} className="email-chip">
+                  <span>{e}</span>
+                  <button type="button" className="btn" onClick={() => removeEmail(e)}>x</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-            <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-            <button type="submit" className="btn btn-primary">Create class</button>
-            <button type="button" className="btn" onClick={() => { setName(''); setCode(''); setDescription(''); setSelectedStudentEmails([]); setMaxStudents(30); }}>Reset</button>
-            <button type="button" className="btn" onClick={() => navigate('/education/classes')}>Cancel</button>
-          </div>
-        </form>
-      </Card>
+        <div className="create-class-actions">
+          <button type="submit" className="btn btn-primary">Create class</button>
+          <button type="button" className="btn" onClick={() => { setName(''); setCode(''); setDescription(''); setSelectedStudentEmails([]); setMaxStudents(30); }}>Reset</button>
+          <button type="button" className="btn" onClick={onClose}>Cancel</button>
+        </div>
+      </form>
 
       <NotificationPopup message={notifyMsg} open={notifyOpen} type={notifyType} onClose={() => setNotifyOpen(false)} />
-    </Section>
+    </Modal>
   );
 }
