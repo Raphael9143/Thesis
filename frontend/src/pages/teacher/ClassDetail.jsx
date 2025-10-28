@@ -4,7 +4,7 @@ import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
-import '../../assets/styles/pages/teacher/ClassDetail.css';
+import '../../assets/styles/pages/ClassDetail.css';
 import CreateLectureForm from '../../components/teacher/CreateLectureForm';
 
 export default function ClassDetailPage() {

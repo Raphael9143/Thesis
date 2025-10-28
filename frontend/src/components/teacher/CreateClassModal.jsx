@@ -3,7 +3,6 @@ import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
 import NotificationPopup from '../../components/ui/NotificationPopup';
 import userAPI from '../../../services/userAPI';
-import '../../assets/styles/pages/teacher/CreateClass.css';
 import '../../assets/styles/components/teacher/CreateClassModal.css';
 
 export default function CreateClassModal({ open, onClose, onCreated }) {

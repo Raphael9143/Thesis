@@ -3,7 +3,7 @@ import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
 import userAPI from '../../../services/userAPI';
 import { useNotifications } from '../../contexts/NotificationContext';
-import '../../assets/styles/pages/teacher/CreateLecture.css';
+import '../../assets/styles/pages/CreateLecture.css';
 
 export default function CreateLectureForm({ open, onClose, defaultCourseId = null, defaultClassId = null, onCreated, lecture = null, onUpdated }) {
 	const { push } = useNotifications();

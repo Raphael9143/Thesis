@@ -119,3 +119,23 @@
 .btn-icon {
 	color: var(--black);
 }
+
+/* Student/teacher shared utilities used by ClassDetail pages */
+.class-detail__list-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+}
+
+.class-detail__item-click {
+	cursor: pointer;
+}
+
+.class-detail__item-title {
+	font-weight: 700;
+}
+
+.class-detail__panel h4 {
+	margin: 0 0 8px 0;
+}

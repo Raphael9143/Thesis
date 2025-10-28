@@ -4,7 +4,7 @@ import Card from '../../components/ui/Card';
 import FormField from '../../components/ui/FormField';
 import NotificationPopup from '../../components/ui/NotificationPopup';
 import userAPI from '../../../services/userAPI';
-import '../../assets/styles/pages/teacher/profile.css';
+import '../../assets/styles/pages/profile.css';
 
 export default function StudentProfile() {
 	const [loading, setLoading] = useState(true);
