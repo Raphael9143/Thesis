@@ -10,6 +10,13 @@ export default function LeftSidebar({ isLoggedIn = false, collapsed = false, onT
 		navigate(path);
 	};
 
+	const logout = () => {
+		sessionStorage.removeItem('isLogin');
+		sessionStorage.removeItem('token');
+		sessionStorage.removeItem('role');
+		goto('/');
+	}
+
 	return (
 		<aside className={`leftsidebar ${collapsed ? 'leftsidebar--collapsed' : ''}`} aria-expanded={!collapsed}>
 			<div className="leftsidebar__brand">
@@ -21,19 +28,13 @@ export default function LeftSidebar({ isLoggedIn = false, collapsed = false, onT
 			</div>
 
 			<nav className="leftsidebar__nav">
-				<button className="leftsidebar__link" onClick={() => goto(role === 'student' ? '/education/student/classes' : '/education/teacher/classes')}>
-					<i className="fa fa-book" aria-hidden />
-					<span>Classes</span>
-				</button>
-				{isLoggedIn && (
-					<button className="leftsidebar__link" onClick={() => goto(role === 'student' ? '/education/student/profile' : '/education/teacher/profile')}>
-						<i className="fa fa-user" aria-hidden />
-						<span>Profile</span>
-					</button>
-				)}
 				<button className="leftsidebar__link" onClick={() => goto('/education/home')}>
 					<i className="fa fa-tachometer-alt" aria-hidden />
 					<span>Dashboard</span>
+				</button>
+				<button className="leftsidebar__link" onClick={() => goto(role === 'student' ? '/education/student/classes' : '/education/teacher/classes')}>
+					<i className="fa fa-book" aria-hidden />
+					<span>Classes</span>
 				</button>
 				<button className="leftsidebar__link" onClick={() => goto('#')}>
 					<i className="fa fa-tasks" aria-hidden />
@@ -46,17 +47,18 @@ export default function LeftSidebar({ isLoggedIn = false, collapsed = false, onT
 			</nav>
 
 			<div className="leftsidebar__bottom">
+				{isLoggedIn && (
+					<button className="leftsidebar__link" onClick={() => goto(role === 'student' ? '/education/student/profile' : '/education/teacher/profile')}>
+						<i className="fa fa-user" aria-hidden />
+						<span>Profile</span>
+					</button>
+				)}
 				<button className="leftsidebar__link" onClick={() => goto('/')}>
 					<i className="fa fa-flask" aria-hidden />
 					<span>Research Hub</span>
 				</button>
 				{isLoggedIn && (
-					<button className="leftsidebar__link" onClick={() => {
-						sessionStorage.removeItem('isLogin');
-						sessionStorage.removeItem('token');
-						sessionStorage.removeItem('role');
-						goto('/');
-					}}>
+					<button className="leftsidebar__link" onClick={logout}>
 						<i className="fa fa-sign-out-alt" aria-hidden />
 						<span>Logout</span>
 					</button>
