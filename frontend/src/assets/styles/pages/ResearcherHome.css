@@ -10,3 +10,8 @@
 		color: var(--brand-strong);
 	}
 }
+
+.switch-to-education p {
+	color: var(--muted);
+	margin: 0 auto;
+}
