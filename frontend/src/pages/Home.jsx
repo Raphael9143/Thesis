@@ -68,7 +68,7 @@ export default function Home() {
 		if (!role) {
 			return (
 				<Card title="Role not set" subtitle="Access your personalized dashboard by logging in.">
-					<div style={{ display: 'flex', gap: 12 }}>
+					<div className="display-flex gap-12">
 						<button className="btn btn-primary" onClick={goToEducation}>Go to Education Login</button>
 						<button className="btn" onClick={() => navigate('/')}>Back to Research Portal</button>
 					</div>

@@ -1,25 +1,52 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  /* Typography */
+  --font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --line-height: 1.5;
+  --font-weight-normal: 400;
+
+  /* Color palette */
+  --color-text: #213547; /* default text */
+  --color-bg: #ffffff; /* page background */
+  --color-primary: #646cff; /* links / accents */
+  --color-primary-600: #535bf2;
+  --color-muted: #64748b; /* secondary text */
+  --color-muted-2: #555555;
+  --color-danger: #e53935; /* danger / required star */
+  --color-dark: #1a1a1a; /* buttons */
+  --bg-gradient: linear-gradient(135deg, #fef6e4 0%, #e3f2fd 45%, #f3e8ff 100%);
+	--brand: #6d28d9;
+	--brand-strong: #5b21b6;
+	--accent: #2563eb;
+	--accent-strong: #1e40af;
+	--secondary: #10b981;
+	--muted: #64748b;
+	--surface: #ffffff;
+	--surface-muted: #f8fafc;
+	--border: #e5e7eb;
+	--black: #000;
+	--white: #fff;
+	--red: #ef4444;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #fdfdfd;
+  color: var(--color-text);
+  background-color: var(--color-bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: var(--font-family);
+  line-height: var(--line-height);
+  font-weight: var(--font-weight-normal);
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--color-primary);
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: var(--color-primary-600);
 }
 
 body {
@@ -28,6 +55,8 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
 }
 
 h1 {
@@ -42,12 +71,13 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--color-dark);
+  color: #fff;
   cursor: pointer;
   transition: border-color 0.25s;
 }
 button:hover {
-  border-color: #646cff;
+  border-color: var(--color-primary);
 }
 button:focus,
 button:focus-visible {
@@ -56,8 +86,8 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    --color-text: #213547;
+    --color-bg: #ffffff;
   }
   a:hover {
     color: #747bff;
@@ -66,3 +96,6 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Utilities file import */
+@import './assets/styles/utils.css';

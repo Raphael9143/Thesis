@@ -41,7 +41,7 @@ export default function MainLayout() {
           </>
         ) : (
           <>
-            <div className="app-container" style={{ paddingTop: 16 }}>
+            <div className="app-container pt-16">
               <Outlet />
             </div>
           </>

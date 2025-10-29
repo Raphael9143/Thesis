@@ -49,7 +49,7 @@ export default function StudentClassesPage() {
           <div>No classes found.</div>
         )}
         {!loading && !error && classes.length > 0 && (
-          <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+          <div className="grid-cards">
             {classes.map(c => (
               <ClassCard
                 key={c.id}

@@ -157,13 +157,13 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
 					<FormField label="Max students" type="number" value={maxStudents} onChange={e => setMaxStudents(e.target.value)} required={true}/>
 				</div>
 				<div className="create-class-row mt">
-					<div style={{ flex: 1 }}>
+					<div className="full-width">
 						<FormField label="Description" value={description} onChange={e => setDescription(e.target.value)} textarea/>
 					</div>
 				</div>
 
 				<div className="create-class-student-emails">
-					<label style={{ fontWeight: 600 }}>Student emails</label>
+					<label className="font-600">Student emails</label>
 					<div className="input-row">
 						<input className="auth-input" value={studentEmailsInput} onChange={e => setStudentEmailsInput(e.target.value)} placeholder="Type to search student emails" />
 						<button className='btn btn-icon' title='Add' onClick={() => addEmail(studentEmailsInput)}>

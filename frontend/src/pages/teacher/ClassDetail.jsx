@@ -118,8 +118,8 @@ export default function ClassDetailPage() {
         <div className="class-detail">
           <div className="class-detail__sections">
             <div className="class-detail__panel">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h4 style={{ margin: 0 }}>Lectures</h4>
+              <div className="flex-between">
+                <h4 className="no-margin">Lectures</h4>
                 <div>
                   <button className="btn btn-primary btn-sm" onClick={() => setLectureModalOpen(true)}>New Lecture</button>
                 </div>
@@ -131,12 +131,12 @@ export default function ClassDetailPage() {
                 <ul className="class-detail__list">
                   {lectures.map(l => (
                     <li key={l.id} className="class-detail__list-item">
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                        <div style={{ cursor: 'pointer' }} onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/lectures/${l.id}`)}>
-                          <div style={{ fontWeight: 700 }}>{l.title}</div>
+                      <div className="flex-between full-width">
+                        <div className="clickable" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/lectures/${l.id}`)}>
+                          <div className="font-700">{l.title}</div>
                           <small>{l.publish_date ? new Date(l.publish_date).toLocaleString() : ''}</small>
                         </div>
-                        <div style={{ display: 'flex', gap: 8, marginLeft: 12 }}>
+                        <div className="display-flex gap-8 ml-12">
                           {l.status === 'draft' ? (
                             <>
                               <button className="btn btn-icon" title="Publish" onClick={() => publishLecture(l.id)}>
@@ -174,7 +174,7 @@ export default function ClassDetailPage() {
                 <ul className="class-detail__list">
                   {assignments.map(a => (
                     <li key={a.assignment_id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/assignments/${a.assignment_id}`)}>
-                      <div style={{ fontWeight: 700 }}>{a.title}</div>
+                      <div className="font-700">{a.title}</div>
                       <small>{a.courses?.[0]?.assignment_course?.due_date ? `Due: ${new Date(a.courses[0].assignment_course.due_date).toLocaleString()}` : ''}</small>
                     </li>
                   ))}
@@ -189,7 +189,7 @@ export default function ClassDetailPage() {
                 <ul className="class-detail__list">
                   {exams.map(ex => (
                     <li key={ex.id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/exams/${ex.id}`)}>
-                      <div style={{ fontWeight: 700 }}>{ex.title}</div>
+                      <div className="font-700">{ex.title}</div>
                       <small>{ex.start_time ? `${new Date(ex.start_time).toLocaleString()} - ${new Date(ex.end_time).toLocaleString()}` : ''}</small>
                     </li>
                   ))}

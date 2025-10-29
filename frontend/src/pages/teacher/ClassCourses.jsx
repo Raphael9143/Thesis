@@ -58,11 +58,11 @@ export default function ClassCoursesPage() {
   return (
     <Section>
       <Card>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="flex-between">
           <h3>Subjects / Courses</h3>
         </div>
 
-        <div style={{ marginTop: 12 }}>
+        <div className="mt-12">
           {loading && <div>Loading courses...</div>}
           {error && <div className="text-error">{error}</div>}
 
@@ -71,7 +71,7 @@ export default function ClassCoursesPage() {
           )}
 
           {!loading && !error && courses.length > 0 && (
-            <div style={{ display: 'grid', gap: 12, gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+            <div className="grid-cards">
               {courses.map((course) => (
                 <ClassCard
                   key={course.id || course.course_id}

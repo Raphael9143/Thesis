@@ -22,13 +22,7 @@ export default function FormField({
         <label htmlFor={id} className="form-label">
           <span>{label}</span>
           {required && (
-            <span
-              aria-hidden="true"
-              className="required-star"
-              style={{ color: '#e53935', marginLeft: 6, fontWeight: 600 }}
-            >
-              *
-            </span>
+            <span aria-hidden="true" className="required-star">*</span>
           )}
         </label>
       )}

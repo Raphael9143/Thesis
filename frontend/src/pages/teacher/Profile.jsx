@@ -201,7 +201,7 @@ export default function TeacherProfile() {
 							)}
 
 							{!editing && (
-								<div className="profile-form" style={{ marginTop: 20 }}>
+								<div className="profile-form">
 									<div className="form-row">
 										<FormField label="Full Name" value={profile.full_name || ''} readOnly />
 									</div>

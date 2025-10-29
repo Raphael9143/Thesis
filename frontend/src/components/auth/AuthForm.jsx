@@ -103,7 +103,7 @@ export default function AuthForm({
   return (
     <div className="form-container">
       {title && <h3>{title}</h3>}
-      {subtitle && <div style={{ color: '#64748b', marginBottom: 8 }}>{subtitle}</div>}
+  {subtitle && <div className="text-muted mb-8">{subtitle}</div>}
       {roles.length > 1 && (
         <RoleTabs
           role={role}

@@ -3,7 +3,7 @@ import React from 'react';
 export default function Input({ label, type = 'text', value, onChange, placeholder, autoFocus, name }) {
   return (
     <div>
-      {label && <label style={{ fontWeight: 500 }}>{label}</label>}
+      {label && <label className="font-500">{label}</label>}
       <input
         name={name}
         type={type}

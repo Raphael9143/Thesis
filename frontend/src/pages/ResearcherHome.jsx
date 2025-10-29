@@ -72,7 +72,7 @@ export default function ResearcherHome() {
             </div>
           </div>
         </div>
-        <div className="hero-images" style={{ width: '50%' }}>
+        <div className="hero-images hero-half">
           <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800" alt="research teamwork" />
           <img src="https://cdn-dynmedia-1.microsoft.com/is/image/microsoftcorp/55132-uml-diagramming-and-database-modeling-1?resMode=sharp2&op_usm=1.5,0.65,15,0&wid=752&hei=580&qlt=100&fmt=png-alpha&fit=constrain" alt="uml modeling" />
           <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800" alt="coding group" />
