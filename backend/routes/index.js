@@ -86,4 +86,6 @@ app.use('/api/lectures', lectureRoutes);
 // Exam routes
 app.use('/api/exams', examRoutes);
 
+
+app.use('/uploads', express.static('uploads'));
 module.exports = app
