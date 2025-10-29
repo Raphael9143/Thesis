@@ -11,7 +11,7 @@ export default function TeacherProfile() {
 	const [error, setError] = useState('');
 	const [profile, setProfile] = useState(null);
 	const [editing, setEditing] = useState(false);
-    const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState([]);
 
 	// notifications
 	const [notifyOpen, setNotifyOpen] = useState(false);

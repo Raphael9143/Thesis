@@ -25,6 +25,12 @@ export default function LeftSidebar({ isLoggedIn = false, collapsed = false, onT
 					<i className="fa fa-book" aria-hidden />
 					<span>Classes</span>
 				</button>
+				{isLoggedIn && (
+					<button className="leftsidebar__link" onClick={() => goto(role === 'student' ? '/education/student/profile' : '/education/teacher/profile')}>
+						<i className="fa fa-user" aria-hidden />
+						<span>Profile</span>
+					</button>
+				)}
 				<button className="leftsidebar__link" onClick={() => goto('/education/home')}>
 					<i className="fa fa-tachometer-alt" aria-hidden />
 					<span>Dashboard</span>
