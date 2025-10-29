@@ -125,7 +125,13 @@ async function initDatabase() {
 		teacher_id: teacherUser.id,
 		title: 'Lecture 1: Basics of OCL',
 		attachments: [
-			{ type: 'pdf', filename: 'test', url: '/uploads/lectures/test.docx' }
+			{
+				"url": "/uploads/lectures/1761727023299-678758101-boarding-pass.jpg",
+				"size": 636531,
+				"filename": "1761727023299-678758101-boarding-pass.jpg",
+				"mimetype": "image/jpeg",
+				"originalname": "boarding-pass.jpg"
+			}
 		],
 		publish_date: new Date('2025-09-21T08:00:00Z'),
 		status: 'published'
@@ -136,7 +142,13 @@ async function initDatabase() {
 		teacher_id: teacherUser.id,
 		title: 'Reference Materials for OCL',
 		attachments: [
-			{ type: 'link', description: 'Slides', url: 'https://example.com/web-slides' }
+			{
+				"url": "/uploads/lectures/1761727023299-678758101-boarding-pass.jpg",
+				"size": 636531,
+				"filename": "1761727023299-678758101-boarding-pass.jpg",
+				"mimetype": "image/jpeg",
+				"originalname": "boarding-pass.jpg"
+			}
 		],
 		publish_date: new Date('2025-09-22T08:00:00Z'),
 		status: 'published'
