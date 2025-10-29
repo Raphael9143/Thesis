@@ -1,6 +1,5 @@
 import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-// Navbar components replaced by LeftSidebar
 import LeftSidebar from '../components/layout/LeftSidebar';
 import { PageInfoProvider, usePageInfo } from '../contexts/PageInfoContext';
 import socketClient from '../services/socketClient';
@@ -27,16 +26,26 @@ export default function MainLayout() {
     // send to landing page of current context
     if (showEducationNavbar) navigate('/education'); else navigate('/');
   };
+  const wrapperClass = (isLoggedIn && showEducationNavbar) ? `app-bg app-with-sidebar${leftCollapsed ? ' collapsed' : ''}` : 'app-bg';
+
   return (
     <PageInfoProvider>
-      <div className={`app-bg app-with-sidebar${leftCollapsed ? ' collapsed' : ''}`}>
-        {/* Left sidebar replaces top navbar */}
-        <LeftSidebar isLoggedIn={isLoggedIn} collapsed={leftCollapsed} onToggleCollapse={() => setLeftCollapsed(v => !v)} />
-
-        <div className="app-container">
-          <PageInfoBar />
-          <Outlet />
-        </div>
+      <div className={wrapperClass}>
+        {isLoggedIn && showEducationNavbar ? (
+          <>
+            <LeftSidebar isLoggedIn={isLoggedIn} collapsed={leftCollapsed} onToggleCollapse={() => setLeftCollapsed(v => !v)} />
+            <div className="app-container">
+              <PageInfoBar />
+              <Outlet />
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="app-container" style={{ paddingTop: 16 }}>
+              <Outlet />
+            </div>
+          </>
+        )}
       </div>
     </PageInfoProvider>
   );
