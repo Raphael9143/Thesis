@@ -5,6 +5,7 @@ import Card from '../../components/ui/Card';
 import ClassCard from '../../components/ui/ClassCard';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
+import { usePageInfo } from '../../contexts/PageInfoContext';
 
 export default function StudentClassCoursesPage() {
   const { id } = useParams(); // class id
@@ -13,6 +14,7 @@ export default function StudentClassCoursesPage() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { setTitle: setPageTitle } = usePageInfo();
 
   useEffect(() => {
     let mounted = true;
@@ -23,6 +25,9 @@ export default function StudentClassCoursesPage() {
         if (!mounted) return;
         if (clsRes?.success && clsRes.data) {
           setClassInfo(clsRes.data);
+          try { 
+            setPageTitle(clsRes.data.name); 
+          } catch (_) { }
           const maybeCourses = clsRes.data.courses || clsRes.data.course_list || clsRes.data.courses_taught;
           if (Array.isArray(maybeCourses) && maybeCourses.length > 0) {
             setCourses(maybeCourses);

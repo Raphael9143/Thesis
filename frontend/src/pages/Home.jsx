@@ -8,6 +8,7 @@ import AdminHome from './admin/Home';
 import TeacherHome from './teacher/Home';
 import StudentHome from './student/Home';
 import ResearcherHomePage from './researcher/Home';
+import { usePageInfo } from '../contexts/PageInfoContext';
 
 export default function Home() {
 	const navigate = useNavigate();
@@ -33,6 +34,13 @@ export default function Home() {
 		};
 		hydrate();
 	}, [role]);
+
+	const { setTitle: setPageTitle } = usePageInfo();
+	useEffect(() => {
+		try { 
+			setPageTitle('Home'); 
+		} catch (_) {}
+	}, [setPageTitle]);
 
 	const title = useMemo(() => {
 		switch (role) {

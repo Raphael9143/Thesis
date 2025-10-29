@@ -5,16 +5,21 @@ import ClassCard from '../../components/ui/ClassCard';
 import { useNavigate } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
+import { usePageInfo } from '../../contexts/PageInfoContext';
 
 export default function StudentClassesPage() {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { setTitle: setPageTitle } = usePageInfo();
 
   useEffect(() => {
     let mounted = true;
     (async () => {
+      try { 
+        setPageTitle('Classes'); 
+      } catch(_) {}
       setLoading(true);
       try {
         const res = await userAPI.getStudentEnrolledClasses();

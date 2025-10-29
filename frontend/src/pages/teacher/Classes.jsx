@@ -5,6 +5,7 @@ import ClassCard from '../../components/ui/ClassCard';
 import { useNavigate } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
+import { usePageInfo } from '../../contexts/PageInfoContext';
 import CreateClassModal from '../../components/teacher/CreateClassModal';
 
 export default function ClassesPage() {
@@ -13,10 +14,14 @@ export default function ClassesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const { setTitle: setPageTitle } = usePageInfo();
 
   useEffect(() => {
     let mounted = true;
     (async () => {
+      try { 
+        setPageTitle('Classes'); 
+      } catch (_) {}
       setLoading(true);
       try {
         const res = await userAPI.getTeacherClasses();

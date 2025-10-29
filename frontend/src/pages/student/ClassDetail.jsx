@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Section from '../../components/ui/Section';
+import { usePageInfo } from '../../contexts/PageInfoContext';
 import Card from '../../components/ui/Card';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
@@ -16,6 +17,7 @@ export default function StudentClassDetailPage() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [courseIdState, setCourseIdState] = useState(routeCourseId || null);
+	const { setTitle: setPageTitle } = usePageInfo();
 
 	useEffect(() => {
 		let mounted = true;
@@ -26,6 +28,20 @@ export default function StudentClassDetailPage() {
 				if (!mounted) return;
 				if (cls?.success && cls.data) {
 					setClassInfo(cls.data);
+					try {
+						if (routeCourseId) {
+							const courseRes = await userAPI.getCourseById(routeCourseId);
+							if (courseRes?.success && courseRes.data) {
+								setPageTitle(courseRes.data.name || courseRes.data.title || courseRes.data.course_name || 'Course');
+							} else {
+								setPageTitle(cls.data.name || 'Class');
+							}
+						} else {
+							setPageTitle(cls.data.name || 'Class');
+						}
+					} catch (_) {
+						try { setPageTitle(cls.data.name || 'Class'); } catch (_) {}
+					}
 				}
 
 				const courseId = routeCourseId || ((cls?.success && cls.data && (cls.data.course_id || cls.data.courseId || cls.data.courseId === 0 ? (cls.data.course_id || cls.data.courseId) : null)) || id);
@@ -39,6 +55,16 @@ export default function StudentClassDetailPage() {
 
 				if (!mounted) return;
 				if (lectRes?.success && Array.isArray(lectRes.data)) setLectures(lectRes.data);
+				// If we don't yet have the course title, try fetching courses for the class and find matching course name
+				try {
+					if (routeCourseId) {
+						const coursesRes = await userAPI.getCoursesByClass(id);
+						if (coursesRes?.success && Array.isArray(coursesRes.data)) {
+							const found = coursesRes.data.find(c => (c.id || c.course_id || c.courseId) == routeCourseId);
+							if (found) setPageTitle(found.name || found.title || found.course_name || found.code || 'Course');
+						}
+					}
+				} catch (_) {}
 				if (examRes?.success && Array.isArray(examRes.data)) setExams(examRes.data);
 				if (assignRes?.success && Array.isArray(assignRes.data)) setAssignments(assignRes.data);
 			} catch (err) {

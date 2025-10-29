@@ -44,6 +44,8 @@ const userAPI = {
   getAssignmentsByCourse: (courseId) => axiosClient.get(`assignments/course/${courseId}`),
   // Get courses associated with a class (fallback - adjust endpoint if your backend differs)
   getCoursesByClass: (classId) => axiosClient.get(`courses/by-class/${classId}`),
+  // Get a single course by id
+  getCourseById: (courseId) => axiosClient.get(`courses/${courseId}`),
 
   // Lectures
   // Create lecture: accepts FormData (for file uploads) or JSON payload

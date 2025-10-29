@@ -6,6 +6,7 @@ import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/ClassDetail.css';
 import CreateLectureForm from '../../components/teacher/CreateLectureForm';
+import { usePageInfo } from '../../contexts/PageInfoContext';
 
 export default function ClassDetailPage() {
   const { id, courseId: routeCourseId } = useParams();
@@ -19,6 +20,7 @@ export default function ClassDetailPage() {
   const [courseIdState, setCourseIdState] = useState(routeCourseId || null);
   const [lectureModalOpen, setLectureModalOpen] = useState(false);
   const [editingLecture, setEditingLecture] = useState(null);
+  const { setTitle: setPageTitle } = usePageInfo();
 
   useEffect(() => {
     let mounted = true;
@@ -30,6 +32,22 @@ export default function ClassDetailPage() {
         if (!mounted) return;
         if (cls?.success && cls.data) {
           setClassInfo(cls.data);
+          // If route has courseId, fetch course directly via API and use its name
+          try {
+            if (routeCourseId) {
+              const courseRes = await userAPI.getCourseById(routeCourseId);
+              if (courseRes?.success && courseRes.data) {
+                setPageTitle(courseRes.data.name || courseRes.data.title || courseRes.data.course_name || 'Course');
+              } else {
+                setPageTitle(cls.data.name || 'Class');
+              }
+            } else {
+              setPageTitle(cls.data.name || 'Class');
+            }
+          } catch (err) {
+            // fallback to class name
+            try { setPageTitle(cls.data.name || 'Class'); } catch (_) {}
+          }
         }
 
         // determine course id: prefer route param, then cls.data.course_id or cls.data.courseId, else fall back to id
@@ -45,6 +63,16 @@ export default function ClassDetailPage() {
 
         if (!mounted) return;
         if (lectRes?.success && Array.isArray(lectRes.data)) setLectures(lectRes.data);
+        // If we don't yet have a course title shown, try to fetch courses for the class and find the course name
+        try {
+          if (routeCourseId) {
+            const coursesRes = await userAPI.getCoursesByClass(id);
+            if (coursesRes?.success && Array.isArray(coursesRes.data)) {
+              const found = coursesRes.data.find(c => (c.id || c.course_id || c.courseId) == routeCourseId);
+              if (found) setPageTitle(found.name || found.title || found.course_name || found.code || 'Course');
+            }
+          }
+        } catch (err) { /* ignore */ }
         if (examRes?.success && Array.isArray(examRes.data)) setExams(examRes.data);
         if (assignRes?.success && Array.isArray(assignRes.data)) setAssignments(assignRes.data);
       } catch (err) {
