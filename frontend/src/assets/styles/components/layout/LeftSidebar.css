@@ -1,0 +1,126 @@
+.leftsidebar {
+	width: 220px;
+	min-width: 72px;
+	height: 100vh;
+	position: fixed;
+	left: 0;
+	top: 0;
+	background: rgba(255, 255, 255, 0.72);
+	backdrop-filter: blur(8px);
+	color: #0f172a;
+	display: flex;
+	flex-direction: column;
+	padding: 12px;
+	box-sizing: border-box;
+	z-index: 1100;
+	border-right: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.leftsidebar__brand {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin-bottom: 12px;
+	position: relative;
+}
+
+.leftsidebar__brand img {
+	border-radius: 4px;
+}
+
+.leftsidebar__brandText {
+	font-weight: 700;
+	color: #0f172a;
+}
+
+.leftsidebar__collapseBtn {
+	background-color: transparent;
+	color: rgba(15, 23, 42, 0.6);
+	padding: 6px;
+	cursor: pointer;
+}
+
+.leftsidebar__nav {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-top: 8px;
+}
+
+.leftsidebar__link {
+	background: transparent;
+	color: rgba(15, 23, 42, 0.9);
+	border: none;
+	text-align: left;
+	padding: 8px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+
+.leftsidebar__link i {
+	width: 20px;
+	text-align: center;
+}
+
+.leftsidebar__link span {
+	white-space: nowrap;
+}
+
+.leftsidebar__link:hover {
+	background: rgba(15, 23, 42, 0.04);
+}
+
+.leftsidebar__bottom {
+	margin-top: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+/* Collapsed state */
+.leftsidebar.leftsidebar--collapsed {
+	width: 72px;
+	padding: 8px;
+}
+
+.leftsidebar.leftsidebar--collapsed .leftsidebar__brandText {
+	display: none;
+}
+
+.leftsidebar.leftsidebar--collapsed .leftsidebar__link span {
+	display: none;
+}
+
+.leftsidebar.leftsidebar--collapsed .leftsidebar__collapseBtn {
+	right: 8px;
+}
+
+/* Adjust page content when collapsed or expanded */
+.app-with-sidebar .app-container {
+	margin-left: 220px;
+	/* default when expanded */
+	padding: 24px;
+}
+
+.app-with-sidebar.collapsed .app-container {
+	margin-left: 72px;
+	/* when sidebar collapsed */
+}
+
+.page-info {
+	background: transparent;
+	color: #0f172a;
+	margin-bottom: 12px;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-weight: 700;
+}
+
+.page-info__title {
+	font-size: 18px;
+}
