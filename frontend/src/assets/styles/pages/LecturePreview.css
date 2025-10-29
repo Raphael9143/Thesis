@@ -1,0 +1,43 @@
+.lecture-preview {
+  display: block;
+}
+
+.lecture-preview .preview-meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+}
+
+.lecture-preview .preview-meta > div {
+  min-width: 160px;
+}
+
+.lecture-preview .preview-attachments {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 8px;
+}
+
+.lecture-preview .attachment-item {
+  border: 1px solid var(--border, #e5e7eb);
+  padding: 12px;
+  background: var(--surface, #fff);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lecture-preview .attachment-item img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.lecture-preview .attachment-item a.btn {
+  align-self: flex-start;
+}

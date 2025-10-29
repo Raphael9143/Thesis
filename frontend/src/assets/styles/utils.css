@@ -108,6 +108,11 @@
   flex-wrap: wrap;
 }
 
+.img-responsive {
+  max-width: 100%;
+  height: auto;
+}
+
 /* Responsive hero image helper */
 .hero-half {
   width: 50%;

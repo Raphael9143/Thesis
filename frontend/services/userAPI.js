@@ -42,6 +42,10 @@ const userAPI = {
   getLecturesByCourse: (courseId) => axiosClient.get(`lectures/course/${courseId}`),
   getExamsByCourse: (courseId) => axiosClient.get(`exams/course/${courseId}`),
   getAssignmentsByCourse: (courseId) => axiosClient.get(`assignments/course/${courseId}`),
+  // Single resource fetchers
+  getLectureById: (id) => axiosClient.get(`lectures/${id}`),
+  getAssignmentById: (id) => axiosClient.get(`assignments/${id}`),
+  getExamById: (id) => axiosClient.get(`exams/${id}`),
   // Get courses associated with a class (fallback - adjust endpoint if your backend differs)
   getCoursesByClass: (classId) => axiosClient.get(`courses/by-class/${classId}`),
   // Get a single course by id

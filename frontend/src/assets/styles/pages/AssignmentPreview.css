@@ -1,0 +1,24 @@
+.assignment-preview {
+  display: block;
+}
+
+.assignment-preview .preview-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  color: var(--color-muted);
+}
+
+.assignment-preview .preview-body {
+  margin-top: 12px;
+}
+
+.assignment-preview .file-download {
+  margin-top: 8px;
+}
+
+.assignment-preview .meta-small {
+  font-size: 0.9rem;
+  color: var(--color-muted-2);
+}

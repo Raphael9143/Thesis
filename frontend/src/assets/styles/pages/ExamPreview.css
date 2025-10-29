@@ -1,0 +1,24 @@
+.exam-preview {
+  display: block;
+}
+
+.exam-preview .preview-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  color: var(--color-muted);
+}
+
+.exam-preview .preview-body {
+  margin-top: 12px;
+}
+
+.exam-preview .model-file {
+  margin-top: 8px;
+}
+
+.exam-preview .meta-small {
+  font-size: 0.9rem;
+  color: var(--color-muted-2);
+}
