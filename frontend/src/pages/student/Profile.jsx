@@ -5,6 +5,7 @@ import FormField from '../../components/ui/FormField';
 import NotificationPopup from '../../components/ui/NotificationPopup';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/pages/profile.css';
+import { usePageInfo } from '../../contexts/PageInfoContext';
 
 export default function StudentProfile() {
 	const [loading, setLoading] = useState(true);
@@ -27,6 +28,14 @@ export default function StudentProfile() {
 	const [studentCode, setStudentCode] = useState('');
 	const [major, setMajor] = useState('');
 	const [year, setYear] = useState('');
+
+	const { setTitle: setPageTitle } = usePageInfo();
+
+	useEffect(() => {
+		try { 
+			setPageTitle('Profile'); 
+		} catch (_) {}
+	})
 
 	useEffect(() => {
 		const load = async () => {

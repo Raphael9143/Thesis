@@ -55,7 +55,7 @@ function PageInfoBar() {
   const { title } = usePageInfo();
   return (
     <div className="page-info" aria-hidden={title ? 'false' : 'true'}>
-      <div className="page-info__title">{title || 'OCL Education'}</div>
+      <div className="page-info__title">{title || ''}</div>
     </div>
   );
 }

@@ -5,13 +5,14 @@ import FormField from '../../components/ui/FormField';
 import NotificationPopup from '../../components/ui/NotificationPopup';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/pages/profile.css';
+import { usePageInfo } from '../../contexts/PageInfoContext';
 
 export default function TeacherProfile() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
 	const [profile, setProfile] = useState(null);
 	const [editing, setEditing] = useState(false);
-  const [courses, setCourses] = useState([]);
+	const [courses, setCourses] = useState([]);
 
 	// notifications
 	const [notifyOpen, setNotifyOpen] = useState(false);
@@ -27,6 +28,14 @@ export default function TeacherProfile() {
 	const [address, setAddress] = useState('');
 	const [teacherCode, setTeacherCode] = useState('');
 	const [department, setDepartment] = useState('');
+
+	const { setTitle: setPageTitle } = usePageInfo();
+
+	useEffect(() => {
+		try {
+			setPageTitle('Profile');
+		} catch (_) { }
+	})
 
 	useEffect(() => {
 		const load = async () => {
