@@ -33,7 +33,7 @@ export default function ResearcherHome() {
             Explore the Frontier of OCL & UML Research
           </h1>
           <p className="hero__subtitle">
-            Welcome to the Research Hub — a collaborative environment for model-driven engineering, OCL constraint sharing, and UML-based innovation. Connect with global researchers, publish studies, and enhance modeling knowledge.
+            Welcome to the Research Hub - a collaborative environment for model-driven engineering, OCL constraint sharing, and UML-based innovation. Connect with global researchers, publish studies, and enhance modeling knowledge.
           </p>
           <div className="hero-buttons">
             <button
@@ -48,6 +48,14 @@ export default function ResearcherHome() {
             >
               Get Started
             </button>
+          </div>
+          <div className="switch-to-education">
+            <p>
+              Looking for educational resources?{' '}
+              <a className="researcher-auth-switch-button" onClick={() => navigate('/education/home')}>
+                Go to Education Portal
+              </a>
+            </p>
           </div>
           <div className="stats">
             <div className="stat-box">
