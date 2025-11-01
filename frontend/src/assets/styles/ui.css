@@ -284,3 +284,7 @@
 .btn.btn-icon i {
 	pointer-events: none;
 }
+
+pre {
+	text-align: left;
+}

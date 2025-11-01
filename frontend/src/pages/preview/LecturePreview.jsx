@@ -171,14 +171,14 @@ export default function LecturePreview() {
 								const url = att.__url || toFullUrl(raw);
 								return (
 									<div key={idx} className="attachment-item">
-												{isImage ? (
-													<img src={url} alt={att.originalname || att.filename} className="img-responsive" />
-												) : (
-													<div>
-														<FilePreview url={att.__url || url} filename={att.originalname || att.filename || att.filename} mimetype={att.mimetype} />
-														<div style={{ marginTop: 8 }}>{att.originalname || att.filename} • {(att.size || 0)} bytes</div>
-													</div>
-												)}
+										{isImage ? (
+											<img src={url} alt={att.originalname || att.filename} className="img-responsive" />
+										) : (
+											<div>
+												<FilePreview url={att.__url || url} filename={att.originalname || att.filename || att.filename} mimetype={att.mimetype} />
+												<div style={{ marginTop: 8 }}>{att.originalname || att.filename} • {(att.size || 0)} bytes</div>
+											</div>
+										)}
 									</div>
 								);
 							})
