@@ -61,6 +61,10 @@ const userAPI = {
   // patch status of lecture
   patchLectureStatus: (id, status) => axiosClient.patch(`lectures/${id}/status`, { status }),
 
+  // Assignments
+  // Create assignment: expects FormData (required .use file under field 'file', optional attachments)
+  createAssignment: (data, config) => axiosClient.post('assignments', data, config),
+
   // Add more API endpoints as needed for your thesis project
   updateTeacherProfile: (data) => axiosClient.patch("teacher/profile", data),
 
