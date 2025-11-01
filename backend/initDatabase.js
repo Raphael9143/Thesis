@@ -126,11 +126,11 @@ async function initDatabase() {
 		title: 'Lecture 1: Basics of OCL',
 		attachments: [
 			{
-				"url": "/uploads/lectures/test.docx",
+				"url": "/uploads/lectures/SYLL.doc",
 				"size": 636531,
-				"filename": "test.docx",
-				"mimetype": "docx",
-				"originalname": "test.docx"
+				"filename": "SYLL.doc",
+				"mimetype": "doc",
+				"originalname": "SYLL.doc"
 			}
 		],
 		publish_date: new Date('2025-09-21T08:00:00Z'),
