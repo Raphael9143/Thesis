@@ -126,11 +126,11 @@ async function initDatabase() {
 		title: 'Lecture 1: Basics of OCL',
 		attachments: [
 			{
-				"url": "/uploads/lectures/1761727023299-678758101-boarding-pass.jpg",
+				"url": "/uploads/lectures/test.docx",
 				"size": 636531,
-				"filename": "1761727023299-678758101-boarding-pass.jpg",
-				"mimetype": "image/jpeg",
-				"originalname": "boarding-pass.jpg"
+				"filename": "test.docx",
+				"mimetype": "docx",
+				"originalname": "test.docx"
 			}
 		],
 		publish_date: new Date('2025-09-21T08:00:00Z'),
@@ -143,11 +143,11 @@ async function initDatabase() {
 		title: 'Reference Materials for OCL',
 		attachments: [
 			{
-				"url": "/uploads/lectures/1761727023299-678758101-boarding-pass.jpg",
+				"url": "/uploads/lectures/usecaseSpecification_template.pdf",
 				"size": 636531,
-				"filename": "1761727023299-678758101-boarding-pass.jpg",
-				"mimetype": "image/jpeg",
-				"originalname": "boarding-pass.jpg"
+				"filename": "usecaseSpecification_template.pdf",
+				"mimetype": "pdf",
+				"originalname": "usecaseSpecification_template.pdf"
 			}
 		],
 		publish_date: new Date('2025-09-22T08:00:00Z'),

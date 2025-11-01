@@ -9,34 +9,31 @@ const ClassCourse = require('../models/ClassCourse');
 const ClassStudent = require('../models/ClassStudent');
 
 const AssignmentController = {
-	// Tạo bài tập mới (chỉ giáo viên)
+	// Create assignment (teachers only)
 	createAssignment: async (req, res) => {
 		try {
-			if (req.user.role !== 'TEACHER') {
-				return res.status(403).json({ success: false, message: 'Chỉ giáo viên mới được tạo bài tập.' });
+			if (!req.user || req.user.role !== 'TEACHER') {
+				return res.status(403).json({ success: false, message: 'Only teachers can create assignments.' });
 			}
 			const { course_id, title, description, start_date, end_date, status } = req.body;
 			if (!course_id || !title) {
-				return res.status(400).json({ success: false, message: 'course_id và title là bắt buộc.' });
+				return res.status(400).json({ success: false, message: 'course_id and title are required.' });
 			}
-			// Kiểm tra course tồn tại
+
+			// Verify course exists
 			const course = await Course.findByPk(course_id);
-			if (!course) {
-				return res.status(404).json({ success: false, message: 'Course không tồn tại.' });
-			}
-			// Xử lý file upload (bắt buộc .use)
+			if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
+
+			// File upload is optional
 			let filePath = null;
-			if (req.file) {
-				filePath = 'uploads/assignments/' + req.file.filename;
-			} else {
-				return res.status(400).json({ success: false, message: 'File .use là bắt buộc.' });
-			}
-			// Tạo assignment
+			if (req.file) filePath = 'uploads/assignments/' + req.file.filename;
+
 			// Validate status if provided
 			const allowedStatuses = ['draft', 'published', 'archived'];
 			if (status && !allowedStatuses.includes(status)) {
 				return res.status(400).json({ success: false, message: 'Invalid status' });
 			}
+
 			const assignment = await Assignment.create({
 				course_id,
 				title,
@@ -48,19 +45,21 @@ const AssignmentController = {
 				end_date: end_date || null,
 				created_at: new Date()
 			});
-			// Tạo ánh xạ assignment_courses for backward compatibility
+
+			// Create assignment_course mapping for backward compatibility
 			await AssignmentCourse.create({
 				assignment_id: assignment.assignment_id,
 				course_id
 			});
-			res.status(201).json({ success: true, data: assignment });
+
+			res.status(201).json({ success: true, message: 'Assignment created', data: assignment });
 		} catch (error) {
 			console.error('Create assignment error:', error);
 			res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	},
 
-	// Lấy tất cả bài tập
+	// Get all assignments
 	getAllAssignments: async (req, res) => {
 		try {
 			const assignments = await Assignment.findAll({
@@ -75,6 +74,7 @@ const AssignmentController = {
 				],
 				order: [['created_at', 'DESC']]
 			});
+
 			// Convert AssignmentCourse to assignment_course in response
 			const data = assignments.map(a => {
 				const obj = a.toJSON();
@@ -95,25 +95,24 @@ const AssignmentController = {
 			res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	},
-	// Lấy tất cả bài tập theo lớp
+
+	// Get assignments by class
 	getAssignmentsByClass: async (req, res) => {
 		try {
 			const { classId } = req.params;
 			if (!classId) {
-				return res.status(400).json({ success: false, message: 'Thiếu classId.' });
+				return res.status(400).json({ success: false, message: 'Missing classId.' });
 			}
-			// Lấy tất cả course_id thuộc class này
+			// Find course_ids for this class
 			const classCourses = await ClassCourse.findAll({ where: { class_id: classId } });
 			const courseIds = classCourses.map(cc => cc.course_id);
-			if (courseIds.length === 0) {
-				return res.json({ success: true, data: [] });
-			}
-			// Lấy assignment qua assignment_courses
+			if (courseIds.length === 0) return res.json({ success: true, data: [] });
+
+			// Find assignment ids via AssignmentCourse
 			const assignmentCourses = await AssignmentCourse.findAll({ where: { course_id: courseIds } });
 			const assignmentIds = assignmentCourses.map(ac => ac.assignment_id);
-			if (assignmentIds.length === 0) {
-				return res.json({ success: true, data: [] });
-			}
+			if (assignmentIds.length === 0) return res.json({ success: true, data: [] });
+
 			const assignments = await Assignment.findAll({
 				where: { assignment_id: assignmentIds },
 				include: [
@@ -127,6 +126,7 @@ const AssignmentController = {
 				],
 				order: [['created_at', 'DESC']]
 			});
+
 			// Convert AssignmentCourse to assignment_course in response
 			const data = assignments.map(a => {
 				const obj = a.toJSON();
@@ -147,50 +147,43 @@ const AssignmentController = {
 			res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	},
-	// Sửa bài tập (chỉ giảng viên đứng lớp chứa bài tập đó)
+
+	// Update assignment (teacher of the class that contains the course)
 	updateAssignment: async (req, res) => {
 		try {
 			if (req.user.role !== 'TEACHER') {
-				return res.status(403).json({ success: false, message: 'Chỉ giáo viên mới được sửa bài tập.' });
+				return res.status(403).json({ success: false, message: 'Only teachers can update assignments.' });
 			}
 			const { id } = req.params;
 			const assignment = await Assignment.findByPk(id);
-			if (!assignment) {
-				return res.status(404).json({ success: false, message: 'Assignment không tồn tại.' });
-			}
-			// Tìm class chứa course này
+			if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found.' });
+
+			// Find a class that contains this course
 			const classCourse = await ClassCourse.findOne({ where: { course_id: assignment.course_id } });
-			if (!classCourse) {
-				return res.status(404).json({ success: false, message: 'Không tìm thấy lớp chứa bài tập này.' });
-			}
+			if (!classCourse) return res.status(404).json({ success: false, message: 'No class found for this assignment.' });
 			const classObj = await Class.findByPk(classCourse.class_id);
-			if (!classObj) {
-				return res.status(404).json({ success: false, message: 'Lớp không tồn tại.' });
-			}
-			if (classObj.teacherId !== req.user.userId) {
-				return res.status(403).json({ success: false, message: 'Bạn không có quyền sửa bài tập này.' });
-			}
-			// Xử lý file upload nếu có
+			if (!classObj) return res.status(404).json({ success: false, message: 'Class not found.' });
+			if (classObj.teacherId !== req.user.userId) return res.status(403).json({ success: false, message: 'You do not have permission to edit this assignment.' });
+
+			// Handle file upload if present
 			let filePath = assignment.file;
-			if (req.file) {
-				filePath = 'uploads/assignments/' + req.file.filename;
-			}
-			// Cập nhật assignment
+			if (req.file) filePath = 'uploads/assignments/' + req.file.filename;
+
+			// Update fields
 			const fields = ['title', 'description', 'start_date', 'end_date'];
-			fields.forEach(f => {
-				if (req.body[f] !== undefined) assignment[f] = req.body[f];
-			});
+			fields.forEach(f => { if (req.body[f] !== undefined) assignment[f] = req.body[f]; });
+
 			// Handle status update if provided
 			if (req.body.status !== undefined) {
 				const allowedStatuses = ['draft', 'published', 'archived'];
-				if (!allowedStatuses.includes(req.body.status)) {
-					return res.status(400).json({ success: false, message: 'Invalid status' });
-				}
+				if (!allowedStatuses.includes(req.body.status)) return res.status(400).json({ success: false, message: 'Invalid status' });
 				assignment.status = req.body.status;
 			}
+
 			assignment.file = filePath;
 			await assignment.save();
-			// Cập nhật due_date, week nếu có (keep existing behavior if needed)
+
+			// Update AssignmentCourse due_date/week if provided
 			if (req.body.due_date !== undefined || req.body.week !== undefined) {
 				const assignmentCourse = await AssignmentCourse.findOne({ where: { assignment_id: assignment.assignment_id } });
 				if (assignmentCourse) {
@@ -199,66 +192,49 @@ const AssignmentController = {
 					await assignmentCourse.save();
 				}
 			}
+
 			res.json({ success: true, data: assignment });
 		} catch (error) {
 			console.error('Update assignment error:', error);
 			res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	},
-	// Xoá assignment khỏi course (ClassCourse), không xoá khỏi assignments
+
+	// Remove assignment from course (do not delete assignment)
 	removeAssignmentFromCourse: async (req, res) => {
 		try {
-			if (req.user.role !== 'TEACHER') {
-				return res.status(403).json({ success: false, message: 'Chỉ giáo viên mới được xoá assignment.' });
-			}
+			if (req.user.role !== 'TEACHER') return res.status(403).json({ success: false, message: 'Only teachers can remove assignments.' });
 			const { assignmentId } = req.params;
-			// Tìm assignment
 			const assignment = await Assignment.findByPk(assignmentId);
-			if (!assignment) {
-				return res.status(404).json({ success: false, message: 'Assignment không tồn tại.' });
-			}
-			// Xoá ánh xạ assignment-course (chỉ xoá row assignment_courses)
-			// Tìm assignment_courses
+			if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found.' });
+
 			const assignmentCourse = await AssignmentCourse.findOne({ where: { assignment_id: assignment.assignment_id } });
-			if (!assignmentCourse) {
-				return res.status(404).json({ success: false, message: 'Không tìm thấy ánh xạ assignment-course.' });
-			}
-			// Kiểm tra quyền giáo viên
+			if (!assignmentCourse) return res.status(404).json({ success: false, message: 'Assignment-course mapping not found.' });
+
 			const classCourse = await ClassCourse.findOne({ where: { course_id: assignmentCourse.course_id } });
-			if (!classCourse) {
-				return res.status(404).json({ success: false, message: 'Không tìm thấy lớp chứa course này.' });
-			}
+			if (!classCourse) return res.status(404).json({ success: false, message: 'No class found for this course.' });
 			const classObj = await Class.findByPk(classCourse.class_id);
-			if (!classObj) {
-				return res.status(404).json({ success: false, message: 'Lớp không tồn tại.' });
-			}
-			if (classObj.teacherId !== req.user.userId) {
-				return res.status(403).json({ success: false, message: 'Bạn không có quyền xoá assignment này.' });
-			}
+			if (!classObj) return res.status(404).json({ success: false, message: 'Class not found.' });
+			if (classObj.teacherId !== req.user.userId) return res.status(403).json({ success: false, message: 'You do not have permission to remove this assignment.' });
+
 			await AssignmentCourse.destroy({ where: { assignment_id: assignment.assignment_id, course_id: assignmentCourse.course_id } });
-			res.json({ success: true, message: 'Đã xoá assignment khỏi course. Assignment vẫn còn trong hệ thống.', data: assignment });
+			res.json({ success: true, message: 'Assignment removed from course. Assignment still exists in the system.', data: assignment });
 		} catch (error) {
 			console.error('Remove assignment from course error:', error);
 			res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	},
-	// Thêm assignment đã có vào lớp (qua course)
+
+	// Add existing assignment to a course
 	addAssignmentToClass: async (req, res) => {
 		try {
 			const { assignment_id, course_id, due_date, week } = req.body;
 			const assignment = await Assignment.findByPk(assignment_id);
-			if (!assignment) {
-				return res.status(404).json({ success: false, message: 'Assignment không tồn tại.' });
-			}
+			if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found.' });
 			const course = await Course.findByPk(course_id);
-			if (!course) {
-				return res.status(404).json({ success: false, message: 'Course không tồn tại.' });
-			}
-			// Kiểm tra đã ánh xạ chưa
+			if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
 			const exist = await AssignmentCourse.findOne({ where: { assignment_id, course_id } });
-			if (exist) {
-				return res.status(400).json({ success: false, message: 'Assignment đã có trong course này.' });
-			}
+			if (exist) return res.status(400).json({ success: false, message: 'Assignment already in this course.' });
 			await AssignmentCourse.create({ assignment_id, course_id, due_date, week });
 			res.json({ success: true, data: assignment });
 		} catch (error) {
@@ -266,33 +242,27 @@ const AssignmentController = {
 			res.status(500).json({ success: false, message: 'Server error' });
 		}
 	},
-	// Xoá assignment khỏi database (chỉ admin)
+
+	// Delete assignment from database (admin only)
 	deleteAssignment: async (req, res) => {
 		try {
-			if (req.user.role !== 'ADMIN') {
-				return res.status(403).json({ success: false, message: 'Chỉ admin mới được xoá assignment.' });
-			}
+			if (req.user.role !== 'ADMIN') return res.status(403).json({ success: false, message: 'Only admin can delete assignments.' });
 			const { id } = req.params;
 			const assignment = await Assignment.findByPk(id);
-			if (!assignment) {
-				return res.status(404).json({ success: false, message: 'Assignment không tồn tại.' });
-			}
-			// Xoá tất cả ánh xạ assignment_courses trước
+			if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found.' });
 			await AssignmentCourse.destroy({ where: { assignment_id: id } });
-			// Xoá assignment
 			await assignment.destroy();
-			res.json({ success: true, message: 'Đã xoá assignment khỏi database.' });
+			res.json({ success: true, message: 'Assignment deleted from database.' });
 		} catch (error) {
 			console.error('Delete assignment error:', error);
 			res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	},
-	// Lấy bài tập theo id
+
+	// Get assignment by id (admin or teacher)
 	getAssignmentById: async (req, res) => {
 		try {
-			if (!req.user || (req.user.role !== 'ADMIN' && req.user.role !== 'TEACHER')) {
-				return res.status(403).json({ success: false, message: 'Chỉ admin hoặc giáo viên mới được truy cập.' });
-			}
+			if (!req.user || (req.user.role !== 'ADMIN' && req.user.role !== 'TEACHER')) return res.status(403).json({ success: false, message: 'Only admin or teacher can access.' });
 			const { id } = req.params;
 			const assignment = await Assignment.findByPk(id, {
 				include: [
@@ -305,10 +275,7 @@ const AssignmentController = {
 					{ model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
 				]
 			});
-			if (!assignment) {
-				return res.status(404).json({ success: false, message: 'Assignment không tồn tại.' });
-			}
-			// Convert AssignmentCourse to assignment_course in response
+			if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found.' });
 			const obj = assignment.toJSON();
 			if (obj.courses) {
 				obj.courses = obj.courses.map(c => {
@@ -326,7 +293,7 @@ const AssignmentController = {
 		}
 	},
 
-	// Lấy tất cả bài tập theo course id (admin, giáo viên liên quan, hoặc sinh viên trong lớp)
+	// Get assignments by course id (admin, related teacher, or enrolled student)
 	getAssignmentsByCourseId: async (req, res) => {
 		try {
 			const courseId = parseInt(req.params.id, 10);
