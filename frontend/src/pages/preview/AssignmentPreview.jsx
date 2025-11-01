@@ -8,6 +8,7 @@ import axiosClient from '../../../services/axiosClient';
 import { usePageInfo } from '../../contexts/PageInfoContext';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/AssignmentPreview.css';
+import FilePreview from '../../components/ui/FilePreview';
 
 function fmtDate(d) {
 	if (!d) return '';
@@ -81,7 +82,9 @@ export default function AssignmentPreview() {
 
 					<div className="file-download">
 						{assignment.file ? (
-							<a href={toFullUrl(assignment.file)} target="_blank" rel="noreferrer" className="btn btn-primary">Download attachment</a>
+							<div className="file-preview-wrapper">
+								<FilePreview url={toFullUrl(assignment.file)} filename={assignment.file || ''} />
+							</div>
 						) : (
 							<div>No file attached.</div>
 						)}

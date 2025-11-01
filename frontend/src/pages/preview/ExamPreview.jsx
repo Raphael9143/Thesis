@@ -8,6 +8,7 @@ import axiosClient from '../../../services/axiosClient';
 import { usePageInfo } from '../../contexts/PageInfoContext';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/ExamPreview.css';
+import FilePreview from '../../components/ui/FilePreview';
 
 function fmtDate(d) {
 	if (!d) return '';
@@ -79,7 +80,7 @@ export default function ExamPreview() {
 
 					<div className="model-file">
 						{exam.model_file ? (
-							<a href={toFullUrl(exam.model_file)} target="_blank" rel="noreferrer" className="btn btn-primary">Download model file</a>
+							<FilePreview url={toFullUrl(exam.model_file)} filename={exam.model_file || ''} />
 						) : (
 							<div>No model file attached.</div>
 						)}
