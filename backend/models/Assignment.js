@@ -27,6 +27,11 @@ const Assignment = sequelize.define('Assignment', {
 		type: DataTypes.STRING(255),
 		allowNull: true
 	},
+	status: {
+ 		type: DataTypes.ENUM('draft','published','archived'),
+ 		allowNull: false,
+ 		defaultValue: 'draft'
+ 	},
 	start_date: {
 		type: DataTypes.DATE,
 		allowNull: true

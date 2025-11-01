@@ -15,7 +15,7 @@ const AssignmentController = {
 			if (req.user.role !== 'TEACHER') {
 				return res.status(403).json({ success: false, message: 'Chỉ giáo viên mới được tạo bài tập.' });
 			}
-			const { course_id, title, description, start_date, end_date } = req.body;
+			const { course_id, title, description, start_date, end_date, status } = req.body;
 			if (!course_id || !title) {
 				return res.status(400).json({ success: false, message: 'course_id và title là bắt buộc.' });
 			}
@@ -32,12 +32,18 @@ const AssignmentController = {
 				return res.status(400).json({ success: false, message: 'File .use là bắt buộc.' });
 			}
 			// Tạo assignment
+			// Validate status if provided
+			const allowedStatuses = ['draft', 'published', 'archived'];
+			if (status && !allowedStatuses.includes(status)) {
+				return res.status(400).json({ success: false, message: 'Invalid status' });
+			}
 			const assignment = await Assignment.create({
 				course_id,
 				title,
 				description: description || null,
 				created_by: req.user.userId,
 				file: filePath,
+				status: status || 'draft',
 				start_date: start_date || null,
 				end_date: end_date || null,
 				created_at: new Date()
@@ -174,6 +180,14 @@ const AssignmentController = {
 			fields.forEach(f => {
 				if (req.body[f] !== undefined) assignment[f] = req.body[f];
 			});
+			// Handle status update if provided
+			if (req.body.status !== undefined) {
+				const allowedStatuses = ['draft', 'published', 'archived'];
+				if (!allowedStatuses.includes(req.body.status)) {
+					return res.status(400).json({ success: false, message: 'Invalid status' });
+				}
+				assignment.status = req.body.status;
+			}
 			assignment.file = filePath;
 			await assignment.save();
 			// Cập nhật due_date, week nếu có (keep existing behavior if needed)
