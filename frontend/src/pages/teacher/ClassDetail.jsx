@@ -6,6 +6,7 @@ import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/ClassDetail.css';
 import CreateLectureForm from '../../components/teacher/CreateLectureForm';
+import CreateAssignmentForm from '../../components/teacher/CreateAssignmentForm';
 import { usePageInfo } from '../../contexts/PageInfoContext';
 
 export default function ClassDetailPage() {
@@ -20,6 +21,7 @@ export default function ClassDetailPage() {
   const [courseIdState, setCourseIdState] = useState(routeCourseId || null);
   const [lectureModalOpen, setLectureModalOpen] = useState(false);
   const [editingLecture, setEditingLecture] = useState(null);
+  const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
   const { setTitle: setPageTitle } = usePageInfo();
 
   useEffect(() => {
@@ -168,7 +170,12 @@ export default function ClassDetailPage() {
             </div>
 
             <div className="class-detail__panel">
-              <h4>Assignments</h4>
+              <div className="flex-between">
+                <h4 className="no-margin">Assignments</h4>
+                <div>
+                  <button className="btn btn-primary btn-sm" onClick={() => setAssignmentModalOpen(true)}>New Assignment</button>
+                </div>
+              </div>
               {!loading && !error && assignments.length === 0 && <div>No assignments.</div>}
               {!loading && !error && assignments.length > 0 && (
                 <ul className="class-detail__list">
@@ -210,6 +217,14 @@ export default function ClassDetailPage() {
         }}
         onUpdated={(updated) => {
           if (updated) setLectures((s) => s.map(x => x.id === updated.id ? updated : x));
+        }}
+      />
+      <CreateAssignmentForm
+        open={assignmentModalOpen}
+        onClose={() => { setAssignmentModalOpen(false); }}
+        defaultCourseId={courseIdState}
+        onCreated={(newAssignment) => {
+          if (newAssignment) setAssignments((s) => [newAssignment, ...s]);
         }}
       />
     </Section>

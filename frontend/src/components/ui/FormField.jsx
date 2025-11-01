@@ -13,6 +13,8 @@ export default function FormField({
   rows = 3,
   options = [],
   className = '',
+  inputRef = undefined,
+  inputProps = {},
 }) {
   const id = name || (label ? label.toLowerCase().replace(/\s+/g, '-') : undefined);
 
@@ -36,6 +38,8 @@ export default function FormField({
           placeholder={placeholder}
           readOnly={readOnly}
           required={required}
+          ref={inputRef}
+          {...inputProps}
         />
       ) : options && options.length > 0 ? (
         <select
@@ -45,6 +49,8 @@ export default function FormField({
           onChange={onChange}
           disabled={readOnly}
           required={required}
+          ref={inputRef}
+          {...inputProps}
         >
           {options.map((opt, idx) => (
             <option key={idx} value={typeof opt === 'string' ? opt : opt.value}>
@@ -53,16 +59,25 @@ export default function FormField({
           ))}
         </select>
       ) : (
-        <input
-          id={id}
-          name={name}
-          type={type}
-          value={value ?? ''}
-          onChange={onChange}
-          placeholder={placeholder}
-          readOnly={readOnly}
-          required={required}
-        />
+        (() => {
+          const common = {
+            id,
+            name,
+            type,
+            placeholder,
+            readOnly,
+            required,
+            ref: inputRef,
+            ...inputProps,
+          };
+
+          // file inputs must be uncontrolled (no value prop)
+          if (type === 'file') {
+            return <input {...common} onChange={onChange} />;
+          }
+
+          return <input {...common} value={value ?? ''} onChange={onChange} />;
+        })()
       )}
     </div>
   );
