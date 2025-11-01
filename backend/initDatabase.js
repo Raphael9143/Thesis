@@ -107,7 +107,7 @@ async function initDatabase() {
 		title: 'Exercise 1: Basic OCL',
 		description: 'Learn the basics of OCL programming.',
 		created_by: teacherUser.id,
-		file: null,
+		file: 'uploads/assignments/1761965756726-57902127-sample.use',
 		start_date: new Date('2025-09-20T08:00:00Z'),
 		end_date: new Date('2025-10-01T23:59:00Z')
 	});
