@@ -7,6 +7,7 @@ import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/ClassDetail.css';
 import CreateLectureForm from '../../components/teacher/CreateLectureForm';
 import CreateAssignmentForm from '../../components/teacher/CreateAssignmentForm';
+import CreateExamForm from '../../components/teacher/CreateExamForm';
 import { usePageInfo } from '../../contexts/PageInfoContext';
 
 export default function ClassDetailPage() {
@@ -22,6 +23,7 @@ export default function ClassDetailPage() {
   const [lectureModalOpen, setLectureModalOpen] = useState(false);
   const [editingLecture, setEditingLecture] = useState(null);
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
+  const [examModalOpen, setExamModalOpen] = useState(false);
   const { setTitle: setPageTitle } = usePageInfo();
 
   useEffect(() => {
@@ -48,7 +50,7 @@ export default function ClassDetailPage() {
             }
           } catch (err) {
             // fallback to class name
-            try { setPageTitle(cls.data.name || 'Class'); } catch (_) {}
+            try { setPageTitle(cls.data.name || 'Class'); } catch (_) { }
           }
         }
 
@@ -122,7 +124,7 @@ export default function ClassDetailPage() {
             <div className="class-detail__panel">
               <div className="flex-between">
                 <h4 className="no-margin">Lectures</h4>
-                <div>
+                <div className='create-button-section'>
                   <button className="btn btn-primary btn-sm" onClick={() => setLectureModalOpen(true)}>New Lecture</button>
                 </div>
               </div>
@@ -136,7 +138,6 @@ export default function ClassDetailPage() {
                       <div className="flex-between full-width">
                         <div className="clickable" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/lectures/${l.id}`)}>
                           <div className="font-700">{l.title}</div>
-                          <small>{l.publish_date ? new Date(l.publish_date).toLocaleString() : ''}</small>
                         </div>
                         <div className="display-flex gap-8 ml-12">
                           {l.status === 'draft' ? (
@@ -172,7 +173,7 @@ export default function ClassDetailPage() {
             <div className="class-detail__panel">
               <div className="flex-between">
                 <h4 className="no-margin">Assignments</h4>
-                <div>
+                <div className='create-button-section'>
                   <button className="btn btn-primary btn-sm" onClick={() => setAssignmentModalOpen(true)}>New Assignment</button>
                 </div>
               </div>
@@ -190,14 +191,20 @@ export default function ClassDetailPage() {
             </div>
 
             <div className="class-detail__panel">
-              <h4>Exams</h4>
+              <div className="flex-between">
+                <h4>Exams</h4>
+                <div className='create-button-section'>
+                  <button className="btn btn-primary btn-sm" onClick={() => setExamModalOpen(true)}>New Exam</button>
+                </div>
+              </div>
               {!loading && !error && exams.length === 0 && <div>No exams.</div>}
               {!loading && !error && exams.length > 0 && (
                 <ul className="class-detail__list">
                   {exams.map(ex => (
                     <li key={ex.id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/exams/${ex.id}`)}>
                       <div className="font-700">{ex.title}</div>
-                      <small>{ex.start_time ? `${new Date(ex.start_time).toLocaleString()} - ${new Date(ex.end_time).toLocaleString()}` : ''}</small>
+                      <small>Start: {new Date(ex.start_time).toLocaleString()}</small>
+                      <small>End: {new Date(ex.end_time).toLocaleString()}</small>
                     </li>
                   ))}
                 </ul>
@@ -225,6 +232,14 @@ export default function ClassDetailPage() {
         defaultCourseId={courseIdState}
         onCreated={(newAssignment) => {
           if (newAssignment) setAssignments((s) => [newAssignment, ...s]);
+        }}
+      />
+      <CreateExamForm
+        open={examModalOpen}
+        onClose={() => { setExamModalOpen(false); }}
+        defaultCourseId={courseIdState}
+        onCreated={(newExam) => {
+          if (newExam) setExams((s) => [newExam, ...s]);
         }}
       />
     </Section>
