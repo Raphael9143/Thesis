@@ -27,7 +27,7 @@ const Exam = sequelize.define('Exam', {
     type: DataTypes.DATE,
     allowNull: true
   },
-  model_file: {
+  attachment: {
     type: DataTypes.STRING(255),
     allowNull: true
   },

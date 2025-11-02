@@ -24,7 +24,7 @@ const Submission = sequelize.define('Submission', {
     allowNull: false,
     defaultValue: 1
   },
-  file_path: {
+  attachment: {
     type: DataTypes.STRING(255),
     allowNull: true
   },

@@ -20,8 +20,8 @@ const Lecture = sequelize.define('Lecture', {
     type: DataTypes.STRING(255),
     allowNull: false
   },
-  attachments: {
-    type: DataTypes.JSON,
+  attachment: {
+    type: DataTypes.STRING(255),
     allowNull: true
   },
   publish_date: {

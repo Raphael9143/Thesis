@@ -23,7 +23,7 @@ const Assignment = sequelize.define('Assignment', {
 		type: DataTypes.INTEGER,
 		allowNull: false
 	},
-	file: {
+	attachment: {
 		type: DataTypes.STRING(255),
 		allowNull: true
 	},
