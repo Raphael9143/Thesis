@@ -69,7 +69,7 @@ export default function ClassesPage() {
                 <ClassCard
                   key={c.id}
                   title={c.name}
-                  subtitle={`${c.code} • ${c.semester} • ${c.year}`}
+                  subtitle={`${c.code} • ${c.year}`}
                   image={c.image || c.thumbnail}
                   badge={c.status}
                   description={c.description}
