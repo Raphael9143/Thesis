@@ -276,8 +276,7 @@ router.post('/:id/students', auth, requireRole('TEACHER', 'ADMIN'), ClassControl
  *                 type: string
  *               description:
  *                 type: string
- *               semester:
- *                 type: string
+ *               # semester (removed)
  *               year:
  *                 type: integer
  *               max_students:
@@ -327,9 +326,7 @@ router.put('/:id', auth, requireRole('TEACHER', 'ADMIN'), ClassController.update
  *               description:
  *                 type: string
  *                 example: "Lớp học về UML và OCL cho sinh viên năm 3."
- *               semester:
- *                 type: string
- *                 example: "Spring 2025"
+ *               # semester (removed)
  *               year:
  *                 type: integer
  *                 example: 2025

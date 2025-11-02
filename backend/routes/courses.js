@@ -34,10 +34,11 @@ const CourseController = require('../controllers/CourseController');
  *     requestBody:
  *       required: true
  *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
+                            # start_week and end_week removed from schema
+                            status:
+                                type: string
+                                enum: [ACTIVE, INACTIVE]
+                                example: ACTIVE
  *               - course_name
  *               - course_code
  *               - class_id
@@ -57,12 +58,7 @@ const CourseController = require('../controllers/CourseController');
  *               class_id:
  *                 type: integer
  *                 example: 1
- *               start_week:
- *                 type: integer
- *                 example: 1
- *               end_week:
- *                 type: integer
- *                 example: 15
+ *               # start_week/end_week and semester removed from Course schema
  *               status:
  *                 type: string
  *                 enum: [ACTIVE, INACTIVE]
@@ -127,12 +123,7 @@ router.get('/', auth, CourseController.getAllCourses);
  *               class_id:
  *                 type: integer
  *                 example: 1
- *               start_week:
- *                 type: integer
- *                 example: 1
- *               end_week:
- *                 type: integer
- *                 example: 15
+ *               # start_week/end_week and semester removed from Course schema
  *               status:
  *                 type: string
  *                 enum: [ACTIVE, INACTIVE]
@@ -219,12 +210,7 @@ router.get('/by-class/:classId', auth, CourseController.getCoursesByClass);
  *           schema:
  *             type: object
  *             properties:
- *               start_week:
- *                 type: integer
- *                 example: 1
- *               end_week:
- *                 type: integer
- *                 example: 15
+ *               # start_week and end_week removed from schema
  *               status:
  *                 type: string
  *                 enum: [ACTIVE, INACTIVE]

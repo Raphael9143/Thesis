@@ -28,14 +28,6 @@ const Course = sequelize.define('Course', {
 		type: DataTypes.STRING(50),
 		allowNull: true
 	},
-	start_week: {
-		type: DataTypes.INTEGER,
-		allowNull: true
-	},
-	end_week: {
-		type: DataTypes.INTEGER,
-		allowNull: true
-	},
 	status: {
 		type: DataTypes.ENUM('ACTIVE', 'INACTIVE'),
 		allowNull: false,

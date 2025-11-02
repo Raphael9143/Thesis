@@ -26,10 +26,6 @@ const Class = sequelize.define('Class', {
     allowNull: false,
     field: 'teacher_id'
   },
-  semester: {
-    type: DataTypes.STRING(50),
-    allowNull: true
-  },
   year: {
     type: DataTypes.INTEGER,
     allowNull: true

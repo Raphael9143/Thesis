@@ -66,7 +66,7 @@ const TeacherController = {
 			// Lấy danh sách lớp
 			const classes = await Class.findAll({
 				where: { teacherId: userId },
-				attributes: ['id', 'name', 'code', 'description', 'semester', 'year', 'status', 'max_students', 'current_students', 'createdAt', 'updatedAt']
+				attributes: ['id', 'name', 'code', 'description', 'year', 'status', 'max_students', 'current_students', 'createdAt', 'updatedAt']
 			});
 			res.json({
 				success: true,

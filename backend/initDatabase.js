@@ -75,8 +75,6 @@ async function initDatabase() {
 		description: 'A course about OCL fundamentals',
 		created_by: teacherUser.id,
 		semester: 'Spring 2025',
-		start_week: 1,
-		end_week: 15,
 		status: 'ACTIVE'
 	});
 
@@ -85,7 +83,6 @@ async function initDatabase() {
 		code: 'OCL2025',
 		description: 'OCL Basic class for 1st year students',
 		teacherId: teacherUser.id,
-		semester: 'Spring 2025',
 		year: 2025,
 		max_students: 50,
 		status: 'active'

@@ -17,7 +17,7 @@ const CourseController = {
 	// Tạo môn học mới
 	createCourse: async (req, res) => {
 		try {
-			const { course_name, course_code, description, semester, class_id, start_week, end_week, status } = req.body;
+			const { course_name, course_code, description, semester, class_id, status } = req.body;
 			if (!course_name || !course_code || !class_id) {
 				return res.status(400).json({ success: false, message: 'course_name, course_code và class_id là bắt buộc.' });
 			}
@@ -46,8 +46,6 @@ const CourseController = {
 				course_code,
 				description,
 				semester,
-				start_week,
-				end_week,
 				status: courseStatus,
 				created_by,
 				created_at: new Date()
@@ -84,7 +82,7 @@ const CourseController = {
 	updateClassCourse: async (req, res) => {
 		try {
 			const { id } = req.params; // id của class_course
-			const { start_week, end_week, status, name, description } = req.body;
+			const { status, name, description } = req.body;
 			const userId = req.user.userId;
 			const userRole = req.user.role;
 			// Tìm class_course
@@ -107,8 +105,6 @@ const CourseController = {
 				return res.status(404).json({ success: false, message: 'Course not found.' });
 			}
 			let updated = false;
-			if (start_week !== undefined) { course.start_week = start_week; updated = true; }
-			if (end_week !== undefined) { course.end_week = end_week; updated = true; }
 			if (status !== undefined) {
 				if (!['ACTIVE', 'INACTIVE'].includes(status)) {
 					return res.status(400).json({ success: false, message: 'Chỉ cho phép status là ACTIVE hoặc INACTIVE.' });

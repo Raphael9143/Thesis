@@ -293,12 +293,11 @@ const ClassController = {
         return res.status(403).json({ success: false, message: 'You do not have permission to update this class.' });
       }
 
-      const { name, code, description, semester, year, status } = req.body;
+  const { name, code, description, year, status } = req.body;
       // Chỉ cập nhật các trường được phép
       if (name !== undefined) foundClass.name = name;
       if (code !== undefined) foundClass.code = code;
       if (description !== undefined) foundClass.description = description;
-      if (semester !== undefined) foundClass.semester = semester;
       if (year !== undefined) foundClass.year = year;
       if (status !== undefined) foundClass.status = status;
 
@@ -314,7 +313,7 @@ const ClassController = {
             code: foundClass.code,
             description: foundClass.description,
             teacherId: foundClass.teacherId,
-            semester: foundClass.semester,
+            // semester removed from Class schema
             year: foundClass.year,
             status: foundClass.status,
             createdAt: foundClass.createdAt,
@@ -336,7 +335,7 @@ const ClassController = {
       if (req.user.role !== 'TEACHER') {
         return res.status(403).json({ success: false, message: 'Only teachers can create classes.' });
       }
-      const { name, code, description, semester, year, status, studentEmails, max_students } = req.body;
+  const { name, code, description, year, status, studentEmails, max_students } = req.body;
       if (!name || !code) {
         return res.status(400).json({ success: false, message: 'Class name and code are required.' });
       }
@@ -345,7 +344,6 @@ const ClassController = {
         name,
         code,
         description,
-        semester,
         year,
         status: status || 'active',
         teacherId: req.user.userId,
@@ -377,7 +375,6 @@ const ClassController = {
             code: newClass.code,
             description: newClass.description,
             teacherId: newClass.teacherId,
-            semester: newClass.semester,
             year: newClass.year,
             status: newClass.status,
             createdAt: newClass.createdAt,

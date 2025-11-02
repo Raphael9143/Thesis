@@ -24,14 +24,8 @@ const TeacherController = require('../controllers/TeacherController');
  *           type: string
  *         dob:
  *           type: string
- *           format: date
- *         phone_number:
  *           type: string
  *         address:
- *           type: string
- *         status:
- *           type: string
- *         teacher_code:
  *           type: string
  *         department:
  *           type: string
@@ -48,11 +42,7 @@ const TeacherController = require('../controllers/TeacherController');
  *           format: date-time
  *         updatedAt:
  *           type: string
- *           format: date-time
- */
 
-
-/**
  * @swagger
  * /api/teacher/classes:
  *   get:
