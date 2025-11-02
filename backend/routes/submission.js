@@ -45,6 +45,6 @@ const SubmissionController = require('../controllers/SubmissionController');
  *       500:
  *         description: Internal Server Error
  */
-router.post('/', auth, submissionUpload.single('file'), SubmissionController.submitAssignment);
+router.post('/', auth, submissionUpload.single('attachment'), SubmissionController.submitAssignment);
 
 module.exports = router;

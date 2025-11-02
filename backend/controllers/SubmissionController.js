@@ -31,10 +31,10 @@ const SubmissionController = {
 			if (!assignmentCourse) {
 				return res.status(403).json({ success: false, message: 'Bài tập này không thuộc lớp này.' });
 			}
-			// Xử lý file upload
-			let filePath = null;
+			// Handle uploaded single attachment
+			let attachment = null;
 			if (req.file) {
-				filePath = 'uploads/submission/' + req.file.filename;
+				attachment = '/uploads/submission/' + req.file.filename;
 			}
 			// Lần nộp thứ mấy
 			const attempt_number = await Submission.count({ where: { class_assignment_id: assignmentCourse.id, student_id: req.user.userId } }) + 1;
@@ -44,7 +44,7 @@ const SubmissionController = {
 				student_id: req.user.userId,
 				submission_time: new Date(),
 				attempt_number,
-				file_path: filePath,
+				attachment: attachment,
 				ocl_constraints,
 				status: 'submitted',
 				is_final: false,
