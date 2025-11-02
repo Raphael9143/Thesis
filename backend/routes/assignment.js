@@ -66,7 +66,7 @@ const AssignmentController = require('../controllers/AssignmentController');
  *       500:
  *         description: Internal Server Error
  */
-router.post('/', auth, upload.single('file'), (req, res, next) => {
+router.post('/', auth, upload.single('attachment'), (req, res, next) => {
 	// Nếu có trường constraints là string, parse sang object
 	if (req.body.constraints && typeof req.body.constraints === 'string') {
 		try {
@@ -216,7 +216,7 @@ router.get('/course/:id', auth, AssignmentController.getAssignmentsByCourseId);
  *       500:
  *         description: Internal Server Error
  */
-router.put('/:id', auth, upload.single('file'), (req, res, next) => {
+router.put('/:id', auth, upload.single('attachment'), (req, res, next) => {
 	if (req.body.constraints && typeof req.body.constraints === 'string') {
 		try {
 			req.body.constraints = JSON.parse(req.body.constraints);
