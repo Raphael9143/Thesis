@@ -22,3 +22,8 @@
   font-size: 0.9rem;
   color: var(--color-muted-2);
 }
+
+.preview-header {
+  display: flex;
+  gap: 24px;
+}

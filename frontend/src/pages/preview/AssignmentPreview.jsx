@@ -9,28 +9,13 @@ import { usePageInfo } from '../../contexts/PageInfoContext';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/AssignmentPreview.css';
 import FilePreview from '../../components/ui/FilePreview';
-
-function fmtDate(d) {
-	if (!d) return '';
-	try { return new Date(d).toLocaleString(); } catch { return d; }
-}
-
-function toFullUrl(path) {
-	if (!path) return path;
-	if (/^https?:\/\//i.test(path)) return path;
-	try {
-		const base = axiosClient.defaults.baseURL || '';
-		const origin = new URL(base).origin;
-		if (path.startsWith('/')) return origin + path;
-		return origin + '/' + path.replace(/^\/+/, '');
-	} catch (err) {
-		return path;
-	}
-}
+import toFullUrl from '../../utils/FullURLFile';
+import fmtDate from '../../utils/FormatDate';
+import { formatAvailable, formatDue } from '../../utils/previewMeta';
 
 export default function AssignmentPreview() {
-		const { id, assignmentId } = useParams();
-		const resourceId = id || assignmentId;
+	const { id, assignmentId } = useParams();
+	const resourceId = id || assignmentId;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
 	const [assignment, setAssignment] = useState(null);
@@ -41,10 +26,10 @@ export default function AssignmentPreview() {
 
 	useEffect(() => {
 		let mounted = true;
-			(async () => {
+		(async () => {
 			setLoading(true);
 			try {
-					const res = await userAPI.getAssignmentById(resourceId);
+				const res = await userAPI.getAssignmentById(resourceId);
 				if (!mounted) return;
 				if (res?.success && res.data) {
 					setAssignment(res.data);
@@ -58,22 +43,41 @@ export default function AssignmentPreview() {
 			} finally {
 				if (mounted) setLoading(false);
 			}
-			})();
+		})();
 		return () => { mounted = false; };
 	}, [id]);
 
 	if (loading) return (<Section title="Assignment Preview"><Card>Loading...</Card></Section>);
 	if (error) return (<Section title="Assignment Preview"><Card><div className="text-error">{error}</div></Card></Section>);
 	if (!assignment) return (<Section title="Assignment Preview"><Card><div>No assignment found.</div></Card></Section>);
-
+	console.log(toFullUrl(assignment.attachment))
 	return (
 		<Section title={assignment.title || 'Assignment'}>
 			<Card>
 				<div className="assignment-preview">
 					<div className="preview-meta">
-						<div><strong>Course:</strong> {assignment.courses?.[0]?.course_name || ''}</div>
-						<div><strong>Start:</strong> {fmtDate(assignment.start_date)}</div>
-						<div><strong>Due:</strong> {fmtDate(assignment.end_date)}</div>
+						<div className="preview-header">
+							<div><strong>Course:</strong> {assignment.courses?.[0]?.course_name || ''}</div>
+							<div>
+								<strong>Due</strong> {formatDue(assignment.end_date)}
+							</div>
+							<div>
+								<strong>Available</strong> {assignment.start_date || assignment.end_date ? formatAvailable(assignment.start_date, assignment.end_date, '') : 'Available'}
+							</div>
+							<div>
+								{assignment.attachment && (
+									<a
+										href={toFullUrl(assignment.attachment)}
+										target="_blank"
+										rel="noreferrer"
+										className="btn btn-primary btn-sm"
+										download
+									>
+										Download
+									</a>
+								)}
+							</div>
+						</div>
 					</div>
 
 					<div className="preview-body">
@@ -81,9 +85,9 @@ export default function AssignmentPreview() {
 					</div>
 
 					<div className="file-download">
-						{assignment.file ? (
+						{assignment.attachment ? (
 							<div className="file-preview-wrapper">
-								<FilePreview url={toFullUrl(assignment.file)} filename={assignment.file || ''} />
+								<FilePreview url={toFullUrl(assignment.attachment)} filename={assignment.attachment || ''} allowInlinePreview={false} />
 							</div>
 						) : (
 							<div>No file attached.</div>

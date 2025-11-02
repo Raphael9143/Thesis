@@ -10,32 +10,10 @@ import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/ClassDetail.css';
 import '../../assets/styles/pages/LecturePreview.css';
 import FilePreview from '../../components/ui/FilePreview';
+import toFullUrl from '../../utils/FullURLFile';
+import fmtDate from '../../utils/FormatDate';
+import { formatDue } from '../../utils/previewMeta';
 
-function fmtDate(d) {
-	if (!d) return '';
-	try { return new Date(d).toLocaleString(); } catch { return d; }
-}
-
-function toFullUrl(path) {
-	if (!path) return path;
-	if (/^https?:\/\//i.test(path)) return path;
-	try {
-		const base = axiosClient.defaults.baseURL || '';
-		const origin = new URL(base).origin;
-		if (path.startsWith('/')) return origin + path;
-		return origin + '/' + path.replace(/^\/+/, '');
-	} catch (err) {
-		return path;
-	}
-}
-
-// Given an array of attachment objects (with url/path/filename), probe a small
-// set of candidate URLs and attach a resolved __url field on the attachment
-// object with the first working URL. Candidates tried (in order):
-//  - origin + rawPath
-//  - origin + basePath + rawPath (where basePath comes from axios baseURL pathname)
-// If none succeed, we leave attachments unchanged and rendering will fall back
-// to a best-effort `toFullUrl(raw)`.
 async function resolveAttachmentUrls(attachments) {
 	if (!Array.isArray(attachments) || attachments.length === 0) return attachments;
 	const base = axiosClient.defaults.baseURL || '';
@@ -153,30 +131,53 @@ export default function LecturePreview() {
 	if (error) return (<Section title="Lecture Preview"><Card><div className="text-error">{error}</div></Card></Section>);
 	if (!lecture) return (<Section title="Lecture Preview"><Card><div>No lecture found.</div></Card></Section>);
 
+	// Normalize attachments: older shape used `attachment` (single string or object),
+	// newer shape uses `attachments` array. Convert to array for rendering.
+	const attachments = (() => {
+		const raw = lecture.attachments || lecture.attachment;
+		if (!raw) return [];
+		if (Array.isArray(raw)) return raw;
+		if (typeof raw === 'string') return [{ url: raw }];
+		return [raw];
+	})();
+
 	return (
 		<Section title={lecture.title || 'Lecture'}>
 			<Card>
 				<div className="lecture-preview">
 					<div className="preview-meta">
-						<div><strong>Course:</strong> {lecture.course?.course_name || lecture.course?.course_name || ''}</div>
-						<div><strong>Publish date:</strong> {fmtDate(lecture.publish_date)}</div>
-						<div><strong>Status:</strong> {lecture.status}</div>
+						<div className="preview-header">
+							<div><strong>Course:</strong> {lecture.course?.course_name || lecture.course?.course_name || ''}</div>
+							<div><strong>Publish date:</strong> {fmtDate(lecture.publish_date)}</div>
+							<div><strong>Status:</strong> {lecture.status}</div>
+							<div>
+								<strong>Due</strong> {formatDue(null)} &nbsp; <strong>Available</strong>
+							</div>
+							<div>
+								{lecture.attachment && (
+									<a href={toFullUrl(lecture.attachment)} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm" download>
+										Download
+									</a>
+								)}
+							</div>
+						</div>
 					</div>
 
 					<div className="preview-attachments">
-						{Array.isArray(lecture.attachments) && lecture.attachments.length > 0 ? (
-							lecture.attachments.map((att, idx) => {
-								const isImage = att.mimetype && att.mimetype.startsWith('image/');
-								const raw = att.url || att.path || att.filename;
-								const url = att.__url || toFullUrl(raw);
+						{attachments.length > 0 ? (
+							attachments.map((att, idx) => {
+								const a = (typeof att === 'string') ? { url: att } : att || {};
+								const isImage = a.mimetype && a.mimetype.startsWith('image/');
+								const raw = a.__url || a.url || a.path || a.filename || a;
+								const url = toFullUrl(raw);
+								const name = a.originalname || a.filename || (typeof a === 'string' ? String(a).split('/').pop() : 'attachment');
 								return (
 									<div key={idx} className="attachment-item">
 										{isImage ? (
-											<img src={url} alt={att.originalname || att.filename} className="img-responsive" />
+											<img src={url} alt={name} className="img-responsive" />
 										) : (
 											<div>
-												<FilePreview url={att.__url || url} filename={att.originalname || att.filename || att.filename} mimetype={att.mimetype} />
-												<div style={{ marginTop: 8 }}>{att.originalname || att.filename} • {(att.size || 0)} bytes</div>
+												<FilePreview url={url} filename={name} mimetype={a.mimetype} />
 											</div>
 										)}
 									</div>
@@ -186,7 +187,6 @@ export default function LecturePreview() {
 							<div>No attachments.</div>
 						)}
 					</div>
-
 					<div className="mt-12">
 						<small>Created: {fmtDate(lecture.createdAt)} • Updated: {fmtDate(lecture.updatedAt)}</small>
 					</div>

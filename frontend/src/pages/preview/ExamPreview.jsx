@@ -9,28 +9,13 @@ import { usePageInfo } from '../../contexts/PageInfoContext';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/ExamPreview.css';
 import FilePreview from '../../components/ui/FilePreview';
-
-function fmtDate(d) {
-	if (!d) return '';
-	try { return new Date(d).toLocaleString(); } catch { return d; }
-}
-
-function toFullUrl(path) {
-	if (!path) return path;
-	if (/^https?:\/\//i.test(path)) return path;
-	try {
-		const base = axiosClient.defaults.baseURL || '';
-		const origin = new URL(base).origin;
-		if (path.startsWith('/')) return origin + path;
-		return origin + '/' + path.replace(/^\/+/, '');
-	} catch (err) {
-		return path;
-	}
-}
+import toFullUrl from '../../utils/FullURLFile';
+import fmtDate from '../../utils/FormatDate';
+import { formatAvailable, formatDue } from '../../utils/previewMeta';
 
 export default function ExamPreview() {
-		const { id, examId } = useParams();
-		const resourceId = id || examId;
+	const { id, examId } = useParams();
+	const resourceId = id || examId;
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
 	const [exam, setExam] = useState(null);
@@ -41,10 +26,10 @@ export default function ExamPreview() {
 
 	useEffect(() => {
 		let mounted = true;
-			(async () => {
+		(async () => {
 			setLoading(true);
 			try {
-					const res = await userAPI.getExamById(resourceId);
+				const res = await userAPI.getExamById(resourceId);
 				if (!mounted) return;
 				if (res?.success && res.data) {
 					setExam(res.data);
@@ -58,7 +43,7 @@ export default function ExamPreview() {
 			} finally {
 				if (mounted) setLoading(false);
 			}
-			})();
+		})();
 		return () => { mounted = false; };
 	}, [id]);
 
@@ -70,8 +55,22 @@ export default function ExamPreview() {
 			<Card>
 				<div className="exam-preview">
 					<div className="preview-meta">
-						<div><strong>Course:</strong> {exam.course?.course_name || ''}</div>
-						<div><strong>Window:</strong> {fmtDate(exam.start_time)} — {fmtDate(exam.end_time)}</div>
+						<div className="preview-header">
+							<div><strong>Course:</strong> {exam.course?.course_name || ''}</div>
+							<div>
+								<strong>Due</strong> {formatDue(exam.end_time)}
+							</div>
+							<div>
+								<strong>Available</strong> {exam.start_time || exam.end_time ? formatAvailable(exam.start_time, exam.end_time, '') : 'Available'}
+							</div>
+							<div>
+								{exam.attachment && (
+									<a href={toFullUrl(exam.attachment)} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm" download>
+										Download
+									</a>
+								)}
+							</div>
+						</div>
 					</div>
 
 					<div className="preview-body">
@@ -79,8 +78,8 @@ export default function ExamPreview() {
 					</div>
 
 					<div className="model-file">
-						{exam.model_file ? (
-							<FilePreview url={toFullUrl(exam.model_file)} filename={exam.model_file || ''} />
+						{exam.attachment ? (
+							<FilePreview url={toFullUrl(exam.attachment)} filename={exam.attachment || ''} allowInlinePreview={false} />
 						) : (
 							<div>No model file attached.</div>
 						)}
