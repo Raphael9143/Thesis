@@ -5,7 +5,7 @@ import userAPI from '../../../services/userAPI';
 import { useNotifications } from '../../contexts/NotificationContext';
 import '../../assets/styles/pages/CreateLecture.css';
 
-export default function CreateAssignmentForm({ open, onClose, defaultCourseId = null, onCreated }) {
+export default function CreateAssignmentForm({ open, onClose, defaultCourseId = null, onCreated, assignment = null, onUpdated }) {
 	const { push } = useNotifications();
 	const [form, setForm] = useState({
 		course_id: defaultCourseId || '',
@@ -22,7 +22,21 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 
 	useEffect(() => {
 		setForm((f) => ({ ...f, course_id: defaultCourseId || '' }));
-	}, [defaultCourseId, open]);
+		// if editing an existing assignment, populate fields
+		if (assignment) {
+			try {
+				setForm({
+					course_id: assignment.course_id || assignment.courseId || defaultCourseId || '',
+					title: assignment.title || '',
+					description: assignment.description || assignment.desc || '',
+					start_date_date: assignment.start_date ? (new Date(assignment.start_date)).toISOString().slice(0,10) : '',
+					start_date_time: assignment.start_date ? (new Date(assignment.start_date)).toTimeString().slice(0,5) : '',
+					end_date_date: assignment.end_date ? (new Date(assignment.end_date)).toISOString().slice(0,10) : '',
+					end_date_time: assignment.end_date ? (new Date(assignment.end_date)).toTimeString().slice(0,5) : '',
+				});
+			} catch (err) { /* ignore parse errors */ }
+		}
+	}, [defaultCourseId, open, assignment]);
 
 	const update = (e) => {
 		const { name, value } = e.target;
@@ -89,17 +103,36 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 				for (let i = 0; i < atts.length; i++) fd.append('attachments', atts[i]);
 			}
 
-			const res = await userAPI.createAssignment(fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-			if (res && res.success) {
-				push({ title: 'Success', body: status === 'draft' ? 'Assignment saved as draft.' : 'Assignment created.' });
-				onCreated?.(res.data);
-				onClose?.();
-				// reset
-				setForm({ course_id: defaultCourseId || '', title: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
-				if (fileRef.current) fileRef.current.value = null;
-				if (attachmentsRef.current) attachmentsRef.current.value = null;
+			let res;
+			if (assignment) {
+				// update existing assignment
+				const id = assignment.assignment_id || assignment.id || assignment.assignmentId;
+				res = await userAPI.updateAssignment(id, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+				if (res && res.success) {
+					push({ title: 'Success', body: status === 'draft' ? 'Assignment saved as draft.' : 'Assignment updated.' });
+					onUpdated?.(res.data);
+					onClose?.();
+					// reset
+					setForm({ course_id: defaultCourseId || '', title: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+					if (fileRef.current) fileRef.current.value = null;
+					if (attachmentsRef.current) attachmentsRef.current.value = null;
+				} else {
+					push({ title: 'Error', body: res?.message || 'Failed to update assignment' });
+				}
 			} else {
-				push({ title: 'Error', body: res?.message || 'Failed to create assignment' });
+				// create new
+				res = await userAPI.createAssignment(fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+				if (res && res.success) {
+					push({ title: 'Success', body: status === 'draft' ? 'Assignment saved as draft.' : 'Assignment created.' });
+					onCreated?.(res.data);
+					onClose?.();
+					// reset
+					setForm({ course_id: defaultCourseId || '', title: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+					if (fileRef.current) fileRef.current.value = null;
+					if (attachmentsRef.current) attachmentsRef.current.value = null;
+				} else {
+					push({ title: 'Error', body: res?.message || 'Failed to create assignment' });
+				}
 			}
 		} catch (err) {
 			console.error('Create assignment error', err);

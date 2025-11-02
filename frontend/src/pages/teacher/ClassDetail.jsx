@@ -9,6 +9,7 @@ import CreateLectureForm from '../../components/teacher/CreateLectureForm';
 import CreateAssignmentForm from '../../components/teacher/CreateAssignmentForm';
 import CreateExamForm from '../../components/teacher/CreateExamForm';
 import { usePageInfo } from '../../contexts/PageInfoContext';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 export default function ClassDetailPage() {
   const { id, courseId: routeCourseId } = useParams();
@@ -23,8 +24,10 @@ export default function ClassDetailPage() {
   const [lectureModalOpen, setLectureModalOpen] = useState(false);
   const [editingLecture, setEditingLecture] = useState(null);
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
+  const [editingAssignment, setEditingAssignment] = useState(null);
   const [examModalOpen, setExamModalOpen] = useState(false);
   const { setTitle: setPageTitle } = usePageInfo();
+  const { push } = useNotifications();
 
   useEffect(() => {
     let mounted = true;
@@ -80,9 +83,11 @@ export default function ClassDetailPage() {
         if (examRes?.success && Array.isArray(examRes.data)) setExams(examRes.data);
         if (assignRes?.success && Array.isArray(assignRes.data)) setAssignments(assignRes.data);
       } catch (err) {
-        console.error('Failed to load class detail', err);
         if (!mounted) return;
-        setError(err?.response?.data?.message || err.message || 'Server error');
+        const msg = err?.response?.data?.message || err.message || 'Server error';
+        // show notification instead of console.error
+        try { push({ title: 'Error', body: msg }); } catch (_) { }
+        setError(msg);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -95,9 +100,11 @@ export default function ClassDetailPage() {
       const res = await userAPI.patchLectureStatus(lectureId, 'published');
       if (res?.success) {
         setLectures((s) => s.map(x => x.id === lectureId ? res.data : x));
+        push({ title: 'Success', body: 'Lecture published.' });
       }
     } catch (error) {
-      console.error('publish lecture error', error);
+      const msg = error?.response?.data?.message || error.message || 'Failed to publish lecture.';
+      try { push({ title: 'Error', body: msg }); } catch (_) { }
     }
   }
 
@@ -105,15 +112,52 @@ export default function ClassDetailPage() {
     if (!confirm('Delete this lecture?')) return;
     try {
       const res = await userAPI.deleteLecture(l.id);
-      if (res?.success) setLectures((s) => s.filter(x => x.id !== l.id));
+      if (res?.success) {
+        setLectures((s) => s.filter(x => x.id !== l.id));
+        push({ title: 'Success', body: 'Lecture deleted.' });
+      }
     } catch (err) {
-      console.error('delete error', err);
+      const msg = err?.response?.data?.message || err.message || 'Failed to delete lecture.';
+      try { push({ title: 'Error', body: msg }); } catch (_) { }
     }
   }
 
   const updateLecture = async (l) => {
     setEditingLecture(l);
     setLectureModalOpen(true);
+  }
+
+  const publishAssignment = async (assignmentId) => {
+    try {
+      const res = await userAPI.patchAssignmentStatus(assignmentId, 'published');
+      if (res?.success) {
+        setAssignments((s) => s.map(x => (x.assignment_id || x.id) === assignmentId ? res.data : x));
+        push({ title: 'Success', body: 'Assignment published.' });
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.message || err.message || 'Failed to publish assignment.';
+      try { push({ title: 'Error', body: msg }); } catch (_) { }
+    }
+  }
+
+  const cancelAssignment = async (a) => {
+    if (!confirm('Delete this assignment?')) return;
+    try {
+      const id = a.assignment_id || a.id;
+      const res = await userAPI.deleteAssignment(id);
+      if (res?.success) {
+        setAssignments((s) => s.filter(x => (x.assignment_id || x.id) !== id));
+        push({ title: 'Success', body: 'Assignment deleted.' });
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.message || err.message || 'Failed to delete assignment.';
+      try { push({ title: 'Error', body: msg }); } catch (_) { }
+    }
+  }
+
+  const updateAssignment = async (a) => {
+    setEditingAssignment(a);
+    setAssignmentModalOpen(true);
   }
 
   return (
@@ -181,9 +225,37 @@ export default function ClassDetailPage() {
               {!loading && !error && assignments.length > 0 && (
                 <ul className="class-detail__list">
                   {assignments.map(a => (
-                    <li key={a.assignment_id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/assignments/${a.assignment_id}`)}>
-                      <div className="font-700">{a.title}</div>
-                      <small>{a.courses?.[0]?.assignment_course?.due_date ? `Due: ${new Date(a.courses[0].assignment_course.due_date).toLocaleString()}` : ''}</small>
+                    <li key={a.assignment_id || a.id} className="class-detail__list-item">
+                      <div className="flex-between full-width">
+                        <div className="clickable" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/assignments/${a.assignment_id || a.id}`)}>
+                          <div className="font-700">{a.title}</div>
+                          <small>{a.courses?.[0]?.assignment_course?.due_date ? `Due: ${new Date(a.courses[0].assignment_course.due_date).toLocaleString()}` : ''}</small>
+                        </div>
+                        <div className="display-flex gap-8 ml-12">
+                          {a.status === 'draft' ? (
+                            <>
+                              <button className="btn btn-icon" title="Publish" onClick={() => publishAssignment(a.assignment_id || a.id)}>
+                                <i className="fa fa-paper-plane" />
+                              </button>
+                              <button className="btn btn-icon" title="Delete" onClick={() => cancelAssignment(a)}>
+                                <i className="fa fa-times" />
+                              </button>
+                              <button className="btn btn-icon" title="Update" onClick={() => updateAssignment(a)}>
+                                <i className="fa fa-edit" />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button className="btn btn-icon" title="Delete" onClick={() => cancelAssignment(a)}>
+                                <i className="fa fa-times" />
+                              </button>
+                              <button className="btn btn-icon" title="Update" onClick={() => updateAssignment(a)}>
+                                <i className="fa fa-edit" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -228,10 +300,15 @@ export default function ClassDetailPage() {
       />
       <CreateAssignmentForm
         open={assignmentModalOpen}
-        onClose={() => { setAssignmentModalOpen(false); }}
+        onClose={() => { setAssignmentModalOpen(false); setEditingAssignment(null); }}
         defaultCourseId={courseIdState}
+        assignment={editingAssignment}
         onCreated={(newAssignment) => {
           if (newAssignment) setAssignments((s) => [newAssignment, ...s]);
+        }}
+        onUpdated={(updated) => {
+          if (updated) setAssignments((s) => s.map(x => (x.assignment_id || x.id) === (updated.assignment_id || updated.id) ? updated : x));
+          setEditingAssignment(null);
         }}
       />
       <CreateExamForm
