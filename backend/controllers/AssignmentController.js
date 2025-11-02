@@ -61,30 +61,13 @@ const AssignmentController = {
 		try {
 			const assignments = await Assignment.findAll({
 				include: [
-					{
-						model: Course,
-						as: 'courses',
-						through: { attributes: ['due_date', 'start_date', 'week'] },
-						attributes: ['course_id', 'course_name', 'course_code']
-					},
-					{ model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
-				],
+						{ model: Course, as: 'course', attributes: ['course_id', 'course_name', 'course_code'] },
+						{ model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
+					],
 				order: [['created_at', 'DESC']]
 			});
 
-			const data = assignments.map(a => {
-				const obj = a.toJSON();
-				if (obj.courses) {
-					obj.courses = obj.courses.map(c => {
-						if (c.AssignmentCourse) {
-							c.assignment_course = c.AssignmentCourse;
-							delete c.AssignmentCourse;
-						}
-						return c;
-					});
-				}
-				return obj;
-			});
+			const data = assignments.map(a => a.toJSON());
 
 			res.json({ success: true, data });
 		} catch (error) {
@@ -109,33 +92,17 @@ const AssignmentController = {
 			const assignmentIds = assignmentCourses.map(ac => ac.assignment_id);
 			if (assignmentIds.length === 0) return res.json({ success: true, data: [] });
 
+			// assignments belong to a single course via course_id
 			const assignments = await Assignment.findAll({
-				where: { assignment_id: assignmentIds },
+				where: { course_id: courseIds },
 				include: [
-					{
-						model: Course,
-						as: 'courses',
-						through: { attributes: ['due_date', 'start_date', 'week'] },
-						attributes: ['course_id', 'course_name', 'course_code']
-					},
+					{ model: Course, as: 'course', attributes: ['course_id', 'course_name', 'course_code'] },
 					{ model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
 				],
 				order: [['created_at', 'DESC']]
 			});
 
-			const data = assignments.map(a => {
-				const obj = a.toJSON();
-				if (obj.courses) {
-					obj.courses = obj.courses.map(c => {
-						if (c.AssignmentCourse) {
-							c.assignment_course = c.AssignmentCourse;
-							delete c.AssignmentCourse;
-						}
-						return c;
-					});
-				}
-				return obj;
-			});
+			const data = assignments.map(a => a.toJSON());
 
 			res.json({ success: true, data });
 		} catch (error) {
@@ -153,10 +120,18 @@ const AssignmentController = {
 			if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found.' });
 
 			const classCourse = await ClassCourse.findOne({ where: { course_id: assignment.course_id } });
-			if (!classCourse) return res.status(404).json({ success: false, message: 'Class for this assignment not found.' });
-			const classObj = await Class.findByPk(classCourse.class_id);
-			if (!classObj) return res.status(404).json({ success: false, message: 'Class not found.' });
-			if (classObj.teacherId !== req.user.userId) return res.status(403).json({ success: false, message: 'You do not have permission to update this assignment.' });
+			let classObj = null;
+			if (classCourse) classObj = await Class.findByPk(classCourse.class_id);
+			// Permission: admin OR the teacher who created the assignment OR the homeroom teacher of the class containing the course
+			if (req.user.role === 'ADMIN') {
+				// allowed
+			} else if (req.user.role === 'TEACHER') {
+				const isCreator = assignment.created_by === req.user.userId;
+				const isClassTeacher = classObj && classObj.teacherId === req.user.userId;
+				if (!isCreator && !isClassTeacher) return res.status(403).json({ success: false, message: 'You do not have permission to update this assignment.' });
+			} else {
+				return res.status(403).json({ success: false, message: 'Only teachers or admins can update assignments.' });
+			}
 
 			// handle file
 			if (req.file) assignment.attachment = '/uploads/assignments/' + req.file.filename;
@@ -248,26 +223,12 @@ const AssignmentController = {
 			const { id } = req.params;
 			const assignment = await Assignment.findByPk(id, {
 				include: [
-					{
-						model: Course,
-						as: 'courses',
-						through: { attributes: ['due_date', 'start_date', 'week'] },
-						attributes: ['course_id', 'course_name', 'course_code']
-					},
+					{ model: Course, as: 'course', attributes: ['course_id', 'course_name', 'course_code'] },
 					{ model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
 				]
 			});
 			if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found.' });
 			const obj = assignment.toJSON();
-			if (obj.courses) {
-				obj.courses = obj.courses.map(c => {
-					if (c.AssignmentCourse) {
-						c.assignment_course = c.AssignmentCourse;
-						delete c.AssignmentCourse;
-					}
-					return c;
-				});
-			}
 			res.json({ success: true, data: obj });
 		} catch (error) {
 			console.error('Get assignment by id error:', error);
@@ -304,37 +265,17 @@ const AssignmentController = {
 				return res.status(403).json({ success: false, message: 'Forbidden' });
 			}
 
-			const assignmentCourses = await AssignmentCourse.findAll({ where: { course_id: courseId } });
-			const assignmentIds = assignmentCourses.map(ac => ac.assignment_id);
-			if (assignmentIds.length === 0) return res.json({ success: true, data: [] });
-
+			// fetch assignments directly by course_id
 			const assignments = await Assignment.findAll({
-				where: { assignment_id: assignmentIds },
+				where: { course_id: courseId },
 				include: [
-					{
-						model: Course,
-						as: 'courses',
-						through: { attributes: ['due_date', 'start_date', 'week'] },
-						attributes: ['course_id', 'course_name', 'course_code']
-					},
+					{ model: Course, as: 'course', attributes: ['course_id', 'course_name', 'course_code'] },
 					{ model: User, as: 'creator', attributes: ['id', 'full_name', 'email'] }
 				],
 				order: [['created_at', 'DESC']]
 			});
 
-			const data = assignments.map(a => {
-				const obj = a.toJSON();
-				if (obj.courses) {
-					obj.courses = obj.courses.map(c => {
-						if (c.AssignmentCourse) {
-							c.assignment_course = c.AssignmentCourse;
-							delete c.AssignmentCourse;
-						}
-						return c;
-					});
-				}
-				return obj;
-			});
+			const data = assignments.map(a => a.toJSON());
 
 			res.json({ success: true, data });
 		} catch (error) {

@@ -20,7 +20,7 @@ const AssignmentController = require('../controllers/AssignmentController');
  *                   required:
  *                     - course_id
  *                     - title
- *                     - file
+*                     - attachment
  *                   properties:
  *                     course_id:
  *                       type: integer
@@ -39,10 +39,10 @@ const AssignmentController = require('../controllers/AssignmentController');
  *                     description:
  *                       type: string
  *                       example: "Viết ràng buộc OCL cho mô hình lớp."
- *                     file:
+*                     attachment:
  *                       type: string
  *                       format: binary
- *                       description: File .use (UML/OCL model)
+*                       description: Attachment file (e.g. .use, PDF, image)
  *                 format: binary
  *                 description: File OCL/UML/hình ảnh đính kèm
  *     responses:
@@ -157,7 +157,7 @@ router.get('/course/:id', auth, AssignmentController.getAssignmentsByCourseId);
  * @swagger
  * /api/assignments/{id}:
  *   put:
- *     summary: Sửa bài tập (chỉ giảng viên đứng lớp chứa bài tập đó)
+ *     summary: Update an assignment by id (teacher who created it or homeroom teacher, or admin)
  *     tags: [Assignment]
  *     security:
  *       - bearerAuth: []
@@ -167,9 +167,9 @@ router.get('/course/:id', auth, AssignmentController.getAssignmentsByCourseId);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID của bài tập
+ *         description: Assignment ID
  *     requestBody:
- *       required: true
+ *       required: false
  *       content:
  *         multipart/form-data:
  *           schema:
@@ -179,24 +179,47 @@ router.get('/course/:id', auth, AssignmentController.getAssignmentsByCourseId);
  *                 type: string
  *               description:
  *                 type: string
- *               type:
+ *               status:
  *                 type: string
- *                 enum: [LECTURE, EXERCISE, EXAM]
- *               constraints:
- *                 type: string
- *               difficulty:
- *                 type: string
- *                 enum: [EASY, MEDIUM, HARD]
- *               file:
+ *                 enum: [draft, published, archived]
+ *               attachment:
  *                 type: string
  *                 format: binary
+ *               start_date:
+ *                 type: string
+ *                 format: date-time
+ *               end_date:
+ *                 type: string
+ *                 format: date-time
  *               due_date:
  *                 type: string
  *                 format: date-time
- *                 example: "2025-10-01T23:59:00Z"
  *               week:
  *                 type: integer
- *                 example: 5
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published, archived]
+ *               attachment:
+ *                 type: string
+ *               start_date:
+ *                 type: string
+ *                 format: date-time
+ *               end_date:
+ *                 type: string
+ *                 format: date-time
+ *               due_date:
+ *                 type: string
+ *                 format: date-time
+ *               week:
+ *                 type: integer
  *     responses:
  *       200:
  *         description: Assignment updated
@@ -209,6 +232,8 @@ router.get('/course/:id', auth, AssignmentController.getAssignmentsByCourseId);
  *                   type: boolean
  *                 data:
  *                   $ref: '#/components/schemas/Assignment'
+ *       400:
+ *         description: Bad request
  *       403:
  *         description: Forbidden
  *       404:
