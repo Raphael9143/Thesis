@@ -12,11 +12,15 @@ const ExamController = {
       if (!req.user || req.user.role !== 'TEACHER') {
         return res.status(403).json({ success: false, message: 'Only teachers can create exams.' });
       }
-      const { course_id, title, description, start_time, end_time, model_file } = req.body;
+      const { course_id, title, description, start_time, end_time } = req.body;
       if (!course_id || !title) return res.status(400).json({ success: false, message: 'course_id and title are required.' });
 
       const course = await Course.findByPk(course_id);
       if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
+
+      // handle uploaded single attachment
+      let attachment = null;
+      if (req.file) attachment = '/uploads/exams/' + req.file.filename;
 
       const exam = await Exam.create({
         course_id,
@@ -24,7 +28,7 @@ const ExamController = {
         description: description || null,
         start_time: start_time || null,
         end_time: end_time || null,
-        model_file: model_file || null
+        attachment: attachment || null
       });
 
       res.status(201).json({ success: true, message: 'Exam created!', data: exam });

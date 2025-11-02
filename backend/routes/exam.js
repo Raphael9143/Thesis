@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middlewares/auth');
 const ExamController = require('../controllers/ExamController');
+const examUpload = require('../middlewares/examUpload');
 
 /**
  * @swagger
@@ -36,7 +37,7 @@ const ExamController = require('../controllers/ExamController');
  *       201:
  *         description: Exam created
  */
-router.post('/', auth, ExamController.createExam);
+router.post('/', auth, examUpload.single('attachment'), ExamController.createExam);
 
 /**
  * @swagger
