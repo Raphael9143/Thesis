@@ -39,4 +39,5 @@ const formatDue = (due) => {
   return s || 'No due date';
 }
 
+export { formatAvailable, formatDue, formatShort };
 export default { formatAvailable, formatDue, formatShort };
