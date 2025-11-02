@@ -64,6 +64,12 @@ const userAPI = {
   // Assignments
   // Create assignment: expects FormData (required .use file under field 'file', optional attachments)
   createAssignment: (data, config) => axiosClient.post('assignments', data, config),
+  // Update assignment (id, data FormData or JSON)
+  updateAssignment: (id, data, config) => axiosClient.put(`assignments/${id}`, data, config),
+  // Delete assignment
+  deleteAssignment: (id) => axiosClient.delete(`assignments/${id}`),
+  // Patch assignment status
+  patchAssignmentStatus: (id, status) => axiosClient.patch(`assignments/${id}/status`, { status }),
 
   // Exams
   // Create exam: accepts FormData with fields: course_id, title, description, start_time, end_time, file
