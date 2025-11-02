@@ -26,6 +26,7 @@ export default function ClassDetailPage() {
   const [assignmentModalOpen, setAssignmentModalOpen] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
   const [examModalOpen, setExamModalOpen] = useState(false);
+  const [editingExam, setEditingExam] = useState(null);
   const { setTitle: setPageTitle } = usePageInfo();
   const { push } = useNotifications();
 
@@ -160,6 +161,39 @@ export default function ClassDetailPage() {
     setAssignmentModalOpen(true);
   }
 
+  const publishExam = async (examId) => {
+    try {
+      const res = await userAPI.patchExamStatus(examId, 'published');
+      if (res?.success) {
+        setExams((s) => s.map(x => (x.id === examId ? res.data : x)));
+        push({ title: 'Success', body: 'Exam published.' });
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.message || err.message || 'Failed to publish exam.';
+      try { push({ title: 'Error', body: msg }); } catch (_) { }
+    }
+  }
+
+  const cancelExam = async (e) => {
+    if (!confirm('Delete this exam?')) return;
+    try {
+      const id = e.id || e.exam_id;
+      const res = await userAPI.deleteExam(id);
+      if (res?.success) {
+        setExams((s) => s.filter(x => (x.id || x.exam_id) !== id));
+        push({ title: 'Success', body: 'Exam deleted.' });
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.message || err.message || 'Failed to delete exam.';
+      try { push({ title: 'Error', body: msg }); } catch (_) { }
+    }
+  }
+
+  const updateExam = async (e) => {
+    setEditingExam(e);
+    setExamModalOpen(true);
+  }
+
   return (
     <Section title={classInfo?.name || 'Class'}>
       <Card>
@@ -273,10 +307,36 @@ export default function ClassDetailPage() {
               {!loading && !error && exams.length > 0 && (
                 <ul className="class-detail__list">
                   {exams.map(ex => (
-                    <li key={ex.id} className="class-detail__list-item" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/exams/${ex.id}`)}>
-                      <div className="font-700">{ex.title}</div>
-                      <small>Start: {new Date(ex.start_time).toLocaleString()}</small>
-                      <small>End: {new Date(ex.end_time).toLocaleString()}</small>
+                    <li key={ex.id || ex.exam_id} className="class-detail__list-item">
+                      <div className="flex-between full-width">
+                        <div className="clickable" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/exams/${ex.id || ex.exam_id}`)}>
+                          <div className="font-700">{ex.title}</div>
+                        </div>
+                        <div className="display-flex gap-8 ml-12">
+                          {ex.status === 'draft' ? (
+                            <>
+                              <button className="btn btn-icon" title="Publish" onClick={() => publishExam(ex.id || ex.exam_id)}>
+                                <i className="fa fa-paper-plane" />
+                              </button>
+                              <button className="btn btn-icon" title="Delete" onClick={() => cancelExam(ex)}>
+                                <i className="fa fa-times" />
+                              </button>
+                              <button className="btn btn-icon" title="Update" onClick={() => updateExam(ex)}>
+                                <i className="fa fa-edit" />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button className="btn btn-icon" title="Delete" onClick={() => cancelExam(ex)}>
+                                <i className="fa fa-times" />
+                              </button>
+                              <button className="btn btn-icon" title="Update" onClick={() => updateExam(ex)}>
+                                <i className="fa fa-edit" />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -313,10 +373,15 @@ export default function ClassDetailPage() {
       />
       <CreateExamForm
         open={examModalOpen}
-        onClose={() => { setExamModalOpen(false); }}
+        onClose={() => { setExamModalOpen(false); setEditingExam(null); }}
         defaultCourseId={courseIdState}
+        exam={editingExam}
         onCreated={(newExam) => {
           if (newExam) setExams((s) => [newExam, ...s]);
+        }}
+        onUpdated={(updated) => {
+          if (updated) setExams((s) => s.map(x => (x.id || x.exam_id) === (updated.id || updated.exam_id) ? updated : x));
+          setEditingExam(null);
         }}
       />
     </Section>

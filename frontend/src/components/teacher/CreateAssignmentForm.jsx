@@ -142,8 +142,8 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 		}
 	};
 
-	return (
-		<Modal open={open} onClose={onClose} title="Create new assignment">
+		return (
+			<Modal open={open} onClose={onClose} title={assignment ? 'Edit assignment' : 'Create new assignment'}>
 			<form className="create-lecture-form" onSubmit={(e) => e.preventDefault()}>
 				<FormField
 					label="Title"
@@ -211,11 +211,10 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 					inputProps={{ accept: '.use' }}
 				/>
 
-				<div className="create-lecture-form__actions">
-					<button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>Cancel</button>
-					<button type="button" className="btn btn-signin" onClick={() => doSubmit('draft')} disabled={submitting}>{submitting ? 'Submitting…' : 'Save as draft'}</button>
-					<button type="button" className="btn btn-primary" onClick={() => doSubmit('published')} disabled={submitting}>{submitting ? 'Submitting…' : 'Publish'}</button>
-				</div>
+						<div className="create-lecture-form__actions">
+							<button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>Cancel</button>
+							<button type="button" className="btn btn-primary" onClick={() => doSubmit('published')} disabled={submitting}>{submitting ? 'Submitting…' : 'Apply'}</button>
+						</div>
 			</form>
 		</Modal>
 	);

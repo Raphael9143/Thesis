@@ -5,7 +5,7 @@ import userAPI from '../../../services/userAPI';
 import { useNotifications } from '../../contexts/NotificationContext';
 import '../../assets/styles/pages/CreateLecture.css';
 
-export default function CreateExamForm({ open, onClose, defaultCourseId = null, onCreated }) {
+export default function CreateExamForm({ open, onClose, defaultCourseId = null, onCreated, exam = null, onUpdated }) {
   const { push } = useNotifications();
   const [form, setForm] = useState({
     course_id: defaultCourseId || '',
@@ -22,6 +22,42 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
   useEffect(() => {
     setForm((f) => ({ ...f, course_id: defaultCourseId || '' }));
   }, [defaultCourseId, open]);
+
+  // when editing an existing exam, populate form
+  useEffect(() => {
+    if (exam && open) {
+      const s = {
+        course_id: exam.course_id || exam.courseId || defaultCourseId || '',
+        title: exam.title || '',
+        description: exam.description || '',
+        start_date_date: '',
+        start_date_time: '',
+        end_date_date: '',
+        end_date_time: '',
+      };
+      // parse ISO datetimes into date + time fields if present
+      try {
+        if (exam.start_time) {
+          const sd = new Date(exam.start_time);
+          if (!isNaN(sd)) {
+            s.start_date_date = sd.toISOString().slice(0,10);
+            s.start_date_time = sd.toTimeString().slice(0,5);
+          }
+        }
+      } catch (_) {}
+      try {
+        if (exam.end_time) {
+          const ed = new Date(exam.end_time);
+          if (!isNaN(ed)) {
+            s.end_date_date = ed.toISOString().slice(0,10);
+            s.end_date_time = ed.toTimeString().slice(0,5);
+          }
+        }
+      } catch (_) {}
+      setForm(s);
+      if (fileRef.current) fileRef.current.value = null;
+    }
+  }, [exam, open, defaultCourseId]);
 
   const update = (e) => {
     const { name, value } = e.target;
@@ -67,15 +103,30 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
       // append status if backend supports it (optional)
       if (status) fd.append('status', status);
 
-      const res = await userAPI.createExam(fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      if (res && res.success) {
-        push({ title: 'Success', body: status === 'draft' ? 'Exam saved as draft.' : 'Exam created.' });
-        onCreated?.(res.data);
-        onClose?.();
-        setForm({ course_id: defaultCourseId || '', title: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
-        if (fileRef.current) fileRef.current.value = null;
+      let res;
+      if (exam && (exam.id || exam.exam_id)) {
+        // update
+        const id = exam.id || exam.exam_id;
+        res = await userAPI.updateExam(id, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        if (res && res.success) {
+          push({ title: 'Success', body: status === 'draft' ? 'Exam saved as draft.' : 'Exam updated.' });
+          onUpdated?.(res.data);
+          onClose?.();
+        } else {
+          push({ title: 'Error', body: res?.message || 'Failed to update exam' });
+        }
       } else {
-        push({ title: 'Error', body: res?.message || 'Failed to create exam' });
+        // create
+        res = await userAPI.createExam(fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        if (res && res.success) {
+          push({ title: 'Success', body: status === 'draft' ? 'Exam saved as draft.' : 'Exam created.' });
+          onCreated?.(res.data);
+          onClose?.();
+          setForm({ course_id: defaultCourseId || '', title: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+          if (fileRef.current) fileRef.current.value = null;
+        } else {
+          push({ title: 'Error', body: res?.message || 'Failed to create exam' });
+        }
       }
     } catch (err) {
       console.error('Create exam error', err);
@@ -86,7 +137,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
   };
 
   return (
-    <Modal open={open} onClose={onClose} title="Create new exam">
+    <Modal open={open} onClose={onClose} title={exam ? 'Edit exam' : 'Create new exam'}>
       <form className="create-lecture-form" onSubmit={(e) => e.preventDefault()}>
         <FormField label="Title" name="title" value={form.title} onChange={update} placeholder="Exam title" required />
         <FormField label="Description" name="description" value={form.description} onChange={update} placeholder="Optional description" textarea />
@@ -105,8 +156,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
 
         <div className="create-lecture-form__actions">
           <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>Cancel</button>
-          <button type="button" className="btn btn-outline" onClick={() => doSubmit('draft')} disabled={submitting}>{submitting ? 'Submitting…' : 'Save as draft'}</button>
-          <button type="button" className="btn btn-primary" onClick={() => doSubmit('published')} disabled={submitting}>{submitting ? 'Submitting…' : 'Publish'}</button>
+          <button type="button" className="btn btn-primary" onClick={() => doSubmit('published')} disabled={submitting}>{submitting ? 'Submitting…' : 'Apply'}</button>
         </div>
       </form>
     </Modal>

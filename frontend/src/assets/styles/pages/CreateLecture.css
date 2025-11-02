@@ -25,7 +25,7 @@
 
 .create-lecture-form__actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 0.5rem;
   margin-top: 0.5rem;
 }
