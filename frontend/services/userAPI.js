@@ -50,6 +50,8 @@ const userAPI = {
   getCoursesByClass: (classId) => axiosClient.get(`courses/by-class/${classId}`),
   // Get a single course by id
   getCourseById: (courseId) => axiosClient.get(`courses/${courseId}`),
+  // Create a new course (expects { course_name, course_code, description, semester, class_id, start_week, end_week, status })
+  createCourse: (data, config) => axiosClient.post('courses', data, config),
 
   // Lectures
   // Create lecture: accepts FormData (for file uploads) or JSON payload
