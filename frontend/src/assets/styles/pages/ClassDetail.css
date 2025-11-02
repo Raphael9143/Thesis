@@ -139,3 +139,8 @@
 .class-detail__panel h4 {
 	margin: 0 0 8px 0;
 }
+
+.create-button-section {
+	text-align: right;
+	margin-bottom: 8px;
+}
