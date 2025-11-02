@@ -6,12 +6,14 @@ import ClassCard from '../../components/ui/ClassCard';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
 import { usePageInfo } from '../../contexts/PageInfoContext';
+import CreateCourseModal from '../../components/teacher/CreateCourseModal';
 
 export default function ClassCoursesPage() {
   const { id } = useParams(); // class id
   const navigate = useNavigate();
   const [classInfo, setClassInfo] = useState(null);
   const [courses, setCourses] = useState([]);
+  const [createCourseOpen, setCreateCourseOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { setTitle: setPageTitle } = usePageInfo();
@@ -60,6 +62,9 @@ export default function ClassCoursesPage() {
       <Card>
         <div className="flex-between">
           <h3>Subjects / Courses</h3>
+          <div>
+            <button className="btn btn-primary" onClick={() => setCreateCourseOpen(true)}>New Course</button>
+          </div>
         </div>
 
         <div className="mt-12">
@@ -86,6 +91,9 @@ export default function ClassCoursesPage() {
           )}
         </div>
       </Card>
+      <CreateCourseModal open={createCourseOpen} onClose={() => setCreateCourseOpen(false)} defaultClassId={id} onCreated={(newCourse) => {
+        if (newCourse) setCourses((s) => [newCourse, ...s]);
+      }} />
     </Section>
   );
 }
