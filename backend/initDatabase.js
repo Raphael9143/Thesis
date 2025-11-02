@@ -107,7 +107,7 @@ async function initDatabase() {
 		title: 'Exercise 1: Basic OCL',
 		description: 'Learn the basics of OCL programming.',
 		created_by: teacherUser.id,
-		file: 'uploads/assignments/1761965756726-57902127-sample.use',
+		attachment: '/uploads/assignments/sample.use',
 		start_date: new Date('2025-09-20T08:00:00Z'),
 		end_date: new Date('2025-10-01T23:59:00Z')
 	});
@@ -124,15 +124,7 @@ async function initDatabase() {
 		course_id: course.course_id,
 		teacher_id: teacherUser.id,
 		title: 'Lecture 1: Basics of OCL',
-		attachments: [
-			{
-				"url": "/uploads/lectures/SYLL.doc",
-				"size": 636531,
-				"filename": "SYLL.doc",
-				"mimetype": "doc",
-				"originalname": "SYLL.doc"
-			}
-		],
+		attachment: '/uploads/lectures/SYLL.doc',
 		publish_date: new Date('2025-09-21T08:00:00Z'),
 		status: 'published'
 	});
@@ -141,15 +133,7 @@ async function initDatabase() {
 		course_id: course.course_id,
 		teacher_id: teacherUser.id,
 		title: 'Reference Materials for OCL',
-		attachments: [
-			{
-				"url": "/uploads/lectures/usecaseSpecification_template.pdf",
-				"size": 636531,
-				"filename": "usecaseSpecification_template.pdf",
-				"mimetype": "pdf",
-				"originalname": "usecaseSpecification_template.pdf"
-			}
-		],
+		attachment: '/uploads/lectures/usecaseSpecification_template.pdf',
 		publish_date: new Date('2025-09-22T08:00:00Z'),
 		status: 'published'
 	});
@@ -160,7 +144,7 @@ async function initDatabase() {
 		description: 'Midterm exam for USE fundamentals',
 		start_time: new Date('2025-10-15T09:00:00Z'),
 		end_time: new Date('2025-10-15T11:00:00Z'),
-		model_file: '/uploads/exams/sample.use'
+		attachment: '/uploads/exams/sample.use'
 	});
 
 	console.log('✅ Seeded sample data!');
