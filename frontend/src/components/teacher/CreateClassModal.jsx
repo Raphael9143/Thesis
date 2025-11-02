@@ -9,7 +9,6 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
 	const [name, setName] = useState('');
 	const [code, setCode] = useState('');
 	const [description, setDescription] = useState('');
-	const [semester, setSemester] = useState('');
 	const [year, setYear] = useState(new Date().getFullYear());
 	const [maxStudents, setMaxStudents] = useState(30);
 	const [studentEmailsInput, setStudentEmailsInput] = useState('');
@@ -64,7 +63,7 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
 	useEffect(() => {
 		if (!open) {
 			// reset when modal closes
-			setName(''); setCode(''); setDescription(''); setSemester(''); setYear(new Date().getFullYear()); setMaxStudents(30); setSelectedStudentEmails([]);
+			setName(''); setCode(''); setDescription(''); setYear(new Date().getFullYear()); setMaxStudents(30); setSelectedStudentEmails([]);
 			setStudentEmailsInput('');
 		}
 	}, [open]);
@@ -83,7 +82,6 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
 				name,
 				code,
 				description,
-				semester,
 				year: Number(year),
 				max_students: Number(maxStudents),
 				status: status || 'active',
@@ -99,7 +97,7 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
 				const emailsToNotify = [...selectedStudentEmails];
 
 				// reset form
-				setName(''); setCode(''); setDescription(''); setSemester(''); setYear(new Date().getFullYear()); setMaxStudents(30); setSelectedStudentEmails([]);
+				setName(''); setCode(''); setDescription(''); setYear(new Date().getFullYear()); setMaxStudents(30); setSelectedStudentEmails([]);
 
 				// notify added students (async, do not block)
 				(async () => {
@@ -150,7 +148,6 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
 					<FormField label="Code" value={code} onChange={e => setCode(e.target.value)} required={true}/>
 				</div>
 				<div className="create-class-row mt">
-					<FormField label="Semester" value={semester} onChange={e => setSemester(e.target.value)}/>
 					<FormField label="Year" type="number" value={year} onChange={e => setYear(e.target.value)} required={true}/>
 				</div>
 				<div className="create-class-row mt">
