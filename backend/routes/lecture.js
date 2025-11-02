@@ -42,14 +42,12 @@ const lectureUpload = require('../middlewares/lectureUpload');
  *         description: Forbidden
  */
 // Allow multiple attachments under field name 'attachments'
-router.post('/', auth, lectureUpload.array('attachments', 10), (req, res, next) => {
-	// If the client sent attachments as a JSON string field, try to parse it
-	if (req.body.attachments && typeof req.body.attachments === 'string') {
-		try {
-			req.body.attachments = JSON.parse(req.body.attachments);
-		} catch (e) {
-			// ignore, will be overridden by uploaded files if present
-		}
+router.post('/', auth, lectureUpload.single('attachment'), (req, res, next) => {
+	// If the client sent attachment as a JSON string field, try to parse it
+	if (req.body.attachment && typeof req.body.attachment === 'string') {
+		// keep as string path; no JSON parsing needed for single attachment
+		// normalize empty string to undefined
+		if (req.body.attachment === '') delete req.body.attachment;
 	}
 	next();
 }, LectureController.createLecture);
@@ -187,10 +185,10 @@ router.patch('/:id/status', auth, LectureController.updateLectureStatus);
  *       403:
  *         description: Forbidden
  */
-// Allow attachments to be updated/added via multipart form-data under field 'attachments'
-router.patch('/:id', auth, lectureUpload.array('attachments', 10), (req, res, next) => {
-	if (req.body.attachments && typeof req.body.attachments === 'string') {
-		try { req.body.attachments = JSON.parse(req.body.attachments); } catch (e) { }
+// Allow single attachment to be updated via multipart form-data under field 'attachment'
+router.patch('/:id', auth, lectureUpload.single('attachment'), (req, res, next) => {
+	if (req.body.attachment && typeof req.body.attachment === 'string') {
+		if (req.body.attachment === '') delete req.body.attachment;
 	}
 	next();
 }, LectureController.updateLecture);

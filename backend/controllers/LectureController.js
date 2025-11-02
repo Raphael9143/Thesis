@@ -16,7 +16,7 @@ const LectureController = {
         return res.status(403).json({ success: false, message: 'Only teachers can create lectures.' });
       }
   const teacherId = req.user.userId;
-  const { course_id, title, attachments, publish_date, status } = req.body;
+  const { course_id, title, publish_date, status } = req.body;
       if (!course_id || !title) {
         return res.status(400).json({ success: false, message: 'course_id and title are required.' });
       }
@@ -32,45 +32,20 @@ const LectureController = {
       const owned = await Class.findOne({ where: { id: classIds, teacherId } });
       if (!owned) return res.status(403).json({ success: false, message: 'You are not the homeroom teacher for any class of this course.' });
 
-      // Build attachments array from uploaded files (req.files) or from request body
-      let attachmentsArray = null;
-      if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-        attachmentsArray = req.files.map(file => ({
-          filename: file.filename,
-          originalname: file.originalname,
-          url: `/uploads/lectures/${file.filename}`,
-          mimetype: file.mimetype,
-          size: file.size
-        }));
-        // If client also sent attachments in body (e.g., links), try to merge
-        if (attachments && typeof attachments !== 'object') {
-          try {
-            const parsed = JSON.parse(attachments);
-            if (Array.isArray(parsed)) attachmentsArray = attachmentsArray.concat(parsed);
-          } catch (e) {
-            // ignore parse error
-          }
-        } else if (attachments && Array.isArray(attachments)) {
-          attachmentsArray = attachmentsArray.concat(attachments);
-        }
-      } else if (attachments) {
-        // No uploaded files; use attachments from body if provided
-        if (typeof attachments === 'string') {
-          try {
-            attachmentsArray = JSON.parse(attachments);
-          } catch (e) {
-            attachmentsArray = [attachments];
-          }
-        } else {
-          attachmentsArray = attachments;
-        }
+      // Single attachment handling: prefer uploaded file, else use body. Store as string path.
+      let attachment = null;
+      if (req.file) {
+        attachment = `/uploads/lectures/${req.file.filename}`;
+      } else if (req.body.attachment) {
+        // client may provide existing path
+        attachment = req.body.attachment;
       }
 
       const lecture = await Lecture.create({
         course_id,
         teacher_id: teacherId,
         title,
-        attachments: attachmentsArray || null,
+        attachment: attachment || null,
         publish_date: publish_date || null,
         status: status || 'draft'
       });
@@ -113,41 +88,21 @@ const LectureController = {
         return res.status(403).json({ success: false, message: 'Forbidden' });
       }
 
-      const { title, publish_date, status, attachments } = req.body;
+  const { title, publish_date, status } = req.body;
       const allowed = ['draft', 'published', 'archived'];
       if (status && !allowed.includes(status)) return res.status(400).json({ success: false, message: 'Invalid status' });
 
-      // Merge uploaded files into attachments
-      let attachmentsArray = lecture.attachments && Array.isArray(lecture.attachments) ? [...lecture.attachments] : [];
-      if (req.files && Array.isArray(req.files) && req.files.length > 0) {
-        const uploaded = req.files.map(file => ({
-          filename: file.filename,
-          originalname: file.originalname,
-          url: `/uploads/lectures/${file.filename}`,
-          mimetype: file.mimetype,
-          size: file.size
-        }));
-        attachmentsArray = attachmentsArray.concat(uploaded);
-      }
-
-      // Merge attachments from body if present
-      if (attachments) {
-        if (typeof attachments === 'string') {
-          try {
-            const parsed = JSON.parse(attachments);
-            if (Array.isArray(parsed)) attachmentsArray = attachmentsArray.concat(parsed);
-          } catch (e) {
-            attachmentsArray.push(attachments);
-          }
-        } else if (Array.isArray(attachments)) {
-          attachmentsArray = attachmentsArray.concat(attachments);
-        }
+      // Single attachment update: replace or keep existing
+      if (req.file) {
+        lecture.attachment = `/uploads/lectures/${req.file.filename}`;
+      } else if (req.body.attachment !== undefined) {
+        // explicit set (could be null/empty)
+        lecture.attachment = req.body.attachment || null;
       }
 
       if (title) lecture.title = title;
       if (publish_date) lecture.publish_date = publish_date;
       if (status) lecture.status = status;
-      lecture.attachments = attachmentsArray.length > 0 ? attachmentsArray : null;
 
       await lecture.save();
       res.json({ success: true, message: 'Lecture updated', data: lecture });
