@@ -35,8 +35,9 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 		return name.toLowerCase().endsWith('.use');
 	};
 
-	const doSubmit = async () => {
-		if (!form.course_id || !form.title) {
+	const doSubmit = async (status = 'published') => {
+		// When publishing, require course and title. When saving draft, allow partial data.
+		if (status === 'published' && (!form.course_id || !form.title)) {
 			push({ title: 'Validation', body: 'Course and title are required.' });
 			return;
 		}
@@ -57,6 +58,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 			const fd = new FormData();
 			fd.append('course_id', form.course_id);
 			fd.append('title', form.title);
+			fd.append('status', status);
 			if (form.description) fd.append('description', form.description);
 			// combine date+time fields into ISO datetimes (if provided)
 			if (form.start_date_date) {
@@ -89,7 +91,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 
 			const res = await userAPI.createAssignment(fd, { headers: { 'Content-Type': 'multipart/form-data' } });
 			if (res && res.success) {
-				push({ title: 'Success', body: 'Assignment created.' });
+				push({ title: 'Success', body: status === 'draft' ? 'Assignment saved as draft.' : 'Assignment created.' });
 				onCreated?.(res.data);
 				onClose?.();
 				// reset
@@ -126,7 +128,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 					placeholder="Optional description"
 					textarea
 				/>
-                
+
 
 				<div className="form-row">
 					<FormField
@@ -167,7 +169,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 						required
 					/>
 				</div>
- 
+
 				<FormField
 					label="Model"
 					name="file"
@@ -175,10 +177,11 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 					inputRef={fileRef}
 					inputProps={{ accept: '.use' }}
 				/>
-                
+
 				<div className="create-lecture-form__actions">
 					<button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>Cancel</button>
-					<button type="button" className="btn btn-primary" onClick={doSubmit} disabled={submitting}>{submitting ? 'Submitting…' : 'Create'}</button>
+					<button type="button" className="btn btn-signin" onClick={() => doSubmit('draft')} disabled={submitting}>{submitting ? 'Submitting…' : 'Save as draft'}</button>
+					<button type="button" className="btn btn-primary" onClick={() => doSubmit('published')} disabled={submitting}>{submitting ? 'Submitting…' : 'Publish'}</button>
 				</div>
 			</form>
 		</Modal>
