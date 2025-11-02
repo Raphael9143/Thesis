@@ -42,6 +42,123 @@ router.post('/', auth, examUpload.single('attachment'), ExamController.createExa
 /**
  * @swagger
  * /api/exams/{id}:
+ *   put:
+ *     summary: Update an exam by id (teacher who created it or homeroom teacher, or admin)
+ *     tags: [Exam]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Exam ID
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               attachment:
+ *                 type: string
+ *                 format: binary
+ *               start_time:
+ *                 type: string
+ *                 format: date-time
+ *               end_time:
+ *                 type: string
+ *                 format: date-time
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               start_time:
+ *                 type: string
+ *                 format: date-time
+ *               end_time:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: Exam updated
+ */
+router.put('/:id', auth, examUpload.single('attachment'), ExamController.updateExam);
+
+/**
+ * @swagger
+ * /api/exams/{id}:
+ *   patch:
+ *     summary: Patch an exam by id (partial update)
+ *     tags: [Exam]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Exam ID
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               attachment:
+ *                 type: string
+ *                 format: binary
+ *               start_time:
+ *                 type: string
+ *                 format: date-time
+ *               end_time:
+ *                 type: string
+ *                 format: date-time
+ *     responses:
+ *       200:
+ *         description: Exam patched
+ */
+router.patch('/:id', auth, examUpload.single('attachment'), ExamController.patchExam);
+
+/**
+ * @swagger
+ * /api/exams/{id}:
+ *   delete:
+ *     summary: Delete an exam by id (admin only)
+ *     tags: [Exam]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Exam ID
+ *     responses:
+ *       200:
+ *         description: Exam deleted
+ */
+router.delete('/:id', auth, ExamController.deleteExam);
+
+/**
+ * @swagger
+ * /api/exams/{id}:
  *   get:
  *     summary: Lấy chi tiết bài thi theo id
  *     tags: [Exam]

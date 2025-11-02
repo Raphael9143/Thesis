@@ -92,6 +92,111 @@ const ExamController = {
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   }
+  ,
+
+  // Update an exam (full update). Allowed: ADMIN or creator or homeroom teacher
+  updateExam: async (req, res) => {
+    try {
+      if (!req.user) return res.status(403).json({ success: false, message: 'Authentication required.' });
+      const { id } = req.params;
+      const exam = await Exam.findByPk(id);
+      if (!exam) return res.status(404).json({ success: false, message: 'Exam not found.' });
+
+      // check permissions
+      const classCourse = await ClassCourse.findOne({ where: { course_id: exam.course_id } });
+      let classObj = null;
+      if (classCourse) classObj = await Class.findByPk(classCourse.class_id);
+
+      if (req.user.role === 'ADMIN') {
+        // allowed
+      } else if (req.user.role === 'TEACHER') {
+        const isCreator = exam.created_by === req.user.userId;
+        const isClassTeacher = classObj && classObj.teacherId === req.user.userId;
+        if (!isCreator && !isClassTeacher) return res.status(403).json({ success: false, message: 'You do not have permission to update this exam.' });
+      } else {
+        return res.status(403).json({ success: false, message: 'Only teachers or admins can update exams.' });
+      }
+
+      // handle uploaded file
+      if (req.file) exam.attachment = '/uploads/exams/' + req.file.filename;
+
+      const fields = ['title', 'description', 'start_time', 'end_time'];
+      fields.forEach(f => { if (req.body[f] !== undefined) exam[f] = req.body[f]; });
+
+      await exam.save();
+      res.json({ success: true, data: exam });
+    } catch (error) {
+      console.error('Update exam error:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  // Patch exam (partial update) - similar to update but allows partial fields
+  patchExam: async (req, res) => {
+    try {
+      if (!req.user) return res.status(403).json({ success: false, message: 'Authentication required.' });
+      const { id } = req.params;
+      const exam = await Exam.findByPk(id);
+      if (!exam) return res.status(404).json({ success: false, message: 'Exam not found.' });
+
+      // permissions same as update
+      const classCourse = await ClassCourse.findOne({ where: { course_id: exam.course_id } });
+      let classObj = null;
+      if (classCourse) classObj = await Class.findByPk(classCourse.class_id);
+
+      if (req.user.role === 'ADMIN') {
+        // allowed
+      } else if (req.user.role === 'TEACHER') {
+        const isCreator = exam.created_by === req.user.userId;
+        const isClassTeacher = classObj && classObj.teacherId === req.user.userId;
+        if (!isCreator && !isClassTeacher) return res.status(403).json({ success: false, message: 'You do not have permission to patch this exam.' });
+      } else {
+        return res.status(403).json({ success: false, message: 'Only teachers or admins can patch exams.' });
+      }
+
+      // allow status or times or title/description updates
+      const updatable = ['title', 'description', 'start_time', 'end_time'];
+      updatable.forEach(f => { if (req.body[f] !== undefined) exam[f] = req.body[f]; });
+      if (req.file) exam.attachment = '/uploads/exams/' + req.file.filename;
+
+      await exam.save();
+      res.json({ success: true, data: exam });
+    } catch (error) {
+      console.error('Patch exam error:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  },
+
+  // Delete exam (admin only)
+  deleteExam: async (req, res) => {
+    try {
+      if (!req.user) return res.status(403).json({ success: false, message: 'Authentication required.' });
+      const { id } = req.params;
+      const exam = await Exam.findByPk(id);
+      if (!exam) return res.status(404).json({ success: false, message: 'Exam not found.' });
+
+      // Find class for the course to check homeroom teacher
+      const classCourse = await ClassCourse.findOne({ where: { course_id: exam.course_id } });
+      let classObj = null;
+      if (classCourse) classObj = await Class.findByPk(classCourse.class_id);
+
+      if (req.user.role === 'ADMIN') {
+        // allowed
+      } else if (req.user.role === 'TEACHER') {
+        const isCreator = exam.created_by === req.user.userId;
+        const isClassTeacher = classObj && classObj.teacherId === req.user.userId;
+        if (!isCreator && !isClassTeacher) return res.status(403).json({ success: false, message: 'You do not have permission to delete this exam.' });
+      } else {
+        return res.status(403).json({ success: false, message: 'Only teachers or admins can delete exams.' });
+      }
+
+      await exam.destroy();
+      res.json({ success: true, message: 'Exam deleted.' });
+    } catch (error) {
+      console.error('Delete exam error:', error);
+      res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  }
 };
 
 module.exports = ExamController;
