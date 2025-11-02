@@ -74,6 +74,12 @@ const userAPI = {
   // Exams
   // Create exam: accepts FormData with fields: course_id, title, description, start_time, end_time, file
   createExam: (data, config) => axiosClient.post('exams', data, config),
+  // Update exam (id, data FormData or JSON)
+  updateExam: (id, data, config) => axiosClient.put(`exams/${id}`, data, config),
+  // Delete exam
+  deleteExam: (id) => axiosClient.delete(`exams/${id}`),
+  // Patch exam status (e.g., publish)
+  patchExamStatus: (id, status) => axiosClient.patch(`exams/${id}/status`, { status }),
 
   // Add more API endpoints as needed for your thesis project
   updateTeacherProfile: (data) => axiosClient.patch("teacher/profile", data),
