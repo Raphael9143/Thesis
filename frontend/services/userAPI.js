@@ -65,6 +65,10 @@ const userAPI = {
   // Create assignment: expects FormData (required .use file under field 'file', optional attachments)
   createAssignment: (data, config) => axiosClient.post('assignments', data, config),
 
+  // Exams
+  // Create exam: accepts FormData with fields: course_id, title, description, start_time, end_time, file
+  createExam: (data, config) => axiosClient.post('exams', data, config),
+
   // Add more API endpoints as needed for your thesis project
   updateTeacherProfile: (data) => axiosClient.patch("teacher/profile", data),
 
