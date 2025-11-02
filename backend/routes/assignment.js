@@ -254,6 +254,54 @@ router.put('/:id', auth, upload.single('attachment'), (req, res, next) => {
 
 /**
  * @swagger
+ * /api/assignments/{id}/status:
+ *   patch:
+ *     summary: Update the status of an assignment by id (teacher who created it or homeroom teacher, or admin)
+ *     tags: [Assignment]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Assignment ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published, archived]
+ *     responses:
+ *       200:
+ *         description: Assignment status updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   $ref: '#/components/schemas/Assignment'
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Assignment not found
+ *       500:
+ *         description: Internal Server Error
+ */
+router.patch('/:id/status', auth, AssignmentController.updateAssignmentStatus);
+
+/**
+ * @swagger
  * /api/assignments/remove-from-course/{assignmentId}:
  *   patch:
  *     summary: Xoá assignment khỏi course (không xoá khỏi assignments)

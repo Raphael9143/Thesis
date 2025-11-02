@@ -283,6 +283,46 @@ const AssignmentController = {
 			res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	}
+	,
+
+	// Patch assignment status by id
+	updateAssignmentStatus: async (req, res) => {
+		try {
+			const { id } = req.params;
+			const { status } = req.body;
+			if (!status) return res.status(400).json({ success: false, message: 'Missing status in request body.' });
+			const allowed = ['draft', 'published', 'archived'];
+			if (!allowed.includes(status)) return res.status(400).json({ success: false, message: 'Invalid status value.' });
+
+			const assignment = await Assignment.findByPk(id);
+			if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found.' });
+
+			// Permission: admin OR creator OR homeroom teacher of class containing the course
+			const classCourse = await ClassCourse.findOne({ where: { course_id: assignment.course_id } });
+			let classObj = null;
+			if (classCourse) classObj = await Class.findByPk(classCourse.class_id);
+
+			if (!req.user) return res.status(403).json({ success: false, message: 'Authentication required.' });
+			if (req.user.role === 'ADMIN') {
+				// allowed
+			} else if (req.user.role === 'TEACHER') {
+				const isCreator = assignment.created_by === req.user.userId;
+				const isClassTeacher = classObj && classObj.teacherId === req.user.userId;
+				if (!isCreator && !isClassTeacher) return res.status(403).json({ success: false, message: 'You do not have permission to change status of this assignment.' });
+			} else {
+				return res.status(403).json({ success: false, message: 'Only teachers or admins can change assignment status.' });
+			}
+
+			assignment.status = status;
+			assignment.updated_at = new Date();
+			await assignment.save();
+
+			res.json({ success: true, data: assignment });
+		} catch (error) {
+			console.error('Update assignment status error:', error);
+			res.status(500).json({ success: false, message: 'Internal Server Error' });
+		}
+	}
 };
 
 module.exports = AssignmentController;
