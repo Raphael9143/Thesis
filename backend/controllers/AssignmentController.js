@@ -14,7 +14,7 @@ const AssignmentController = {
 				return res.status(403).json({ success: false, message: 'Only teachers can create assignments.' });
 			}
 
-			const { course_id, title, description, start_date, end_date, status } = req.body;
+			const { course_id, title, description, start_date, end_date, status, type } = req.body;
 			if (!course_id || !title) {
 				return res.status(400).json({ success: false, message: 'course_id and title are required.' });
 			}
@@ -46,6 +46,11 @@ const AssignmentController = {
 				return res.status(400).json({ success: false, message: 'Invalid status' });
 			}
 
+			const allowedTypes = ['SINGLE', 'GROUP'];
+			if (type && !allowedTypes.includes(type)) {
+				return res.status(400).json({ success: false, message: 'Invalid type. Allowed: SINGLE or GROUP' });
+			}
+
 			const assignment = await Assignment.create({
 				course_id,
 				title,
@@ -53,6 +58,7 @@ const AssignmentController = {
 				created_by: req.user.userId,
 				attachment: attachment,
 				status: status || 'draft',
+				type: type || 'SINGLE',
 				start_date: start_date || null,
 				end_date: end_date || null,
 				created_at: new Date()
@@ -166,6 +172,13 @@ const AssignmentController = {
 				const allowed = ['draft', 'published', 'archived'];
 				if (!allowed.includes(req.body.status)) return res.status(400).json({ success: false, message: 'Invalid status' });
 				assignment.status = req.body.status;
+			}
+
+			// allow updating type
+			if (req.body.type !== undefined) {
+				const allowedT = ['SINGLE', 'GROUP'];
+				if (!allowedT.includes(req.body.type)) return res.status(400).json({ success: false, message: 'Invalid type. Allowed: SINGLE or GROUP' });
+				assignment.type = req.body.type;
 			}
 
 			// ensure assignment has start_date and end_date (required invariant)

@@ -105,6 +105,7 @@ async function initDatabase() {
 		description: 'Learn the basics of OCL programming.',
 		created_by: teacherUser.id,
 		attachment: '/uploads/assignments/sample.use',
+		type: 'SINGLE',
 		start_date: new Date('2025-09-20T08:00:00Z'),
 		end_date: new Date('2025-10-01T23:59:00Z')
 	});
@@ -141,6 +142,7 @@ async function initDatabase() {
 		description: 'Midterm exam for USE fundamentals',
 		start_date: new Date('2025-10-15T09:00:00Z'),
 		end_date: new Date('2025-10-15T11:00:00Z'),
+		type: 'SINGLE',
 		attachment: '/uploads/exams/sample.use'
 	});
 

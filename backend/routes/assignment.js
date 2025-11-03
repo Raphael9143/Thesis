@@ -34,6 +34,10 @@ const AssignmentController = require('../controllers/AssignmentController');
  *                       type: string
  *                       format: date-time
  *                       example: "2025-10-01T23:59:00Z"
+										type:
+											type: string
+											enum: [SINGLE, GROUP]
+											example: SINGLE
  *                     title:
  *                       type: string
  *                       example: "Bài tập OCL số 1"
@@ -183,6 +187,9 @@ router.get('/course/:id', auth, AssignmentController.getAssignmentsByCourseId);
  *               status:
  *                 type: string
  *                 enum: [draft, published, archived]
+ *               type:
+ *                 type: string
+ *                 enum: [SINGLE, GROUP]
  *               attachment:
  *                 type: string
  *                 format: binary
@@ -208,6 +215,9 @@ router.get('/course/:id', auth, AssignmentController.getAssignmentsByCourseId);
  *               status:
  *                 type: string
  *                 enum: [draft, published, archived]
+ *               type:
+ *                 type: string
+ *                 enum: [SINGLE, GROUP]
  *               attachment:
  *                 type: string
  *               start_date:

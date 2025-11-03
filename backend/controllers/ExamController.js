@@ -12,7 +12,7 @@ const ExamController = {
       if (!req.user || req.user.role !== 'TEACHER') {
         return res.status(403).json({ success: false, message: 'Only teachers can create exams.' });
       }
-  const { course_id, title, description, start_date, end_date } = req.body;
+  const { course_id, title, description, start_date, end_date, type } = req.body;
   if (!course_id || !title) return res.status(400).json({ success: false, message: 'course_id and title are required.' });
 
   // start_date and end_date are required
@@ -25,7 +25,11 @@ const ExamController = {
       const course = await Course.findByPk(course_id);
       if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
 
-      // handle uploaded single attachment
+  // validate type if provided
+  const allowedTypes = ['SINGLE', 'GROUP'];
+  if (type && !allowedTypes.includes(type)) return res.status(400).json({ success: false, message: 'Invalid type. Allowed: SINGLE or GROUP' });
+
+  // handle uploaded single attachment
       let attachment = null;
       if (req.file) attachment = '/uploads/exams/' + req.file.filename;
 
@@ -35,6 +39,7 @@ const ExamController = {
         description: description || null,
         start_date: start_date || null,
         end_date: end_date || null,
+        type: type || 'SINGLE',
         attachment: attachment || null
       });
 
@@ -139,6 +144,13 @@ const ExamController = {
       const fields = ['title', 'description'];
       fields.forEach(f => { if (req.body[f] !== undefined) exam[f] = req.body[f]; });
 
+      // allow updating type
+      if (req.body.type !== undefined) {
+        const allowedT = ['SINGLE', 'GROUP'];
+        if (!allowedT.includes(req.body.type)) return res.status(400).json({ success: false, message: 'Invalid type. Allowed: SINGLE or GROUP' });
+        exam.type = req.body.type;
+      }
+
       // ensure invariant
   if (!exam.start_date || !exam.end_date) return res.status(400).json({ success: false, message: 'start_date and end_date must be set.' });
 
@@ -186,6 +198,13 @@ const ExamController = {
       const updatable = ['title', 'description'];
       updatable.forEach(f => { if (req.body[f] !== undefined) exam[f] = req.body[f]; });
       if (req.file) exam.attachment = '/uploads/exams/' + req.file.filename;
+
+      // allow updating type on patch
+      if (req.body.type !== undefined) {
+        const allowedT = ['SINGLE', 'GROUP'];
+        if (!allowedT.includes(req.body.type)) return res.status(400).json({ success: false, message: 'Invalid type. Allowed: SINGLE or GROUP' });
+        exam.type = req.body.type;
+      }
 
   if (!exam.start_date || !exam.end_date) return res.status(400).json({ success: false, message: 'start_date and end_date must be set.' });
 

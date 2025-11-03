@@ -36,6 +36,10 @@ const examUpload = require('../middlewares/examUpload');
  *               end_date:
  *                 type: string
  *                 format: date-time
+ *               type:
+ *                 type: string
+ *                 enum: [SINGLE, GROUP]
+ *                 example: SINGLE
  *               model_file:
  *                 type: string
  *     responses:
@@ -79,6 +83,10 @@ router.post('/', auth, examUpload.single('attachment'), ExamController.createExa
  *               end_date:
  *                 type: string
  *                 format: date-time
+ *               type:
+ *                 type: string
+ *                 enum: [SINGLE, GROUP]
+ *                 example: SINGLE
  *         application/json:
  *           schema:
  *             type: object
@@ -93,6 +101,10 @@ router.post('/', auth, examUpload.single('attachment'), ExamController.createExa
  *               end_date:
  *                 type: string
  *                 format: date-time
+ *               type:
+ *                 type: string
+ *                 enum: [SINGLE, GROUP]
+ *                 example: SINGLE
  *     responses:
  *       200:
  *         description: Exam updated

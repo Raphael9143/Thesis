@@ -32,6 +32,11 @@ const Assignment = sequelize.define('Assignment', {
  		allowNull: false,
  		defaultValue: 'draft'
  	},
+	type: {
+		type: DataTypes.ENUM('SINGLE','GROUP'),
+		allowNull: false,
+		defaultValue: 'SINGLE'
+	},
 	start_date: {
 		type: DataTypes.DATE,
 		allowNull: false

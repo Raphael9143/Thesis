@@ -31,6 +31,11 @@ const Exam = sequelize.define('Exam', {
     type: DataTypes.STRING(255),
     allowNull: true
   },
+  type: {
+    type: DataTypes.ENUM('SINGLE','GROUP'),
+    allowNull: false,
+    defaultValue: 'SINGLE'
+  },
   createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
