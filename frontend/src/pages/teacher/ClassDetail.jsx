@@ -215,7 +215,7 @@ export default function ClassDetailPage() {
                     <li key={l.id} className="class-detail__list-item">
                       <div className="flex-between full-width">
                         <div className="clickable" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/lectures/${l.id}`)}>
-                          <div className="font-700">{l.title}</div>
+                          <div className="font-700 truncate">{l.title}</div>
                         </div>
                         <div className="display-flex gap-8 ml-12">
                           {l.status === 'draft' ? (
@@ -262,7 +262,7 @@ export default function ClassDetailPage() {
                     <li key={a.assignment_id || a.id} className="class-detail__list-item">
                       <div className="flex-between full-width">
                         <div className="clickable" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/assignments/${a.assignment_id || a.id}`)}>
-                          <div className="font-700">{a.title}</div>
+                          <div className="font-700 truncate">{a.title}</div>
                           <small>{a.courses?.[0]?.assignment_course?.due_date ? `Due: ${new Date(a.courses[0].assignment_course.due_date).toLocaleString()}` : ''}</small>
                         </div>
                         <div className="display-flex gap-8 ml-12">
@@ -310,7 +310,7 @@ export default function ClassDetailPage() {
                     <li key={ex.id || ex.exam_id} className="class-detail__list-item">
                       <div className="flex-between full-width">
                         <div className="clickable" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/exams/${ex.id || ex.exam_id}`)}>
-                          <div className="font-700">{ex.title}</div>
+                          <div className="font-700 truncate">{ex.title}</div>
                         </div>
                         <div className="display-flex gap-8 ml-12">
                           {ex.status === 'draft' ? (
