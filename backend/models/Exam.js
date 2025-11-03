@@ -19,13 +19,13 @@ const Exam = sequelize.define('Exam', {
     type: DataTypes.TEXT,
     allowNull: true
   },
-  start_time: {
+  start_date: {
     type: DataTypes.DATE,
-    allowNull: true
+    allowNull: false,
   },
-  end_time: {
+  end_date: {
     type: DataTypes.DATE,
-    allowNull: true
+    allowNull: false,
   },
   attachment: {
     type: DataTypes.STRING(255),

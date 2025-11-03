@@ -18,6 +18,11 @@ const examUpload = require('../middlewares/examUpload');
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - course_id
+ *               - title
+ *               - start_date
+ *               - end_date
  *             properties:
  *               course_id:
  *                 type: integer
@@ -25,10 +30,10 @@ const examUpload = require('../middlewares/examUpload');
  *                 type: string
  *               description:
  *                 type: string
- *               start_time:
+ *               start_date:
  *                 type: string
  *                 format: date-time
- *               end_time:
+ *               end_date:
  *                 type: string
  *                 format: date-time
  *               model_file:
@@ -68,10 +73,10 @@ router.post('/', auth, examUpload.single('attachment'), ExamController.createExa
  *               attachment:
  *                 type: string
  *                 format: binary
- *               start_time:
+ *               start_date:
  *                 type: string
  *                 format: date-time
- *               end_time:
+ *               end_date:
  *                 type: string
  *                 format: date-time
  *         application/json:
@@ -82,10 +87,10 @@ router.post('/', auth, examUpload.single('attachment'), ExamController.createExa
  *                 type: string
  *               description:
  *                 type: string
- *               start_time:
+ *               start_date:
  *                 type: string
  *                 format: date-time
- *               end_time:
+ *               end_date:
  *                 type: string
  *                 format: date-time
  *     responses:
@@ -123,10 +128,10 @@ router.put('/:id', auth, examUpload.single('attachment'), ExamController.updateE
  *               attachment:
  *                 type: string
  *                 format: binary
- *               start_time:
+ *               start_date:
  *                 type: string
  *                 format: date-time
- *               end_time:
+ *               end_date:
  *                 type: string
  *                 format: date-time
  *     responses:

@@ -19,6 +19,21 @@ const AssignmentController = {
 				return res.status(400).json({ success: false, message: 'course_id and title are required.' });
 			}
 
+			// start_date and end_date are required
+			if (!start_date || !end_date) {
+				return res.status(400).json({ success: false, message: 'start_date and end_date are required.' });
+			}
+
+			// validate dates
+			const sDate = new Date(start_date);
+			const eDate = new Date(end_date);
+			if (isNaN(sDate.getTime()) || isNaN(eDate.getTime())) {
+				return res.status(400).json({ success: false, message: 'Invalid start_date or end_date.' });
+			}
+			if (sDate >= eDate) {
+				return res.status(400).json({ success: false, message: 'start_date must be before end_date.' });
+			}
+
 			const course = await Course.findByPk(course_id);
 			if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
 
@@ -136,7 +151,16 @@ const AssignmentController = {
 			// handle file
 			if (req.file) assignment.attachment = '/uploads/assignments/' + req.file.filename;
 
-			const fields = ['title', 'description', 'start_date', 'end_date'];
+			// Handle updates to start/end dates: if either is provided, ensure both exist and are valid
+			if (req.body.start_date !== undefined || req.body.end_date !== undefined) {
+				const newStart = req.body.start_date !== undefined ? new Date(req.body.start_date) : new Date(assignment.start_date);
+				const newEnd = req.body.end_date !== undefined ? new Date(req.body.end_date) : new Date(assignment.end_date);
+				if (isNaN(newStart.getTime()) || isNaN(newEnd.getTime())) return res.status(400).json({ success: false, message: 'Invalid start_date or end_date.' });
+				if (newStart >= newEnd) return res.status(400).json({ success: false, message: 'start_date must be before end_date.' });
+				assignment.start_date = newStart;
+				assignment.end_date = newEnd;
+			}
+			const fields = ['title', 'description'];
 			fields.forEach(f => { if (req.body[f] !== undefined) assignment[f] = req.body[f]; });
 			if (req.body.status !== undefined) {
 				const allowed = ['draft', 'published', 'archived'];
@@ -144,6 +168,8 @@ const AssignmentController = {
 				assignment.status = req.body.status;
 			}
 
+			// ensure assignment has start_date and end_date (required invariant)
+			if (!assignment.start_date || !assignment.end_date) return res.status(400).json({ success: false, message: 'start_date and end_date must be set.' });
 			await assignment.save();
 
 			// update assignment_course if present

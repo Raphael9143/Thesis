@@ -12,8 +12,15 @@ const ExamController = {
       if (!req.user || req.user.role !== 'TEACHER') {
         return res.status(403).json({ success: false, message: 'Only teachers can create exams.' });
       }
-      const { course_id, title, description, start_time, end_time } = req.body;
-      if (!course_id || !title) return res.status(400).json({ success: false, message: 'course_id and title are required.' });
+  const { course_id, title, description, start_date, end_date } = req.body;
+  if (!course_id || !title) return res.status(400).json({ success: false, message: 'course_id and title are required.' });
+
+  // start_date and end_date are required
+  if (!start_date || !end_date) return res.status(400).json({ success: false, message: 'start_date and end_date are required.' });
+  const s = new Date(start_date);
+  const e = new Date(end_date);
+  if (isNaN(s.getTime()) || isNaN(e.getTime())) return res.status(400).json({ success: false, message: 'Invalid start_date or end_date.' });
+  if (s >= e) return res.status(400).json({ success: false, message: 'start_date must be before end_date.' });
 
       const course = await Course.findByPk(course_id);
       if (!course) return res.status(404).json({ success: false, message: 'Course not found.' });
@@ -26,8 +33,8 @@ const ExamController = {
         course_id,
         title,
         description: description || null,
-        start_time: start_time || null,
-        end_time: end_time || null,
+        start_date: start_date || null,
+        end_date: end_date || null,
         attachment: attachment || null
       });
 
@@ -85,7 +92,7 @@ const ExamController = {
         return res.status(403).json({ success: false, message: 'Forbidden' });
       }
 
-      const exams = await Exam.findAll({ where: { course_id: courseId }, include: [{ model: Course, as: 'course' }], order: [['start_time', 'DESC']] });
+  const exams = await Exam.findAll({ where: { course_id: courseId }, include: [{ model: Course, as: 'course' }], order: [['start_date', 'DESC']] });
       res.json({ success: true, data: exams });
     } catch (error) {
       console.error('Get exams by course id error:', error);
@@ -120,8 +127,20 @@ const ExamController = {
       // handle uploaded file
       if (req.file) exam.attachment = '/uploads/exams/' + req.file.filename;
 
-      const fields = ['title', 'description', 'start_time', 'end_time'];
+      // If updating times, validate both exist and ordering
+      if (req.body.start_date !== undefined || req.body.end_date !== undefined) {
+        const newStart = req.body.start_date !== undefined ? new Date(req.body.start_date) : new Date(exam.start_date || exam.get('start_date'));
+        const newEnd = req.body.end_date !== undefined ? new Date(req.body.end_date) : new Date(exam.end_date || exam.get('end_date'));
+        if (isNaN(newStart.getTime()) || isNaN(newEnd.getTime())) return res.status(400).json({ success: false, message: 'Invalid start_date or end_date.' });
+        if (newStart >= newEnd) return res.status(400).json({ success: false, message: 'start_date must be before end_date.' });
+        exam.start_date = newStart;
+        exam.end_date = newEnd;
+      }
+      const fields = ['title', 'description'];
       fields.forEach(f => { if (req.body[f] !== undefined) exam[f] = req.body[f]; });
+
+      // ensure invariant
+  if (!exam.start_date || !exam.end_date) return res.status(400).json({ success: false, message: 'start_date and end_date must be set.' });
 
       await exam.save();
       res.json({ success: true, data: exam });
@@ -155,9 +174,20 @@ const ExamController = {
       }
 
       // allow status or times or title/description updates
-      const updatable = ['title', 'description', 'start_time', 'end_time'];
+      // For patch: if either time field is provided, require both (either in body or existing)
+      if (req.body.start_date !== undefined || req.body.end_date !== undefined) {
+        const newStart = req.body.start_date !== undefined ? new Date(req.body.start_date) : new Date(exam.start_date || exam.get('start_date'));
+        const newEnd = req.body.end_date !== undefined ? new Date(req.body.end_date) : new Date(exam.end_date || exam.get('end_date'));
+        if (isNaN(newStart.getTime()) || isNaN(newEnd.getTime())) return res.status(400).json({ success: false, message: 'Invalid start_date or end_date.' });
+        if (newStart >= newEnd) return res.status(400).json({ success: false, message: 'start_date must be before end_date.' });
+        exam.start_date = newStart;
+        exam.end_date = newEnd;
+      }
+      const updatable = ['title', 'description'];
       updatable.forEach(f => { if (req.body[f] !== undefined) exam[f] = req.body[f]; });
       if (req.file) exam.attachment = '/uploads/exams/' + req.file.filename;
+
+  if (!exam.start_date || !exam.end_date) return res.status(400).json({ success: false, message: 'start_date and end_date must be set.' });
 
       await exam.save();
       res.json({ success: true, data: exam });

@@ -34,11 +34,11 @@ const Assignment = sequelize.define('Assignment', {
  	},
 	start_date: {
 		type: DataTypes.DATE,
-		allowNull: true
+		allowNull: false
 	},
 	end_date: {
 		type: DataTypes.DATE,
-		allowNull: true
+		allowNull: false
 	},
 	created_at: {
 		type: DataTypes.DATE,
