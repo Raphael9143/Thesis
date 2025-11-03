@@ -37,8 +37,8 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
       };
       // parse ISO datetimes into date + time fields if present
       try {
-        if (exam.start_time) {
-          const sd = new Date(exam.start_time);
+        if (exam.start_date) {
+          const sd = new Date(exam.start_date);
           if (!isNaN(sd)) {
             s.start_date_date = sd.toISOString().slice(0,10);
             s.start_date_time = sd.toTimeString().slice(0,5);
@@ -46,8 +46,8 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         }
       } catch (_) {}
       try {
-        if (exam.end_time) {
-          const ed = new Date(exam.end_time);
+        if (exam.end_date) {
+          const ed = new Date(exam.end_date);
           if (!isNaN(ed)) {
             s.end_date_date = ed.toISOString().slice(0,10);
             s.end_date_time = ed.toTimeString().slice(0,5);
@@ -78,21 +78,21 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
       if (form.title) fd.append('title', form.title);
       if (form.description) fd.append('description', form.description);
 
-      // combine date+time into ISO strings for start_time and end_time
+      // combine date+time into ISO strings for start_date and end_date
       if (form.start_date_date) {
         const time = form.start_date_time || '00:00';
         try {
-          fd.append('start_time', new Date(`${form.start_date_date}T${time}`).toISOString());
+          fd.append('start_date', new Date(`${form.start_date_date}T${time}`).toISOString());
         } catch (err) {
-          fd.append('start_time', `${form.start_date_date}T${time}`);
+          fd.append('start_date', `${form.start_date_date}T${time}`);
         }
       }
       if (form.end_date_date) {
         const time2 = form.end_date_time || '23:59';
         try {
-          fd.append('end_time', new Date(`${form.end_date_date}T${time2}`).toISOString());
+          fd.append('end_date', new Date(`${form.end_date_date}T${time2}`).toISOString());
         } catch (err) {
-          fd.append('end_time', `${form.end_date_date}T${time2}`);
+          fd.append('end_date', `${form.end_date_date}T${time2}`);
         }
       }
 
@@ -143,13 +143,13 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         <FormField label="Description" name="description" value={form.description} onChange={update} placeholder="Optional description" textarea />
 
         <div className="form-row">
-          <FormField label="Start date" name="start_date_date" type="date" value={form.start_date_date} onChange={update} />
-          <FormField label="Start time" name="start_date_time" type="time" value={form.start_date_time} onChange={update} inputProps={{ min: '00:00', max: '23:59' }} />
+          <FormField label="Start date" name="start_date_date" type="date" value={form.start_date_date} onChange={update} required />
+          <FormField label="Start time" name="start_date_time" type="time" value={form.start_date_time} onChange={update} inputProps={{ min: '00:00', max: '23:59' }} required />
         </div>
 
         <div className="form-row">
-          <FormField label="End date" name="end_date_date" type="date" value={form.end_date_date} onChange={update} />
-          <FormField label="End time" name="end_date_time" type="time" value={form.end_date_time} onChange={update} inputProps={{ min: '00:00', max: '23:59' }} />
+          <FormField label="End date" name="end_date_date" type="date" value={form.end_date_date} onChange={update} required />
+          <FormField label="End time" name="end_date_time" type="time" value={form.end_date_time} onChange={update} inputProps={{ min: '00:00', max: '23:59' }} required />
         </div>
 
         <FormField label="Attachment" name="file" type="file" inputRef={fileRef} />

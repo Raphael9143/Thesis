@@ -127,7 +127,7 @@ export default function StudentClassDetailPage() {
 									{exams.map(ex => (
 										<li key={ex.id} className="class-detail__list-item" onClick={() => navigate(`/education/student/classes/${id}/courses/${courseIdState}/exams/${ex.id}`)}>
 											<div className="class-detail__item-title">{ex.title}</div>
-											<small>{ex.start_time ? `${new Date(ex.start_time).toLocaleString()} - ${new Date(ex.end_time).toLocaleString()}` : ''}</small>
+											<small>{ex.start_date ? `${new Date(ex.start_date).toLocaleString()} - ${new Date(ex.end_date).toLocaleString()}` : ''}</small>
 										</li>
 									))}
 									</ul>

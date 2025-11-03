@@ -58,10 +58,10 @@ export default function ExamPreview() {
 						<div className="preview-header">
 							<div><strong>Course:</strong> {exam.course?.course_name || ''}</div>
 							<div>
-								<strong>Due</strong> {formatDue(exam.end_time)}
+								<strong>Due</strong> {formatDue(exam.end_date)}
 							</div>
 							<div>
-								<strong>Available</strong> {exam.start_time || exam.end_time ? formatAvailable(exam.start_time, exam.end_time, '') : 'Available'}
+								<strong>Available</strong> {exam.start_date || exam.end_date ? formatAvailable(exam.start_date, exam.end_date, '') : 'Available'}
 							</div>
 							<div>
 								{exam.attachment && (
