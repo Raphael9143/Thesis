@@ -10,6 +10,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
   const [form, setForm] = useState({
     course_id: defaultCourseId || '',
     title: '',
+    type: '',
     description: '',
     start_date_date: '',
     start_date_time: '',
@@ -29,6 +30,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
       const s = {
         course_id: exam.course_id || exam.courseId || defaultCourseId || '',
         title: exam.title || '',
+        type: exam.type || '',
         description: exam.description || '',
         start_date_date: '',
         start_date_time: '',
@@ -65,9 +67,9 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
   };
 
   const doSubmit = async (status = 'published') => {
-    // If publishing, require course and title. Draft allows partial input but backend may still enforce.
-    if (status === 'published' && (!form.course_id || !form.title)) {
-      push({ title: 'Validation', body: 'Course and title are required.' });
+    // Validate required fields: course, title and type are mandatory
+    if (!form.course_id || !form.title || !form.type) {
+      push({ title: 'Validation', body: 'Course, title and type are required.' });
       return;
     }
 
@@ -76,6 +78,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
       const fd = new FormData();
       if (form.course_id) fd.append('course_id', form.course_id);
       if (form.title) fd.append('title', form.title);
+  if (form.type) fd.append('type', form.type);
       if (form.description) fd.append('description', form.description);
 
       // combine date+time into ISO strings for start_date and end_date
@@ -122,7 +125,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
           push({ title: 'Success', body: status === 'draft' ? 'Exam saved as draft.' : 'Exam created.' });
           onCreated?.(res.data);
           onClose?.();
-          setForm({ course_id: defaultCourseId || '', title: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+          setForm({ course_id: defaultCourseId || '', title: '', type: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
           if (fileRef.current) fileRef.current.value = null;
         } else {
           push({ title: 'Error', body: res?.message || 'Failed to create exam' });
@@ -140,6 +143,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
     <Modal open={open} onClose={onClose} title={exam ? 'Edit exam' : 'Create new exam'}>
       <form className="create-lecture-form" onSubmit={(e) => e.preventDefault()}>
         <FormField label="Title" name="title" value={form.title} onChange={update} placeholder="Exam title" required />
+          <FormField label="Type" name="type" value={form.type} onChange={update} options={[{ value: 'SINGLE', label: 'Single' }, { value: 'GROUP', label: 'Group' }]} required />
         <FormField label="Description" name="description" value={form.description} onChange={update} placeholder="Optional description" textarea />
 
         <div className="form-row">

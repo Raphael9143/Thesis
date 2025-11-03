@@ -10,6 +10,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 	const [form, setForm] = useState({
 		course_id: defaultCourseId || '',
 		title: '',
+        type: '',
 		description: '',
 		start_date_date: '',
 		start_date_time: '',
@@ -28,6 +29,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 				setForm({
 					course_id: assignment.course_id || assignment.courseId || defaultCourseId || '',
 					title: assignment.title || '',
+                    type: assignment.type || '',
 					description: assignment.description || assignment.desc || '',
 					start_date_date: assignment.start_date ? (new Date(assignment.start_date)).toISOString().slice(0,10) : '',
 					start_date_time: assignment.start_date ? (new Date(assignment.start_date)).toTimeString().slice(0,5) : '',
@@ -50,9 +52,9 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 	};
 
 	const doSubmit = async (status = 'published') => {
-		// When publishing, require course and title. When saving draft, allow partial data.
-		if (status === 'published' && (!form.course_id || !form.title)) {
-			push({ title: 'Validation', body: 'Course and title are required.' });
+		// Validate required fields: course, title, type are mandatory
+		if (!form.course_id || !form.title || !form.type) {
+			push({ title: 'Validation', body: 'Course, title and type are required.' });
 			return;
 		}
 
@@ -72,6 +74,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 			const fd = new FormData();
 			fd.append('course_id', form.course_id);
 			fd.append('title', form.title);
+			fd.append('type', form.type);
 			fd.append('status', status);
 			if (form.description) fd.append('description', form.description);
 			// combine date+time fields into ISO datetimes (if provided)
@@ -113,7 +116,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 					onUpdated?.(res.data);
 					onClose?.();
 					// reset
-					setForm({ course_id: defaultCourseId || '', title: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+					setForm({ course_id: defaultCourseId || '', title: '', type: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
 					if (fileRef.current) fileRef.current.value = null;
 					if (attachmentsRef.current) attachmentsRef.current.value = null;
 				} else {
@@ -127,7 +130,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 					onCreated?.(res.data);
 					onClose?.();
 					// reset
-					setForm({ course_id: defaultCourseId || '', title: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+					setForm({ course_id: defaultCourseId || '', title: '', type: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
 					if (fileRef.current) fileRef.current.value = null;
 					if (attachmentsRef.current) attachmentsRef.current.value = null;
 				} else {
@@ -151,6 +154,14 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 					value={form.title}
 					onChange={update}
 					placeholder="Assignment title"
+					required
+				/>
+				<FormField
+					label="Type"
+					name="type"
+					value={form.type}
+					onChange={update}
+					options={[{ value: 'SINGLE', label: 'Single' }, { value: 'GROUP', label: 'Group' }]}
 					required
 				/>
 				<FormField
