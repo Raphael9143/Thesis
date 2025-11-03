@@ -20,7 +20,8 @@ const AssignmentController = require('../controllers/AssignmentController');
  *                   required:
  *                     - course_id
  *                     - title
-*                     - attachment
+ *                     - start_date
+ *                     - end_date
  *                   properties:
  *                     course_id:
  *                       type: integer

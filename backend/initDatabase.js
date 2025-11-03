@@ -139,8 +139,8 @@ async function initDatabase() {
 		course_id: course.course_id,
 		title: 'Midterm Exam',
 		description: 'Midterm exam for USE fundamentals',
-		start_time: new Date('2025-10-15T09:00:00Z'),
-		end_time: new Date('2025-10-15T11:00:00Z'),
+		start_date: new Date('2025-10-15T09:00:00Z'),
+		end_date: new Date('2025-10-15T11:00:00Z'),
 		attachment: '/uploads/exams/sample.use'
 	});
 
