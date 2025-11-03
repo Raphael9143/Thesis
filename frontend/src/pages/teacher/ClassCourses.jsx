@@ -61,7 +61,7 @@ export default function ClassCoursesPage() {
     <Section>
       <Card>
         <div className="flex-between">
-          <h3>Subjects / Courses</h3>
+          <h3>Courses</h3>
           <div>
             <button className="btn btn-primary" onClick={() => setCreateCourseOpen(true)}>New Course</button>
           </div>
