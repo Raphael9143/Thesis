@@ -16,10 +16,10 @@ const StudentController = {
 			}
 			// Lấy danh sách class đã enrolled
 			const classStudents = await ClassStudent.findAll({
-				where: { student_id: studentId },
+				where: { studentId: studentId },
 				include: [{ model: Class }]
 			});
-			const classes = classStudents.map(cs => cs.Class);
+			const classes = classStudents.map(cs => cs.class);
 			res.json({ success: true, data: { classes } });
 		} catch (error) {
 			console.error('Get enrolled classes error:', error);
@@ -45,10 +45,10 @@ const StudentController = {
 
 			// Lấy danh sách lớp đã/enrolled (chỉ lấy id để gọn nhẹ)
 			const classLinks = await ClassStudent.findAll({
-				where: { student_id: userId },
-				attributes: ['class_id']
+				where: { studentId: userId },
+				attributes: ['classId']
 			});
-			const enrolled_classes = classLinks.map(link => (link.class_id ?? link.classId));
+			const enrolled_classes = classLinks.map(link => (link.classId));
 
 			res.json({
 				success: true,
@@ -67,6 +67,7 @@ const StudentController = {
 	// Sửa thông tin profile sinh viên hiện tại
 	updateProfile: async (req, res) => {
 		try {
+
 			const studentId = req.user.userId;
 			const { student_code, major, year } = req.body;
 			// Không cho phép cập nhật completed_assignments từ API
@@ -85,6 +86,94 @@ const StudentController = {
 			res.json({ success: true, message: 'Student profile updated!', data: student });
 		} catch (error) {
 			console.error('Update student profile error:', error);
+			res.status(500).json({ success: false, message: 'Server error' });
+		}
+	}
+	,
+
+	// Lấy tất cả assignment/exam liên quan tới sinh viên cùng thông tin nộp bài của sinh viên
+	// Trả về các item với: id, title, kind ('assignment'|'exam'), submissions_count, attempt_limit (nullable), graded (boolean), course_id, due_date
+	getAssignmentsWithSubmissions: async (req, res) => {
+		try {
+			// Determine target student id: param id (admin/teacher or self) or current user
+			let targetStudentId = req.params && req.params.id ? parseInt(req.params.id, 10) : null;
+			const requesterRole = req.user && req.user.role;
+			const requesterId = req.user && req.user.userId;
+			if (!targetStudentId) targetStudentId = requesterId;
+			if (req.params && req.params.id) {
+				// Only admin, teacher or the student themself can fetch another student's info
+				if (!(requesterRole === 'ADMIN' || requesterRole === 'TEACHER' || requesterId === targetStudentId)) {
+					return res.status(403).json({ success: false, message: 'Forbidden' });
+				}
+			}
+			// Lấy danh sách lớp của sinh viên
+			const ClassStudent = require('../models/ClassStudent');
+			const classLinks = await ClassStudent.findAll({ where: { studentId: targetStudentId }, attributes: ['classId'] });
+			const classIds = classLinks.map(l => l.classId);
+			if (classIds.length === 0) return res.json({ success: true, data: [] });
+
+			// Lấy courses của các lớp
+			const ClassCourse = require('../models/ClassCourse');
+			const classCourses = await ClassCourse.findAll({ where: { class_id: classIds }, attributes: ['course_id'] });
+			const courseIds = [...new Set(classCourses.map(cc => cc.course_id ?? cc.courseId))];
+			if (courseIds.length === 0) return res.json({ success: true, data: [] });
+
+			const AssignmentCourse = require('../models/AssignmentCourse');
+			const Assignment = require('../models/Assignment');
+			const Exam = require('../models/Exam');
+			const Submission = require('../models/Submission');
+			const { Op } = require('sequelize');
+
+			// Lấy danh sách assignment (qua assignment_courses)
+			const assignmentCourses = await AssignmentCourse.findAll({
+				where: { course_id: courseIds },
+				include: [{ model: Assignment, as: 'assignment', attributes: ['assignment_id', 'title'] }]
+			});
+
+			// Lấy exams trực tiếp theo course_id
+			const exams = await Exam.findAll({ where: { course_id: courseIds }, attributes: ['id', 'title', 'start_date', 'end_date', 'course_id'] });
+
+			const results = [];
+
+			// Process assignments
+			for (const ac of assignmentCourses) {
+				const a = ac.assignment;
+				if (!a) continue;
+				const assignmentId = a.assignment_id;
+				const submissionsCount = await Submission.count({ where: { assignment_id: assignmentId, student_id: targetStudentId } });
+				const graded = await Submission.findOne({ where: { assignment_id: assignmentId, student_id: targetStudentId, score: { [Op.ne]: null } } });
+				results.push({
+					id: assignmentId,
+					title: a.title,
+					kind: 'assignment',
+					submissions_count: submissionsCount,
+					attempt_limit: null,
+					graded: !!graded,
+					course_id: ac.course_id ?? ac.courseId,
+					due_date: ac.due_date ?? ac.dueDate
+				});
+			}
+
+			// Process exams
+			for (const ex of exams) {
+				const examId = ex.id;
+				const submissionsCount = await Submission.count({ where: { exam_id: examId, student_id: targetStudentId } });
+				const graded = await Submission.findOne({ where: { exam_id: examId, student_id: targetStudentId, score: { [Op.ne]: null } } });
+				results.push({
+					id: examId,
+					title: ex.title,
+					kind: 'exam',
+					submissions_count: submissionsCount,
+					attempt_limit: null,
+					graded: !!graded,
+					course_id: ex.course_id,
+					due_date: ex.start_date
+				});
+			}
+
+			res.json({ success: true, data: results });
+		} catch (error) {
+			console.error('Get assignments with submissions error:', error);
 			res.status(500).json({ success: false, message: 'Server error' });
 		}
 	}

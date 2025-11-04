@@ -189,4 +189,51 @@ router.patch('/profile', auth, StudentController.updateProfile);
 
 router.get('/enrolled-classes', auth, StudentController.getEnrolledClasses);
 
+/**
+ * @swagger
+ * /api/student/assignments:
+ *   get:
+ *     summary: Lấy danh sách assignments/exams liên quan tới sinh viên kèm thông tin nộp bài của sinh viên
+ *     tags: [Student]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Danh sách assignments/exams với thông tin nộp bài
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       title:
+ *                         type: string
+ *                       kind:
+ *                         type: string
+ *                         enum: [assignment, exam]
+ *                       submissions_count:
+ *                         type: integer
+ *                       attempt_limit:
+ *                         type: integer
+ *                         nullable: true
+ *                       graded:
+ *                         type: boolean
+ *                       course_id:
+ *                         type: integer
+ *                       due_date:
+ *                         type: string
+ *                         format: date-time
+ */
+router.get('/assignments', auth, StudentController.getAssignmentsWithSubmissions);
+// Get assignments/submissions for a specific student by id (admin/teacher or the student themself)
+router.get('/:id/assignments', auth, StudentController.getAssignmentsWithSubmissions);
+
 module.exports = router;

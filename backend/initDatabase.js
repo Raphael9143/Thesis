@@ -169,6 +169,56 @@ async function initDatabase() {
 		attachment: '/uploads/exams/sample.use'
 	});
 
+	// Additional sample assignments
+	const assignment2 = await Assignment.create({
+		course_id: course.course_id,
+		title: 'Exercise 2: Advanced OCL',
+		description: 'Advanced exercises to deepen OCL knowledge.',
+		created_by: teacherUser.id,
+		attachment: '/uploads/assignments/exercise2.use',
+		type: 'SINGLE',
+		start_date: new Date('2025-10-05T08:00:00Z'),
+		end_date: new Date('2025-10-20T23:59:00Z')
+	});
+
+	await AssignmentCourse.create({
+		assignment_id: assignment2.assignment_id,
+		course_id: course.course_id,
+		start_date: new Date('2025-10-05T08:00:00Z'),
+		due_date: new Date('2025-10-20T23:59:00Z'),
+		week: 4
+	});
+
+	const assignment3 = await Assignment.create({
+		course_id: course.course_id,
+		title: 'Group Project: OCL Use Case',
+		description: 'A group assignment to model a real-world use case with OCL.',
+		created_by: teacherUser.id,
+		attachment: '/uploads/assignments/group_project.use',
+		type: 'GROUP',
+		start_date: new Date('2025-10-25T08:00:00Z'),
+		end_date: new Date('2025-11-30T23:59:00Z')
+	});
+
+	await AssignmentCourse.create({
+		assignment_id: assignment3.assignment_id,
+		course_id: course.course_id,
+		start_date: new Date('2025-10-25T08:00:00Z'),
+		due_date: new Date('2025-11-30T23:59:00Z'),
+		week: 8
+	});
+
+	// Final exam sample
+	const finalExam = await Exam.create({
+		course_id: course.course_id,
+		title: 'Final Exam',
+		description: 'Comprehensive final exam covering the whole course.',
+		start_date: new Date('2025-12-10T09:00:00Z'),
+		end_date: new Date('2025-12-10T12:00:00Z'),
+		type: 'SINGLE',
+		attachment: '/uploads/exams/final_exam.use'
+	});
+
 	// Sample submission (student submitted to the assignment)
 	await Submission.create({
 		assignment_id: assignment.assignment_id,
