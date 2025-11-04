@@ -38,7 +38,8 @@ const ClassController = {
       res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   },
-  // Lấy danh sách sinh viên của lớp
+  // Lấy danh sách sinh viên của lớp (phân trang)
+  // Query params: page (integer, default 1). Page size fixed to 20.
   getStudentsOfClass: async (req, res) => {
     try {
       const classId = req.params.id;
@@ -49,15 +50,31 @@ const ClassController = {
         return res.status(404).json({ success: false, message: 'Class not found.' });
       }
 
-      // Lấy danh sách sinh viên
-      const students = await ClassStudent.findAll({
+      // Pagination: page query param, default 1. Fixed page size 20 as requested.
+      const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+      const pageSize = 20;
+      const offset = (page - 1) * pageSize;
+
+      // Lấy danh sách sinh viên phân trang
+      const { count, rows } = await ClassStudent.findAndCountAll({
         where: { classId },
-        include: [{ model: User, as: 'student', attributes: ['id', 'full_name', 'email', 'role', 'createdAt', 'updatedAt'] }]
+        include: [{ model: User, as: 'student', attributes: ['id', 'full_name', 'email', 'role', 'createdAt', 'updatedAt'] }],
+        limit: pageSize,
+        offset,
+        order: [['joined_at', 'ASC']]
       });
+
+      const totalPages = Math.max(1, Math.ceil(count / pageSize));
 
       res.json({
         success: true,
-        data: students.map(cs => ({
+        pagination: {
+          page,
+          pageSize,
+          total: count,
+          totalPages
+        },
+        data: rows.map(cs => ({
           id: cs.student.id,
           student_name: cs.student.full_name,
           email: cs.student.email,

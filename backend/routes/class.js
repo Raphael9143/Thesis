@@ -53,6 +53,12 @@ router.get('/:id/student-count', auth, ClassController.getStudentCountOfClass);
  *           type: integer
  *         required: true
  *         description: ID lớp học
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         required: false
+ *         description: Số trang (mỗi trang chứa 20 sinh viên). Mặc định 1.
  *     responses:
  *       200:
  *         description: Danh sách sinh viên
@@ -63,6 +69,17 @@ router.get('/:id/student-count', auth, ClassController.getStudentCountOfClass);
  *               properties:
  *                 success:
  *                   type: boolean
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     pageSize:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *                     totalPages:
+ *                       type: integer
  *                 data:
  *                   type: array
  *                   items:
@@ -70,6 +87,8 @@ router.get('/:id/student-count', auth, ClassController.getStudentCountOfClass);
  *                     properties:
  *                       id:
  *                         type: integer
+  *                       student_name:
+  *                         type: string
  *                       email:
  *                         type: string
  *                       role:
