@@ -9,7 +9,15 @@ const Submission = sequelize.define('Submission', {
   },
   class_assignment_id: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: true
+  },
+  assignment_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
+  exam_id: {
+    type: DataTypes.BIGINT.UNSIGNED,
+    allowNull: true
   },
   student_id: {
     type: DataTypes.INTEGER,
@@ -28,14 +36,6 @@ const Submission = sequelize.define('Submission', {
     type: DataTypes.STRING(255),
     allowNull: true
   },
-  ocl_constraints: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  check_result: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
   score: {
     type: DataTypes.FLOAT,
     allowNull: true
@@ -44,16 +44,7 @@ const Submission = sequelize.define('Submission', {
     type: DataTypes.TEXT,
     allowNull: true
   },
-  status: {
-    type: DataTypes.ENUM('submitted', 'graded', 'late', 'resubmitted'),
-    allowNull: false,
-    defaultValue: 'submitted'
-  },
-  is_final: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false
-  },
+  
   created_at: {
     type: DataTypes.DATE,
     allowNull: false,
@@ -69,7 +60,8 @@ const Submission = sequelize.define('Submission', {
 });
 
 // Associations (khai báo sau khi đã import đầy đủ các model ở file trung tâm, ví dụ models/index.js)
-Submission.belongsTo(require('./AssignmentCourse'), { foreignKey: 'class_assignment_id', as: 'assignmentCourse' });
+Submission.belongsTo(require('./Assignment'), { foreignKey: 'assignment_id', as: 'assignment' });
+Submission.belongsTo(require('./Exam'), { foreignKey: 'exam_id', as: 'exam' });
 Submission.belongsTo(require('./Student'), { foreignKey: 'student_id', as: 'student' });
 
 module.exports = Submission;
