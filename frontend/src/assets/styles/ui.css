@@ -298,3 +298,6 @@ pre {
 	white-space: nowrap;
 	vertical-align: middle;
 }
+
+/* Course tab styles were moved to components/layout/coursestab.css */
+

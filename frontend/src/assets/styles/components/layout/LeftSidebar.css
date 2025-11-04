@@ -124,3 +124,38 @@
 .page-info__title {
 	font-size: 18px;
 }
+
+.toggle-subnav-btn {
+	background: transparent;
+	border: none;
+	padding: 6px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	color: rgba(15,23,42,0.8);
+}
+.toggle-subnav-btn .hamburger {
+	display: inline-block;
+	width: 18px;
+	height: 14px;
+	position: relative;
+}
+.toggle-subnav-btn .hamburger span {
+	display: block;
+	height: 2px;
+	background: currentColor;
+	margin: 3px 0;
+	border-radius: 2px;
+}
+
+.toggle-subnav-btn i.fa {
+	font-size: 18px;
+}
+
+.page-info {
+	/* ensure button sits to the left of the title */
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}

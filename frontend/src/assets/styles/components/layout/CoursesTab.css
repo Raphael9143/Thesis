@@ -1,0 +1,68 @@
+/* Course tabs */
+.course-tabs {
+	margin: 0;
+	padding: 8px 0;
+}
+
+.course-tabs__nav {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	align-items: stretch;
+}
+
+.course-tab {
+	text-align: left;
+	padding: 10px 12px;
+	border: 1px solid transparent;
+	background: transparent;
+	color: var(--muted);
+	text-decoration: none;
+	display: inline-block;
+}
+
+.course-tab.active {
+	background: transparent;
+	box-shadow: none;
+	color: var(--brand);
+	border-left: 4px solid var(--brand);
+	padding-left: 8px;
+}
+
+.course-tab:focus,
+.course-tab:focus-visible {
+	outline: none;
+	background: transparent;
+	color: var(--brand);
+	border-left: 4px solid var(--brand);
+	padding-left: 8px;
+}
+
+.class-detail-parent {
+	display: flex;
+	gap: 16px;
+	align-items: flex-start;
+}
+
+.class-detail-parent .course-tabs {
+	min-width: 200px;
+	max-width: 260px;
+	padding-right: 12px;
+	border-right: 1px solid var(--border);
+}
+
+.class-detail-child {
+	flex: 1 1 auto;
+}
+
+@media (max-width: 900px) {
+	.class-detail-parent {
+		display: block;
+	}
+
+	.class-detail-parent .course-tabs {
+		border-right: none;
+		padding-bottom: 12px;
+		margin-bottom: 12px;
+	}
+}

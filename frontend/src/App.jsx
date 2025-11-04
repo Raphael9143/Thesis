@@ -12,6 +12,7 @@ import StudentProfile from './pages/student/Profile';
 import StudentClassesPage from './pages/student/Classes';
 import ClassesPage from './pages/teacher/Classes';
 import ClassDetailTeacherPage from './pages/teacher/ClassDetail';
+import CourseOverview from './pages/teacher/course/CourseOverview';
 import ClassCoursesTeacherPage from './pages/teacher/ClassCourses';
 import ClassDetailStudentPage from './pages/student/ClassDetail';
 import ClassCoursesStudentPage from './pages/student/ClassCourses';
@@ -33,7 +34,14 @@ const router = createBrowserRouter(
         <Route path="/education/home" element={<Home />} />
         <Route path="/education/teacher/classes" element={<RequireRole allowed={["teacher"]}><ClassesPage /></RequireRole>} />
         <Route path="/education/teacher/classes/:id" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><ClassCoursesTeacherPage /></React.Suspense></RequireRole>} />
-        <Route path="/education/teacher/classes/:id/courses/:courseId" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><ClassDetailTeacherPage /></React.Suspense></RequireRole>} />
+        <Route path="/education/teacher/classes/:id/courses/:courseId" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><ClassDetailTeacherPage /></React.Suspense></RequireRole>}>
+          <Route index element={<CourseOverview />} />
+          <Route path="lectures" element={<CourseOverview />} />
+          <Route path="assignments" element={<CourseOverview />} />
+          <Route path="exams" element={<CourseOverview />} />
+          <Route path="students" element={<RequireRole allowed={["teacher"]}><div>Students list (coming soon)</div></RequireRole>} />
+          <Route path="submissions" element={<RequireRole allowed={["teacher"]}><div>Submissions (coming soon)</div></RequireRole>} />
+        </Route>
         <Route path="/education/teacher/classes/:classId/courses/:courseId/lectures/:lectureId" element={<RequireRole allowed={["teacher"]}><LecturePreview /></RequireRole>} />
         <Route path="/education/teacher/classes/:classId/courses/:courseId/assignments/:assignmentId" element={<RequireRole allowed={["teacher"]}><AssignmentPreview /></RequireRole>} />
         <Route path="/education/teacher/classes/:classId/courses/:courseId/exams/:examId" element={<RequireRole allowed={["teacher"]}><ExamPreview /></RequireRole>} />
