@@ -52,13 +52,14 @@ const ClassController = {
       // Lấy danh sách sinh viên
       const students = await ClassStudent.findAll({
         where: { classId },
-        include: [{ model: User, as: 'student', attributes: ['id', 'email', 'role', 'createdAt', 'updatedAt'] }]
+        include: [{ model: User, as: 'student', attributes: ['id', 'full_name', 'email', 'role', 'createdAt', 'updatedAt'] }]
       });
 
       res.json({
         success: true,
         data: students.map(cs => ({
           id: cs.student.id,
+          student_name: cs.student.full_name,
           email: cs.student.email,
           role: cs.student.role,
           joinedAt: cs.joinedAt,
