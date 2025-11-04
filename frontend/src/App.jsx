@@ -13,6 +13,9 @@ import StudentClassesPage from './pages/student/Classes';
 import ClassesPage from './pages/teacher/Classes';
 import ClassDetailTeacherPage from './pages/teacher/ClassDetail';
 import CourseOverview from './pages/teacher/course/CourseOverview';
+import LecturesList from './pages/teacher/course/LecturesList';
+import AssignmentsList from './pages/teacher/course/AssignmentsList';
+import ExamsList from './pages/teacher/course/ExamsList';
 import ClassCoursesTeacherPage from './pages/teacher/ClassCourses';
 import ClassDetailStudentPage from './pages/student/ClassDetail';
 import ClassCoursesStudentPage from './pages/student/ClassCourses';
@@ -36,9 +39,9 @@ const router = createBrowserRouter(
         <Route path="/education/teacher/classes/:id" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><ClassCoursesTeacherPage /></React.Suspense></RequireRole>} />
         <Route path="/education/teacher/classes/:id/courses/:courseId" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><ClassDetailTeacherPage /></React.Suspense></RequireRole>}>
           <Route index element={<CourseOverview />} />
-          <Route path="lectures" element={<CourseOverview />} />
-          <Route path="assignments" element={<CourseOverview />} />
-          <Route path="exams" element={<CourseOverview />} />
+          <Route path="lectures" element={<LecturesList />} />
+          <Route path="assignments" element={<AssignmentsList />} />
+          <Route path="exams" element={<ExamsList />} />
           <Route path="students" element={<RequireRole allowed={["teacher"]}><div>Students list (coming soon)</div></RequireRole>} />
           <Route path="submissions" element={<RequireRole allowed={["teacher"]}><div>Submissions (coming soon)</div></RequireRole>} />
         </Route>
