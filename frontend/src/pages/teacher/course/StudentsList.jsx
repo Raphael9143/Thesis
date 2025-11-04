@@ -1,48 +1,66 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import Section from '../../../components/ui/Section';
 import Card from '../../../components/ui/Card';
 import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import { usePageInfo } from '../../../contexts/PageInfoContext';
 import { useNotifications } from '../../../contexts/NotificationContext';
+import '../../../assets/styles/components/teacher/course/StudentList.css';
 
 export default function StudentsList() {
   const { id } = useParams(); // id is class id
   const [students, setStudents] = useState([]);
+  const [pagination, setPagination] = useState({ page: 1, pageSize: 20, total: 0, totalPages: 1 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { setTitle: setPageTitle } = usePageInfo();
   const { push } = useNotifications();
   const navigate = useNavigate();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
   useEffect(() => {
     let mounted = true;
     (async () => {
       setLoading(true);
+      setError(null);
       try {
-        const res = await userAPI.getStudentsByClass(id);
+        const pageParam = Number(searchParams.get('page')) || 1;
+        const res = await userAPI.getStudentsByClass(id, { page: pageParam });
         if (!mounted) return;
+        // Expecting response like: { success: true, pagination: {...}, data: [...] }
         if (res?.success && Array.isArray(res.data)) {
           setStudents(res.data);
+          if (res.pagination) {
+            setPagination({
+              page: res.pagination.page || pageParam,
+              pageSize: res.pagination.pageSize || (res.pagination.pageSize === 0 ? 0 : 20),
+              total: res.pagination.total || 0,
+              totalPages: res.pagination.totalPages || 1,
+            });
+          } else {
+            setPagination({ page: pageParam, pageSize: res.data.length || 20, total: res.data.length || 0, totalPages: 1 });
+          }
         } else {
           setStudents([]);
+          setPagination({ page: 1, pageSize: 20, total: 0, totalPages: 1 });
         }
-        try { setPageTitle('Students'); } catch (_) {}
+        try { setPageTitle('Students'); } catch (_) { }
       } catch (err) {
         if (!mounted) return;
         const msg = err?.response?.data?.message || err.message || 'Failed to load students';
         setError(msg);
-        try { push({ title: 'Error', body: msg }); } catch (_) {}
+        try { push({ title: 'Error', body: msg }); } catch (_) { }
       } finally {
         if (mounted) setLoading(false);
       }
     })();
     return () => { mounted = false; };
-  }, [id]);
+  }, [id, searchParams]);
 
   return (
-    <Section title="Students">
+    <Section>
       <Card>
         {loading && <div>Loading students...</div>}
         {error && <div className="text-error">{error}</div>}
@@ -51,21 +69,23 @@ export default function StudentsList() {
           <table className="table students-table">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Actions</th>
+                <th className="table-header index">Index</th>
+                <th className="table-header name">Name</th>
+                <th className="table-header actions">Actions</th>
               </tr>
             </thead>
             <tbody>
               {students.map((s, idx) => (
                 <tr key={s.classStudentId || s.id}>
-                  <td style={{ width: 48 }}>{idx + 1}</td>
-                  <td>
-                    <button className="link-button" onClick={() => navigate(`/education/users/${s.id}`)}>
-                      {s.student_name}
-                    </button>
+                  <td style={{ width: 48 }} className="table-cell index">
+                    {(pagination.page - 1) * pagination.pageSize + idx + 1}
                   </td>
-                  <td style={{ width: 140 }}>
+                  <td className="table-cell name">
+                    <p>
+                      {s.student_name}
+                    </p>
+                  </td>
+                  <td style={{ width: 140 }} className="table-cell actions">
                     <div className="display-flex gap-8">
                       <button
                         className="btn btn-icon"
@@ -77,7 +97,7 @@ export default function StudentsList() {
                       <button
                         className="btn btn-icon"
                         title="Remove from class"
-                        onClick={() => {}}
+                        onClick={() => { }}
                       >
                         <i className="fa fa-trash" />
                       </button>
@@ -87,6 +107,47 @@ export default function StudentsList() {
               ))}
             </tbody>
           </table>
+        )}
+        {!loading && !error && pagination.totalPages > 1 && (
+          <div className="pagination" style={{ marginTop: 12 }}>
+            <div className="pagination-indexes">
+              <button
+                className="pagination-prev"
+                disabled={pagination.page <= 1}
+                onClick={() => setSearchParams({ page: String(Math.max(1, pagination.page - 1)) })}
+              >
+                <i class="fa-solid fa-backward"></i>
+              </button>
+
+              {Array.from({ length: pagination.totalPages }).map((_, i) => {
+                const p = i + 1;
+                return (
+                  <button
+                    key={p}
+                    className={`pagination-button ${p === pagination.page ? 'focus' : ''}`}
+                    onClick={() => setSearchParams({ page: String(p) })}
+                    style={{ marginLeft: 6 }}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
+
+              <button
+                className="pagination-next"
+                disabled={pagination.page >= pagination.totalPages}
+                onClick={() => setSearchParams({ page: String(Math.min(pagination.totalPages, pagination.page + 1)) })}
+                style={{ marginLeft: 8 }}
+              >
+                <i class="fa-solid fa-forward"></i>
+              </button>
+            </div>
+            <div className="pagination-info">
+              <span style={{ marginLeft: 12 }}>
+                Page {pagination.page} / {pagination.totalPages} - {pagination.total} students
+              </span>
+            </div>
+          </div>
         )}
       </Card>
     </Section>
