@@ -10,6 +10,7 @@ const ClassStudent = require('./models/ClassStudent');
 const Assignment = require('./models/Assignment');
 const Lecture = require('./models/Lecture');
 const Exam = require('./models/Exam');
+const Submission = require('./models/Submission');
 const AssignmentCourse = require('./models/AssignmentCourse');
 
 async function initDatabase() {
@@ -99,6 +100,28 @@ async function initDatabase() {
 		joinedAt: new Date()
 	});
 
+	for (let i = 2; i <= 30; i++) {
+		const email = `student${i}@example.com`;
+		const u = await User.create({
+			full_name: `Le Thi B ${i}`,
+			email,
+			password: await bcrypt.hash('student123', 10),
+			role: 'STUDENT',
+			status: 'ACTIVE'
+		});
+		await Student.create({
+			student_id: u.id,
+			student_code: `SV${String(i).padStart(3, '0')}`,
+			major: 'Computer Science',
+			year: 3
+		});
+		await ClassStudent.create({
+			classId: class1.id,
+			studentId: u.id,
+			joinedAt: new Date()
+		});
+	}
+
 	const assignment = await Assignment.create({
 		course_id: course.course_id,
 		title: 'Exercise 1: Basic OCL',
@@ -144,6 +167,17 @@ async function initDatabase() {
 		end_date: new Date('2025-10-15T11:00:00Z'),
 		type: 'SINGLE',
 		attachment: '/uploads/exams/sample.use'
+	});
+
+	// Sample submission (student submitted to the assignment)
+	await Submission.create({
+		assignment_id: assignment.assignment_id,
+		exam_id: null,
+		student_id: studentUser.id,
+		submission_time: new Date(),
+		attempt_number: 1,
+		attachment: '/uploads/submission/sample.use',
+		created_at: new Date()
 	});
 
 	console.log('✅ Seeded sample data!');
