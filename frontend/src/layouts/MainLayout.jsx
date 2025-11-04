@@ -53,16 +53,23 @@ export default function MainLayout() {
 
 function PageInfoBar() {
   const { title, showCourseNav, toggleCourseNav } = usePageInfo();
+  const location = useLocation();
+
+  // only show the subnav toggle on course detail pages
+  const isCoursePage = /^\/education\/(teacher|student)\/classes\/[^/]+\/courses\//.test(location.pathname);
+
   return (
     <div className="page-info" aria-hidden={title ? 'false' : 'true'}>
-      <button
-        className="toggle-subnav-btn"
-        aria-pressed={!showCourseNav}
-        title={showCourseNav ? 'Hide course navigation' : 'Show course navigation'}
-        onClick={toggleCourseNav}
-      >
-        <i className="fa fa-bars" aria-hidden="true" />
-      </button>
+      {isCoursePage && (
+        <button
+          className="toggle-subnav-btn"
+          aria-pressed={!showCourseNav}
+          title={showCourseNav ? 'Hide course navigation' : 'Show course navigation'}
+          onClick={toggleCourseNav}
+        >
+          <i className="fa fa-bars" aria-hidden="true" />
+        </button>
+      )}
       <div className="page-info__title">{title || ''}</div>
     </div>
   );
