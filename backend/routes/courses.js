@@ -25,68 +25,7 @@ const CourseController = require('../controllers/CourseController');
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Course'
- *
- *   post:
- *     summary: Tạo môn học mới và ánh xạ với lớp học
- *     tags: [Course]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
-                            # start_week and end_week removed from schema
-                            status:
-                                type: string
-                                enum: [ACTIVE, INACTIVE]
-                                example: ACTIVE
- *               - course_name
- *               - course_code
- *               - class_id
- *             properties:
- *               course_name:
- *                 type: string
- *                 example: "Lập trình nâng cao"
- *               course_code:
- *                 type: string
- *                 example: "CS2025"
- *               description:
- *                 type: string
- *                 example: "Môn học về các kỹ thuật lập trình nâng cao."
- *               semester:
- *                 type: string
- *                 example: "Spring 2025"
- *               class_id:
- *                 type: integer
- *                 example: 1
- *               # start_week/end_week and semester removed from Course schema
- *               status:
- *                 type: string
- *                 enum: [ACTIVE, INACTIVE]
- *                 example: ACTIVE
- *     responses:
- *       201:
- *         description: Môn học đã được tạo và ánh xạ với lớp học
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 data:
- *                   type: object
- *                   properties:
- *                     course:
- *                       $ref: '#/components/schemas/Course'
- *                     class_course:
- *                       type: object
- *       400:
- *         description: Bad request
- *       403:
- *         description: Forbidden
- *       404:
- *         description: Class not found
- */
+ 
 router.get('/', auth, CourseController.getAllCourses);
 
 /**
