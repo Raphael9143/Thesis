@@ -48,6 +48,12 @@ const userAPI = {
   getExamById: (id) => axiosClient.get(`exams/${id}`),
   // Get courses associated with a class (fallback - adjust endpoint if your backend differs)
   getCoursesByClass: (classId) => axiosClient.get(`courses/by-class/${classId}`),
+  // Get students in a class
+  // GET /api/class/{id}/students
+  getStudentsByClass: (classId) => axiosClient.get(`class/${classId}/students`),
+  // Remove a student from a class
+  // DELETE /api/class/{classId}/students/{classStudentId}
+  removeStudentFromClass: (classId, classStudentId) => axiosClient.delete(`class/${classId}/students/${classStudentId}`),
   // Get a single course by id
   getCourseById: (courseId) => axiosClient.get(`courses/${courseId}`),
   // Create a new course (expects { course_name, course_code, description, semester, class_id, start_week, end_week, status })
