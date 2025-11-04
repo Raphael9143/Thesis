@@ -8,7 +8,7 @@ const SubmissionController = require('../controllers/SubmissionController');
  * @swagger
  * /api/submissions:
  *   post:
- *     summary: Nộp bài assignment (chỉ sinh viên trong lớp có assignment đó)
+ *     summary: Nộp bài (chỉ sinh viên trong lớp)
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []
@@ -19,25 +19,28 @@ const SubmissionController = require('../controllers/SubmissionController');
  *           schema:
  *             type: object
  *             required:
- *               - assignment_id
  *               - class_id
  *             properties:
  *               assignment_id:
  *                 type: integer
  *                 example: 1
+ *               exam_id:
+ *                 type: integer
+ *                 example: 1
  *               class_id:
  *                 type: integer
  *                 example: 1
- *               ocl_constraints:
- *                 type: string
- *                 example: '{"type":"OCL","rule":["context Student inv: self.age > 18"]}'
- *               file:
+ *               attachment:
  *                 type: string
  *                 format: binary
- *                 description: File UML/OCL nộp lên
+ *                 description: File upload (.use only)
+ *             description: |
+ *               Provide either assignment_id or exam_id (mutually exclusive). The class_id is required. Attachment must be a .use file.
  *     responses:
  *       201:
  *         description: Submission created
+ *       400:
+ *         description: Bad request
  *       403:
  *         description: Forbidden
  *       404:

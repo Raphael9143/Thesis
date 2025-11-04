@@ -11,43 +11,60 @@ const SubmissionController = {
 			if (!req.user || req.user.role !== 'STUDENT') {
 				return res.status(403).json({ success: false, message: 'Chỉ sinh viên mới được nộp bài.' });
 			}
-			const { assignment_id, class_id, ocl_constraints } = req.body;
-			// Kiểm tra assignment và class tồn tại
-			const assignment = await Assignment.findByPk(assignment_id);
-			if (!assignment) {
-				return res.status(404).json({ success: false, message: 'Assignment không tồn tại.' });
-			}
+			const { assignment_id, exam_id, class_id } = req.body;
+			// Require either assignment_id or exam_id (mutually exclusive requirement)
+			if (!assignment_id && !exam_id) return res.status(400).json({ success: false, message: 'assignment_id or exam_id is required.' });
+			if (assignment_id && exam_id) return res.status(400).json({ success: false, message: 'Provide only one of assignment_id or exam_id.' });
+
+			// Validate class exists
+			if (!class_id) return res.status(400).json({ success: false, message: 'class_id is required.' });
 			const classObj = await Class.findByPk(class_id);
-			if (!classObj) {
-				return res.status(404).json({ success: false, message: 'Class không tồn tại.' });
-			}
+			if (!classObj) return res.status(404).json({ success: false, message: 'Class không tồn tại.' });
+
 			// Kiểm tra sinh viên có trong lớp không
 			const isMember = await ClassStudent.findOne({ where: { classId: class_id, studentId: req.user.userId } });
-			if (!isMember) {
-				return res.status(403).json({ success: false, message: 'Bạn không thuộc lớp này.' });
+			if (!isMember) return res.status(403).json({ success: false, message: 'Bạn không thuộc lớp này.' });
+
+			let targetCourseId = null;
+			if (assignment_id) {
+				const assignment = await Assignment.findByPk(assignment_id);
+				if (!assignment) return res.status(404).json({ success: false, message: 'Assignment không tồn tại.' });
+				// verify assignment belongs to class via AssignmentCourse
+				const assignmentCourse = await AssignmentCourse.findOne({ where: { assignment_id: assignment_id, course_id: assignment.course_id } });
+				if (!assignmentCourse) return res.status(403).json({ success: false, message: 'Bài tập này không thuộc lớp này.' });
+				targetCourseId = assignment.course_id;
+			} else if (exam_id) {
+				const exam = await require('../models/Exam').findByPk(exam_id);
+				if (!exam) return res.status(404).json({ success: false, message: 'Exam không tồn tại.' });
+				// verify exam belongs to class via ClassCourse linking course to class
+				const classCourse = await AssignmentCourse.sequelize.models.ClassCourse ? null : null;
+				// Use ClassCourse model to verify
+				const ClassCourseModel = require('../models/ClassCourse');
+				const link = await ClassCourseModel.findOne({ where: { course_id: exam.course_id, class_id: class_id } });
+				if (!link) return res.status(403).json({ success: false, message: 'Bài kiểm tra này không thuộc lớp này.' });
+				targetCourseId = exam.course_id;
 			}
-			// Kiểm tra assignment có thuộc class này không (qua assignment_courses)
-			const assignmentCourse = await AssignmentCourse.findOne({ where: { assignment_id: assignment_id, course_id: assignment.course_id } });
-			if (!assignmentCourse) {
-				return res.status(403).json({ success: false, message: 'Bài tập này không thuộc lớp này.' });
-			}
-			// Handle uploaded single attachment
-			let attachment = null;
-			if (req.file) {
-				attachment = '/uploads/submission/' + req.file.filename;
-			}
-			// Lần nộp thứ mấy
-			const attempt_number = await Submission.count({ where: { class_assignment_id: assignmentCourse.id, student_id: req.user.userId } }) + 1;
-			// Tạo submission
+
+			// Handle uploaded single attachment: required and must be .use
+			if (!req.file) return res.status(400).json({ success: false, message: 'Attachment file is required.' });
+			const filename = req.file.filename || '';
+			if (!filename.toLowerCase().endsWith('.use')) return res.status(400).json({ success: false, message: 'Attachment must be a .use file.' });
+			const attachment = '/uploads/submission/' + filename;
+
+			// Determine attempt number (count previous submissions by student for this assignment or exam)
+			let whereCount = { student_id: req.user.userId };
+			if (assignment_id) whereCount.assignment_id = assignment_id;
+			if (exam_id) whereCount.exam_id = exam_id;
+			const attempt_number = await Submission.count({ where: whereCount }) + 1;
+
+			// Create submission record
 			const submission = await Submission.create({
-				class_assignment_id: assignmentCourse.id,
+				assignment_id: assignment_id || null,
+				exam_id: exam_id || null,
 				student_id: req.user.userId,
 				submission_time: new Date(),
 				attempt_number,
 				attachment: attachment,
-				ocl_constraints,
-				status: 'submitted',
-				is_final: false,
 				created_at: new Date()
 			});
 			res.status(201).json({ success: true, data: submission });
