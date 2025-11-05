@@ -66,8 +66,6 @@ export default function StudentSubmissions() {
     setItems(kind === 'assignments' ? assignments : exams);
   }, [kind, assignments, exams]);
 
-  console.log(assignments, exams, items);
-
   const handleOpenGrade = async (it) => {
     // fetch submissions for this activity and find the submission for this student
     const itemKind = it.kind || kind || 'assignment';
@@ -155,7 +153,7 @@ export default function StudentSubmissions() {
                   <td>{typeof it.submissions_count !== 'undefined' ? `${it.submissions_count}/${it.attempt_limit}` : '-'}</td>
                   <td>
                     <a className="score-btn" onClick={() => handleOpenGrade(it)}>
-                      {it.graded ? 'Graded' : 'Not graded'}
+                      {typeof it.score !== 'undefined' && it.score !== null ? `${String(it.score)}` : 'Not graded'}
                     </a>
                   </td>
                 </tr>
