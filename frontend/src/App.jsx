@@ -17,6 +17,7 @@ import LecturesList from './pages/teacher/course/LecturesList';
 import AssignmentsList from './pages/teacher/course/AssignmentsList';
 import ExamsList from './pages/teacher/course/ExamsList';
 import StudentsList from './pages/teacher/course/StudentsList';
+import StudentSubmissions from './pages/teacher/course/StudentSubmissions';
 import ClassCoursesTeacherPage from './pages/teacher/ClassCourses';
 import ClassDetailStudentPage from './pages/student/ClassDetail';
 import ClassCoursesStudentPage from './pages/student/ClassCourses';
@@ -45,6 +46,7 @@ const router = createBrowserRouter(
           <Route path="exams" element={<ExamsList />} />
           <Route path="students" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><StudentsList /></React.Suspense></RequireRole>} />
           <Route path="submissions" element={<RequireRole allowed={["teacher"]}><div>Submissions (coming soon)</div></RequireRole>} />
+          <Route path="students/:studentId/submissions" element={<RequireRole allowed={["teacher"]}><StudentSubmissions /></RequireRole>} />
         </Route>
         <Route path="/education/teacher/classes/:classId/courses/:courseId/lectures/:lectureId" element={<RequireRole allowed={["teacher"]}><LecturePreview /></RequireRole>} />
         <Route path="/education/teacher/classes/:classId/courses/:courseId/assignments/:assignmentId" element={<RequireRole allowed={["teacher"]}><AssignmentPreview /></RequireRole>} />

@@ -9,7 +9,7 @@ import { useNotifications } from '../../../contexts/NotificationContext';
 import '../../../assets/styles/components/teacher/course/StudentList.css';
 
 export default function StudentsList() {
-  const { id } = useParams(); // id is class id
+  const { id, courseId } = useParams(); // id is class id, courseId available from parent route
   const [students, setStudents] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, pageSize: 20, total: 0, totalPages: 1 });
   const [loading, setLoading] = useState(true);
@@ -90,7 +90,7 @@ export default function StudentsList() {
                       <button
                         className="btn btn-icon"
                         title="View submissions"
-                        onClick={() => navigate(`/education/teacher/classes/${id}/students/${s.id}/submissions`)}
+                        onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseId}/students/${s.id}/submissions`)}
                       >
                         <i className="fa fa-eye" />
                       </button>
