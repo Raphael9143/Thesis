@@ -19,6 +19,7 @@ import ExamsList from './pages/teacher/course/ExamsList';
 import StudentsList from './pages/teacher/course/StudentsList';
 import StudentSubmissions from './pages/teacher/course/StudentSubmissions';
 import Submissions from './pages/teacher/course/Submissions';
+import SubmissionsView from './pages/teacher/course/SubmissionsView';
 import ClassCoursesTeacherPage from './pages/teacher/ClassCourses';
 import ClassDetailStudentPage from './pages/student/ClassDetail';
 import ClassCoursesStudentPage from './pages/student/ClassCourses';
@@ -47,6 +48,8 @@ const router = createBrowserRouter(
           <Route path="exams" element={<ExamsList />} />
           <Route path="students" element={<RequireRole allowed={["teacher"]}><React.Suspense fallback={<div>Loading...</div>}><StudentsList /></React.Suspense></RequireRole>} />
           <Route path="submissions" element={<RequireRole allowed={["teacher"]}><Submissions /></RequireRole>} />
+          <Route path="submissions/assignment/:assignmentId" element={<RequireRole allowed={["teacher"]}><SubmissionsView /></RequireRole>} />
+          <Route path="submissions/exam/:examId" element={<RequireRole allowed={["teacher"]}><SubmissionsView /></RequireRole>} />
           <Route path="students/:studentId/submissions" element={<RequireRole allowed={["teacher"]}><StudentSubmissions /></RequireRole>} />
         </Route>
         <Route path="/education/teacher/classes/:classId/courses/:courseId/lectures/:lectureId" element={<RequireRole allowed={["teacher"]}><LecturePreview /></RequireRole>} />
