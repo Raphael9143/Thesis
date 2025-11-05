@@ -6,6 +6,7 @@ import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import { usePageInfo } from '../../../contexts/PageInfoContext';
 import { useNotifications } from '../../../contexts/NotificationContext';
+import GradeSubmissionModal from '../../../components/teacher/GradeSubmissionModal';
 
 export default function StudentSubmissions() {
   const { id: classId, courseId, studentId } = useParams();
@@ -13,6 +14,8 @@ export default function StudentSubmissions() {
   const [items, setItems] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [exams, setExams] = useState([]);
+  const [gradeModalOpen, setGradeModalOpen] = useState(false);
+  const [selectedForGrade, setSelectedForGrade] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { setTitle } = usePageInfo();
@@ -25,7 +28,7 @@ export default function StudentSubmissions() {
 
   useEffect(() => {
     let mounted = true;
-    (async () => {
+    const loadItems = async () => {
       setLoading(true);
       setError(null);
       try {
@@ -53,7 +56,8 @@ export default function StudentSubmissions() {
       } finally {
         if (mounted) setLoading(false);
       }
-    })();
+    };
+    loadItems();
     return () => { mounted = false; };
   }, [courseId, studentId]);
 
@@ -61,6 +65,60 @@ export default function StudentSubmissions() {
   useEffect(() => {
     setItems(kind === 'assignments' ? assignments : exams);
   }, [kind, assignments, exams]);
+
+  console.log(assignments, exams, items);
+
+  const handleOpenGrade = async (it) => {
+    // fetch submissions for this activity and find the submission for this student
+    const itemKind = it.kind || kind || 'assignment';
+    try {
+      setLoading(true);
+      let res;
+      if (itemKind === 'assignment') res = await userAPI.getSubmissionsByAssignmentId(it.id);
+      else res = await userAPI.getSubmissionsByExamId(it.id);
+      if (res?.success && Array.isArray(res.data)) {
+        const subs = res.data;
+        const found = subs.find((s) => (
+          Number(s.student?.student_id) === Number(studentId) ||
+          Number(s.student?.user?.id) === Number(studentId) ||
+          Number(s.student_id) === Number(studentId)
+        ));
+        if (found) {
+          setSelectedForGrade(found);
+          setGradeModalOpen(true);
+        } else {
+          try { push({ title: 'Info', body: 'No submission found for this student.' }); } catch (_) {}
+        }
+      } else {
+        try { push({ title: 'Error', body: res?.message || 'Failed to fetch submissions.' }); } catch (_) {}
+      }
+    } catch (err) {
+      try { push({ title: 'Error', body: err?.response?.data?.message || err.message || 'Failed to fetch submissions.' }); } catch (_) {}
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onGraded = async (updated) => {
+    // refresh the student's assignment/exam list after grading
+    try {
+      setLoading(true);
+      const params = { course: courseId };
+      const res = await userAPI.getStudentAssignments(studentId, params);
+      if (res?.success && Array.isArray(res.data)) {
+        const all = res.data;
+        const a = all.filter((it2) => (it2.kind || 'assignment') === 'assignment');
+        const e = all.filter((it2) => (it2.kind || '') === 'exam');
+        setAssignments(a);
+        setExams(e);
+        setItems(kind === 'assignments' ? a : e);
+      }
+    } catch (err) {
+      // ignore refresh errors
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Section title="Submissions">
@@ -95,12 +153,22 @@ export default function StudentSubmissions() {
                   <td>{it.title}</td>
                   <td>{it.due_date ? new Date(it.due_date).toLocaleString() : '-'}</td>
                   <td>{typeof it.submissions_count !== 'undefined' ? `${it.submissions_count}/${it.attempt_limit}` : '-'}</td>
-                  <td>{it.graded ? <span className="tag tag-success">Graded</span> : <span className="tag">Not graded</span>}</td>
+                  <td>
+                    <a className="score-btn" onClick={() => handleOpenGrade(it)}>
+                      {it.graded ? 'Graded' : 'Not graded'}
+                    </a>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
+        <GradeSubmissionModal
+          open={gradeModalOpen}
+          onClose={() => setGradeModalOpen(false)}
+          submission={selectedForGrade}
+          onGraded={onGraded}
+        />
       </Card>
     </Section>
   );
