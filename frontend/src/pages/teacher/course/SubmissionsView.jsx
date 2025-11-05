@@ -8,6 +8,7 @@ import '../../../assets/styles/pages/Submissions.css';
 import { usePageInfo } from '../../../contexts/PageInfoContext';
 import { useNotifications } from '../../../contexts/NotificationContext';
 import GradeSubmissionModal from '../../../components/teacher/GradeSubmissionModal';
+import toFullUrl from '../../../utils/FullURLFile';
 
 export default function SubmissionsView() {
   const params = useParams();
@@ -99,7 +100,7 @@ export default function SubmissionsView() {
                           {typeof s.score !== 'undefined' && s.score !== null ? String(s.score) : 'Not graded'}
                         </a>
                       </td>
-                      <td>{s.attachment ? <a className="score-btn" href={s.attachment} target="_blank" rel="noreferrer">Download</a> : '-'}</td>
+                      <td>{s.attachment ? <a className="score-btn" href={toFullUrl(s.attachment)} target="_blank" rel="noreferrer">Download</a> : '-'}</td>
                     </tr>
                   ))}
                 </tbody>

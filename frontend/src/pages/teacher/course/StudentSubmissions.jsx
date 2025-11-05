@@ -7,6 +7,7 @@ import '../../../assets/styles/ui.css';
 import { usePageInfo } from '../../../contexts/PageInfoContext';
 import { useNotifications } from '../../../contexts/NotificationContext';
 import GradeSubmissionModal from '../../../components/teacher/GradeSubmissionModal';
+import toFullUrl from '../../../utils/FullURLFile';
 
 export default function StudentSubmissions() {
   const { id: classId, courseId, studentId } = useParams();
@@ -142,6 +143,7 @@ export default function StudentSubmissions() {
                 <th>Due</th>
                 <th>Submissions</th>
                 <th>Graded</th>
+                <th>Download</th>
               </tr>
             </thead>
             <tbody>
@@ -155,6 +157,11 @@ export default function StudentSubmissions() {
                     <a className="score-btn" onClick={() => handleOpenGrade(it)}>
                       {typeof it.score !== 'undefined' && it.score !== null ? `${String(it.score)}` : 'Not graded'}
                     </a>
+                  </td>
+                  <td>
+                    {it.attachment ? (
+                      <a href={toFullUrl(it.attachment)} target="_blank" rel="noreferrer">Download</a>
+                    ) : '-'}
                   </td>
                 </tr>
               ))}
