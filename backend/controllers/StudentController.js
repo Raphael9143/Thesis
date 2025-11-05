@@ -1,13 +1,10 @@
-const Student = require('../models/Student');
-const ClassStudent = require('../models/ClassStudent');
-const Class = require('../models/Class');
-const User = require('../models/User');
-
-
 const StudentController = {
 	// Lấy danh sách các lớp đã enrolled của sinh viên hiện tại
 	getEnrolledClasses: async (req, res) => {
 		try {
+			const Student = require('../models/Student');
+			const ClassStudent = require('../models/ClassStudent');
+			const Class = require('../models/Class');
 			const studentId = req.user.userId;
 			// Kiểm tra student tồn tại
 			const student = await Student.findByPk(studentId);
@@ -30,6 +27,9 @@ const StudentController = {
 	// Lấy thông tin profile sinh viên hiện tại
 	getProfile: async (req, res) => {
 		try {
+			const User = require('../models/User');
+			const Student = require('../models/Student');
+			const ClassStudent = require('../models/ClassStudent');
 			const userId = req.user.userId;
 			// Lấy thông tin user và kiểm tra role
 			const user = await User.findByPk(userId, { attributes: { exclude: ['password'] } });
@@ -67,7 +67,7 @@ const StudentController = {
 	// Sửa thông tin profile sinh viên hiện tại
 	updateProfile: async (req, res) => {
 		try {
-
+			const Student = require('../models/Student');
 			const studentId = req.user.userId;
 			const { student_code, major, year } = req.body;
 			// Không cho phép cập nhật completed_assignments từ API
@@ -115,7 +115,15 @@ const StudentController = {
 			// Lấy courses của các lớp
 			const ClassCourse = require('../models/ClassCourse');
 			const classCourses = await ClassCourse.findAll({ where: { class_id: classIds }, attributes: ['course_id'] });
-			const courseIds = [...new Set(classCourses.map(cc => cc.course_id ?? cc.courseId))];
+			let courseIds = [...new Set(classCourses.map(cc => cc.course_id ?? cc.courseId))];
+
+			// Optional course filter from query string: ?course=1
+			const courseFilter = req.query && req.query.course ? parseInt(req.query.course, 10) : null;
+			if (courseFilter !== null && Number.isFinite(courseFilter)) {
+				// If the student is not related to that course through any of their classes, return empty
+				if (!courseIds.includes(courseFilter)) return res.json({ success: true, data: [] });
+				courseIds = [courseFilter];
+			}
 			if (courseIds.length === 0) return res.json({ success: true, data: [] });
 
 			const AssignmentCourse = require('../models/AssignmentCourse');
