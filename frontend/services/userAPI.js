@@ -52,6 +52,12 @@ const userAPI = {
   // GET /api/class/{id}/students
   // Accepts optional params object, e.g. { page: 2 }
   getStudentsByClass: (classId, params) => axiosClient.get(`class/${classId}/students`, { params }),
+  // Get assignments submitted or available for a given student in a course
+  // GET /api/student/{studentId}/assignments?course={courseId}
+  getStudentAssignments: (studentId, params) => axiosClient.get(`student/${studentId}/assignments`, { params }),
+  // Get exams for a given student in a course
+  // GET /api/student/{studentId}/exams?course={courseId}
+  getStudentExams: (studentId, params) => axiosClient.get(`student/${studentId}/exams`, { params }),
   // Remove a student from a class
   // DELETE /api/class/{classId}/students/{classStudentId}
   removeStudentFromClass: (classId, classStudentId) => axiosClient.delete(`class/${classId}/students/${classStudentId}`),
