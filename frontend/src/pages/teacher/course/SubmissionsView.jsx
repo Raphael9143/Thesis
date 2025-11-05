@@ -1,0 +1,103 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import Section from '../../../components/ui/Section';
+import Card from '../../../components/ui/Card';
+import userAPI from '../../../../services/userAPI';
+import '../../../assets/styles/ui.css';
+import '../../../assets/styles/pages/Submissions.css';
+import { usePageInfo } from '../../../contexts/PageInfoContext';
+import { useNotifications } from '../../../contexts/NotificationContext';
+
+export default function SubmissionsView() {
+  const params = useParams();
+  const navigate = useNavigate();
+  const { id: classId, courseId } = params;
+  const assignmentId = params.assignmentId;
+  const examId = params.examId;
+  const kind = assignmentId ? 'assignment' : (examId ? 'exam' : null);
+  const id = assignmentId || examId;
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [submissions, setSubmissions] = useState([]);
+
+  const { setTitle } = usePageInfo();
+  const { push } = useNotifications();
+
+  useEffect(() => { try { setTitle('Submissions'); } catch (_) {} }, [setTitle]);
+
+  useEffect(() => {
+    if (!kind || !id) return;
+    let mounted = true;
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        let res;
+        if (kind === 'assignment') res = await userAPI.getSubmissionsByAssignmentId(id);
+        else res = await userAPI.getSubmissionsByExamId(id);
+        if (!mounted) return;
+        if (res?.success && Array.isArray(res.data)) setSubmissions(res.data);
+        else setSubmissions([]);
+      } catch (err) {
+        if (!mounted) return;
+        const msg = err?.response?.data?.message || err.message || 'Failed to load submissions';
+        setError(msg);
+        try { push({ title: 'Error', body: msg }); } catch (_) {}
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [kind, id]);
+
+  return (
+    <Section>
+      <Card>
+        {loading && <div>Loading submissions...</div>}
+        {error && <div className="text-error">{error}</div>}
+
+        {!loading && !error && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h4>{kind ? (kind === 'assignment' ? `Assignment ${id} - submissions` : `Exam ${id} - submissions`) : 'No activity selected'}</h4>
+            </div>
+
+            {!kind && <div>Please select an assignment or exam to view its submissions.</div>}
+
+            {kind && submissions.length === 0 && <div>No submissions yet.</div>}
+
+            {kind && submissions.length > 0 && (
+              <table className="table students-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Student Code</th>
+                    <th>Full name</th>
+                    <th>Time</th>
+                    <th>Attempt</th>
+                    <th>Score</th>
+                    <th>Attachment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {submissions.map((s, idx) => (
+                    <tr key={`sub-${s.id || idx}`}>
+                      <td>{idx + 1}</td>
+                      <td>{s.student?.student_code || s.student_id || 'Unknown'}</td>
+                      <td>{s.student?.user?.full_name || '-'}</td>
+                      <td>{s.submission_time ? new Date(s.submission_time).toLocaleString() : '-'}</td>
+                      <td>{s.attempt_number ?? '-'}</td>
+                      <td>{s.score ?? 'Not graded'}</td>
+                      <td>{s.attachment ? <a href={s.attachment} target="_blank" rel="noreferrer">Download</a> : '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+      </Card>
+    </Section>
+  );
+}
