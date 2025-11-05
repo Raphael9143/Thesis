@@ -63,6 +63,10 @@ const userAPI = {
   getSubmissionsByAssignment: (assignmentId) => axiosClient.get(`submissions`, { params: { assignment: assignmentId } }),
   // GET /api/submissions?exam={examId}
   getSubmissionsByExam: (examId) => axiosClient.get(`submissions`, { params: { exam: examId } }),
+  // Some backends expose path-style endpoints for submissions by assignment/exam
+  // e.g. GET /api/submissions/assignment/{id} and GET /api/submissions/exam/{id}
+  getSubmissionsByAssignmentId: (assignmentId) => axiosClient.get(`submissions/assignment/${assignmentId}`),
+  getSubmissionsByExamId: (examId) => axiosClient.get(`submissions/exam/${examId}`),
   // Get single submission by id
   // GET /api/submissions/{id}
   getSubmissionById: (id) => axiosClient.get(`submissions/${id}`),
