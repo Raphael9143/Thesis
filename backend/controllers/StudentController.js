@@ -150,13 +150,26 @@ const StudentController = {
 				const assignmentId = a.id;
 				const submissionsCount = await Submission.count({ where: { assignment_id: assignmentId, student_id: targetStudentId } });
 				const graded = await Submission.findOne({ where: { assignment_id: assignmentId, student_id: targetStudentId, score: { [Op.ne]: null } } });
+				// determine class size from ClassCourse -> Class.current_students
+				let classSize = null;
+				try {
+					const ClassCourse = require('../models/ClassCourse');
+					const Class = require('../models/Class');
+					const cc = await ClassCourse.findOne({ where: { course_id: ac.course_id ?? ac.courseId }, attributes: ['class_id'] });
+					if (cc) {
+						const cls = await Class.findByPk(cc.class_id ?? cc.classId);
+						if (cls) classSize = cls.current_students;
+					}
+				} catch (err) {
+					console.warn('Could not determine class size for assignment:', err.message || err);
+				}
 				results.push({
 					id: assignmentId,
 					title: a.title,
 					kind: 'assignment',
-					submissions_count: submissionsCount,
-						attempt_limit: a.submission_limit,
-						graded: !!graded,
+					submissions_count: `${submissionsCount}${classSize !== null ? '/' + classSize : ''}`,
+					attempt_limit: a.submission_limit,
+					graded: !!graded,
 					course_id: ac.course_id ?? ac.courseId,
 					due_date: ac.due_date ?? ac.dueDate
 				});
@@ -167,13 +180,25 @@ const StudentController = {
 				const examId = ex.id;
 				const submissionsCount = await Submission.count({ where: { exam_id: examId, student_id: targetStudentId } });
 				const graded = await Submission.findOne({ where: { exam_id: examId, student_id: targetStudentId, score: { [Op.ne]: null } } });
+				let classSize = null;
+				try {
+					const ClassCourse = require('../models/ClassCourse');
+					const Class = require('../models/Class');
+					const cc = await ClassCourse.findOne({ where: { course_id: ex.course_id }, attributes: ['class_id'] });
+					if (cc) {
+						const cls = await Class.findByPk(cc.class_id ?? cc.classId);
+						if (cls) classSize = cls.current_students;
+					}
+				} catch (err) {
+					console.warn('Could not determine class size for exam:', err.message || err);
+				}
 				results.push({
 					id: examId,
 					title: ex.title,
 					kind: 'exam',
-					submissions_count: submissionsCount,
-						attempt_limit: ex.submission_limit,
-						graded: !!graded,
+					submissions_count: `${submissionsCount}${classSize !== null ? '/' + classSize : ''}`,
+					attempt_limit: ex.submission_limit,
+					graded: !!graded,
 					course_id: ex.course_id,
 					due_date: ex.start_date
 				});

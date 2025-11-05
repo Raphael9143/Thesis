@@ -107,7 +107,35 @@ const ExamController = {
       }
 
   const exams = await Exam.findAll({ where: { course_id: courseId }, include: [{ model: Course, as: 'course' }], order: [['start_date', 'DESC']] });
-      res.json({ success: true, data: exams });
+      // compute submissions_count (distinct students) and class size
+      let classSize = null;
+      try {
+        const ClassCourse = require('../models/ClassCourse');
+        const Class = require('../models/Class');
+        const cc = await ClassCourse.findOne({ where: { course_id: courseId }, attributes: ['class_id'] });
+        if (cc) {
+          const cls = await Class.findByPk(cc.class_id ?? cc.classId);
+          if (cls) classSize = cls.current_students;
+        }
+      } catch (err) {
+        console.warn('Could not determine class size for course exams:', err.message || err);
+      }
+
+      const Submission = require('../models/Submission');
+      const data = [];
+      for (const ex of exams) {
+        const obj = ex.toJSON();
+        let submittedCount = 0;
+        try {
+          submittedCount = await Submission.count({ where: { exam_id: obj.id }, distinct: true, col: 'student_id' });
+        } catch (err) {
+          console.warn('Could not count submissions for exam', obj.id, err.message || err);
+        }
+        obj.submissions_count = `${submittedCount}${classSize !== null ? '/' + classSize : ''}`;
+        data.push(obj);
+      }
+
+      res.json({ success: true, data });
     } catch (error) {
       console.error('Get exams by course id error:', error);
       res.status(500).json({ success: false, message: 'Internal Server Error' });

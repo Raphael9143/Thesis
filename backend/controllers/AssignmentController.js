@@ -329,7 +329,34 @@ const AssignmentController = {
 				order: [['created_at', 'DESC']]
 			});
 
-			const data = assignments.map(a => a.toJSON());
+			// Determine class size for this course (use first linked class)
+			let classSize = null;
+			try {
+				const ClassCourse = require('../models/ClassCourse');
+				const Class = require('../models/Class');
+				const cc = await ClassCourse.findOne({ where: { course_id: courseId }, attributes: ['class_id'] });
+				if (cc) {
+					const cls = await Class.findByPk(cc.class_id ?? cc.classId);
+					if (cls) classSize = cls.current_students;
+				}
+			} catch (err) {
+				console.warn('Could not determine class size for course assignments:', err.message || err);
+			}
+
+			const Submission = require('../models/Submission');
+			const data = [];
+			for (const a of assignments) {
+				const obj = a.toJSON();
+				// count distinct students who submitted for this assignment
+				let submittedCount = 0;
+				try {
+					submittedCount = await Submission.count({ where: { assignment_id: obj.id }, distinct: true, col: 'student_id' });
+				} catch (err) {
+					console.warn('Could not count submissions for assignment', obj.id, err.message || err);
+				}
+				obj.submissions_count = `${submittedCount}${classSize !== null ? '/' + classSize : ''}`;
+				data.push(obj);
+			}
 
 			res.json({ success: true, data });
 		} catch (error) {

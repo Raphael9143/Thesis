@@ -173,7 +173,35 @@ const SubmissionController = {
 				order: [['created_at', 'ASC']]
 			});
 
-			return res.json({ success: true, data: submissions });
+			// Determine class size for the course (pick a representative class)
+			let classSize = null;
+			try {
+				const ClassCourse = require('../models/ClassCourse');
+				const ClassStudent = require('../models/ClassStudent');
+				const classCourses = await ClassCourse.findAll({ where: { course_id: assignment.course_id }, attributes: ['class_id'] });
+				const classId = (classCourses && classCourses.length > 0) ? (classCourses[0].class_id ?? classCourses[0].classId) : null;
+				if (classId) {
+					const cls = await Class.findByPk(classId);
+					if (cls) {
+						// Use the class current_students column as the class size
+						classSize = cls.current_students;
+					}
+				}
+			} catch (err) {
+				console.warn('Could not determine class size:', err.message || err);
+			}
+
+			// For each submission, compute student submission count and attach submissions_count string
+			const enriched = [];
+			for (const s of submissions) {
+				const studentSubmissions = await Submission.count({ where: { assignment_id: assignmentId, student_id: s.student_id } });
+				enriched.push({
+					...s.toJSON(),
+					submissions_count: `${studentSubmissions}${classSize !== null ? '/' + classSize : ''}`
+				});
+			}
+
+			return res.json({ success: true, data: enriched });
 		} catch (error) {
 			console.error('Get submissions by assignment error:', error);
 			return res.status(500).json({ success: false, message: 'Internal Server Error' });
@@ -212,7 +240,34 @@ const SubmissionController = {
 				order: [['created_at', 'ASC']]
 			});
 
-			return res.json({ success: true, data: submissions });
+			// Determine class size for the course (pick a representative class)
+			let classSize = null;
+			try {
+				const ClassCourse = require('../models/ClassCourse');
+				const ClassStudent = require('../models/ClassStudent');
+				const classCourses = await ClassCourse.findAll({ where: { course_id: exam.course_id }, attributes: ['class_id'] });
+				const classId = (classCourses && classCourses.length > 0) ? (classCourses[0].class_id ?? classCourses[0].classId) : null;
+				if (classId) {
+					const cls = await Class.findByPk(classId);
+					if (cls) {
+						// Use the class current_students column as the class size
+						classSize = cls.current_students;
+					}
+				}
+			} catch (err) {
+				console.warn('Could not determine class size:', err.message || err);
+			}
+
+			const enriched = [];
+			for (const s of submissions) {
+				const studentSubmissions = await Submission.count({ where: { exam_id: examId, student_id: s.student_id } });
+				enriched.push({
+					...s.toJSON(),
+					submissions_count: `${studentSubmissions}${classSize !== null ? '/' + classSize : ''}`
+				});
+			}
+
+			return res.json({ success: true, data: enriched });
 		} catch (error) {
 			console.error('Get submissions by exam error:', error);
 			return res.status(500).json({ success: false, message: 'Internal Server Error' });

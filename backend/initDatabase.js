@@ -86,6 +86,7 @@ async function initDatabase() {
 		teacherId: teacherUser.id,
 		year: 2025,
 		max_students: 50,
+		current_students: 30,
 		status: 'active'
 	});
 
