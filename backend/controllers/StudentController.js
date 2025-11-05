@@ -149,14 +149,15 @@ const StudentController = {
 				if (!a) continue;
 				const assignmentId = a.id;
 				const submissionsCount = await Submission.count({ where: { assignment_id: assignmentId, student_id: targetStudentId } });
-				const graded = await Submission.findOne({ where: { assignment_id: assignmentId, student_id: targetStudentId, score: { [Op.ne]: null } } });
+				// fetch latest submission for this student/assignment to get score (if any)
+				const latestSub = await Submission.findOne({ where: { assignment_id: assignmentId, student_id: targetStudentId }, order: [['created_at', 'DESC']] });
 				results.push({
 					id: assignmentId,
 					title: a.title,
 					kind: 'assignment',
 					submissions_count: submissionsCount,
 					attempt_limit: a.submission_limit,
-					graded: !!graded,
+					score: latestSub ? latestSub.score : null,
 					course_id: ac.course_id ?? ac.courseId,
 					due_date: ac.due_date ?? ac.dueDate
 				});
@@ -166,14 +167,15 @@ const StudentController = {
 			for (const ex of exams) {
 				const examId = ex.id;
 				const submissionsCount = await Submission.count({ where: { exam_id: examId, student_id: targetStudentId } });
-				const graded = await Submission.findOne({ where: { exam_id: examId, student_id: targetStudentId, score: { [Op.ne]: null } } });
+				// fetch latest submission for this student/exam to get score (if any)
+				const latestSub = await Submission.findOne({ where: { exam_id: examId, student_id: targetStudentId }, order: [['created_at', 'DESC']] });
 				results.push({
 					id: examId,
 					title: ex.title,
 					kind: 'exam',
 					submissions_count: submissionsCount,
 					attempt_limit: ex.submission_limit,
-					graded: !!graded,
+					score: latestSub ? latestSub.score : null,
 					course_id: ex.course_id,
 					due_date: ex.start_date
 				});
