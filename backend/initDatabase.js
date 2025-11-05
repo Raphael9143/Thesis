@@ -230,6 +230,26 @@ async function initDatabase() {
 		created_at: new Date()
 	});
 
+	// Additional sample submissions by other students (mix of assignment and exam)
+	const { Op } = require('sequelize');
+	const otherStudents = await Student.findAll({ where: { student_id: { [Op.ne]: studentUser.id } }, limit: 8 });
+	for (let i = 0; i < otherStudents.length; i++) {
+		const s = otherStudents[i];
+		if (i % 4 === 0) {
+			// assignment2 submission
+			await Submission.create({ assignment_id: assignment2.assignment_id, exam_id: null, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });
+		} else if (i % 4 === 1) {
+			// assignment3 submission
+			await Submission.create({ assignment_id: assignment3.assignment_id, exam_id: null, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });
+		} else if (i % 4 === 2) {
+			// midterm exam submission
+			await Submission.create({ assignment_id: null, exam_id: exam1.id, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });
+		} else {
+			// final exam submission
+			await Submission.create({ assignment_id: null, exam_id: finalExam.id, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });
+		}
+	}
+
 	console.log('✅ Seeded sample data!');
 }
 
