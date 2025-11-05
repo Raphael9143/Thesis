@@ -108,8 +108,8 @@ export default function Submissions() {
 				{!loading && !error && (
 					<div>
 						<div className="submissions-tabs">
-							<button className={`btn tab-button ${tab === 'assignments' ? 'btn-primary' : 'btn-signin'}`} onClick={() => { setVisibleActivities([]); setTab('assignments'); }}>{`Assignments (${assignments.length})`}</button>
-							<button className={`btn tab-button ${tab === 'exams' ? 'btn-primary' : 'btn-signin'}`} onClick={() => { setVisibleActivities([]); setTab('exams'); }}>{`Exams (${exams.length})`}</button>
+							<button className={`btn tab-button ${tab === 'assignments' ? 'btn-primary' : 'btn-signin'}`} onClick={() => { setVisibleActivities([]); setTab('assignments'); }}>{`Assignments`}</button>
+							<button className={`btn tab-button ${tab === 'exams' ? 'btn-primary' : 'btn-signin'}`} onClick={() => { setVisibleActivities([]); setTab('exams'); }}>{`Exams`}</button>
 						</div>
 
 						<div className="activity-list">
@@ -120,7 +120,7 @@ export default function Submissions() {
 										<div className="activity-card-inner">
 											<div>
 												<div className="activity-title">{a.title}</div>
-												<div className="activity-meta">{a.due_date ? new Date(a.due_date).toLocaleString() : '-'}</div>
+												<div className="activity-meta">{a.end_date ? new Date(a.end_date).toLocaleString() : '-'}</div>
 											</div>
 											<div className="activity-right">
 												<div className="activity-submissions">Submissions: {a.submissions_count ?? '-'}</div>
