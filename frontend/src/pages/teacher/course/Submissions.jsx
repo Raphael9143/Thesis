@@ -133,60 +133,6 @@ export default function Submissions() {
 								);
 							})}
 						</div>
-
-						{selectedActivity && (
-							<div className="submissions-section">
-								<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-									<h4>{selectedActivity.title} — submissions</h4>
-									<div>
-										<button className="btn" onClick={() => { setSelectedActivity(null); setSubmissions([]); }}>{'Back'}</button>
-									</div>
-								</div>
-								{subsLoading && <div>Loading submissions...</div>}
-								{/* {!subsLoading && submissions.length === 0 && <div>No submissions yet.</div>} */}
-								{/* {!subsLoading && submissions.length > 0 && (
-									<table className="table students-table">
-										<thead>
-											<tr>
-												<th>#</th>
-												<th>Student Code</th>
-												<th>Full name</th>
-												<th>Time</th>
-												<th>Attempt</th>
-												<th>Score</th>
-												<th>Attachment</th>
-											</tr>
-										</thead>
-										<tbody>
-											{submissions.map((s, idx) => (
-												<tr key={`sub-${s.id || idx}`}>
-													<td>{idx + 1}</td>
-													<td>{s.student?.student_code || s.student_id || 'Unknown'}</td>
-													<td>{s.student?.user?.full_name || '-'}</td>
-													<td>{s.submission_time ? new Date(s.submission_time).toLocaleString() : '-'}</td>
-													<td>{s.attempt_number ?? '-'}</td>
-													<td>
-														<a className="score-btn" onClick={() => { setSelectedForGrade(s); setGradeModalOpen(true); }}>
-															{typeof s.score !== 'undefined' && s.score !== null ? String(s.score) : 'Not graded'}
-														</a>
-													</td>
-													<td>{s.attachment ? <a href={toFullUrl(s.attachment)} target="_blank" rel="noreferrer">Download</a> : '-'}</td>
-												</tr>
-											))}
-										</tbody>
-									</table>
-								)} */}
-								<GradeSubmissionModal
-									open={gradeModalOpen}
-									onClose={() => setGradeModalOpen(false)}
-									submission={selectedForGrade}
-									onGraded={(updated) => {
-										if (!updated) return;
-										setSubmissions((prev) => prev.map((p) => (p.id === (updated.id || p.id) ? { ...p, ...updated } : p)));
-									}}
-								/>
-							</div>
-						)}
 					</div>
 				)}
 			</Card>
