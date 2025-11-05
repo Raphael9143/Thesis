@@ -56,9 +56,13 @@ const ClassController = {
       const offset = (page - 1) * pageSize;
 
       // Lấy danh sách sinh viên phân trang
+      const Student = require('../models/Student');
       const { count, rows } = await ClassStudent.findAndCountAll({
         where: { classId },
-        include: [{ model: User, as: 'student', attributes: ['id', 'full_name', 'email', 'role', 'createdAt', 'updatedAt'] }],
+        include: [
+          { model: User, as: 'student', attributes: ['id', 'full_name', 'email', 'role', 'createdAt', 'updatedAt'] },
+          { model: Student, as: 'studentProfile', attributes: ['student_code'] }
+        ],
         limit: pageSize,
         offset,
         order: [['joined_at', 'ASC']]
@@ -77,6 +81,7 @@ const ClassController = {
         data: rows.map(cs => ({
           id: cs.student.id,
           student_name: cs.student.full_name,
+          student_code: cs.studentProfile ? cs.studentProfile.student_code : null,
           email: cs.student.email,
           role: cs.student.role,
           joinedAt: cs.joinedAt,
