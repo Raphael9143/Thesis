@@ -135,7 +135,7 @@ const StudentController = {
 			// Lấy danh sách assignment (qua assignment_courses)
 			const assignmentCourses = await AssignmentCourse.findAll({
 				where: { course_id: courseIds },
-				include: [{ model: Assignment, as: 'assignment', attributes: ['assignment_id', 'title'] }]
+				include: [{ model: Assignment, as: 'assignment', attributes: ['id', 'title'] }]
 			});
 
 			// Lấy exams trực tiếp theo course_id
@@ -147,7 +147,7 @@ const StudentController = {
 			for (const ac of assignmentCourses) {
 				const a = ac.assignment;
 				if (!a) continue;
-				const assignmentId = a.assignment_id;
+				const assignmentId = a.id;
 				const submissionsCount = await Submission.count({ where: { assignment_id: assignmentId, student_id: targetStudentId } });
 				const graded = await Submission.findOne({ where: { assignment_id: assignmentId, student_id: targetStudentId, score: { [Op.ne]: null } } });
 				results.push({

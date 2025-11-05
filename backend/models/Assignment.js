@@ -2,10 +2,10 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 const Assignment = sequelize.define('Assignment', {
-	assignment_id: {
+	id: {
 		type: DataTypes.INTEGER,
 		primaryKey: true,
-		autoIncrement: true
+		autoIncrement: true,
 	},
 	course_id: {
 		type: DataTypes.INTEGER,

@@ -134,7 +134,7 @@ async function initDatabase() {
 	});
 
 	await AssignmentCourse.create({
-		assignment_id: assignment.assignment_id,
+		assignment_id: assignment.id,
 		course_id: course.course_id,
 		start_date: new Date('2025-09-20T08:00:00Z'),
 		due_date: new Date('2025-10-01T23:59:00Z'),
@@ -182,7 +182,7 @@ async function initDatabase() {
 	});
 
 	await AssignmentCourse.create({
-		assignment_id: assignment2.assignment_id,
+		assignment_id: assignment2.id,
 		course_id: course.course_id,
 		start_date: new Date('2025-10-05T08:00:00Z'),
 		due_date: new Date('2025-10-20T23:59:00Z'),
@@ -201,7 +201,7 @@ async function initDatabase() {
 	});
 
 	await AssignmentCourse.create({
-		assignment_id: assignment3.assignment_id,
+		assignment_id: assignment3.id,
 		course_id: course.course_id,
 		start_date: new Date('2025-10-25T08:00:00Z'),
 		due_date: new Date('2025-11-30T23:59:00Z'),
@@ -221,7 +221,7 @@ async function initDatabase() {
 
 	// Sample submission (student submitted to the assignment)
 	await Submission.create({
-		assignment_id: assignment.assignment_id,
+		assignment_id: assignment.id,
 		exam_id: null,
 		student_id: studentUser.id,
 		submission_time: new Date(),
@@ -237,10 +237,10 @@ async function initDatabase() {
 		const s = otherStudents[i];
 		if (i % 4 === 0) {
 			// assignment2 submission
-			await Submission.create({ assignment_id: assignment2.assignment_id, exam_id: null, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });
+			await Submission.create({ assignment_id: assignment2.id, exam_id: null, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });
 		} else if (i % 4 === 1) {
 			// assignment3 submission
-			await Submission.create({ assignment_id: assignment3.assignment_id, exam_id: null, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });
+			await Submission.create({ assignment_id: assignment3.id, exam_id: null, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });
 		} else if (i % 4 === 2) {
 			// midterm exam submission
 			await Submission.create({ assignment_id: null, exam_id: exam1.id, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });

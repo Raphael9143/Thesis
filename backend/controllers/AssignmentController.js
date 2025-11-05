@@ -66,7 +66,7 @@ const AssignmentController = {
 
 			// Create assignment_course mapping for backward compatibility
 			await AssignmentCourse.create({
-				assignment_id: assignment.assignment_id,
+				assignment_id: assignment.id,
 				course_id
 			});
 
@@ -187,7 +187,7 @@ const AssignmentController = {
 
 			// update assignment_course if present
 			if (req.body.due_date !== undefined || req.body.week !== undefined) {
-				const ac = await AssignmentCourse.findOne({ where: { assignment_id: assignment.assignment_id } });
+				const ac = await AssignmentCourse.findOne({ where: { assignment_id: assignment.id } });
 				if (ac) { if (req.body.due_date !== undefined) ac.due_date = req.body.due_date; if (req.body.week !== undefined) ac.week = req.body.week; await ac.save(); }
 			}
 
@@ -205,7 +205,7 @@ const AssignmentController = {
 			const { assignmentId } = req.params;
 			const assignment = await Assignment.findByPk(assignmentId);
 			if (!assignment) return res.status(404).json({ success: false, message: 'Assignment not found.' });
-			const ac = await AssignmentCourse.findOne({ where: { assignment_id: assignment.assignment_id } });
+			const ac = await AssignmentCourse.findOne({ where: { assignment_id: assignment.id } });
 			if (!ac) return res.status(404).json({ success: false, message: 'Assignment-course mapping not found.' });
 
 			const classCourse = await ClassCourse.findOne({ where: { course_id: ac.course_id } });
