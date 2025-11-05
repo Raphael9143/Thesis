@@ -10,7 +10,7 @@ const ClassStudent = require('./models/ClassStudent');
 const Assignment = require('./models/Assignment');
 const Lecture = require('./models/Lecture');
 const Exam = require('./models/Exam');
-const Submission = require('./models/submissions');
+const Submission = require('./models/Submission');
 const AssignmentCourse = require('./models/AssignmentCourse');
 
 async function initDatabase() {
