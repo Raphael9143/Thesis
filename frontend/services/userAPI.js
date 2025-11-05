@@ -58,6 +58,14 @@ const userAPI = {
   // Get exams for a given student in a course
   // GET /api/student/{studentId}/exams?course={courseId}
   getStudentExams: (studentId, params) => axiosClient.get(`student/${studentId}/exams`, { params }),
+  // List submissions by assignment or exam
+  // GET /api/submissions?assignment={assignmentId}
+  getSubmissionsByAssignment: (assignmentId) => axiosClient.get(`submissions`, { params: { assignment: assignmentId } }),
+  // GET /api/submissions?exam={examId}
+  getSubmissionsByExam: (examId) => axiosClient.get(`submissions`, { params: { exam: examId } }),
+  // Get single submission by id
+  // GET /api/submissions/{id}
+  getSubmissionById: (id) => axiosClient.get(`submissions/${id}`),
   // Remove a student from a class
   // DELETE /api/class/{classId}/students/{classStudentId}
   removeStudentFromClass: (classId, classStudentId) => axiosClient.delete(`class/${classId}/students/${classStudentId}`),

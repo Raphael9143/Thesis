@@ -1,0 +1,61 @@
+.submissions-tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.tab-button{
+  padding:6px 10px;
+}
+
+.activity-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.activity-card{
+  padding:12px;
+  border:1px solid #ddd;
+  border-radius:6px;
+  cursor:pointer;
+  background: #fff;
+  transition: box-shadow .15s ease, transform .08s ease;
+}
+
+.activity-card:hover{
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
+}
+
+.activity-card.selected{
+  border-color: var(--primary-color, #2b6cb0);
+  box-shadow: 0 4px 12px rgba(43,108,176,0.08);
+}
+
+.activity-card-inner{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.activity-title{
+  font-weight:600;
+}
+
+.activity-meta{
+  font-size:12px;
+  color:#666;
+}
+
+.activity-right{
+  text-align:right;
+}
+
+.activity-submissions{
+  font-size:12px;
+}
+
+.submissions-section{
+  margin-top:18px;
+}
