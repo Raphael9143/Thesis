@@ -70,6 +70,7 @@ export default function StudentsList() {
             <thead>
               <tr>
                 <th className="table-header index">Index</th>
+                <th className="table-header code">Student Code</th>
                 <th className="table-header name">Name</th>
                 <th className="table-header actions">Actions</th>
               </tr>
@@ -79,6 +80,9 @@ export default function StudentsList() {
                 <tr key={s.classStudentId || s.id}>
                   <td style={{ width: 48 }} className="table-cell index">
                     {(pagination.page - 1) * pagination.pageSize + idx + 1}
+                  </td>
+                  <td className="table-cell code" style={{ width: 120 }}>
+                    {s.student_code || '-'}
                   </td>
                   <td className="table-cell name">
                     <p>

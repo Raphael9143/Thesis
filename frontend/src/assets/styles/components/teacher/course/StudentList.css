@@ -8,7 +8,11 @@
 }
 
 .table-header.name {
-	width: 70%;
+	width: 40%;
+}
+
+.table-header.code {
+	width: 30%;
 }
 
 .table-cell {
@@ -17,9 +21,8 @@
 }
 
 .table-cell p {
-	text-align: left;
+	text-align: center;
 	color: black;
-	padding-left: 3rem;
 }
 
 .pagination-prev, .pagination-next {
@@ -51,6 +54,10 @@
 
 .table tbody td {
 	border-bottom: 1px solid var(--border);
+	div {
+		display: flex;
+		justify-content: center;
+	}
 }
 
 .students-table tbody tr:nth-child(odd) {
