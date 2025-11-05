@@ -123,4 +123,25 @@ router.get('/:id', auth, SubmissionController.getSubmissionById);
  */
 router.get('/assignment/:id', auth, SubmissionController.getSubmissionsByAssignment);
 
+// Lấy tất cả submissions của một exam
+/**
+ * @swagger
+ * /api/submissions/exam/{id}:
+ *   get:
+ *     summary: Lấy tất cả submissions của một exam (ADMIN hoặc teacher của course)
+ *     tags: [Submission]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of submissions
+ */
+router.get('/exam/:id', auth, SubmissionController.getSubmissionsByExam);
+
 module.exports = router;

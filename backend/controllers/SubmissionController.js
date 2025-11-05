@@ -173,6 +173,44 @@ const SubmissionController = {
 			return res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	}
+	,
+
+	// Lấy tất cả submission của một exam (ADMIN hoặc teacher của course)
+	getSubmissionsByExam: async (req, res) => {
+		try {
+			const examId = parseInt(req.params.id, 10);
+			if (Number.isNaN(examId)) return res.status(400).json({ success: false, message: 'Invalid exam id' });
+			const Exam = require('../models/Exam');
+			const ClassCourse = require('../models/ClassCourse');
+			const Class = require('../models/Class');
+			const Submission = require('../models/Submission');
+			const Student = require('../models/Student');
+			const exam = await Exam.findByPk(examId);
+			if (!exam) return res.status(404).json({ success: false, message: 'Exam not found' });
+
+			const role = req.user && req.user.role;
+			const userId = req.user && req.user.userId;
+			if (role !== 'ADMIN') {
+				// verify requester is teacher of at least one class that uses this course
+				const classCourses = await ClassCourse.findAll({ where: { course_id: exam.course_id }, attributes: ['class_id'] });
+				const classIds = classCourses.map(cc => cc.class_id ?? cc.classId);
+				if (classIds.length === 0) return res.json({ success: true, data: [] });
+				const teacherClass = await Class.findOne({ where: { id: classIds, teacherId: userId } });
+				if (!teacherClass) return res.status(403).json({ success: false, message: 'Forbidden' });
+			}
+
+			const submissions = await Submission.findAll({
+				where: { exam_id: examId },
+				include: [{ model: Student, as: 'student' }],
+				order: [['created_at', 'ASC']]
+			});
+
+			return res.json({ success: true, data: submissions });
+		} catch (error) {
+			console.error('Get submissions by exam error:', error);
+			return res.status(500).json({ success: false, message: 'Internal Server Error' });
+		}
+	}
 };
 
 module.exports = SubmissionController;
