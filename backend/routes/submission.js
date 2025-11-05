@@ -81,4 +81,25 @@ router.post('/', auth, submissionUpload.single('attachment'), SubmissionControll
  */
 router.patch('/:id/grade', auth, SubmissionController.gradeSubmission);
 
+// Lấy thông tin submission theo id
+/**
+ * @swagger
+ * /api/submissions/{id}:
+ *   get:
+ *     summary: Lấy thông tin submission theo id (ADMIN, TEACHER hoặc chính sinh viên)
+ *     tags: [Submission]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Submission
+ */
+router.get('/:id', auth, SubmissionController.getSubmissionById);
+
 module.exports = router;

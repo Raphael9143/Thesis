@@ -99,6 +99,42 @@ const SubmissionController = {
 			res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	}
+	,
+
+	// Lấy thông tin submission theo id (ADMIN, TEACHER hoặc chính sinh viên nộp bài)
+	getSubmissionById: async (req, res) => {
+		try {
+			const id = parseInt(req.params.id, 10);
+			if (Number.isNaN(id)) return res.status(400).json({ success: false, message: 'Invalid submission id' });
+			const submission = await Submission.findByPk(id);
+			if (!submission) return res.status(404).json({ success: false, message: 'Submission not found' });
+
+			const role = req.user && req.user.role;
+			const userId = req.user && req.user.userId;
+			if (!(role === 'ADMIN' || role === 'TEACHER' || submission.student_id === userId)) {
+				return res.status(403).json({ success: false, message: 'Forbidden' });
+			}
+
+			const data = {
+				id: submission.id,
+				assignment_id: submission.assignment_id || null,
+				exam_id: submission.exam_id || null,
+				student_id: submission.student_id,
+				submission_time: submission.submission_time,
+				attempt_number: submission.attempt_number,
+				attachment: submission.attachment,
+				score: submission.score,
+				feedback: submission.feedback,
+				created_at: submission.created_at,
+				updated_at: submission.updated_at
+			};
+
+			return res.json({ success: true, data });
+		} catch (error) {
+			console.error('Get submission error:', error);
+			return res.status(500).json({ success: false, message: 'Internal Server Error' });
+		}
+	}
 };
 
 module.exports = SubmissionController;
