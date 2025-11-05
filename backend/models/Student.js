@@ -42,3 +42,8 @@ Student.hasMany(ClassStudent, { foreignKey: 'student_id', as: 'classEnrollments'
 
 
 module.exports = Student;
+
+// Associations back to User (belongsTo) to allow eager-loading the user's profile from Student
+// Require User after export to avoid circular require issues
+const User = require('./User');
+Student.belongsTo(User, { foreignKey: 'student_id', as: 'user' });

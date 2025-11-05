@@ -106,7 +106,11 @@ const SubmissionController = {
 		try {
 			const id = parseInt(req.params.id, 10);
 			if (Number.isNaN(id)) return res.status(400).json({ success: false, message: 'Invalid submission id' });
-			const submission = await Submission.findByPk(id);
+			const Student = require('../models/Student');
+			const User = require('../models/User');
+			const submission = await Submission.findByPk(id, {
+				include: [{ model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: ['id', 'full_name', 'email'] }] }]
+			});
 			if (!submission) return res.status(404).json({ success: false, message: 'Submission not found' });
 
 			const role = req.user && req.user.role;
@@ -120,6 +124,7 @@ const SubmissionController = {
 				assignment_id: submission.assignment_id || null,
 				exam_id: submission.exam_id || null,
 				student_id: submission.student_id,
+				student_name: submission.student && submission.student.user ? submission.student.user.full_name : null,
 				submission_time: submission.submission_time,
 				attempt_number: submission.attempt_number,
 				attachment: submission.attachment,
@@ -161,9 +166,10 @@ const SubmissionController = {
 				if (!teacherClass) return res.status(403).json({ success: false, message: 'Forbidden' });
 			}
 
+			const User = require('../models/User');
 			const submissions = await Submission.findAll({
 				where: { assignment_id: assignmentId },
-				include: [{ model: Student, as: 'student' }],
+				include: [{ model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: ['id', 'full_name', 'email'] }] }],
 				order: [['created_at', 'ASC']]
 			});
 
@@ -199,9 +205,10 @@ const SubmissionController = {
 				if (!teacherClass) return res.status(403).json({ success: false, message: 'Forbidden' });
 			}
 
+			const User = require('../models/User');
 			const submissions = await Submission.findAll({
 				where: { exam_id: examId },
-				include: [{ model: Student, as: 'student' }],
+				include: [{ model: Student, as: 'student', include: [{ model: User, as: 'user', attributes: ['id', 'full_name', 'email'] }] }],
 				order: [['created_at', 'ASC']]
 			});
 
