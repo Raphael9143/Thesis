@@ -102,4 +102,25 @@ router.patch('/:id/grade', auth, SubmissionController.gradeSubmission);
  */
 router.get('/:id', auth, SubmissionController.getSubmissionById);
 
+// Lấy tất cả submissions của một assignment
+/**
+ * @swagger
+ * /api/submissions/assignment/{id}:
+ *   get:
+ *     summary: Lấy tất cả submissions của một assignment (ADMIN hoặc teacher của course)
+ *     tags: [Submission]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of submissions
+ */
+router.get('/assignment/:id', auth, SubmissionController.getSubmissionsByAssignment);
+
 module.exports = router;
