@@ -94,7 +94,7 @@ export default function StudentSubmissions() {
                   <td style={{ width: 48 }}>{idx + 1}</td>
                   <td>{it.title}</td>
                   <td>{it.due_date ? new Date(it.due_date).toLocaleString() : '-'}</td>
-                  <td>{typeof it.submissions_count !== 'undefined' ? it.submissions_count : '-'}</td>
+                  <td>{typeof it.submissions_count !== 'undefined' ? `${it.submissions_count}/${it.attempt_limit}` : '-'}</td>
                   <td>{it.graded ? <span className="tag tag-success">Graded</span> : <span className="tag">Not graded</span>}</td>
                 </tr>
               ))}
