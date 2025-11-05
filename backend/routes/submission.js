@@ -49,5 +49,36 @@ const SubmissionController = require('../controllers/SubmissionController');
  *         description: Internal Server Error
  */
 router.post('/', auth, submissionUpload.single('attachment'), SubmissionController.submitAssignment);
+// Giáo viên chấm điểm submission (cập nhật score và feedback)
+/**
+ * @swagger
+ * /api/submissions/{id}/grade:
+ *   patch:
+ *     summary: Giáo viên chấm điểm một submission (cập nhật score và feedback)
+ *     tags: [Submission]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               score:
+ *                 type: number
+ *               feedback:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Submission graded
+ */
+router.patch('/:id/grade', auth, SubmissionController.gradeSubmission);
 
 module.exports = router;

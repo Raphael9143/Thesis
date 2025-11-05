@@ -73,6 +73,32 @@ const SubmissionController = {
 			res.status(500).json({ success: false, message: 'Internal Server Error' });
 		}
 	},
+
+	// Giáo viên chấm điểm submission
+	gradeSubmission: async (req, res) => {
+		try {
+			if (!req.user || req.user.role !== 'TEACHER') {
+				return res.status(403).json({ success: false, message: 'Chỉ giáo viên mới được chấm điểm.' });
+			}
+			const submissionId = parseInt(req.params.id, 10);
+			if (Number.isNaN(submissionId)) return res.status(400).json({ success: false, message: 'Invalid submission id' });
+			const submission = await Submission.findByPk(submissionId);
+			if (!submission) return res.status(404).json({ success: false, message: 'Submission not found' });
+			const { score, feedback } = req.body;
+			if (score === undefined) return res.status(400).json({ success: false, message: 'Score is required' });
+			// Validate score is a number
+			const numericScore = Number(score);
+			if (Number.isNaN(numericScore)) return res.status(400).json({ success: false, message: 'Score must be a number' });
+			submission.score = numericScore;
+			if (feedback !== undefined) submission.feedback = feedback;
+			submission.updated_at = new Date();
+			await submission.save();
+			res.json({ success: true, data: submission });
+		} catch (error) {
+			console.error('Grade submission error:', error);
+			res.status(500).json({ success: false, message: 'Internal Server Error' });
+		}
+	}
 };
 
 module.exports = SubmissionController;

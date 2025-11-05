@@ -16,14 +16,19 @@ export default function CreateLectureForm({ open, onClose, defaultCourseId = nul
 	const fileRef = useRef(null);
 
 	useEffect(() => {
-		setForm((f) => ({ ...f, course_id: defaultCourseId || '', class_id: defaultClassId || '' }));
-		if (lecture) {
-			setForm((f) => ({
-				...f,
-				title: lecture.title || '',
-				course_id: lecture.course_id || lecture.courseId || f.course_id,
-				class_id: lecture.class_id || lecture.classId || f.class_id,
-			}));
+		// When modal opens, populate for edit or reset for create
+		if (open) {
+			if (lecture) {
+				setForm({
+					course_id: lecture.course_id || lecture.courseId || defaultCourseId || '',
+					class_id: lecture.class_id || lecture.classId || defaultClassId || '',
+					title: lecture.title || '',
+				});
+				if (fileRef.current) fileRef.current.value = null;
+			} else {
+				setForm({ course_id: defaultCourseId || '', class_id: defaultClassId || '', title: '' });
+				if (fileRef.current) fileRef.current.value = null;
+			}
 		}
 	}, [defaultCourseId, defaultClassId, open, lecture]);
 

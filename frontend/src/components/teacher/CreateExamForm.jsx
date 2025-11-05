@@ -10,7 +10,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
   const [form, setForm] = useState({
     course_id: defaultCourseId || '',
     title: '',
-    type: '',
+    type: 'SINGLE',
     description: '',
     start_date_date: '',
     start_date_time: '',
@@ -21,7 +21,46 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
   const fileRef = useRef(null);
 
   useEffect(() => {
-    setForm((f) => ({ ...f, course_id: defaultCourseId || '' }));
+    // When modal opens, either populate with exam (edit) or reset to defaults (create)
+    if (open) {
+      if (exam) {
+        const s = {
+          course_id: exam.course_id || exam.courseId || defaultCourseId || '',
+          title: exam.title || '',
+          type: exam.type || 'SINGLE',
+          description: exam.description || '',
+          start_date_date: '',
+          start_date_time: '',
+          end_date_date: '',
+          end_date_time: '',
+        };
+        // parse ISO datetimes into date + time fields if present
+        try {
+          if (exam.start_date) {
+            const sd = new Date(exam.start_date);
+            if (!isNaN(sd)) {
+              s.start_date_date = sd.toISOString().slice(0, 10);
+              s.start_date_time = sd.toTimeString().slice(0, 5);
+            }
+          }
+        } catch (_) { }
+        try {
+          if (exam.end_date) {
+            const ed = new Date(exam.end_date);
+            if (!isNaN(ed)) {
+              s.end_date_date = ed.toISOString().slice(0, 10);
+              s.end_date_time = ed.toTimeString().slice(0, 5);
+            }
+          }
+        } catch (_) { }
+        setForm(s);
+        if (fileRef.current) fileRef.current.value = null;
+      } else {
+        setForm({ course_id: defaultCourseId || '', title: '', type: 'SINGLE', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+        if (fileRef.current) fileRef.current.value = null;
+      }
+      return;
+    }
   }, [defaultCourseId, open]);
 
   // when editing an existing exam, populate form
@@ -30,7 +69,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
       const s = {
         course_id: exam.course_id || exam.courseId || defaultCourseId || '',
         title: exam.title || '',
-        type: exam.type || '',
+        type: exam.type || 'SINGLE',
         description: exam.description || '',
         start_date_date: '',
         start_date_time: '',
@@ -42,20 +81,20 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         if (exam.start_date) {
           const sd = new Date(exam.start_date);
           if (!isNaN(sd)) {
-            s.start_date_date = sd.toISOString().slice(0,10);
-            s.start_date_time = sd.toTimeString().slice(0,5);
+            s.start_date_date = sd.toISOString().slice(0, 10);
+            s.start_date_time = sd.toTimeString().slice(0, 5);
           }
         }
-      } catch (_) {}
+      } catch (_) { }
       try {
         if (exam.end_date) {
           const ed = new Date(exam.end_date);
           if (!isNaN(ed)) {
-            s.end_date_date = ed.toISOString().slice(0,10);
-            s.end_date_time = ed.toTimeString().slice(0,5);
+            s.end_date_date = ed.toISOString().slice(0, 10);
+            s.end_date_time = ed.toTimeString().slice(0, 5);
           }
         }
-      } catch (_) {}
+      } catch (_) { }
       setForm(s);
       if (fileRef.current) fileRef.current.value = null;
     }
@@ -66,10 +105,13 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
     setForm((s) => ({ ...s, [name]: value }));
   };
 
-  const doSubmit = async (status = 'published') => {
-    // Validate required fields: course, title and type are mandatory
-    if (!form.course_id || !form.title || !form.type) {
-      push({ title: 'Validation', body: 'Course, title and type are required.' });
+  const doSubmit = async (status) => {
+    // Validate required fields when publishing: course, title and type are mandatory
+    const courseId = (form.course_id ?? '').toString().trim();
+    const title = (form.title ?? '').toString().trim();
+    const type = (form.type ?? '').toString().trim();
+    if (status === 'published' && (!courseId || !title || !type)) {
+      push({ title: 'Validation', body: 'Course, title and type are required to publish.' });
       return;
     }
 
@@ -78,7 +120,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
       const fd = new FormData();
       if (form.course_id) fd.append('course_id', form.course_id);
       if (form.title) fd.append('title', form.title);
-  if (form.type) fd.append('type', form.type);
+      if (form.type) fd.append('type', form.type);
       if (form.description) fd.append('description', form.description);
 
       // combine date+time into ISO strings for start_date and end_date
@@ -103,8 +145,8 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
       const files = fileRef.current?.files;
       if (files && files.length > 0) fd.append('file', files[0]);
 
-      // append status if backend supports it (optional)
-      if (status) fd.append('status', status);
+      // append status only when explicitly provided (so updates can keep existing status)
+      if (typeof status !== 'undefined' && status !== null && status !== '') fd.append('status', status);
 
       let res;
       if (exam && (exam.id || exam.exam_id)) {
@@ -125,7 +167,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
           push({ title: 'Success', body: status === 'draft' ? 'Exam saved as draft.' : 'Exam created.' });
           onCreated?.(res.data);
           onClose?.();
-          setForm({ course_id: defaultCourseId || '', title: '', type: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+          setForm({ course_id: defaultCourseId || '', title: '', type: 'SINGLE', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
           if (fileRef.current) fileRef.current.value = null;
         } else {
           push({ title: 'Error', body: res?.message || 'Failed to create exam' });
@@ -143,7 +185,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
     <Modal open={open} onClose={onClose} title={exam ? 'Edit exam' : 'Create new exam'}>
       <form className="create-lecture-form" onSubmit={(e) => e.preventDefault()}>
         <FormField label="Title" name="title" value={form.title} onChange={update} placeholder="Exam title" required />
-          <FormField label="Type" name="type" value={form.type} onChange={update} options={[{ value: 'SINGLE', label: 'Single' }, { value: 'GROUP', label: 'Group' }]} required />
+        <FormField label="Type" name="type" value={form.type} onChange={update} options={[{ value: 'SINGLE', label: 'Single' }, { value: 'GROUP', label: 'Group' }]} required />
         <FormField label="Description" name="description" value={form.description} onChange={update} placeholder="Optional description" textarea />
 
         <div className="form-row">
@@ -159,8 +201,18 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         <FormField label="Attachment" name="file" type="file" inputRef={fileRef} />
 
         <div className="create-lecture-form__actions">
-          <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>Cancel</button>
-          <button type="button" className="btn btn-primary" onClick={() => doSubmit('published')} disabled={submitting}>{submitting ? 'Submitting…' : 'Apply'}</button>
+          {exam ? (
+            <>
+              <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>Cancel</button>
+              <button type="button" className="btn btn-primary" onClick={() => doSubmit()} disabled={submitting}>{submitting ? 'Applying…' : 'Apply'}</button>
+            </>
+          ) : (
+            <>
+              <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>Cancel</button>
+              <button type="button" className="btn btn-signin" onClick={() => doSubmit('draft')} disabled={submitting}>Save as draft</button>
+              <button type="button" className="btn btn-primary" onClick={() => doSubmit('published')} disabled={submitting}>{submitting ? 'Submitting…' : 'Publish'}</button>
+            </>
+          )}
         </div>
       </form>
     </Modal>

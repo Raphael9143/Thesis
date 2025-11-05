@@ -292,7 +292,7 @@ pre {
 /* Utility: truncate long text with ellipsis */
 .truncate {
 	display: inline-block;
-	max-width: 22ch; /* roughly 40 characters */
+	max-width: 18ch; /* roughly 40 characters */
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
