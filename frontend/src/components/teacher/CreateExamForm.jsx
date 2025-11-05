@@ -12,6 +12,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
     title: '',
     type: 'SINGLE',
     description: '',
+    submission_limit: 1,
     start_date_date: '',
     start_date_time: '',
     end_date_date: '',
@@ -28,7 +29,8 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
           course_id: exam.course_id || exam.courseId || defaultCourseId || '',
           title: exam.title || '',
           type: exam.type || 'SINGLE',
-          description: exam.description || '',
+            submission_limit: exam.submission_limit ?? 1,
+            description: exam.description || '',
           start_date_date: '',
           start_date_time: '',
           end_date_date: '',
@@ -56,7 +58,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         setForm(s);
         if (fileRef.current) fileRef.current.value = null;
       } else {
-        setForm({ course_id: defaultCourseId || '', title: '', type: 'SINGLE', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+  setForm({ course_id: defaultCourseId || '', title: '', type: 'SINGLE', submission_limit: 1, description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
         if (fileRef.current) fileRef.current.value = null;
       }
       return;
@@ -70,7 +72,8 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         course_id: exam.course_id || exam.courseId || defaultCourseId || '',
         title: exam.title || '',
         type: exam.type || 'SINGLE',
-        description: exam.description || '',
+          submission_limit: exam.submission_limit ?? 1,
+          description: exam.description || '',
         start_date_date: '',
         start_date_time: '',
         end_date_date: '',
@@ -121,6 +124,8 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
       if (form.course_id) fd.append('course_id', form.course_id);
       if (form.title) fd.append('title', form.title);
       if (form.type) fd.append('type', form.type);
+        // submission_limit required by backend
+        fd.append('submission_limit', (typeof form.submission_limit !== 'undefined' && form.submission_limit !== null) ? String(form.submission_limit) : '1');
       if (form.description) fd.append('description', form.description);
 
       // combine date+time into ISO strings for start_date and end_date
@@ -167,7 +172,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
           push({ title: 'Success', body: status === 'draft' ? 'Exam saved as draft.' : 'Exam created.' });
           onCreated?.(res.data);
           onClose?.();
-          setForm({ course_id: defaultCourseId || '', title: '', type: 'SINGLE', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+          setForm({ course_id: defaultCourseId || '', title: '', type: 'SINGLE', submission_limit: 1, description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
           if (fileRef.current) fileRef.current.value = null;
         } else {
           push({ title: 'Error', body: res?.message || 'Failed to create exam' });
@@ -187,6 +192,16 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         <FormField label="Title" name="title" value={form.title} onChange={update} placeholder="Exam title" required />
         <FormField label="Type" name="type" value={form.type} onChange={update} options={[{ value: 'SINGLE', label: 'Single' }, { value: 'GROUP', label: 'Group' }]} required />
         <FormField label="Description" name="description" value={form.description} onChange={update} placeholder="Optional description" textarea />
+
+        <FormField
+          label="Submission limit"
+          name="submission_limit"
+          type="number"
+          value={form.submission_limit}
+          onChange={update}
+          inputProps={{ min: 1 }}
+          required
+        />
 
         <div className="form-row">
           <FormField label="Start date" name="start_date_date" type="date" value={form.start_date_date} onChange={update} required />

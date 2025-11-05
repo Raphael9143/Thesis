@@ -11,6 +11,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 		course_id: defaultCourseId || '',
 		type: 'SINGLE',
 		description: '',
+		submission_limit: 1,
 		start_date_date: '',
 		start_date_time: '',
 		end_date_date: '',
@@ -29,6 +30,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 						course_id: assignment.course_id || assignment.courseId || defaultCourseId || '',
 						title: assignment.title || '',
 						type: assignment.type || 'SINGLE',
+						submission_limit: assignment.submission_limit ?? 1,
 						description: assignment.description || assignment.desc || '',
 						start_date_date: assignment.start_date ? (new Date(assignment.start_date)).toISOString().slice(0, 10) : '',
 						start_date_time: assignment.start_date ? (new Date(assignment.start_date)).toTimeString().slice(0, 5) : '',
@@ -45,6 +47,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 					course_id: defaultCourseId || '',
 					title: '',
 					type: 'SINGLE',
+					submission_limit: 1,
 					description: '',
 					start_date_date: '',
 					start_date_time: '',
@@ -96,6 +99,8 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 			fd.append('course_id', form.course_id);
 			fd.append('title', form.title);
 			fd.append('type', form.type);
+			// submission_limit is required by backend; ensure a sane default
+			fd.append('submission_limit', (typeof form.submission_limit !== 'undefined' && form.submission_limit !== null) ? String(form.submission_limit) : '1');
 			// only append status when explicitly provided (so updates can keep existing status)
 			if (typeof status !== 'undefined' && status !== null && status !== '') fd.append('status', status);
 			if (form.description) fd.append('description', form.description);
@@ -137,8 +142,8 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 					push({ title: 'Success', body: status === 'draft' ? 'Assignment saved as draft.' : 'Assignment updated.' });
 					onUpdated?.(res.data);
 					onClose?.();
-					// reset
-					setForm({ course_id: defaultCourseId || '', title: '', type: 'SINGLE', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+						// reset
+						setForm({ course_id: defaultCourseId || '', title: '', type: 'SINGLE', submission_limit: 1, description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
 					if (fileRef.current) fileRef.current.value = null;
 					if (attachmentsRef.current) attachmentsRef.current.value = null;
 				} else {
@@ -152,7 +157,7 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 					onCreated?.(res.data);
 					onClose?.();
 					// reset
-					setForm({ course_id: defaultCourseId || '', title: '', type: '', description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+					setForm({ course_id: defaultCourseId || '', title: '', type: '', submission_limit: 1, description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
 					if (fileRef.current) fileRef.current.value = null;
 					if (attachmentsRef.current) attachmentsRef.current.value = null;
 				} else {
@@ -193,6 +198,16 @@ export default function CreateAssignmentForm({ open, onClose, defaultCourseId = 
 					onChange={update}
 					placeholder="Optional description"
 					textarea
+				/>
+
+				<FormField
+					label="Submission limit"
+					name="submission_limit"
+					type="number"
+					value={form.submission_limit}
+					onChange={update}
+					inputProps={{ min: 1 }}
+					required
 				/>
 
 
