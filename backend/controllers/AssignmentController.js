@@ -14,7 +14,7 @@ const AssignmentController = {
 				return res.status(403).json({ success: false, message: 'Only teachers can create assignments.' });
 			}
 
-			const { course_id, title, description, start_date, end_date, status, type } = req.body;
+			const { course_id, title, description, start_date, end_date, status, type, submission_limit } = req.body;
 			if (!course_id || !title) {
 				return res.status(400).json({ success: false, message: 'course_id and title are required.' });
 			}
@@ -51,6 +51,14 @@ const AssignmentController = {
 				return res.status(400).json({ success: false, message: 'Invalid type. Allowed: SINGLE or GROUP' });
 			}
 
+			// validate submission_limit if provided
+			let sl = 1;
+			if (submission_limit !== undefined) {
+				const n = Number(submission_limit);
+				if (!Number.isInteger(n) || n < 1) return res.status(400).json({ success: false, message: 'submission_limit must be an integer >= 1' });
+				sl = n;
+			}
+
 			const assignment = await Assignment.create({
 				course_id,
 				title,
@@ -61,6 +69,7 @@ const AssignmentController = {
 				type: type || 'SINGLE',
 				start_date: start_date || null,
 				end_date: end_date || null,
+				submission_limit: sl,
 				created_at: new Date()
 			});
 
@@ -168,6 +177,12 @@ const AssignmentController = {
 			}
 			const fields = ['title', 'description'];
 			fields.forEach(f => { if (req.body[f] !== undefined) assignment[f] = req.body[f]; });
+			// allow updating submission_limit
+			if (req.body.submission_limit !== undefined) {
+				const n = Number(req.body.submission_limit);
+				if (!Number.isInteger(n) || n < 1) return res.status(400).json({ success: false, message: 'submission_limit must be an integer >= 1' });
+				assignment.submission_limit = n;
+			}
 			if (req.body.status !== undefined) {
 				const allowed = ['draft', 'published', 'archived'];
 				if (!allowed.includes(req.body.status)) return res.status(400).json({ success: false, message: 'Invalid status' });

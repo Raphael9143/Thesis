@@ -12,7 +12,7 @@ const ExamController = {
       if (!req.user || req.user.role !== 'TEACHER') {
         return res.status(403).json({ success: false, message: 'Only teachers can create exams.' });
       }
-  const { course_id, title, description, start_date, end_date, type } = req.body;
+  const { course_id, title, description, start_date, end_date, type, submission_limit } = req.body;
   if (!course_id || !title) return res.status(400).json({ success: false, message: 'course_id and title are required.' });
 
   // start_date and end_date are required
@@ -33,6 +33,14 @@ const ExamController = {
       let attachment = null;
       if (req.file) attachment = '/uploads/exams/' + req.file.filename;
 
+      // validate submission_limit if provided
+      let sl = 1;
+      if (submission_limit !== undefined) {
+        const n = Number(submission_limit);
+        if (!Number.isInteger(n) || n < 1) return res.status(400).json({ success: false, message: 'submission_limit must be an integer >= 1' });
+        sl = n;
+      }
+
       const exam = await Exam.create({
         course_id,
         title,
@@ -40,7 +48,8 @@ const ExamController = {
         start_date: start_date || null,
         end_date: end_date || null,
         type: type || 'SINGLE',
-        attachment: attachment || null
+        attachment: attachment || null,
+        submission_limit: sl
       });
 
       res.status(201).json({ success: true, message: 'Exam created!', data: exam });
@@ -151,6 +160,13 @@ const ExamController = {
         exam.type = req.body.type;
       }
 
+      // allow updating submission_limit
+      if (req.body.submission_limit !== undefined) {
+        const n = Number(req.body.submission_limit);
+        if (!Number.isInteger(n) || n < 1) return res.status(400).json({ success: false, message: 'submission_limit must be an integer >= 1' });
+        exam.submission_limit = n;
+      }
+
       // ensure invariant
   if (!exam.start_date || !exam.end_date) return res.status(400).json({ success: false, message: 'start_date and end_date must be set.' });
 
@@ -204,6 +220,13 @@ const ExamController = {
         const allowedT = ['SINGLE', 'GROUP'];
         if (!allowedT.includes(req.body.type)) return res.status(400).json({ success: false, message: 'Invalid type. Allowed: SINGLE or GROUP' });
         exam.type = req.body.type;
+      }
+
+      // patch: allow updating submission_limit
+      if (req.body.submission_limit !== undefined) {
+        const n = Number(req.body.submission_limit);
+        if (!Number.isInteger(n) || n < 1) return res.status(400).json({ success: false, message: 'submission_limit must be an integer >= 1' });
+        exam.submission_limit = n;
       }
 
   if (!exam.start_date || !exam.end_date) return res.status(400).json({ success: false, message: 'start_date and end_date must be set.' });

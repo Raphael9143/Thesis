@@ -135,11 +135,11 @@ const StudentController = {
 			// Lấy danh sách assignment (qua assignment_courses)
 			const assignmentCourses = await AssignmentCourse.findAll({
 				where: { course_id: courseIds },
-				include: [{ model: Assignment, as: 'assignment', attributes: ['id', 'title'] }]
+				include: [{ model: Assignment, as: 'assignment', attributes: ['id', 'title', 'submission_limit'] }]
 			});
 
 			// Lấy exams trực tiếp theo course_id
-			const exams = await Exam.findAll({ where: { course_id: courseIds }, attributes: ['id', 'title', 'start_date', 'end_date', 'course_id'] });
+			const exams = await Exam.findAll({ where: { course_id: courseIds }, attributes: ['id', 'title', 'start_date', 'end_date', 'course_id', 'submission_limit'] });
 
 			const results = [];
 
@@ -155,8 +155,8 @@ const StudentController = {
 					title: a.title,
 					kind: 'assignment',
 					submissions_count: submissionsCount,
-					attempt_limit: null,
-					graded: !!graded,
+						attempt_limit: a.submission_limit,
+						graded: !!graded,
 					course_id: ac.course_id ?? ac.courseId,
 					due_date: ac.due_date ?? ac.dueDate
 				});
@@ -172,8 +172,8 @@ const StudentController = {
 					title: ex.title,
 					kind: 'exam',
 					submissions_count: submissionsCount,
-					attempt_limit: null,
-					graded: !!graded,
+						attempt_limit: ex.submission_limit,
+						graded: !!graded,
 					course_id: ex.course_id,
 					due_date: ex.start_date
 				});

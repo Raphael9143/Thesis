@@ -45,6 +45,11 @@ const Assignment = sequelize.define('Assignment', {
 		type: DataTypes.DATE,
 		allowNull: false
 	},
+	submission_limit: {
+		type: DataTypes.INTEGER,
+		allowNull: false,
+		defaultValue: 1
+	},
 	created_at: {
 		type: DataTypes.DATE,
 		allowNull: false,

@@ -36,6 +36,11 @@ const Exam = sequelize.define('Exam', {
     allowNull: false,
     defaultValue: 'SINGLE'
   },
+  submission_limit: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    defaultValue: 1
+  },
   createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
