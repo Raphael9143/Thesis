@@ -158,6 +158,7 @@ const StudentController = {
 					submissions_count: submissionsCount,
 					attempt_limit: a.submission_limit,
 					score: latestSub ? latestSub.score : null,
+					attachment: latestSub ? latestSub.attachment : null,
 					course_id: ac.course_id ?? ac.courseId,
 					due_date: ac.due_date ?? ac.dueDate
 				});
@@ -176,6 +177,7 @@ const StudentController = {
 					submissions_count: submissionsCount,
 					attempt_limit: ex.submission_limit,
 					score: latestSub ? latestSub.score : null,
+					attachment: latestSub ? latestSub.attachment : null,
 					course_id: ex.course_id,
 					due_date: ex.start_date
 				});
