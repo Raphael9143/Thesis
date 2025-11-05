@@ -10,7 +10,7 @@ const ClassStudent = require('./models/ClassStudent');
 const Assignment = require('./models/Assignment');
 const Lecture = require('./models/Lecture');
 const Exam = require('./models/Exam');
-const Submission = require('./models/Submission');
+const Submission = require('./models/submissions');
 const AssignmentCourse = require('./models/AssignmentCourse');
 
 async function initDatabase() {
@@ -227,7 +227,7 @@ async function initDatabase() {
 		student_id: studentUser.id,
 		submission_time: new Date(),
 		attempt_number: 1,
-		attachment: '/uploads/submission/sample.use',
+		attachment: '/uploads/submissions/sample.use',
 		created_at: new Date()
 	});
 
@@ -238,16 +238,16 @@ async function initDatabase() {
 		const s = otherStudents[i];
 		if (i % 4 === 0) {
 			// assignment2 submission
-			await Submission.create({ assignment_id: assignment2.id, exam_id: null, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });
+			await Submission.create({ assignment_id: assignment2.id, exam_id: null, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submissions/sample.use', created_at: new Date() });
 		} else if (i % 4 === 1) {
 			// assignment3 submission
-			await Submission.create({ assignment_id: assignment3.id, exam_id: null, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });
+			await Submission.create({ assignment_id: assignment3.id, exam_id: null, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submissions/sample.use', created_at: new Date() });
 		} else if (i % 4 === 2) {
 			// midterm exam submission
-			await Submission.create({ assignment_id: null, exam_id: exam1.id, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });
+			await Submission.create({ assignment_id: null, exam_id: exam1.id, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submissions/sample.use', created_at: new Date() });
 		} else {
 			// final exam submission
-			await Submission.create({ assignment_id: null, exam_id: finalExam.id, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submission/sample.use', created_at: new Date() });
+			await Submission.create({ assignment_id: null, exam_id: finalExam.id, student_id: s.student_id, submission_time: new Date(), attempt_number: 1, attachment: '/uploads/submissions/sample.use', created_at: new Date() });
 		}
 	}
 
