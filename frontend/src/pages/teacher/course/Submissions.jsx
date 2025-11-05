@@ -8,6 +8,7 @@ import '../../../assets/styles/pages/Submissions.css';
 import { usePageInfo } from '../../../contexts/PageInfoContext';
 import { useNotifications } from '../../../contexts/NotificationContext';
 import toFullUrl from '../../../utils/FullURLFile';
+import GradeSubmissionModal from '../../../components/teacher/GradeSubmissionModal';
 
 export default function Submissions() {
 	const params = useParams();
@@ -22,6 +23,8 @@ export default function Submissions() {
 	const [selectedActivity, setSelectedActivity] = useState(null);
 	const [submissions, setSubmissions] = useState([]);
 	const [subsLoading, setSubsLoading] = useState(false);
+	const [gradeModalOpen, setGradeModalOpen] = useState(false);
+	const [selectedForGrade, setSelectedForGrade] = useState(null);
 
 	const { setTitle } = usePageInfo();
 	const { push } = useNotifications();
@@ -140,8 +143,8 @@ export default function Submissions() {
 									</div>
 								</div>
 								{subsLoading && <div>Loading submissions...</div>}
-								{!subsLoading && submissions.length === 0 && <div>No submissions yet.</div>}
-								{!subsLoading && submissions.length > 0 && (
+								{/* {!subsLoading && submissions.length === 0 && <div>No submissions yet.</div>} */}
+								{/* {!subsLoading && submissions.length > 0 && (
 									<table className="table students-table">
 										<thead>
 											<tr>
@@ -162,13 +165,26 @@ export default function Submissions() {
 													<td>{s.student?.user?.full_name || '-'}</td>
 													<td>{s.submission_time ? new Date(s.submission_time).toLocaleString() : '-'}</td>
 													<td>{s.attempt_number ?? '-'}</td>
-													<td>{s.score ?? 'Not graded'}</td>
+													<td>
+														<a className="score-btn" onClick={() => { setSelectedForGrade(s); setGradeModalOpen(true); }}>
+															{typeof s.score !== 'undefined' && s.score !== null ? String(s.score) : 'Not graded'}
+														</a>
+													</td>
 													<td>{s.attachment ? <a href={toFullUrl(s.attachment)} target="_blank" rel="noreferrer">Download</a> : '-'}</td>
 												</tr>
 											))}
 										</tbody>
 									</table>
-								)}
+								)} */}
+								<GradeSubmissionModal
+									open={gradeModalOpen}
+									onClose={() => setGradeModalOpen(false)}
+									submission={selectedForGrade}
+									onGraded={(updated) => {
+										if (!updated) return;
+										setSubmissions((prev) => prev.map((p) => (p.id === (updated.id || p.id) ? { ...p, ...updated } : p)));
+									}}
+								/>
 							</div>
 						)}
 					</div>

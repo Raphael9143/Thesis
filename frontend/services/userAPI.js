@@ -70,6 +70,8 @@ const userAPI = {
   // Get single submission by id
   // GET /api/submissions/{id}
   getSubmissionById: (id) => axiosClient.get(`submissions/${id}`),
+  // Grade a submission: PATCH /api/submissions/{id}/grade with payload { score, feedback }
+  gradeSubmission: (submissionId, data) => axiosClient.patch(`submissions/${submissionId}/grade`, data),
   // Remove a student from a class
   // DELETE /api/class/{classId}/students/{classStudentId}
   removeStudentFromClass: (classId, classStudentId) => axiosClient.delete(`class/${classId}/students/${classStudentId}`),
