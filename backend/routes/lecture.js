@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middlewares/auth');
 const LectureController = require('../controllers/LectureController');
 const lectureUpload = require('../middlewares/lectureUpload');
+const conditionalLectureUpload = require('../middlewares/conditionalUpload')(lectureUpload);
 
 /**
  * @swagger
@@ -42,7 +43,7 @@ const lectureUpload = require('../middlewares/lectureUpload');
  *         description: Forbidden
  */
 // Allow multiple attachments under field name 'attachments'
-router.post('/', auth, lectureUpload.single('attachment'), (req, res, next) => {
+router.post('/', auth, conditionalLectureUpload, (req, res, next) => {
 	// If the client sent attachment as a JSON string field, try to parse it
 	if (req.body.attachment && typeof req.body.attachment === 'string') {
 		// keep as string path; no JSON parsing needed for single attachment
@@ -186,7 +187,7 @@ router.patch('/:id/status', auth, LectureController.updateLectureStatus);
  *         description: Forbidden
  */
 // Allow single attachment to be updated via multipart form-data under field 'attachment'
-router.patch('/:id', auth, lectureUpload.single('attachment'), (req, res, next) => {
+router.patch('/:id', auth, conditionalLectureUpload, (req, res, next) => {
 	if (req.body.attachment && typeof req.body.attachment === 'string') {
 		if (req.body.attachment === '') delete req.body.attachment;
 	}

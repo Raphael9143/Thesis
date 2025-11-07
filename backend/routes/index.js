@@ -13,6 +13,7 @@ const notifyRoutes = require('./notify');
 const assignmentRoutes = require('./assignment');
 const lectureRoutes = require('./lecture');
 const examRoutes = require('./exam');
+const useRoutes = require('./use');
 
 const { sequelize, testConnection } = require('../config/database');
 const { specs, swaggerUi } = require('../config/swagger')
@@ -86,6 +87,20 @@ app.use('/api/lectures', lectureRoutes);
 // Exam routes
 app.use('/api/exams', examRoutes);
 
+// USE parsing routes
+app.use('/api/use', useRoutes);
+
 
 app.use('/uploads', express.static('uploads'));
+// Multer error handler: give clearer message instead of stacktrace
+const multer = require('multer');
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        // Common multer errors: Unexpected field, Field name missing, LIMIT_FILE_SIZE, etc.
+        const message = err.message || 'File upload error';
+        return res.status(400).json({ success: false, error: 'MulterError', message });
+    }
+    // pass to default error handler
+    return next(err);
+});
 module.exports = app

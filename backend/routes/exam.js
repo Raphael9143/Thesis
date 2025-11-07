@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middlewares/auth');
 const ExamController = require('../controllers/ExamController');
 const examUpload = require('../middlewares/examUpload');
+const conditionalExamUpload = require('../middlewares/conditionalUpload')(examUpload);
 
 /**
  * @swagger
@@ -46,7 +47,7 @@ const examUpload = require('../middlewares/examUpload');
  *       201:
  *         description: Exam created
  */
-router.post('/', auth, examUpload.single('attachment'), ExamController.createExam);
+router.post('/', auth, conditionalExamUpload, ExamController.createExam);
 
 /**
  * @swagger
@@ -109,7 +110,7 @@ router.post('/', auth, examUpload.single('attachment'), ExamController.createExa
  *       200:
  *         description: Exam updated
  */
-router.put('/:id', auth, examUpload.single('attachment'), ExamController.updateExam);
+router.put('/:id', auth, conditionalExamUpload, ExamController.updateExam);
 
 /**
  * @swagger
@@ -150,7 +151,7 @@ router.put('/:id', auth, examUpload.single('attachment'), ExamController.updateE
  *       200:
  *         description: Exam patched
  */
-router.patch('/:id', auth, examUpload.single('attachment'), ExamController.patchExam);
+router.patch('/:id', auth, conditionalExamUpload, ExamController.patchExam);
 
 /**
  * @swagger

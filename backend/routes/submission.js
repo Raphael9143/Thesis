@@ -48,7 +48,8 @@ const SubmissionController = require('../controllers/SubmissionController');
  *       500:
  *         description: Internal Server Error
  */
-router.post('/', auth, submissionUpload.single('attachment'), SubmissionController.submitAssignment);
+const conditionalSubmissionUpload = require('../middlewares/conditionalUpload')(submissionUpload);
+router.post('/', auth, conditionalSubmissionUpload, SubmissionController.submitAssignment);
 // Giáo viên chấm điểm submission (cập nhật score và feedback)
 /**
  * @swagger

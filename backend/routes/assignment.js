@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middlewares/auth');
 
 const upload = require('../middlewares/assignmentUpload');
+const conditionalUpload = require('../middlewares/conditionalUpload')(upload);
 const AssignmentController = require('../controllers/AssignmentController');
 
 /**
@@ -76,7 +77,7 @@ const AssignmentController = require('../controllers/AssignmentController');
  *       500:
  *         description: Internal Server Error
  */
-router.post('/', auth, upload.single('attachment'), (req, res, next) => {
+router.post('/', auth, conditionalUpload, (req, res, next) => {
 	// Nếu có trường constraints là string, parse sang object
 	if (req.body.constraints && typeof req.body.constraints === 'string') {
 		try {
@@ -257,7 +258,7 @@ router.get('/course/:id', auth, AssignmentController.getAssignmentsByCourseId);
  *       500:
  *         description: Internal Server Error
  */
-router.put('/:id', auth, upload.single('attachment'), (req, res, next) => {
+router.put('/:id', auth, conditionalUpload, (req, res, next) => {
 	if (req.body.constraints && typeof req.body.constraints === 'string') {
 		try {
 			req.body.constraints = JSON.parse(req.body.constraints);
