@@ -19,15 +19,16 @@ function broadcast(event, payload) {
  * Uses per-socket emit with callback; resolves with ack results or times out.
  */
 async function emitToUserWithAck(userId, event, payload, timeoutMs = 5000) {
-  if (!_io) return { ok: false, reason: 'io_not_initialized' };
+  if (!_io) return { ok: false, reason: "io_not_initialized" };
   const room = `user:${userId}`;
   const sockets = await _io.in(room).fetchSockets();
   if (!sockets || sockets.length === 0) {
-    return { ok: false, reason: 'no_active_sockets' };
+    return { ok: false, reason: "no_active_sockets" };
   }
 
   // Attach a notification id so client can ack the correct message
-  const notificationId = payload?.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const notificationId =
+    payload?.id || `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const data = { ...payload, id: notificationId };
 
   return await new Promise((resolve) => {
@@ -36,7 +37,12 @@ async function emitToUserWithAck(userId, event, payload, timeoutMs = 5000) {
     const timer = setTimeout(() => {
       if (!resolved) {
         resolved = true;
-        resolve({ ok: false, reason: 'timeout', acks: results, id: notificationId });
+        resolve({
+          ok: false,
+          reason: "timeout",
+          acks: results,
+          id: notificationId,
+        });
       }
     }, timeoutMs);
 
@@ -51,7 +57,10 @@ async function emitToUserWithAck(userId, event, payload, timeoutMs = 5000) {
           }
         });
       } catch (err) {
-        results.push({ socketId: sock.id, error: err?.message || 'emit_failed' });
+        results.push({
+          socketId: sock.id,
+          error: err?.message || "emit_failed",
+        });
       }
     });
   });
