@@ -1,10 +1,10 @@
-const fs = require('fs');
-const path = require('path');
-const { spawn } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const { spawn } = require("child_process");
 
 // Path to the bundled USE CLI batch
-const USE_BIN = path.resolve(__dirname, '..', 'use-7.5.0', 'bin');
-const USE_BATCH = path.join(USE_BIN, 'use.bat');
+const USE_BIN = path.resolve(__dirname, "..", "use-7.5.0", "bin");
+const USE_BATCH = path.join(USE_BIN, "use.bat");
 
 function runUseCli(filePath, timeout = 5000) {
   return new Promise((resolve, reject) => {
@@ -12,7 +12,7 @@ function runUseCli(filePath, timeout = 5000) {
     const spawnUse = () => {
       try {
         // Use shell to allow PATH lookup for `use` command
-        return spawn('use', [], { shell: true });
+        return spawn("use", [], { shell: true });
       } catch (e) {
         return null;
       }
@@ -27,19 +27,25 @@ function runUseCli(filePath, timeout = 5000) {
     };
 
     proc = spawnUse() || spawnBatch();
-    if (!proc) return reject(new Error('USE CLI not found'));
+    if (!proc) return reject(new Error("USE CLI not found"));
 
-    let out = '';
-    let err = '';
+    let out = "";
+    let err = "";
     const timer = setTimeout(() => {
-      try { proc.kill(); } catch (e) { }
-      reject(new Error('USE CLI timed out'));
+      try {
+        proc.kill();
+      } catch (e) {}
+      reject(new Error("USE CLI timed out"));
     }, timeout);
 
-    proc.stdout.on('data', d => { out += d.toString(); });
-    proc.stderr.on('data', d => { err += d.toString(); });
+    proc.stdout.on("data", (d) => {
+      out += d.toString();
+    });
+    proc.stderr.on("data", (d) => {
+      err += d.toString();
+    });
 
-    proc.on('close', code => {
+    proc.on("close", (code) => {
       clearTimeout(timer);
       return resolve({ code, stdout: out, stderr: err });
     });
@@ -48,8 +54,8 @@ function runUseCli(filePath, timeout = 5000) {
     // Ensure file path quoting works across shells
     const openCmd = `open "${filePath.replace(/"/g, '\\"')}"\n`;
     proc.stdin.write(openCmd);
-    proc.stdin.write('info model\n');
-    proc.stdin.write('quit\n');
+    proc.stdin.write("info model\n");
+    proc.stdin.write("quit\n");
     proc.stdin.end();
   });
 }
@@ -66,7 +72,10 @@ function parseUseContent(content) {
   while ((em = enumRe.exec(content)) !== null) {
     const name = em[1];
     const body = em[2];
-    const values = body.split(',').map(v => v.trim()).filter(Boolean);
+    const values = body
+      .split(",")
+      .map((v) => v.trim())
+      .filter(Boolean);
     res.enums.push({ name, values });
   }
 
@@ -76,14 +85,19 @@ function parseUseContent(content) {
   while ((cb = classBlockRe.exec(content)) !== null) {
     const block = cb[0];
     const nameMatch = block.match(/^class\s+([A-Za-z0-9_]+)/im);
-    const name = nameMatch ? nameMatch[1] : 'Unknown';
+    const name = nameMatch ? nameMatch[1] : "Unknown";
     const cls = { name, attributes: [], operations: [] };
 
     // attributes block within class
-    const attrMatch = block.match(/attributes\s*([\s\S]*?)(?:operations\b|\n\s*end\b)/im);
+    const attrMatch = block.match(
+      /attributes\s*([\s\S]*?)(?:operations\b|\n\s*end\b)/im
+    );
     if (attrMatch) {
       const attrBody = attrMatch[1];
-      const lines = attrBody.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const lines = attrBody
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter(Boolean);
       for (const line of lines) {
         // match 'name : Type' allowing namespace in type
         const m = line.match(/^([a-zA-Z0-9_]+)\s*:\s*([A-Za-z0-9_:<>]+)\s*$/);
@@ -95,7 +109,10 @@ function parseUseContent(content) {
     const opMatch = block.match(/operations\s*([\s\S]*?)(?=\n\s*end\b)/im);
     if (opMatch) {
       const opBody = opMatch[1];
-      const opLines = opBody.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const opLines = opBody
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter(Boolean);
       for (const line of opLines) {
         const m = line.match(/^([a-zA-Z0-9_]+)\s*\(([^)]*)\)/);
         if (m) cls.operations.push({ name: m[1], signature: m[2].trim() });
@@ -111,11 +128,16 @@ function parseUseContent(content) {
   while ((am = assocRe.exec(content)) !== null) {
     const name = am[1];
     const body = am[2];
-    const lines = body.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const lines = body
+      .split(/\r?\n/)
+      .map((l) => l.trim())
+      .filter(Boolean);
     const parts = [];
     for (const line of lines) {
       // e.g. Customer [1] role owner
-      const m = line.match(/([A-Za-z0-9_]+)\s*\[([^\]]+)\]\s*role\s*([A-Za-z0-9_]+)/i);
+      const m = line.match(
+        /([A-Za-z0-9_]+)\s*\[([^\]]+)\]\s*role\s*([A-Za-z0-9_]+)/i
+      );
       if (m) parts.push({ class: m[1], multiplicity: m[2].trim(), role: m[3] });
     }
     res.associations.push({ name, parts });
@@ -145,10 +167,15 @@ const UseController = {
       } else if (req.body && req.body.path) {
         filePath = path.resolve(req.body.path);
       } else {
-        return res.status(400).json({ success: false, message: 'file upload or path required' });
+        return res
+          .status(400)
+          .json({ success: false, message: "file upload or path required" });
       }
 
-      if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, message: 'File not found' });
+      if (!fs.existsSync(filePath))
+        return res
+          .status(404)
+          .json({ success: false, message: "File not found" });
 
       // Run USE CLI (best-effort) and also parse file locally
       let cliResult = null;
@@ -158,7 +185,7 @@ const UseController = {
         cliResult = { error: err.message };
       }
 
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = fs.readFileSync(filePath, "utf8");
       // Prefer parsing CLI output if available (it's the normalized model), otherwise parse the file content
       let parsed = null;
       if (cliResult && cliResult.stdout) {
@@ -174,11 +201,12 @@ const UseController = {
 
       return res.json({ success: true, cli: cliResult, model: parsed });
     } catch (error) {
-      console.error('Parse .use error:', error);
-      return res.status(500).json({ success: false, message: 'Internal Server Error' });
+      console.error("Parse .use error:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
     }
-  }
-  ,
+  },
   save: async (req, res) => {
     // Save parsed model into DB tables
     try {
@@ -194,63 +222,94 @@ const UseController = {
         originalInput = req.body.path;
         filePath = path.resolve(req.body.path);
       } else {
-        return res.status(400).json({ success: false, message: 'file upload or path required' });
+        return res
+          .status(400)
+          .json({ success: false, message: "file upload or path required" });
       }
 
-      if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, message: 'File not found' });
+      if (!fs.existsSync(filePath))
+        return res
+          .status(404)
+          .json({ success: false, message: "File not found" });
 
       // Normalize a public-facing path stored in DB. Prefer '/uploads/<filename>' when possible.
-      const uploadsDir = path.resolve(__dirname, '..', 'uploads');
+      const uploadsDir = path.resolve(__dirname, "..", "uploads");
       let publicPath = null;
       if (originalInput) {
         // normalize slashes for comparison
-        const inp = originalInput.replace(/\\/g, '/');
-        if (inp.startsWith('/uploads') || inp.startsWith('uploads') || inp.includes('/uploads/')) {
-          publicPath = inp.startsWith('/') ? inp : '/' + inp;
+        const inp = originalInput.replace(/\\/g, "/");
+        if (
+          inp.startsWith("/uploads") ||
+          inp.startsWith("uploads") ||
+          inp.includes("/uploads/")
+        ) {
+          publicPath = inp.startsWith("/") ? inp : "/" + inp;
         }
       }
       if (!publicPath) {
         // if the resolved absolute path is inside uploads dir, use '/uploads/<basename>'
-        const absUploads = uploadsDir.replace(/\\/g, '/');
-        const absFile = filePath.replace(/\\/g, '/');
+        const absUploads = uploadsDir.replace(/\\/g, "/");
+        const absFile = filePath.replace(/\\/g, "/");
         if (absFile.startsWith(absUploads)) {
-          publicPath = '/uploads/' + path.basename(filePath);
+          publicPath = "/uploads/" + path.basename(filePath);
         } else {
           // fallback: store only the filename under /uploads to keep DB compact
-          publicPath = '/uploads/' + path.basename(filePath);
+          publicPath = "/uploads/" + path.basename(filePath);
         }
       }
 
       // run CLI
       let cliResult = null;
-      try { cliResult = await runUseCli(filePath, 8000); } catch (e) { cliResult = { error: e.message }; }
+      try {
+        cliResult = await runUseCli(filePath, 8000);
+      } catch (e) {
+        cliResult = { error: e.message };
+      }
 
-      const content = fs.readFileSync(filePath, 'utf8');
+      const content = fs.readFileSync(filePath, "utf8");
       let parsed = null;
       if (cliResult && cliResult.stdout) {
-        try { parsed = parseCliOutput(cliResult.stdout); } catch (e) { parsed = parseUseContent(content); }
+        try {
+          parsed = parseCliOutput(cliResult.stdout);
+        } catch (e) {
+          parsed = parseUseContent(content);
+        }
       } else parsed = parseUseContent(content);
 
       // Persist into DB
-      const { sequelize } = require('../config/database');
+      const { sequelize } = require("../config/database");
       // ensure associations are wired
-      require('../models/UseAssociations');
-      const UseModel = require('../models/UseModel');
-      const UseEnum = require('../models/UseEnum');
-      const UseClass = require('../models/UseClass');
-      const UseAttribute = require('../models/UseAttribute');
-      const UseOperation = require('../models/UseOperation');
-      const UseAssociation = require('../models/UseAssociation');
-      const UseAssociationPart = require('../models/UseAssociationPart');
-      const UseConstraint = require('../models/UseConstraint');
+      require("../models/UseAssociations");
+      const UseModel = require("../models/UseModel");
+      const UseEnum = require("../models/UseEnum");
+      const UseClass = require("../models/UseClass");
+      const UseAttribute = require("../models/UseAttribute");
+      const UseOperation = require("../models/UseOperation");
+      const UseAssociation = require("../models/UseAssociation");
+      const UseAssociationPart = require("../models/UseAssociationPart");
+      const UseConstraint = require("../models/UseConstraint");
 
       const result = await sequelize.transaction(async (t) => {
-  const modelRow = await UseModel.create({ name: parsed.model || null, filePath: publicPath, rawText: cliResult && cliResult.stdout ? cliResult.stdout : content }, { transaction: t });
+        const modelRow = await UseModel.create(
+          {
+            name: parsed.model || null,
+            filePath: publicPath,
+            rawText: cliResult && cliResult.stdout ? cliResult.stdout : content,
+          },
+          { transaction: t }
+        );
 
         // enums
         if (parsed.enums && parsed.enums.length) {
           for (const en of parsed.enums) {
-            await UseEnum.create({ useModelId: modelRow.id, name: en.name, values: (en.values || []).join(',') }, { transaction: t });
+            await UseEnum.create(
+              {
+                useModelId: modelRow.id,
+                name: en.name,
+                values: (en.values || []).join(","),
+              },
+              { transaction: t }
+            );
           }
         }
 
@@ -258,18 +317,35 @@ const UseController = {
         const classMap = {}; // name -> id
         if (parsed.classes && parsed.classes.length) {
           for (const cls of parsed.classes) {
-            const c = await UseClass.create({ useModelId: modelRow.id, name: cls.name }, { transaction: t });
+            const c = await UseClass.create(
+              { useModelId: modelRow.id, name: cls.name },
+              { transaction: t }
+            );
             classMap[cls.name] = c.id;
             // attributes
             if (cls.attributes && cls.attributes.length) {
               for (const attr of cls.attributes) {
-                await UseAttribute.create({ useClassId: c.id, name: attr.name, type: attr.type || null }, { transaction: t });
+                await UseAttribute.create(
+                  {
+                    useClassId: c.id,
+                    name: attr.name,
+                    type: attr.type || null,
+                  },
+                  { transaction: t }
+                );
               }
             }
             // operations
             if (cls.operations && cls.operations.length) {
               for (const op of cls.operations) {
-                await UseOperation.create({ useClassId: c.id, name: op.name, signature: op.signature || null }, { transaction: t });
+                await UseOperation.create(
+                  {
+                    useClassId: c.id,
+                    name: op.name,
+                    signature: op.signature || null,
+                  },
+                  { transaction: t }
+                );
               }
             }
           }
@@ -278,10 +354,21 @@ const UseController = {
         // associations
         if (parsed.associations && parsed.associations.length) {
           for (const assoc of parsed.associations) {
-            const a = await UseAssociation.create({ useModelId: modelRow.id, name: assoc.name }, { transaction: t });
+            const a = await UseAssociation.create(
+              { useModelId: modelRow.id, name: assoc.name },
+              { transaction: t }
+            );
             if (assoc.parts && assoc.parts.length) {
               for (const p of assoc.parts) {
-                await UseAssociationPart.create({ useAssociationId: a.id, className: p.class, multiplicity: p.multiplicity, role: p.role }, { transaction: t });
+                await UseAssociationPart.create(
+                  {
+                    useAssociationId: a.id,
+                    className: p.class,
+                    multiplicity: p.multiplicity,
+                    role: p.role,
+                  },
+                  { transaction: t }
+                );
               }
             }
           }
@@ -290,7 +377,8 @@ const UseController = {
         // constraints: attempt to parse contexts from raw content (simple split)
         if (parsed && parsed.model) {
           // crude extraction: find 'constraints' section in CLI output or raw content
-          const cliText = (cliResult && cliResult.stdout) ? cliResult.stdout : content;
+          const cliText =
+            cliResult && cliResult.stdout ? cliResult.stdout : content;
           const consIdx = cliText.search(/\nconstraints\b/i);
           if (consIdx >= 0) {
             const consText = cliText.slice(consIdx);
@@ -300,15 +388,37 @@ const UseController = {
             while ((cm = ctxRe.exec(consText)) !== null) {
               const block = cm[0].trim();
               // attempt to parse header like 'context self : Account inv NonNegativeBalance:' or 'context Account::deposit(amount : Real)'
-              const header = block.split('\n')[0];
-              let contextName = null, kind = null, name = null, expr = block.split('\n').slice(1).join('\n').trim();
-              const m1 = header.match(/^context\s+([^\s]+)\s*:\s*([A-Za-z0-9_]+)\s+inv\s+([^:]+):?/i);
-              if (m1) { contextName = m1[2]; kind = 'invariant'; name = (m1[3] || null); }
-              else {
-                const m2 = header.match(/^context\s+([A-Za-z0-9_:]+)\s*(?:\(|$)/i);
-                if (m2) { contextName = m2[1]; kind = 'constraint'; }
+              const header = block.split("\n")[0];
+              let contextName = null,
+                kind = null,
+                name = null,
+                expr = block.split("\n").slice(1).join("\n").trim();
+              const m1 = header.match(
+                /^context\s+([^\s]+)\s*:\s*([A-Za-z0-9_]+)\s+inv\s+([^:]+):?/i
+              );
+              if (m1) {
+                contextName = m1[2];
+                kind = "invariant";
+                name = m1[3] || null;
+              } else {
+                const m2 = header.match(
+                  /^context\s+([A-Za-z0-9_:]+)\s*(?:\(|$)/i
+                );
+                if (m2) {
+                  contextName = m2[1];
+                  kind = "constraint";
+                }
               }
-              await UseConstraint.create({ useModelId: modelRow.id, context: contextName, kind, name, expression: expr }, { transaction: t });
+              await UseConstraint.create(
+                {
+                  useModelId: modelRow.id,
+                  context: contextName,
+                  kind,
+                  name,
+                  expression: expr,
+                },
+                { transaction: t }
+              );
             }
           }
         }
@@ -318,10 +428,12 @@ const UseController = {
 
       return res.json({ success: true, model_id: result.id, cli: cliResult });
     } catch (error) {
-      console.error('Save .use error:', error);
-      return res.status(500).json({ success: false, message: 'Internal Server Error' });
+      console.error("Save .use error:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
     }
-  }
+  },
 };
 
 module.exports = UseController;
