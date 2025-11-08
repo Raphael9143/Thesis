@@ -32,7 +32,7 @@ function runUseCli(filePath, timeout = 5000) {
     let out = '';
     let err = '';
     const timer = setTimeout(() => {
-      try { proc.kill(); } catch (e) {}
+      try { proc.kill(); } catch (e) { }
       reject(new Error('USE CLI timed out'));
     }, timeout);
 
@@ -92,7 +92,7 @@ function parseUseContent(content) {
     }
 
     // operations block within class
-  const opMatch = block.match(/operations\s*([\s\S]*?)(?=\n\s*end\b)/im);
+    const opMatch = block.match(/operations\s*([\s\S]*?)(?=\n\s*end\b)/im);
     if (opMatch) {
       const opBody = opMatch[1];
       const opLines = opBody.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
@@ -175,6 +175,150 @@ const UseController = {
       return res.json({ success: true, cli: cliResult, model: parsed });
     } catch (error) {
       console.error('Parse .use error:', error);
+      return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    }
+  }
+  ,
+  save: async (req, res) => {
+    // Save parsed model into DB tables
+    try {
+      let filePath = null;
+      let originalInput = null; // keep the original input to build a public /uploads/ path
+      if (req.file) {
+        originalInput = req.file.path;
+        filePath = path.resolve(req.file.path);
+      } else if (req.files && req.files.length) {
+        originalInput = req.files[0].path;
+        filePath = path.resolve(req.files[0].path);
+      } else if (req.body && req.body.path) {
+        originalInput = req.body.path;
+        filePath = path.resolve(req.body.path);
+      } else {
+        return res.status(400).json({ success: false, message: 'file upload or path required' });
+      }
+
+      if (!fs.existsSync(filePath)) return res.status(404).json({ success: false, message: 'File not found' });
+
+      // Normalize a public-facing path stored in DB. Prefer '/uploads/<filename>' when possible.
+      const uploadsDir = path.resolve(__dirname, '..', 'uploads');
+      let publicPath = null;
+      if (originalInput) {
+        // normalize slashes for comparison
+        const inp = originalInput.replace(/\\/g, '/');
+        if (inp.startsWith('/uploads') || inp.startsWith('uploads') || inp.includes('/uploads/')) {
+          publicPath = inp.startsWith('/') ? inp : '/' + inp;
+        }
+      }
+      if (!publicPath) {
+        // if the resolved absolute path is inside uploads dir, use '/uploads/<basename>'
+        const absUploads = uploadsDir.replace(/\\/g, '/');
+        const absFile = filePath.replace(/\\/g, '/');
+        if (absFile.startsWith(absUploads)) {
+          publicPath = '/uploads/' + path.basename(filePath);
+        } else {
+          // fallback: store only the filename under /uploads to keep DB compact
+          publicPath = '/uploads/' + path.basename(filePath);
+        }
+      }
+
+      // run CLI
+      let cliResult = null;
+      try { cliResult = await runUseCli(filePath, 8000); } catch (e) { cliResult = { error: e.message }; }
+
+      const content = fs.readFileSync(filePath, 'utf8');
+      let parsed = null;
+      if (cliResult && cliResult.stdout) {
+        try { parsed = parseCliOutput(cliResult.stdout); } catch (e) { parsed = parseUseContent(content); }
+      } else parsed = parseUseContent(content);
+
+      // Persist into DB
+      const { sequelize } = require('../config/database');
+      // ensure associations are wired
+      require('../models/UseAssociations');
+      const UseModel = require('../models/UseModel');
+      const UseEnum = require('../models/UseEnum');
+      const UseClass = require('../models/UseClass');
+      const UseAttribute = require('../models/UseAttribute');
+      const UseOperation = require('../models/UseOperation');
+      const UseAssociation = require('../models/UseAssociation');
+      const UseAssociationPart = require('../models/UseAssociationPart');
+      const UseConstraint = require('../models/UseConstraint');
+
+      const result = await sequelize.transaction(async (t) => {
+  const modelRow = await UseModel.create({ name: parsed.model || null, filePath: publicPath, rawText: cliResult && cliResult.stdout ? cliResult.stdout : content }, { transaction: t });
+
+        // enums
+        if (parsed.enums && parsed.enums.length) {
+          for (const en of parsed.enums) {
+            await UseEnum.create({ useModelId: modelRow.id, name: en.name, values: (en.values || []).join(',') }, { transaction: t });
+          }
+        }
+
+        // classes
+        const classMap = {}; // name -> id
+        if (parsed.classes && parsed.classes.length) {
+          for (const cls of parsed.classes) {
+            const c = await UseClass.create({ useModelId: modelRow.id, name: cls.name }, { transaction: t });
+            classMap[cls.name] = c.id;
+            // attributes
+            if (cls.attributes && cls.attributes.length) {
+              for (const attr of cls.attributes) {
+                await UseAttribute.create({ useClassId: c.id, name: attr.name, type: attr.type || null }, { transaction: t });
+              }
+            }
+            // operations
+            if (cls.operations && cls.operations.length) {
+              for (const op of cls.operations) {
+                await UseOperation.create({ useClassId: c.id, name: op.name, signature: op.signature || null }, { transaction: t });
+              }
+            }
+          }
+        }
+
+        // associations
+        if (parsed.associations && parsed.associations.length) {
+          for (const assoc of parsed.associations) {
+            const a = await UseAssociation.create({ useModelId: modelRow.id, name: assoc.name }, { transaction: t });
+            if (assoc.parts && assoc.parts.length) {
+              for (const p of assoc.parts) {
+                await UseAssociationPart.create({ useAssociationId: a.id, className: p.class, multiplicity: p.multiplicity, role: p.role }, { transaction: t });
+              }
+            }
+          }
+        }
+
+        // constraints: attempt to parse contexts from raw content (simple split)
+        if (parsed && parsed.model) {
+          // crude extraction: find 'constraints' section in CLI output or raw content
+          const cliText = (cliResult && cliResult.stdout) ? cliResult.stdout : content;
+          const consIdx = cliText.search(/\nconstraints\b/i);
+          if (consIdx >= 0) {
+            const consText = cliText.slice(consIdx);
+            // split contexts by blank lines that start with 'context'
+            const ctxRe = /context\s+([\s\S]*?)(?=\n\s*context\b|$)/gi;
+            let cm;
+            while ((cm = ctxRe.exec(consText)) !== null) {
+              const block = cm[0].trim();
+              // attempt to parse header like 'context self : Account inv NonNegativeBalance:' or 'context Account::deposit(amount : Real)'
+              const header = block.split('\n')[0];
+              let contextName = null, kind = null, name = null, expr = block.split('\n').slice(1).join('\n').trim();
+              const m1 = header.match(/^context\s+([^\s]+)\s*:\s*([A-Za-z0-9_]+)\s+inv\s+([^:]+):?/i);
+              if (m1) { contextName = m1[2]; kind = 'invariant'; name = (m1[3] || null); }
+              else {
+                const m2 = header.match(/^context\s+([A-Za-z0-9_:]+)\s*(?:\(|$)/i);
+                if (m2) { contextName = m2[1]; kind = 'constraint'; }
+              }
+              await UseConstraint.create({ useModelId: modelRow.id, context: contextName, kind, name, expression: expr }, { transaction: t });
+            }
+          }
+        }
+
+        return modelRow;
+      });
+
+      return res.json({ success: true, model_id: result.id, cli: cliResult });
+    } catch (error) {
+      console.error('Save .use error:', error);
       return res.status(500).json({ success: false, message: 'Internal Server Error' });
     }
   }
