@@ -13,7 +13,7 @@ const Exam = require('./models/Exam');
 const Submission = require('./models/Submission');
 const AssignmentCourse = require('./models/AssignmentCourse');
 
-async function initDatabase() {
+const initDatabase = async () => {
 	await User.create({
 		full_name: 'Admin',
 		email: 'admin@example.com',
