@@ -40,3 +40,6 @@ the problem. If possible, please share a link to Colab/Jupyter/any notebook.
 **Other info / logs** Include any logs or source code that would be helpful to
 diagnose the problem. If including tracebacks, please include the full
 traceback. Large logs and files should be attached.
+
+## References
+https://github.com/tensorflow/tensorflow/blob/f3fd82f65724cdba600fdd23d251c2b01152ed3c/.github/ISSUE_TEMPLATE/00-bug-issue.md?plain=1
