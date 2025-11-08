@@ -1,67 +1,79 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database');
+const { DataTypes } = require("sequelize");
+const { sequelize } = require("../config/database");
 
-const Submission = sequelize.define('Submission', {
-  id: {
-    type: DataTypes.BIGINT.UNSIGNED,
-    primaryKey: true,
-    autoIncrement: true
+const Submission = sequelize.define(
+  "Submission",
+  {
+    id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    class_assignment_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    assignment_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    exam_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+    },
+    student_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    submission_time: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    attempt_number: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1,
+    },
+    attachment: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    score: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
+    feedback: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
-  class_assignment_id: {
-    type: DataTypes.INTEGER,
-    allowNull: true
-  },
-  assignment_id: {
-    type: DataTypes.INTEGER,
-    allowNull: true
-  },
-  exam_id: {
-    type: DataTypes.BIGINT.UNSIGNED,
-    allowNull: true
-  },
-  student_id: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  submission_time: {
-    type: DataTypes.DATE,
-    allowNull: false
-  },
-  attempt_number: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    defaultValue: 1
-  },
-  attachment: {
-    type: DataTypes.STRING(255),
-    allowNull: true
-  },
-  score: {
-    type: DataTypes.FLOAT,
-    allowNull: true
-  },
-  feedback: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  
-  created_at: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW
-  },
-  updated_at: {
-    type: DataTypes.DATE,
-    allowNull: true
+  {
+    tableName: "submissions",
+    timestamps: false,
   }
-}, {
-  tableName: 'submissions',
-  timestamps: false
-});
+);
 
-// Associations (khai báo sau khi đã import đầy đủ các model ở file trung tâm, ví dụ models/index.js)
-Submission.belongsTo(require('./Assignment'), { foreignKey: 'assignment_id', as: 'assignment' });
-Submission.belongsTo(require('./Exam'), { foreignKey: 'exam_id', as: 'exam' });
-Submission.belongsTo(require('./Student'), { foreignKey: 'student_id', as: 'student' });
+Submission.belongsTo(require("./Assignment"), {
+  foreignKey: "assignment_id",
+  as: "assignment",
+});
+Submission.belongsTo(require("./Exam"), {
+  foreignKey: "exam_id",
+  as: "exam",
+});
+Submission.belongsTo(require("./Student"), {
+  foreignKey: "student_id",
+  as: "student",
+});
 
 module.exports = Submission;
