@@ -31,15 +31,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
     customSiteTitle: 'Thesis API Document'
 }))
 
-// Test database connection
-testConnection();
-
-// NOTE: Database sync should be performed from the server startup (server.js)
-// or via a dedicated script so that all models are registered before sync runs.
-// The previous automatic sync here caused premature syncs (and drops) before
-// some models were required. Use `scripts/sync-db.js` or let server.js handle
-// syncing to avoid race conditions.
-
 // Routes
 app.get('/', (req, res) => {
     res.json({
@@ -58,7 +49,6 @@ app.get('/', (req, res) => {
 
 // Notification routes
 app.use('/api/notify', notifyRoutes);
-
 // Auth routes
 app.use('/api/auth', authRoutes);
 // User routes
@@ -81,10 +71,8 @@ app.use('/api/submissions', submissionRoutes);
 app.use('/api/lectures', lectureRoutes);
 // Exam routes
 app.use('/api/exams', examRoutes);
-
 // USE parsing routes
 app.use('/api/use', useRoutes);
-
 
 app.use('/uploads', express.static('uploads'));
 // Multer error handler: give clearer message instead of stacktrace
@@ -98,4 +86,5 @@ app.use((err, req, res, next) => {
     // pass to default error handler
     return next(err);
 });
+
 module.exports = app
