@@ -14,6 +14,7 @@ function runUseCli(filePath, timeout = 5000) {
         // Use shell to allow PATH lookup for `use` command
         return spawn("use", [], { shell: true });
       } catch (e) {
+        console.error("Error spawning USE CLI:", e);
         return null;
       }
     };
@@ -22,6 +23,7 @@ function runUseCli(filePath, timeout = 5000) {
       try {
         return spawn(USE_BATCH, [], { cwd: USE_BIN, shell: true });
       } catch (e) {
+        console.error("Error spawning USE CLI batch:", e);
         return null;
       }
     };
@@ -34,7 +36,9 @@ function runUseCli(filePath, timeout = 5000) {
     const timer = setTimeout(() => {
       try {
         proc.kill();
-      } catch (e) {}
+      } catch (e) {
+        console.error("Error killing USE CLI process:", e);
+      }
       reject(new Error("USE CLI timed out"));
     }, timeout);
 
@@ -147,8 +151,6 @@ function parseUseContent(content) {
 }
 
 function parseCliOutput(cliOut) {
-  // The CLI prints some header lines before the normalized model (e.g., "Model BankingSystem ..." and prompts)
-  // Extract the portion starting at the first line that begins with 'model ' (case-insensitive)
   const idx = cliOut.search(/\n?model\s+/i);
   const payload = idx >= 0 ? cliOut.slice(idx) : cliOut;
   // Reuse parseUseContent on the cleaned payload
@@ -186,7 +188,6 @@ const UseController = {
       }
 
       const content = fs.readFileSync(filePath, "utf8");
-      // Prefer parsing CLI output if available (it's the normalized model), otherwise parse the file content
       let parsed = null;
       if (cliResult && cliResult.stdout) {
         try {
@@ -194,6 +195,7 @@ const UseController = {
         } catch (e) {
           // fallback to parsing raw file
           parsed = parseUseContent(content);
+          console.error("Error parsing CLI output, fallback to file parse:", e);
         }
       } else {
         parsed = parseUseContent(content);
@@ -273,6 +275,7 @@ const UseController = {
           parsed = parseCliOutput(cliResult.stdout);
         } catch (e) {
           parsed = parseUseContent(content);
+          console.error("Error parsing CLI output, fallback to file parse:", e);
         }
       } else parsed = parseUseContent(content);
 
@@ -387,7 +390,6 @@ const UseController = {
             let cm;
             while ((cm = ctxRe.exec(consText)) !== null) {
               const block = cm[0].trim();
-              // attempt to parse header like 'context self : Account inv NonNegativeBalance:' or 'context Account::deposit(amount : Real)'
               const header = block.split("\n")[0];
               let contextName = null,
                 kind = null,

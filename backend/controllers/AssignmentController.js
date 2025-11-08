@@ -229,7 +229,7 @@ const AssignmentController = {
       });
       let classObj = null;
       if (classCourse) classObj = await Class.findByPk(classCourse.class_id);
-      // Permission: admin OR the teacher who created the assignment OR the homeroom teacher of the class containing the course
+      // Permission: admin is allow
       if (req.user.role === "ADMIN") {
         // allowed
       } else if (req.user.role === "TEACHER") {

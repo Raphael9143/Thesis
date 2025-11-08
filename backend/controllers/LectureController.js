@@ -6,10 +6,6 @@ const ClassStudent = require("../models/ClassStudent");
 const User = require("../models/User");
 
 const LectureController = {
-  // Create a lecture. Only a teacher who is the homeroom teacher of the class linked to the course
-  // can create a lecture for that class/course. If class_id is provided, teacher must be that class.teacherId
-  // and the class must be linked to the course. If class_id omitted, teacher must be homeroom teacher of at
-  // least one class that links to the course.
   createLecture: async (req, res) => {
     try {
       if (!req.user || req.user.role !== "TEACHER") {
@@ -226,8 +222,6 @@ const LectureController = {
     }
   },
 
-  // Get all lectures for a given course id. Access allowed to admin, the class teacher(s) of linked classes, or students
-  // enrolled in any class linked to the course.
   getLecturesByCourseId: async (req, res) => {
     try {
       const courseId = parseInt(req.params.id, 10);

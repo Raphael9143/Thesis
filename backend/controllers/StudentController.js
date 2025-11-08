@@ -111,8 +111,6 @@ const StudentController = {
       res.status(500).json({ success: false, message: "Server error" });
     }
   },
-  // Lấy tất cả assignment/exam liên quan tới sinh viên cùng thông tin nộp bài của sinh viên
-  // Trả về các item với: id, title, kind ('assignment'|'exam'), submissions_count, attempt_limit (nullable), graded (boolean), course_id, due_date
   getAssignmentsWithSubmissions: async (req, res) => {
     try {
       // Determine target student id: param id (admin/teacher or self) or current user
@@ -167,7 +165,6 @@ const StudentController = {
       const Assignment = require("../models/Assignment");
       const Exam = require("../models/Exam");
       const Submission = require("../models/Submission");
-      const { Op } = require("sequelize");
 
       // Lấy danh sách assignment (qua assignment_courses)
       const assignmentCourses = await AssignmentCourse.findAll({

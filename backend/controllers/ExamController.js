@@ -127,7 +127,8 @@ const ExamController = {
     }
   },
 
-  // Get all exams for a given course id. Access allowed to admin, teachers who created or teach the course,
+  // Get all exams for a given course id. Access allowed to admin, 
+  // teachers who created or teach the course,
   // or students enrolled in any class that is linked to the course.
   getExamsByCourseId: async (req, res) => {
     try {
