@@ -5,11 +5,10 @@ import { defineConfig } from "eslint/config";
 export default defineConfig([
   {
     files: ["**/*.{js,mjs,cjs}"],
-    plugins: { js },
-    extends: ["js/recommended"],
+    extends: [js.configs.recommended],
     languageOptions: { globals: globals.browser },
     rules: {
-      "max-len": ["error", { code: 80 }],
+      "max-len": ["error", { code: 100 }],
     },
   },
   {
