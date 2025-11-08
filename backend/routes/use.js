@@ -69,4 +69,55 @@ function conditionalUpload(req, res, next) {
 
 router.post('/parse', conditionalUpload, UseController.parse);
 
+// POST /api/use/save
+// Saves parsed model into database tables. Accepts same inputs as /parse.
+/**
+ * @swagger
+ * /api/use/save:
+ *   post:
+ *     summary: Parse a .use file and persist the model into database tables
+ *     tags:
+ *       - USE
+ *     consumes:
+ *       - multipart/form-data
+ *       - application/json
+ *     parameters:
+ *       - in: formData
+ *         name: file
+ *         type: file
+ *         description: The .use file to upload and save. Use this OR the `path` body parameter.
+ *       - in: body
+ *         name: body
+ *         required: false
+ *         description: When no file is uploaded, provide a server-side path to an existing .use file.
+ *         schema:
+ *           type: object
+ *           properties:
+ *             path:
+ *               type: string
+ *               description: Relative or absolute path to a .use file on the server (e.g., uploads/banking.use)
+ *     responses:
+ *       200:
+ *         description: Model persisted successfully
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             model_id:
+ *               type: integer
+ *               description: ID of the saved UseModel row
+ *             cli:
+ *               type: object
+ *               description: Best-effort stdout/stderr from the USE CLI
+ *       400:
+ *         description: Missing file or path
+ *       404:
+ *         description: File not found
+ *       500:
+ *         description: Internal server error while saving
+ */
+
+router.post('/save', conditionalUpload, UseController.save);
+
 module.exports = router;
