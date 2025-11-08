@@ -14,11 +14,6 @@ const AssignmentController = require('../controllers/AssignmentController');
  *     tags: [Assignment]
  *     security:
  *       - bearerAuth: []
- *   post:
- *     summary: Tạo bài tập mới (chỉ giáo viên)
- *     tags: [Assignment]
- *     security:
- *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:

@@ -25,7 +25,7 @@ const CourseController = require('../controllers/CourseController');
  *                   type: array
  *                   items:
  *                     $ref: '#/components/schemas/Course'
- 
+ */
 router.get('/', auth, CourseController.getAllCourses);
 
 /**
