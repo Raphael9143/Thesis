@@ -314,7 +314,7 @@ const SubmissionController = {
         });
         const classId =
           classCourses && classCourses.length > 0
-            ? classCourses[0].class_id ?? classCourses[0].classId
+            ? (classCourses[0].class_id ?? classCourses[0].classId)
             : null;
         if (classId) {
           const cls = await Class.findByPk(classId);
@@ -412,7 +412,7 @@ const SubmissionController = {
         });
         const classId =
           classCourses && classCourses.length > 0
-            ? classCourses[0].class_id ?? classCourses[0].classId
+            ? (classCourses[0].class_id ?? classCourses[0].classId)
             : null;
         if (classId) {
           const cls = await Class.findByPk(classId);

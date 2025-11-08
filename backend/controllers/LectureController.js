@@ -9,22 +9,18 @@ const LectureController = {
   createLecture: async (req, res) => {
     try {
       if (!req.user || req.user.role !== "TEACHER") {
-        return res
-          .status(403)
-          .json({
-            success: false,
-            message: "Only teachers can create lectures.",
-          });
+        return res.status(403).json({
+          success: false,
+          message: "Only teachers can create lectures.",
+        });
       }
       const teacherId = req.user.userId;
       const { course_id, title, publish_date, status } = req.body;
       if (!course_id || !title) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "course_id and title are required.",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "course_id and title are required.",
+        });
       }
 
       // Verify course exists
@@ -38,21 +34,17 @@ const LectureController = {
       const links = await ClassCourse.findAll({ where: { course_id } });
       const classIds = links.map((l) => l.class_id);
       if (classIds.length === 0)
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "No classes linked to this course.",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "No classes linked to this course.",
+        });
       const owned = await Class.findOne({ where: { id: classIds, teacherId } });
       if (!owned)
-        return res
-          .status(403)
-          .json({
-            success: false,
-            message:
-              "You are not the homeroom teacher for any class of this course.",
-          });
+        return res.status(403).json({
+          success: false,
+          message:
+            "You are not the homeroom teacher for any class of this course.",
+        });
 
       // Single attachment handling: prefer uploaded file, else use body. Store as string path.
       let attachment = null;

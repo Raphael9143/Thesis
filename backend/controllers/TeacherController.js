@@ -77,12 +77,10 @@ const TeacherController = {
       // Kiểm tra role
       const user = await User.findByPk(userId);
       if (!user || user.role !== "TEACHER") {
-        return res
-          .status(403)
-          .json({
-            success: false,
-            message: "Only teachers can view their managed classes.",
-          });
+        return res.status(403).json({
+          success: false,
+          message: "Only teachers can view their managed classes.",
+        });
       }
       // Lấy danh sách lớp
       const classes = await Class.findAll({
@@ -116,12 +114,10 @@ const TeacherController = {
       // Kiểm tra role
       const user = await User.findByPk(userId);
       if (!user || user.role !== "TEACHER") {
-        return res
-          .status(403)
-          .json({
-            success: false,
-            message: "Only teachers can view their taught courses.",
-          });
+        return res.status(403).json({
+          success: false,
+          message: "Only teachers can view their taught courses.",
+        });
       }
 
       // Lấy danh sách các lớp do giáo viên làm chủ nhiệm (đã và đang)

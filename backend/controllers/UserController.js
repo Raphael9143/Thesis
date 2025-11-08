@@ -7,12 +7,10 @@ const UserController = {
       const userId = req.params.id;
       // Chỉ admin hoặc chính chủ mới được xóa
       if (req.user.role !== "ADMIN" && req.user.userId != userId) {
-        return res
-          .status(403)
-          .json({
-            success: false,
-            message: "Bạn không có quyền xóa tài khoản này.",
-          });
+        return res.status(403).json({
+          success: false,
+          message: "Bạn không có quyền xóa tài khoản này.",
+        });
       }
       const user = await User.findByPk(userId);
       if (!user) {

@@ -23,21 +23,17 @@ const ExamController = {
         submission_limit,
       } = req.body;
       if (!course_id || !title)
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "course_id and title are required.",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "course_id and title are required.",
+        });
 
       // start_date and end_date are required
       if (!start_date || !end_date)
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "start_date and end_date are required.",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "start_date and end_date are required.",
+        });
       const s = new Date(start_date);
       const e = new Date(end_date);
       if (isNaN(s.getTime()) || isNaN(e.getTime()))
@@ -45,12 +41,10 @@ const ExamController = {
           .status(400)
           .json({ success: false, message: "Invalid start_date or end_date." });
       if (s >= e)
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "start_date must be before end_date.",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "start_date must be before end_date.",
+        });
 
       const course = await Course.findByPk(course_id);
       if (!course)
@@ -61,12 +55,10 @@ const ExamController = {
       // validate type if provided
       const allowedTypes = ["SINGLE", "GROUP"];
       if (type && !allowedTypes.includes(type))
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "Invalid type. Allowed: SINGLE or GROUP",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "Invalid type. Allowed: SINGLE or GROUP",
+        });
 
       // handle uploaded single attachment
       let attachment = null;
@@ -77,12 +69,10 @@ const ExamController = {
       if (submission_limit !== undefined) {
         const n = Number(submission_limit);
         if (!Number.isInteger(n) || n < 1)
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "submission_limit must be an integer >= 1",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "submission_limit must be an integer >= 1",
+          });
         sl = n;
       }
 
@@ -127,7 +117,7 @@ const ExamController = {
     }
   },
 
-  // Get all exams for a given course id. Access allowed to admin, 
+  // Get all exams for a given course id. Access allowed to admin,
   // teachers who created or teach the course,
   // or students enrolled in any class that is linked to the course.
   getExamsByCourseId: async (req, res) => {
@@ -267,19 +257,15 @@ const ExamController = {
         const isClassTeacher =
           classObj && classObj.teacherId === req.user.userId;
         if (!isCreator && !isClassTeacher)
-          return res
-            .status(403)
-            .json({
-              success: false,
-              message: "You do not have permission to update this exam.",
-            });
-      } else {
-        return res
-          .status(403)
-          .json({
+          return res.status(403).json({
             success: false,
-            message: "Only teachers or admins can update exams.",
+            message: "You do not have permission to update this exam.",
           });
+      } else {
+        return res.status(403).json({
+          success: false,
+          message: "Only teachers or admins can update exams.",
+        });
       }
 
       // handle uploaded file
@@ -299,19 +285,15 @@ const ExamController = {
             ? new Date(req.body.end_date)
             : new Date(exam.end_date || exam.get("end_date"));
         if (isNaN(newStart.getTime()) || isNaN(newEnd.getTime()))
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "Invalid start_date or end_date.",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "Invalid start_date or end_date.",
+          });
         if (newStart >= newEnd)
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "start_date must be before end_date.",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "start_date must be before end_date.",
+          });
         exam.start_date = newStart;
         exam.end_date = newEnd;
       }
@@ -324,12 +306,10 @@ const ExamController = {
       if (req.body.type !== undefined) {
         const allowedT = ["SINGLE", "GROUP"];
         if (!allowedT.includes(req.body.type))
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "Invalid type. Allowed: SINGLE or GROUP",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "Invalid type. Allowed: SINGLE or GROUP",
+          });
         exam.type = req.body.type;
       }
 
@@ -337,23 +317,19 @@ const ExamController = {
       if (req.body.submission_limit !== undefined) {
         const n = Number(req.body.submission_limit);
         if (!Number.isInteger(n) || n < 1)
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "submission_limit must be an integer >= 1",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "submission_limit must be an integer >= 1",
+          });
         exam.submission_limit = n;
       }
 
       // ensure invariant
       if (!exam.start_date || !exam.end_date)
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "start_date and end_date must be set.",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "start_date and end_date must be set.",
+        });
 
       await exam.save();
       res.json({ success: true, data: exam });
@@ -393,19 +369,15 @@ const ExamController = {
         const isClassTeacher =
           classObj && classObj.teacherId === req.user.userId;
         if (!isCreator && !isClassTeacher)
-          return res
-            .status(403)
-            .json({
-              success: false,
-              message: "You do not have permission to patch this exam.",
-            });
-      } else {
-        return res
-          .status(403)
-          .json({
+          return res.status(403).json({
             success: false,
-            message: "Only teachers or admins can patch exams.",
+            message: "You do not have permission to patch this exam.",
           });
+      } else {
+        return res.status(403).json({
+          success: false,
+          message: "Only teachers or admins can patch exams.",
+        });
       }
 
       // allow status or times or title/description updates
@@ -423,19 +395,15 @@ const ExamController = {
             ? new Date(req.body.end_date)
             : new Date(exam.end_date || exam.get("end_date"));
         if (isNaN(newStart.getTime()) || isNaN(newEnd.getTime()))
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "Invalid start_date or end_date.",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "Invalid start_date or end_date.",
+          });
         if (newStart >= newEnd)
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "start_date must be before end_date.",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "start_date must be before end_date.",
+          });
         exam.start_date = newStart;
         exam.end_date = newEnd;
       }
@@ -449,12 +417,10 @@ const ExamController = {
       if (req.body.type !== undefined) {
         const allowedT = ["SINGLE", "GROUP"];
         if (!allowedT.includes(req.body.type))
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "Invalid type. Allowed: SINGLE or GROUP",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "Invalid type. Allowed: SINGLE or GROUP",
+          });
         exam.type = req.body.type;
       }
 
@@ -462,22 +428,18 @@ const ExamController = {
       if (req.body.submission_limit !== undefined) {
         const n = Number(req.body.submission_limit);
         if (!Number.isInteger(n) || n < 1)
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "submission_limit must be an integer >= 1",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "submission_limit must be an integer >= 1",
+          });
         exam.submission_limit = n;
       }
 
       if (!exam.start_date || !exam.end_date)
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "start_date and end_date must be set.",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "start_date and end_date must be set.",
+        });
 
       await exam.save();
       res.json({ success: true, data: exam });
@@ -517,19 +479,15 @@ const ExamController = {
         const isClassTeacher =
           classObj && classObj.teacherId === req.user.userId;
         if (!isCreator && !isClassTeacher)
-          return res
-            .status(403)
-            .json({
-              success: false,
-              message: "You do not have permission to delete this exam.",
-            });
-      } else {
-        return res
-          .status(403)
-          .json({
+          return res.status(403).json({
             success: false,
-            message: "Only teachers or admins can delete exams.",
+            message: "You do not have permission to delete this exam.",
           });
+      } else {
+        return res.status(403).json({
+          success: false,
+          message: "Only teachers or admins can delete exams.",
+        });
       }
 
       await exam.destroy();

@@ -82,13 +82,11 @@ const StudentController = {
       if (
         Object.prototype.hasOwnProperty.call(req.body, "completed_assignments")
       ) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message:
-              "Field completed_assignments is read-only and cannot be updated.",
-          });
+        return res.status(400).json({
+          success: false,
+          message:
+            "Field completed_assignments is read-only and cannot be updated.",
+        });
       }
       const student = await Student.findByPk(studentId);
       if (!student) {
