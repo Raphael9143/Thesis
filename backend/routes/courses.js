@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const auth = require('../middlewares/auth');
-const CourseController = require('../controllers/CourseController');
+const auth = require("../middlewares/auth");
+const CourseController = require("../controllers/CourseController");
 
 /**
  * @swagger
@@ -26,7 +26,7 @@ const CourseController = require('../controllers/CourseController');
  *                   items:
  *                     $ref: '#/components/schemas/Course'
  */
-router.get('/', auth, CourseController.getAllCourses);
+router.get("/", auth, CourseController.getAllCourses);
 
 /**
  * @swagger
@@ -91,7 +91,7 @@ router.get('/', auth, CourseController.getAllCourses);
  *       404:
  *         description: Class not found
  */
-router.post('/', auth, CourseController.createCourse);
+router.post("/", auth, CourseController.createCourse);
 
 /**
  * @swagger
@@ -125,7 +125,7 @@ router.post('/', auth, CourseController.createCourse);
  *       404:
  *         description: Class not found
  */
-router.get('/by-class/:classId', auth, CourseController.getCoursesByClass);
+router.get("/by-class/:classId", auth, CourseController.getCoursesByClass);
 
 /**
  * @swagger
@@ -185,7 +185,7 @@ router.get('/by-class/:classId', auth, CourseController.getCoursesByClass);
  *         description: Not found
  */
 // PATCH /api/courses/:id
-router.patch('/:id', auth, CourseController.updateClassCourse);
+router.patch("/:id", auth, CourseController.updateClassCourse);
 
 /**
  * @swagger
@@ -237,7 +237,7 @@ router.patch('/:id', auth, CourseController.updateClassCourse);
  *         description: Not found
  */
 // PATCH /api/courses/:id/status - cập nhật trạng thái course
-router.patch('/:id/status', auth, CourseController.updateCourseStatus);
+router.patch("/:id/status", auth, CourseController.updateCourseStatus);
 
 /**
  * @swagger
@@ -271,7 +271,7 @@ router.patch('/:id/status', auth, CourseController.updateCourseStatus);
  *       404:
  *         description: Not found
  */
-router.delete('/:id', auth, CourseController.deleteCourse);
+router.delete("/:id", auth, CourseController.deleteCourse);
 
 /**
  * @swagger
@@ -305,7 +305,7 @@ router.delete('/:id', auth, CourseController.deleteCourse);
  *       500:
  *         description: Server error
  */
-router.get('/:id', auth, CourseController.getCourseById);
+router.get("/:id", auth, CourseController.getCourseById);
 
 /**
  * @swagger
@@ -339,6 +339,6 @@ router.get('/:id', auth, CourseController.getCourseById);
  *       500:
  *         description: Server error
  */
-router.get('/by-code/:code', auth, CourseController.getCourseByCode);
+router.get("/by-code/:code", auth, CourseController.getCourseByCode);
 
 module.exports = router;

@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const auth = require('../middlewares/auth');
-const { emitToUser, emitToUserWithAck } = require('../realtime/socket');
+const auth = require("../middlewares/auth");
+const { emitToUser, emitToUserWithAck } = require("../realtime/socket");
 
 /**
  * @swagger
@@ -57,10 +57,10 @@ const { emitToUser, emitToUserWithAck } = require('../realtime/socket');
  *                   type: boolean
  *                   example: true
  */
-router.post('/:userId', auth, (req, res) => {
+router.post("/:userId", auth, (req, res) => {
   const { userId } = req.params;
-  const { title = 'Notification', body = '', data = {} } = req.body || {};
-  emitToUser(userId, 'notification', { title, body, data, ts: Date.now() });
+  const { title = "Notification", body = "", data = {} } = req.body || {};
+  emitToUser(userId, "notification", { title, body, data, ts: Date.now() });
   res.json({ success: true });
 });
 
@@ -68,8 +68,8 @@ router.post('/:userId', auth, (req, res) => {
  * @swagger
  * /api/notify/{userId}/with-ack:
  *   post:
- *     summary: Gửi thông báo kèm xác nhận nhận từ client
- *     description: Phát sự kiện 'notification' với callback để client phản hồi, trả về kết quả ack hoặc timeout.
+ *     summary: Notify user with acknowledgment
+ *     description: Notify user and wait for ack from client
  *     tags: [Notification]
  *     security:
  *       - bearerAuth: []
@@ -124,15 +124,25 @@ router.post('/:userId', auth, (req, res) => {
  *                           ack:
  *                             type: object
  */
-router.post('/:userId/with-ack', auth, async (req, res) => {
+router.post("/:userId/with-ack", auth, async (req, res) => {
   try {
     const { userId } = req.params;
-    const { title = 'Notification', body = '', data = {}, timeoutMs = 5000 } = req.body || {};
-    const delivery = await emitToUserWithAck(userId, 'notification', { title, body, data, ts: Date.now() }, timeoutMs);
+    const {
+      title = "Notification",
+      body = "",
+      data = {},
+      timeoutMs = 5000,
+    } = req.body || {};
+    const delivery = await emitToUserWithAck(
+      userId,
+      "notification",
+      { title, body, data, ts: Date.now() },
+      timeoutMs
+    );
     res.json({ success: true, delivery });
   } catch (err) {
-    console.error('notify with-ack error:', err);
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error("notify with-ack error:", err);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

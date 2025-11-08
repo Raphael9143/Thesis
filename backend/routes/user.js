@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const auth = require('../middlewares/auth');
-const UserController = require('../controllers/UserController');
+const auth = require("../middlewares/auth");
+const UserController = require("../controllers/UserController");
 
 /**
  * @swagger
@@ -37,7 +37,7 @@ const UserController = require('../controllers/UserController');
  *       500:
  *         description: Internal Server Error
  */
-router.delete('/:id', auth, UserController.deleteUser);
+router.delete("/:id", auth, UserController.deleteUser);
 
 /**
  * @swagger
@@ -66,7 +66,7 @@ router.delete('/:id', auth, UserController.deleteUser);
  *       500:
  *         description: Internal Server Error
  */
-router.get('/students/emails', auth, UserController.getStudentEmails);
+router.get("/students/emails", auth, UserController.getStudentEmails);
 
 /**
  * @swagger
@@ -105,6 +105,6 @@ router.get('/students/emails', auth, UserController.getStudentEmails);
  *       404:
  *         description: User not found
  */
-router.get('/by-email', auth, UserController.getUserIdByEmail);
+router.get("/by-email", auth, UserController.getUserIdByEmail);
 
 module.exports = router;

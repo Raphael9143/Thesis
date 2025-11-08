@@ -1,9 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const auth = require('../middlewares/auth');
-const LectureController = require('../controllers/LectureController');
-const lectureUpload = require('../middlewares/lectureUpload');
-const conditionalLectureUpload = require('../middlewares/conditionalUpload')(lectureUpload);
+const auth = require("../middlewares/auth");
+const LectureController = require("../controllers/LectureController");
+const lectureUpload = require("../middlewares/lectureUpload");
+const conditionalLectureUpload = require("../middlewares/conditionalUpload")(
+  lectureUpload
+);
 
 /**
  * @swagger
@@ -43,15 +45,21 @@ const conditionalLectureUpload = require('../middlewares/conditionalUpload')(lec
  *         description: Forbidden
  */
 // Allow multiple attachments under field name 'attachments'
-router.post('/', auth, conditionalLectureUpload, (req, res, next) => {
-	// If the client sent attachment as a JSON string field, try to parse it
-	if (req.body.attachment && typeof req.body.attachment === 'string') {
-		// keep as string path; no JSON parsing needed for single attachment
-		// normalize empty string to undefined
-		if (req.body.attachment === '') delete req.body.attachment;
-	}
-	next();
-}, LectureController.createLecture);
+router.post(
+  "/",
+  auth,
+  conditionalLectureUpload,
+  (req, res, next) => {
+    // If the client sent attachment as a JSON string field, try to parse it
+    if (req.body.attachment && typeof req.body.attachment === "string") {
+      // keep as string path; no JSON parsing needed for single attachment
+      // normalize empty string to undefined
+      if (req.body.attachment === "") delete req.body.attachment;
+    }
+    next();
+  },
+  LectureController.createLecture
+);
 
 /**
  * @swagger
@@ -69,7 +77,7 @@ router.post('/', auth, conditionalLectureUpload, (req, res, next) => {
  *       200:
  *         description: Lecture details
  */
-router.get('/:id', LectureController.getLectureById);
+router.get("/:id", LectureController.getLectureById);
 
 /**
  * @swagger
@@ -93,8 +101,7 @@ router.get('/:id', LectureController.getLectureById);
  *       404:
  *         description: Not found
  */
-router.delete('/:id', auth, LectureController.deleteLecture);
-
+router.delete("/:id", auth, LectureController.deleteLecture);
 
 /**
  * @swagger
@@ -128,7 +135,7 @@ router.delete('/:id', auth, LectureController.deleteLecture);
  *       403:
  *         description: Forbidden
  */
-router.patch('/:id/status', auth, LectureController.updateLectureStatus);
+router.patch("/:id/status", auth, LectureController.updateLectureStatus);
 /**
  * @swagger
  * /api/lectures/{id}:
@@ -187,19 +194,24 @@ router.patch('/:id/status', auth, LectureController.updateLectureStatus);
  *         description: Forbidden
  */
 // Allow single attachment to be updated via multipart form-data under field 'attachment'
-router.patch('/:id', auth, conditionalLectureUpload, (req, res, next) => {
-	if (req.body.attachment && typeof req.body.attachment === 'string') {
-		if (req.body.attachment === '') delete req.body.attachment;
-	}
-	next();
-}, LectureController.updateLecture);
-
+router.patch(
+  "/:id",
+  auth,
+  conditionalLectureUpload,
+  (req, res, next) => {
+    if (req.body.attachment && typeof req.body.attachment === "string") {
+      if (req.body.attachment === "") delete req.body.attachment;
+    }
+    next();
+  },
+  LectureController.updateLecture
+);
 
 /**
  * @swagger
  * /api/lectures/course/{id}:
  *   get:
- *     summary: Lấy tất cả bài giảng của một môn học theo course id (admin, giáo viên liên quan, hoặc sinh viên trong lớp)
+ *     summary: Get all lectures by course id
  *     tags: [Lecture]
  *     security:
  *       - bearerAuth: []
@@ -214,6 +226,6 @@ router.patch('/:id', auth, conditionalLectureUpload, (req, res, next) => {
  *       200:
  *         description: Danh sách bài giảng của môn học
  */
-router.get('/course/:id', auth, LectureController.getLecturesByCourseId);
+router.get("/course/:id", auth, LectureController.getLecturesByCourseId);
 
 module.exports = router;

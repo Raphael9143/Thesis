@@ -193,7 +193,7 @@ router.get('/enrolled-classes', auth, StudentController.getEnrolledClasses);
  * @swagger
  * /api/student/assignments:
  *   get:
- *     summary: Lấy danh sách assignments/exams liên quan tới sinh viên kèm thông tin nộp bài của sinh viên
+ *     summary: Get all assignment with submission info for the current student
  *     tags: [Student]
  *     security:
  *       - bearerAuth: []

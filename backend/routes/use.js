@@ -1,13 +1,16 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
+const multer = require("multer");
+const path = require("path");
 
-const uploadDir = path.resolve(__dirname, '..', 'uploads');
-const storage = multer.diskStorage({ destination: uploadDir, filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname) });
+const uploadDir = path.resolve(__dirname, "..", "uploads");
+const storage = multer.diskStorage({
+  destination: uploadDir,
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+});
 const upload = multer({ storage });
 
-const UseController = require('../controllers/UseController');
+const UseController = require("../controllers/UseController");
 
 /**
  * @swagger
@@ -27,13 +30,13 @@ const UseController = require('../controllers/UseController');
  *       - in: body
  *         name: body
  *         required: false
- *         description: When no file is uploaded, provide a server-side path to an existing .use file.
+ *         description: If no file is uploaded, provide a server-side path to an existing .use file.
  *         schema:
  *           type: object
  *           properties:
  *             path:
  *               type: string
- *               description: Relative or absolute path to a .use file on the server (e.g., uploads/banking.use)
+ *               description: Relative or absolute path to a .use file on the server.
  *     responses:
  *       200:
  *         description: Parsed model and CLI output
@@ -44,7 +47,7 @@ const UseController = require('../controllers/UseController');
  *               type: boolean
  *             cli:
  *               type: object
- *               description: Best-effort stdout/stderr from the USE CLI (may contain errors if CLI could not run)
+ *               description: Best-effort stdout/stderr from the USE CLI
  *             model:
  *               type: object
  *               description: Parsed JSON representation (model, enums, classes, associations)
@@ -59,15 +62,15 @@ const UseController = require('../controllers/UseController');
 // Accepts multipart file 'file' or JSON body { path: '/absolute/or/relative/path/file.use' }
 // Use conditional middleware so JSON requests (body.path) won't trigger multer/busboy errors.
 function conditionalUpload(req, res, next) {
-	const ct = (req.headers['content-type'] || '').toLowerCase();
-	if (ct.startsWith('multipart/form-data')) {
-		// accept any file field name (more forgiving for clients); controller will pick first file
-		return upload.any()(req, res, next);
-	}
-	return next();
+  const ct = (req.headers["content-type"] || "").toLowerCase();
+  if (ct.startsWith("multipart/form-data")) {
+    // accept any file field name (more forgiving for clients); controller will pick first file
+    return upload.any()(req, res, next);
+  }
+  return next();
 }
 
-router.post('/parse', conditionalUpload, UseController.parse);
+router.post("/parse", conditionalUpload, UseController.parse);
 
 // POST /api/use/save
 // Saves parsed model into database tables. Accepts same inputs as /parse.
@@ -89,13 +92,13 @@ router.post('/parse', conditionalUpload, UseController.parse);
  *       - in: body
  *         name: body
  *         required: false
- *         description: When no file is uploaded, provide a server-side path to an existing .use file.
+ *         description: If no file is uploaded, provide a server-side path to an existing .use file.
  *         schema:
  *           type: object
  *           properties:
  *             path:
  *               type: string
- *               description: Relative or absolute path to a .use file on the server (e.g., uploads/banking.use)
+ *               description: Relative or absolute path to a .use file on the server
  *     responses:
  *       200:
  *         description: Model persisted successfully
@@ -118,6 +121,6 @@ router.post('/parse', conditionalUpload, UseController.parse);
  *         description: Internal server error while saving
  */
 
-router.post('/save', conditionalUpload, UseController.save);
+router.post("/save", conditionalUpload, UseController.save);
 
 module.exports = router;

@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const auth = require('../middlewares/auth');
-const TeacherController = require('../controllers/TeacherController');
+const auth = require("../middlewares/auth");
+const TeacherController = require("../controllers/TeacherController");
 
 /**
  * @swagger
@@ -99,7 +99,7 @@ const TeacherController = require('../controllers/TeacherController');
  *       500:
  *         description: Server error
  */
-router.get('/classes', auth, TeacherController.getManagedClasses);
+router.get("/classes", auth, TeacherController.getManagedClasses);
 
 /**
  * @swagger
@@ -130,7 +130,7 @@ router.get('/classes', auth, TeacherController.getManagedClasses);
  *       500:
  *         description: Server error
  */
-router.get('/courses', auth, TeacherController.getTaughtCourses);
+router.get("/courses", auth, TeacherController.getTaughtCourses);
 
 /**
  * @swagger
@@ -157,7 +157,7 @@ router.get('/courses', auth, TeacherController.getTaughtCourses);
  *       404:
  *         description: Teacher not found
  */
-router.get('/profile', auth, TeacherController.getProfile);
+router.get("/profile", auth, TeacherController.getProfile);
 
 /**
  * @swagger
@@ -203,5 +203,5 @@ router.get('/profile', auth, TeacherController.getProfile);
  *       404:
  *         description: Teacher not found
  */
-router.patch('/profile', auth, TeacherController.updateProfile);
+router.patch("/profile", auth, TeacherController.updateProfile);
 module.exports = router;

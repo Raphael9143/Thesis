@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const auth = require('../middlewares/auth');
-const ResearcherController = require('../controllers/ResearcherController');
+const auth = require("../middlewares/auth");
+const ResearcherController = require("../controllers/ResearcherController");
 
 /**
  * @swagger
@@ -137,9 +137,9 @@ const ResearcherController = require('../controllers/ResearcherController');
  */
 
 // Lấy profile researcher hiện tại
-router.get('/profile', auth, ResearcherController.getProfile);
+router.get("/profile", auth, ResearcherController.getProfile);
 
 // Sửa thông tin profile researcher
-router.patch('/profile', auth, ResearcherController.updateProfile);
+router.patch("/profile", auth, ResearcherController.updateProfile);
 
 module.exports = router;

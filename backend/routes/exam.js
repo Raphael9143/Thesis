@@ -1,9 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const auth = require('../middlewares/auth');
-const ExamController = require('../controllers/ExamController');
-const examUpload = require('../middlewares/examUpload');
-const conditionalExamUpload = require('../middlewares/conditionalUpload')(examUpload);
+const auth = require("../middlewares/auth");
+const ExamController = require("../controllers/ExamController");
+const examUpload = require("../middlewares/examUpload");
+const conditionalExamUpload = require("../middlewares/conditionalUpload")(
+  examUpload
+);
 
 /**
  * @swagger
@@ -47,7 +49,7 @@ const conditionalExamUpload = require('../middlewares/conditionalUpload')(examUp
  *       201:
  *         description: Exam created
  */
-router.post('/', auth, conditionalExamUpload, ExamController.createExam);
+router.post("/", auth, conditionalExamUpload, ExamController.createExam);
 
 /**
  * @swagger
@@ -110,7 +112,7 @@ router.post('/', auth, conditionalExamUpload, ExamController.createExam);
  *       200:
  *         description: Exam updated
  */
-router.put('/:id', auth, conditionalExamUpload, ExamController.updateExam);
+router.put("/:id", auth, conditionalExamUpload, ExamController.updateExam);
 
 /**
  * @swagger
@@ -151,7 +153,7 @@ router.put('/:id', auth, conditionalExamUpload, ExamController.updateExam);
  *       200:
  *         description: Exam patched
  */
-router.patch('/:id', auth, conditionalExamUpload, ExamController.patchExam);
+router.patch("/:id", auth, conditionalExamUpload, ExamController.patchExam);
 
 /**
  * @swagger
@@ -172,7 +174,7 @@ router.patch('/:id', auth, conditionalExamUpload, ExamController.patchExam);
  *       200:
  *         description: Exam deleted
  */
-router.delete('/:id', auth, ExamController.deleteExam);
+router.delete("/:id", auth, ExamController.deleteExam);
 
 /**
  * @swagger
@@ -190,14 +192,13 @@ router.delete('/:id', auth, ExamController.deleteExam);
  *       200:
  *         description: Exam details
  */
-router.get('/:id', ExamController.getExamById);
-
+router.get("/:id", ExamController.getExamById);
 
 /**
  * @swagger
  * /api/exams/course/{id}:
  *   get:
- *     summary: Lấy tất cả bài thi của một môn học theo course id (admin, giáo viên liên quan, hoặc sinh viên trong lớp)
+ *     summary: get all assignment by course id
  *     tags: [Exam]
  *     security:
  *       - bearerAuth: []
@@ -212,6 +213,6 @@ router.get('/:id', ExamController.getExamById);
  *       200:
  *         description: Danh sách bài thi của môn học
  */
-router.get('/course/:id', auth, ExamController.getExamsByCourseId);
+router.get("/course/:id", auth, ExamController.getExamsByCourseId);
 
 module.exports = router;

@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const ClassController = require('../controllers/ClassController');
-const auth = require('../middlewares/auth');
-const requireRole = require('../middlewares/role');
+const ClassController = require("../controllers/ClassController");
+const auth = require("../middlewares/auth");
+const requireRole = require("../middlewares/role");
 /**
  * @swagger
  * /api/class/{id}/student-count:
@@ -37,7 +37,7 @@ const requireRole = require('../middlewares/role');
  *       500:
  *         description: Internal server error
  */
-router.get('/:id/student-count', auth, ClassController.getStudentCountOfClass);
+router.get("/:id/student-count", auth, ClassController.getStudentCountOfClass);
 /**
  * @swagger
  * /api/class/{id}/students:
@@ -87,8 +87,8 @@ router.get('/:id/student-count', auth, ClassController.getStudentCountOfClass);
  *                     properties:
  *                       id:
  *                         type: integer
-  *                       student_name:
-  *                         type: string
+ *                       student_name:
+ *                         type: string
  *                       email:
  *                         type: string
  *                       role:
@@ -103,13 +103,13 @@ router.get('/:id/student-count', auth, ClassController.getStudentCountOfClass);
  *       500:
  *         description: Internal server error
  */
-router.get('/:id/students', auth, ClassController.getStudentsOfClass);
+router.get("/:id/students", auth, ClassController.getStudentsOfClass);
 
 /**
  * @swagger
  * /api/class/{id}:
  *   delete:
- *     summary: Xóa lớp học (chỉ admin được xóa, teacher chỉ được chuyển trạng thái cancelled/closed)
+ *     summary: Delete class by id
  *     tags: [Class]
  *     security:
  *       - bearerAuth: []
@@ -124,13 +124,13 @@ router.get('/:id/students', auth, ClassController.getStudentsOfClass);
  *       200:
  *         description: Class deleted
  *       403:
- *         description: Only admin can delete class. Teachers can only set status to cancelled or closed.
+ *         description: Only admin can delete class.
  *       404:
  *         description: Not found
  *       500:
  *         description: Internal server error
  */
-router.delete('/:id', auth, requireRole('admin'), ClassController.deleteClass);
+router.delete("/:id", auth, requireRole("admin"), ClassController.deleteClass);
 
 /**
  * @swagger
@@ -173,7 +173,12 @@ router.delete('/:id', auth, requireRole('admin'), ClassController.deleteClass);
  *       500:
  *         description: Internal server error
  */
-router.delete('/:id/students', auth, requireRole('TEACHER', 'ADMIN'), ClassController.removeStudentFromClass);
+router.delete(
+  "/:id/students",
+  auth,
+  requireRole("TEACHER", "ADMIN"),
+  ClassController.removeStudentFromClass
+);
 
 /**
  * @swagger
@@ -203,12 +208,11 @@ router.delete('/:id/students', auth, requireRole('TEACHER', 'ADMIN'), ClassContr
  *                 type: string
  *                 enum: [draft, active, in_progress, closed, archived, cancelled]
  *                 description: |
- *                   - **draft (Nháp):** Lớp học mới được tạo, chưa công bố. Giảng viên có thể chỉnh sửa thông tin, thêm bài tập trước khi công bố.
- *                   - **active (Đang mở):** Lớp đã công bố và sinh viên có thể tham gia. Giảng viên có thể đăng bài tập, sinh viên có thể nộp bài.
- *                   - **in_progress (Đang diễn ra):** Lớp đã bắt đầu theo lịch, có hoạt động học tập đang diễn ra.
- *                   - **closed (Đã đóng):** Lớp đã kết thúc, sinh viên không thể nộp bài mới. Giảng viên vẫn có thể chấm bài và sinh viên có thể xem kết quả.
- *                   - **archived (Lưu trữ):** Lớp cũ được lưu trữ để tham khảo nhưng không còn hoạt động.
- *                   - **cancelled (Hủy):** Lớp bị hủy trước khi bắt đầu hoặc khi đang mở.
+ *                   - draft: Class is created but not yet published. 
+ *                   - active: Class is published and students can join. 
+ *                   - closed: Class has ended; students can no longer submit new work.
+ *                   - archived: Old classes are archived for reference but no longer active.
+ *                   - cancelled: Class is cancelled before it starts or while it's active.
  *                 example: draft
  *     responses:
  *       200:
@@ -222,7 +226,12 @@ router.delete('/:id/students', auth, requireRole('TEACHER', 'ADMIN'), ClassContr
  *       500:
  *         description: Internal server error
  */
-router.patch('/:id/status', auth, requireRole('TEACHER', 'ADMIN'), ClassController.updateClassStatus);
+router.patch(
+  "/:id/status",
+  auth,
+  requireRole("TEACHER", "ADMIN"),
+  ClassController.updateClassStatus
+);
 
 /**
  * @swagger
@@ -265,7 +274,12 @@ router.patch('/:id/status', auth, requireRole('TEACHER', 'ADMIN'), ClassControll
  *       500:
  *         description: Internal server error
  */
-router.post('/:id/students', auth, requireRole('TEACHER', 'ADMIN'), ClassController.addStudentToClass);
+router.post(
+  "/:id/students",
+  auth,
+  requireRole("TEACHER", "ADMIN"),
+  ClassController.addStudentToClass
+);
 
 /**
  * @swagger
@@ -316,7 +330,12 @@ router.post('/:id/students', auth, requireRole('TEACHER', 'ADMIN'), ClassControl
  *       500:
  *         description: Internal server error
  */
-router.put('/:id', auth, requireRole('TEACHER', 'ADMIN'), ClassController.updateClass);
+router.put(
+  "/:id",
+  auth,
+  requireRole("TEACHER", "ADMIN"),
+  ClassController.updateClass
+);
 
 /**
  * @swagger
@@ -372,7 +391,7 @@ router.put('/:id', auth, requireRole('TEACHER', 'ADMIN'), ClassController.update
  *       500:
  *         description: Internal server error
  */
-router.post('/', auth, requireRole('TEACHER'), ClassController.createClass);
+router.post("/", auth, requireRole("TEACHER"), ClassController.createClass);
 
 /**
  * @swagger
@@ -401,7 +420,7 @@ router.post('/', auth, requireRole('TEACHER'), ClassController.createClass);
  *       500:
  *         description: Internal Server Error
  */
-router.get('/', auth, ClassController.getAllClasses);
+router.get("/", auth, ClassController.getAllClasses);
 
 /**
  * @swagger
@@ -435,6 +454,6 @@ router.get('/', auth, ClassController.getAllClasses);
  *       500:
  *         description: Internal server error
  */
-router.get('/:id', auth, ClassController.getClassById);
+router.get("/:id", auth, ClassController.getClassById);
 
 module.exports = router;

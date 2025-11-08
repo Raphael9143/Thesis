@@ -1,10 +1,10 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const auth = require('../middlewares/auth');
+const auth = require("../middlewares/auth");
 
-const upload = require('../middlewares/assignmentUpload');
-const conditionalUpload = require('../middlewares/conditionalUpload')(upload);
-const AssignmentController = require('../controllers/AssignmentController');
+const upload = require("../middlewares/assignmentUpload");
+const conditionalUpload = require("../middlewares/conditionalUpload")(upload);
+const AssignmentController = require("../controllers/AssignmentController");
 
 /**
  * @swagger
@@ -72,17 +72,27 @@ const AssignmentController = require('../controllers/AssignmentController');
  *       500:
  *         description: Internal Server Error
  */
-router.post('/', auth, conditionalUpload, (req, res, next) => {
-	// Nếu có trường constraints là string, parse sang object
-	if (req.body.constraints && typeof req.body.constraints === 'string') {
-		try {
-			req.body.constraints = JSON.parse(req.body.constraints);
-		} catch (e) {
-			return res.status(400).json({ success: false, message: 'constraints phải là JSON hợp lệ.' });
-		}
-	}
-	next();
-}, AssignmentController.createAssignment);
+router.post(
+  "/",
+  auth,
+  conditionalUpload,
+  (req, res, next) => {
+    // Nếu có trường constraints là string, parse sang object
+    if (req.body.constraints && typeof req.body.constraints === "string") {
+      try {
+        req.body.constraints = JSON.parse(req.body.constraints);
+      } catch (e) {
+        console.error("Error parsing constraints JSON:", e);
+        return res.status(400).json({
+          success: false,
+          message: "constraints phải là JSON hợp lệ.",
+        });
+      }
+    }
+    next();
+  },
+  AssignmentController.createAssignment
+);
 
 /**
  * @swagger
@@ -105,7 +115,7 @@ router.post('/', auth, conditionalUpload, (req, res, next) => {
  *                   items:
  *                     $ref: '#/components/schemas/Assignment'
  */
-router.get('/', AssignmentController.getAllAssignments);
+router.get("/", AssignmentController.getAllAssignments);
 
 /**
  * @swagger
@@ -135,8 +145,7 @@ router.get('/', AssignmentController.getAllAssignments);
  *                   items:
  *                     $ref: '#/components/schemas/Assignment'
  */
-router.get('/class/:classId', AssignmentController.getAssignmentsByClass);
-
+router.get("/class/:classId", AssignmentController.getAssignmentsByClass);
 
 /**
  * @swagger
@@ -157,7 +166,7 @@ router.get('/class/:classId', AssignmentController.getAssignmentsByClass);
  *       200:
  *         description: Danh sách bài tập của môn học
  */
-router.get('/course/:id', auth, AssignmentController.getAssignmentsByCourseId);
+router.get("/course/:id", auth, AssignmentController.getAssignmentsByCourseId);
 
 /**
  * @swagger
@@ -253,22 +262,32 @@ router.get('/course/:id', auth, AssignmentController.getAssignmentsByCourseId);
  *       500:
  *         description: Internal Server Error
  */
-router.put('/:id', auth, conditionalUpload, (req, res, next) => {
-	if (req.body.constraints && typeof req.body.constraints === 'string') {
-		try {
-			req.body.constraints = JSON.parse(req.body.constraints);
-		} catch (e) {
-			return res.status(400).json({ success: false, message: 'constraints phải là JSON hợp lệ.' });
-		}
-	}
-	next();
-}, AssignmentController.updateAssignment);
+router.put(
+  "/:id",
+  auth,
+  conditionalUpload,
+  (req, res, next) => {
+    if (req.body.constraints && typeof req.body.constraints === "string") {
+      try {
+        req.body.constraints = JSON.parse(req.body.constraints);
+      } catch (e) {
+        console.error("Error parsing constraints JSON:", e);
+        return res.status(400).json({
+          success: false,
+          message: "constraints phải là JSON hợp lệ.",
+        });
+      }
+    }
+    next();
+  },
+  AssignmentController.updateAssignment
+);
 
 /**
  * @swagger
  * /api/assignments/{id}/status:
  *   patch:
- *     summary: Update the status of an assignment by id (teacher who created it or homeroom teacher, or admin)
+ *     summary: Update the status of an assignment by id teacher who created it
  *     tags: [Assignment]
  *     security:
  *       - bearerAuth: []
@@ -310,7 +329,7 @@ router.put('/:id', auth, conditionalUpload, (req, res, next) => {
  *       500:
  *         description: Internal Server Error
  */
-router.patch('/:id/status', auth, AssignmentController.updateAssignmentStatus);
+router.patch("/:id/status", auth, AssignmentController.updateAssignmentStatus);
 
 /**
  * @swagger
@@ -344,7 +363,11 @@ router.patch('/:id/status', auth, AssignmentController.updateAssignmentStatus);
  *       500:
  *         description: Internal Server Error
  */
-router.patch('/remove-from-course/:assignmentId', auth, AssignmentController.removeAssignmentFromCourse);
+router.patch(
+  "/remove-from-course/:assignmentId",
+  auth,
+  AssignmentController.removeAssignmentFromCourse
+);
 
 /**
  * @swagger
@@ -396,7 +419,7 @@ router.patch('/remove-from-course/:assignmentId', auth, AssignmentController.rem
  *       500:
  *         description: Internal Server Error
  */
-router.post('/add-to-class', auth, AssignmentController.addAssignmentToClass);
+router.post("/add-to-class", auth, AssignmentController.addAssignmentToClass);
 
 /**
  * @swagger
@@ -423,7 +446,7 @@ router.post('/add-to-class', auth, AssignmentController.addAssignmentToClass);
  *       500:
  *         description: Internal Server Error
  */
-router.delete('/:id', auth, AssignmentController.deleteAssignment);
+router.delete("/:id", auth, AssignmentController.deleteAssignment);
 
 /**
  * @swagger
@@ -455,6 +478,6 @@ router.delete('/:id', auth, AssignmentController.deleteAssignment);
  *       500:
  *         description: Internal Server Error
  */
-router.get('/:id', auth, AssignmentController.getAssignmentById);
+router.get("/:id", auth, AssignmentController.getAssignmentById);
 
 module.exports = router;

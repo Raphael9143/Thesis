@@ -1,8 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const auth = require('../middlewares/auth');
-const submissionUpload = require('../middlewares/submissionUpload');
-const SubmissionController = require('../controllers/SubmissionController');
+const auth = require("../middlewares/auth");
+const submissionUpload = require("../middlewares/submissionUpload");
+const SubmissionController = require("../controllers/SubmissionController");
 
 /**
  * @swagger
@@ -35,7 +35,9 @@ const SubmissionController = require('../controllers/SubmissionController');
  *                 format: binary
  *                 description: File upload (.use only)
  *             description: |
- *               Provide either assignment_id or exam_id (mutually exclusive). The class_id is required. Attachment must be a .use file.
+ *               Provide either assignment_id or exam_id (mutually exclusive). 
+ *               The class_id is required. 
+ *               Attachment must be a .use file.
  *     responses:
  *       201:
  *         description: Submission created
@@ -48,8 +50,15 @@ const SubmissionController = require('../controllers/SubmissionController');
  *       500:
  *         description: Internal Server Error
  */
-const conditionalSubmissionUpload = require('../middlewares/conditionalUpload')(submissionUpload);
-router.post('/', auth, conditionalSubmissionUpload, SubmissionController.submitAssignment);
+const conditionalSubmissionUpload = require("../middlewares/conditionalUpload")(
+  submissionUpload
+);
+router.post(
+  "/",
+  auth,
+  conditionalSubmissionUpload,
+  SubmissionController.submitAssignment
+);
 // Giáo viên chấm điểm submission (cập nhật score và feedback)
 /**
  * @swagger
@@ -80,7 +89,7 @@ router.post('/', auth, conditionalSubmissionUpload, SubmissionController.submitA
  *       200:
  *         description: Submission graded
  */
-router.patch('/:id/grade', auth, SubmissionController.gradeSubmission);
+router.patch("/:id/grade", auth, SubmissionController.gradeSubmission);
 
 // Lấy thông tin submission theo id
 /**
@@ -101,7 +110,7 @@ router.patch('/:id/grade', auth, SubmissionController.gradeSubmission);
  *       200:
  *         description: Submission
  */
-router.get('/:id', auth, SubmissionController.getSubmissionById);
+router.get("/:id", auth, SubmissionController.getSubmissionById);
 
 // Lấy tất cả submissions của một assignment
 /**
@@ -122,7 +131,11 @@ router.get('/:id', auth, SubmissionController.getSubmissionById);
  *       200:
  *         description: List of submissions
  */
-router.get('/assignment/:id', auth, SubmissionController.getSubmissionsByAssignment);
+router.get(
+  "/assignment/:id",
+  auth,
+  SubmissionController.getSubmissionsByAssignment
+);
 
 // Lấy tất cả submissions của một exam
 /**
@@ -143,6 +156,6 @@ router.get('/assignment/:id', auth, SubmissionController.getSubmissionsByAssignm
  *       200:
  *         description: List of submissions
  */
-router.get('/exam/:id', auth, SubmissionController.getSubmissionsByExam);
+router.get("/exam/:id", auth, SubmissionController.getSubmissionsByExam);
 
 module.exports = router;

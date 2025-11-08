@@ -1,7 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const AuthController = require('../controllers/AuthController');
-const auth = require('../middlewares/auth');
+const AuthController = require("../controllers/AuthController");
+const auth = require("../middlewares/auth");
 
 /**
  * @swagger
@@ -137,7 +137,7 @@ const auth = require('../middlewares/auth');
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/register', AuthController.register);
+router.post("/register", AuthController.register);
 
 /**
  * @swagger
@@ -165,7 +165,7 @@ router.post('/register', AuthController.register);
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/login', AuthController.login);
+router.post("/login", AuthController.login);
 
 /**
  * @swagger
@@ -195,7 +195,7 @@ router.post('/login', AuthController.login);
  *       404:
  *         description: User not found
  */
-router.get('/profile', auth, AuthController.getProfile);
+router.get("/profile", auth, AuthController.getProfile);
 
 /**
  * @swagger
@@ -256,6 +256,6 @@ router.get('/profile', auth, AuthController.getProfile);
  *       404:
  *         description: User not found
  */
-router.patch('/profile', auth, AuthController.updateProfile);
+router.patch("/profile", auth, AuthController.updateProfile);
 
 module.exports = router;
