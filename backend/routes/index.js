@@ -34,16 +34,11 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
 // Test database connection
 testConnection();
 
-// Sync database (drop & create lại), sau đó seed dữ liệu mẫu bằng file riêng
-sequelize.sync({ force: true })
-    .then(async () => {
-        console.log('✅ Database dropped & synced successfully!');
-        const initDatabase = require('../initDatabase');
-        await initDatabase();
-    })
-    .catch((error) => {
-        console.error('❌ Database sync failed:', error.message);
-    });
+// NOTE: Database sync should be performed from the server startup (server.js)
+// or via a dedicated script so that all models are registered before sync runs.
+// The previous automatic sync here caused premature syncs (and drops) before
+// some models were required. Use `scripts/sync-db.js` or let server.js handle
+// syncing to avoid race conditions.
 
 // Routes
 app.get('/', (req, res) => {
