@@ -29,8 +29,8 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
           course_id: exam.course_id || exam.courseId || defaultCourseId || '',
           title: exam.title || '',
           type: exam.type || 'SINGLE',
-            submission_limit: exam.submission_limit ?? 1,
-            description: exam.description || '',
+          submission_limit: exam.submission_limit ?? 1,
+          description: exam.description || '',
           start_date_date: '',
           start_date_time: '',
           end_date_date: '',
@@ -45,7 +45,9 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
               s.start_date_time = sd.toTimeString().slice(0, 5);
             }
           }
-        } catch (_) { }
+        } catch (err) {
+          console.error('parse start date error', err);
+        }
         try {
           if (exam.end_date) {
             const ed = new Date(exam.end_date);
@@ -54,16 +56,28 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
               s.end_date_time = ed.toTimeString().slice(0, 5);
             }
           }
-        } catch (_) { }
+        } catch (err) {
+          console.error('parse end date error', err);
+        }
         setForm(s);
         if (fileRef.current) fileRef.current.value = null;
       } else {
-  setForm({ course_id: defaultCourseId || '', title: '', type: 'SINGLE', submission_limit: 1, description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+        setForm({
+          course_id: defaultCourseId || '',
+          title: '',
+          type: 'SINGLE',
+          submission_limit: 1,
+          description: '',
+          start_date_date: '',
+          start_date_time: '',
+          end_date_date: '',
+          end_date_time: '',
+        });
         if (fileRef.current) fileRef.current.value = null;
       }
       return;
     }
-  }, [defaultCourseId, open]);
+  }, [defaultCourseId, open, exam]);
 
   // when editing an existing exam, populate form
   useEffect(() => {
@@ -72,8 +86,8 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         course_id: exam.course_id || exam.courseId || defaultCourseId || '',
         title: exam.title || '',
         type: exam.type || 'SINGLE',
-          submission_limit: exam.submission_limit ?? 1,
-          description: exam.description || '',
+        submission_limit: exam.submission_limit ?? 1,
+        description: exam.description || '',
         start_date_date: '',
         start_date_time: '',
         end_date_date: '',
@@ -88,7 +102,9 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
             s.start_date_time = sd.toTimeString().slice(0, 5);
           }
         }
-      } catch (_) { }
+      } catch (err) {
+        console.error('parse start date error', err);
+      }
       try {
         if (exam.end_date) {
           const ed = new Date(exam.end_date);
@@ -97,7 +113,9 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
             s.end_date_time = ed.toTimeString().slice(0, 5);
           }
         }
-      } catch (_) { }
+      } catch (err) {
+        console.error('parse end date error', err);
+      }
       setForm(s);
       if (fileRef.current) fileRef.current.value = null;
     }
@@ -124,8 +142,13 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
       if (form.course_id) fd.append('course_id', form.course_id);
       if (form.title) fd.append('title', form.title);
       if (form.type) fd.append('type', form.type);
-        // submission_limit required by backend
-        fd.append('submission_limit', (typeof form.submission_limit !== 'undefined' && form.submission_limit !== null) ? String(form.submission_limit) : '1');
+      // submission_limit required by backend
+      fd.append(
+        'submission_limit',
+        typeof form.submission_limit !== 'undefined' && form.submission_limit !== null
+          ? String(form.submission_limit)
+          : '1'
+      );
       if (form.description) fd.append('description', form.description);
 
       // combine date+time into ISO strings for start_date and end_date
@@ -134,6 +157,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         try {
           fd.append('start_date', new Date(`${form.start_date_date}T${time}`).toISOString());
         } catch (err) {
+          console.error('create exam start date error', err);
           fd.append('start_date', `${form.start_date_date}T${time}`);
         }
       }
@@ -142,6 +166,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         try {
           fd.append('end_date', new Date(`${form.end_date_date}T${time2}`).toISOString());
         } catch (err) {
+          console.error('create exam end date error', err);
           fd.append('end_date', `${form.end_date_date}T${time2}`);
         }
       }
@@ -157,9 +182,14 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
       if (exam && (exam.id || exam.exam_id)) {
         // update
         const id = exam.id || exam.exam_id;
-        res = await userAPI.updateExam(id, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        res = await userAPI.updateExam(id, fd, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
         if (res && res.success) {
-          push({ title: 'Success', body: status === 'draft' ? 'Exam saved as draft.' : 'Exam updated.' });
+          push({
+            title: 'Success',
+            body: status === 'draft' ? 'Exam saved as draft.' : 'Exam updated.',
+          });
           onUpdated?.(res.data);
           onClose?.();
         } else {
@@ -169,10 +199,23 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         // create
         res = await userAPI.createExam(fd, { headers: { 'Content-Type': 'multipart/form-data' } });
         if (res && res.success) {
-          push({ title: 'Success', body: status === 'draft' ? 'Exam saved as draft.' : 'Exam created.' });
+          push({
+            title: 'Success',
+            body: status === 'draft' ? 'Exam saved as draft.' : 'Exam created.',
+          });
           onCreated?.(res.data);
           onClose?.();
-          setForm({ course_id: defaultCourseId || '', title: '', type: 'SINGLE', submission_limit: 1, description: '', start_date_date: '', start_date_time: '', end_date_date: '', end_date_time: '' });
+          setForm({
+            course_id: defaultCourseId || '',
+            title: '',
+            type: 'SINGLE',
+            submission_limit: 1,
+            description: '',
+            start_date_date: '',
+            start_date_time: '',
+            end_date_date: '',
+            end_date_time: '',
+          });
           if (fileRef.current) fileRef.current.value = null;
         } else {
           push({ title: 'Error', body: res?.message || 'Failed to create exam' });
@@ -190,8 +233,25 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
     <Modal open={open} onClose={onClose} title={exam ? 'Edit exam' : 'Create new exam'}>
       <form className="create-lecture-form" onSubmit={(e) => e.preventDefault()}>
         <FormField label="Title" name="title" value={form.title} onChange={update} placeholder="Exam title" required />
-        <FormField label="Type" name="type" value={form.type} onChange={update} options={[{ value: 'SINGLE', label: 'Single' }, { value: 'GROUP', label: 'Group' }]} required />
-        <FormField label="Description" name="description" value={form.description} onChange={update} placeholder="Optional description" textarea />
+        <FormField
+          label="Type"
+          name="type"
+          value={form.type}
+          onChange={update}
+          options={[
+            { value: 'SINGLE', label: 'Single' },
+            { value: 'GROUP', label: 'Group' },
+          ]}
+          required
+        />
+        <FormField
+          label="Description"
+          name="description"
+          value={form.description}
+          onChange={update}
+          placeholder="Optional description"
+          textarea
+        />
 
         <FormField
           label="Submission limit"
@@ -204,13 +264,43 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         />
 
         <div className="form-row">
-          <FormField label="Start date" name="start_date_date" type="date" value={form.start_date_date} onChange={update} required />
-          <FormField label="Start time" name="start_date_time" type="time" value={form.start_date_time} onChange={update} inputProps={{ min: '00:00', max: '23:59' }} required />
+          <FormField
+            label="Start date"
+            name="start_date_date"
+            type="date"
+            value={form.start_date_date}
+            onChange={update}
+            required
+          />
+          <FormField
+            label="Start time"
+            name="start_date_time"
+            type="time"
+            value={form.start_date_time}
+            onChange={update}
+            inputProps={{ min: '00:00', max: '23:59' }}
+            required
+          />
         </div>
 
         <div className="form-row">
-          <FormField label="End date" name="end_date_date" type="date" value={form.end_date_date} onChange={update} required />
-          <FormField label="End time" name="end_date_time" type="time" value={form.end_date_time} onChange={update} inputProps={{ min: '00:00', max: '23:59' }} required />
+          <FormField
+            label="End date"
+            name="end_date_date"
+            type="date"
+            value={form.end_date_date}
+            onChange={update}
+            required
+          />
+          <FormField
+            label="End time"
+            name="end_date_time"
+            type="time"
+            value={form.end_date_time}
+            onChange={update}
+            inputProps={{ min: '00:00', max: '23:59' }}
+            required
+          />
         </div>
 
         <FormField label="Attachment" name="file" type="file" inputRef={fileRef} />
@@ -218,14 +308,29 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         <div className="create-lecture-form__actions">
           {exam ? (
             <>
-              <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>Cancel</button>
-              <button type="button" className="btn btn-primary" onClick={() => doSubmit()} disabled={submitting}>{submitting ? 'Applying…' : 'Apply'}</button>
+              <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-primary" onClick={() => doSubmit()} disabled={submitting}>
+                {submitting ? 'Applying…' : 'Apply'}
+              </button>
             </>
           ) : (
             <>
-              <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>Cancel</button>
-              <button type="button" className="btn btn-signin" onClick={() => doSubmit('draft')} disabled={submitting}>Save as draft</button>
-              <button type="button" className="btn btn-primary" onClick={() => doSubmit('published')} disabled={submitting}>{submitting ? 'Submitting…' : 'Publish'}</button>
+              <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
+                Cancel
+              </button>
+              <button type="button" className="btn btn-signin" onClick={() => doSubmit('draft')} disabled={submitting}>
+                Save as draft
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => doSubmit('published')}
+                disabled={submitting}
+              >
+                {submitting ? 'Submitting…' : 'Publish'}
+              </button>
             </>
           )}
         </div>

@@ -28,7 +28,10 @@ export default function GradeSubmissionModal({ open, onClose, submission, onGrad
     setSubmitting(true);
     try {
       const payload = { score: parsed, feedback: feedback ?? '' };
-      const res = await userAPI.gradeSubmission(submission.id || submission.submission_id || submission.submissionId, payload);
+      const res = await userAPI.gradeSubmission(
+        submission.id || submission.submission_id || submission.submissionId,
+        payload
+      );
       if (res && res.success) {
         push({ title: 'Success', body: 'Graded successfully.' });
         onGraded?.(res.data ?? { ...submission, score: parsed, feedback });
@@ -66,8 +69,12 @@ export default function GradeSubmissionModal({ open, onClose, submission, onGrad
         />
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
-          <button className="btn btn-signin" type="button" onClick={onClose} disabled={submitting}>Cancel</button>
-          <button className="btn btn-primary" type="button" onClick={handleSubmit} disabled={submitting}>{submitting ? 'Saving…' : 'Save'}</button>
+          <button className="btn btn-signin" type="button" onClick={onClose} disabled={submitting}>
+            Cancel
+          </button>
+          <button className="btn btn-primary" type="button" onClick={handleSubmit} disabled={submitting}>
+            {submitting ? 'Saving…' : 'Save'}
+          </button>
         </div>
       </div>
     </Modal>
