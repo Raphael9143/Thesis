@@ -59,9 +59,21 @@ export default defineConfig([
         {
           singleQuote: true,
           semi: true,
-          printWidth: 100,
+          printWidth: 120,
           trailingComma: 'es5',
           endOfLine: 'auto',
+        },
+      ],
+
+      'max-len': [
+        'error',
+        {
+          code: 120,
+          tabWidth: 2,
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+          ignoreComments: false,
         },
       ],
     },
