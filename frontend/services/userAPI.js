@@ -1,29 +1,28 @@
-import axiosClient from "./axiosClient";
+import axiosClient from './axiosClient';
 
 const userAPI = {
   // Auth
   // Đăng nhập: chỉ nhận email, password
-  login: ({ email, password }) =>
-    axiosClient.post("auth/login", { email, password }),
+  login: ({ email, password }) => axiosClient.post('auth/login', { email, password }),
 
   // Đăng ký: nhận email, password, role (UPPER), full_name, dob, gender (UPPER)
   register: ({ email, password, role, full_name, dob, gender }) =>
-    axiosClient.post("auth/register", { email, password, role, full_name, dob, gender }),
-  getProfile: () => axiosClient.get("auth/profile"),
-  updateProfile: (data) => axiosClient.patch("auth/profile", data),
+    axiosClient.post('auth/register', { email, password, role, full_name, dob, gender }),
+  getProfile: () => axiosClient.get('auth/profile'),
+  updateProfile: (data) => axiosClient.patch('auth/profile', data),
   // Teacher
-  getTeacherProfile: () => axiosClient.get("teacher/profile"),
-  getTeacherCourses: () => axiosClient.get("teacher/courses"),
+  getTeacherProfile: () => axiosClient.get('teacher/profile'),
+  getTeacherCourses: () => axiosClient.get('teacher/courses'),
   // Get classes managed/taught by the teacher (requires teacher bearer token)
-  getTeacherClasses: () => axiosClient.get("teacher/classes"),
+  getTeacherClasses: () => axiosClient.get('teacher/classes'),
   // Student
-  getStudentProfile: () => axiosClient.get("student/profile"),
-  updateStudentProfile: (data) => axiosClient.patch("student/profile", data),
+  getStudentProfile: () => axiosClient.get('student/profile'),
+  updateStudentProfile: (data) => axiosClient.patch('student/profile', data),
 
   // User management (add more as needed)
-  getAllUsers: () => axiosClient.get("users"),
+  getAllUsers: () => axiosClient.get('users'),
   // Returns a list of student emails: { success: true, data: ["student1@example.com"] }
-  getStudentEmails: () => axiosClient.get("users/students/emails"),
+  getStudentEmails: () => axiosClient.get('users/students/emails'),
   getUserById: (id) => axiosClient.get(`users/${id}`),
   // Get user by email: GET /api/users/by-email?email=...
   getUserByEmail: (email) => axiosClient.get(`users/by-email?email=${encodeURIComponent(email)}`),
@@ -31,13 +30,13 @@ const userAPI = {
   deleteUser: (id) => axiosClient.delete(`users/${id}`),
 
   // Class management
-  getAllClasses: () => axiosClient.get("class"),
+  getAllClasses: () => axiosClient.get('class'),
   getClassById: (id) => axiosClient.get(`class/${id}`),
-  createClass: (data) => axiosClient.post("class", data),
+  createClass: (data) => axiosClient.post('class', data),
   updateClass: (id, data) => axiosClient.put(`class/${id}`, data),
   deleteClass: (id) => axiosClient.delete(`class/${id}`),
   // Student: get enrolled classes (requires student bearer token)
-  getStudentEnrolledClasses: () => axiosClient.get("student/enrolled-classes"),
+  getStudentEnrolledClasses: () => axiosClient.get('student/enrolled-classes'),
   // Course related
   getLecturesByCourse: (courseId) => axiosClient.get(`lectures/course/${courseId}`),
   getExamsByCourse: (courseId) => axiosClient.get(`exams/course/${courseId}`),
@@ -54,27 +53,32 @@ const userAPI = {
   getStudentsByClass: (classId, params) => axiosClient.get(`class/${classId}/students`, { params }),
   // Get assignments submitted or available for a given student in a course
   // GET /api/student/{studentId}/assignments?course={courseId}
-  getStudentAssignments: (studentId, params) => axiosClient.get(`student/${studentId}/assignments`, { params }),
+  getStudentAssignments: (studentId, params) =>
+    axiosClient.get(`student/${studentId}/assignments`, { params }),
   // Get exams for a given student in a course
   // GET /api/student/{studentId}/exams?course={courseId}
   getStudentExams: (studentId, params) => axiosClient.get(`student/${studentId}/exams`, { params }),
   // List submissions by assignment or exam
   // GET /api/submissions?assignment={assignmentId}
-  getSubmissionsByAssignment: (assignmentId) => axiosClient.get(`submissions`, { params: { assignment: assignmentId } }),
+  getSubmissionsByAssignment: (assignmentId) =>
+    axiosClient.get(`submissions`, { params: { assignment: assignmentId } }),
   // GET /api/submissions?exam={examId}
   getSubmissionsByExam: (examId) => axiosClient.get(`submissions`, { params: { exam: examId } }),
   // Some backends expose path-style endpoints for submissions by assignment/exam
   // e.g. GET /api/submissions/assignment/{id} and GET /api/submissions/exam/{id}
-  getSubmissionsByAssignmentId: (assignmentId) => axiosClient.get(`submissions/assignment/${assignmentId}`),
+  getSubmissionsByAssignmentId: (assignmentId) =>
+    axiosClient.get(`submissions/assignment/${assignmentId}`),
   getSubmissionsByExamId: (examId) => axiosClient.get(`submissions/exam/${examId}`),
   // Get single submission by id
   // GET /api/submissions/{id}
   getSubmissionById: (id) => axiosClient.get(`submissions/${id}`),
   // Grade a submission: PATCH /api/submissions/{id}/grade with payload { score, feedback }
-  gradeSubmission: (submissionId, data) => axiosClient.patch(`submissions/${submissionId}/grade`, data),
+  gradeSubmission: (submissionId, data) =>
+    axiosClient.patch(`submissions/${submissionId}/grade`, data),
   // Remove a student from a class
   // DELETE /api/class/{classId}/students/{classStudentId}
-  removeStudentFromClass: (classId, classStudentId) => axiosClient.delete(`class/${classId}/students/${classStudentId}`),
+  removeStudentFromClass: (classId, classStudentId) =>
+    axiosClient.delete(`class/${classId}/students/${classStudentId}`),
   // Get a single course by id
   getCourseById: (courseId) => axiosClient.get(`courses/${courseId}`),
   // Create a new course (expects { course_name, course_code, description, semester, class_id, start_week, end_week, status })
@@ -111,7 +115,7 @@ const userAPI = {
   patchExamStatus: (id, status) => axiosClient.patch(`exams/${id}/status`, { status }),
 
   // Add more API endpoints as needed for your thesis project
-  updateTeacherProfile: (data) => axiosClient.patch("teacher/profile", data),
+  updateTeacherProfile: (data) => axiosClient.patch('teacher/profile', data),
 
   //notify
   notify: (userId, data) => axiosClient.post(`notify/${userId}`, data),
