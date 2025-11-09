@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
 
 export default function RequireAuth({ children }) {
   const location = useLocation();
   const [checking, setChecking] = useState(true);
-  const [isLogin, setIsLogin] = useState(() => sessionStorage.getItem('isLogin') === 'true');
+  const isLogin = sessionStorage.getItem('isLogin') === 'true';
 
   useEffect(() => {
     // if not logged in locally, no need to hydrate
@@ -34,7 +34,9 @@ export default function RequireAuth({ children }) {
       }
     })();
 
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [isLogin]);
 
   if (checking) return null; // or a spinner
