@@ -17,14 +17,26 @@ export default function CourseTabs() {
   return (
     <div className="course-tabs">
       <nav className="course-tabs__nav">
-        <NavLink to={base} end className={linkClass}>Overview</NavLink>
-        <NavLink to={`${base}/lectures`} className={linkClass}>Lectures</NavLink>
-        <NavLink to={`${base}/assignments`} className={linkClass}>Assignments</NavLink>
-        <NavLink to={`${base}/exams`} className={linkClass}>Exams</NavLink>
+        <NavLink to={base} end className={linkClass}>
+          Overview
+        </NavLink>
+        <NavLink to={`${base}/lectures`} className={linkClass}>
+          Lectures
+        </NavLink>
+        <NavLink to={`${base}/assignments`} className={linkClass}>
+          Assignments
+        </NavLink>
+        <NavLink to={`${base}/exams`} className={linkClass}>
+          Exams
+        </NavLink>
         {role === 'teacher' && (
           <>
-            <NavLink to={`${base}/students`} className={linkClass}>Students</NavLink>
-            <NavLink to={`${base}/submissions`} className={linkClass}>Submissions</NavLink>
+            <NavLink to={`${base}/students`} className={linkClass}>
+              Students
+            </NavLink>
+            <NavLink to={`${base}/submissions`} className={linkClass}>
+              Submissions
+            </NavLink>
           </>
         )}
       </nav>
