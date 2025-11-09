@@ -52,7 +52,12 @@ export default function AuthForm({
         });
       }
       if (!data.success) {
-        setMessage(data.message || (type === 'login' ? 'Wrong email or password!' : 'Failed to register, please try again!'));
+        setMessage(
+          data.message ||
+            (type === 'login'
+              ? 'Wrong email or password!'
+              : 'Failed to register, please try again!')
+        );
         return;
       }
       if (type === 'login' && roles.length === 2) {
@@ -89,9 +94,15 @@ export default function AuthForm({
       if (onSuccess) onSuccess(data);
       // push an example notification: login success
       try {
-        push({ id: `login-${Date.now()}`, title: 'Đăng nhập thành công', body: `Xin chào ${data.data?.user?.full_name || ''}`, ts: Date.now(), data: { type: 'system' } });
+        push({
+          id: `login-${Date.now()}`,
+          title: 'Đăng nhập thành công',
+          body: `Xin chào ${data.data?.user?.full_name || ''}`,
+          ts: Date.now(),
+          data: { type: 'system' },
+        });
       } catch (err) {
-        // ignore
+        console.error('push notification error', err);
       }
     } catch (err) {
       setMessage(err?.response?.data?.message || 'Server error!');
@@ -103,12 +114,12 @@ export default function AuthForm({
   return (
     <div className="form-container">
       {title && <h3>{title}</h3>}
-  {subtitle && <div className="text-muted mb-8">{subtitle}</div>}
+      {subtitle && <div className="text-muted mb-8">{subtitle}</div>}
       {roles.length > 1 && (
         <RoleTabs
           role={role}
           onChange={setRole}
-          options={roles.map(r => ({ value: r.value, label: r.label }))}
+          options={roles.map((r) => ({ value: r.value, label: r.label }))}
         />
       )}
       <form onSubmit={handleSubmit} className="auth-line-form">
@@ -139,7 +150,9 @@ export default function AuthForm({
             onChange={(e) => setGender(e.target.value)}
             required
           >
-            <option value="" disabled>Select gender</option>
+            <option value="" disabled>
+              Select gender
+            </option>
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="other">Other</option>
@@ -163,13 +176,19 @@ export default function AuthForm({
           required
         />
         <button type="submit" className="auth-line-btn" disabled={loading}>
-          {loading ? (type === 'login' ? 'Logging in...' : 'Registering...') : (type === 'login' ? 'Login' : 'Register')}
+          {loading
+            ? type === 'login'
+              ? 'Logging in...'
+              : 'Registering...'
+            : type === 'login'
+              ? 'Login'
+              : 'Register'}
         </button>
         {showSwitch && (
           <p className="switch">
             {type === 'login' ? (
               <>
-                Don't have any accounts? <Link to="/register">Register</Link>
+                Don&apos;t have any accounts? <Link to="/register">Register</Link>
               </>
             ) : (
               <>

@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 
-export default function PasswordInput({ label = 'Mật khẩu', value, onChange, placeholder = 'Nhập mật khẩu' }) {
+export default function PasswordInput({
+  label = 'Mật khẩu',
+  value,
+  onChange,
+  placeholder = 'Nhập mật khẩu',
+}) {
   const [show, setShow] = useState(false);
   return (
     <div>
@@ -14,7 +19,7 @@ export default function PasswordInput({ label = 'Mật khẩu', value, onChange,
           className="auth-input flex-1"
           required
         />
-        <button type="button" className="ghost-btn" onClick={() => setShow(s => !s)}>
+        <button type="button" className="ghost-btn" onClick={() => setShow((s) => !s)}>
           {show ? 'Ẩn' : 'Hiện'}
         </button>
       </div>
