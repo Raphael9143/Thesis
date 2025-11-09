@@ -10,7 +10,7 @@ const PageInfoContext = createContext({
 export function PageInfoProvider({ children }) {
   const [title, setTitle] = useState('');
   const [showCourseNav, setShowCourseNav] = useState(true);
-  const toggleCourseNav = () => setShowCourseNav(s => !s);
+  const toggleCourseNav = () => setShowCourseNav((s) => !s);
   return (
     <PageInfoContext.Provider value={{ title, setTitle, showCourseNav, toggleCourseNav }}>
       {children}

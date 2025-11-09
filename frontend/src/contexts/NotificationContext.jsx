@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import socketClient from '../services/socketClient';
 import NotificationPopup from '../components/ui/NotificationPopup';
 
@@ -20,12 +20,15 @@ export function NotificationProvider({ children }) {
   useEffect(() => {
     const token = sessionStorage.getItem('token');
     if (!token) return;
-    const sock = socketClient.initSocket(token);
     const off = socketClient.onNotification((data, ack) => {
       // debug log incoming payload
       try {
-        console.debug('[NotificationContext] incoming notification', data, { hasAck: typeof ack === 'function' });
-      } catch (err) {}
+        console.debug('[NotificationContext] incoming notification', data, {
+          hasAck: typeof ack === 'function',
+        });
+      } catch (err) {
+        console.error('NotificationContext: debug log error', err);
+      }
 
       // default push
       const notif = {
