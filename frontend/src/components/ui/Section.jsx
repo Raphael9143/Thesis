@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../assets/styles/components/ui/Section.css'
+import '../../assets/styles/components/ui/Section.css';
 
 export default function Section({ title, subtitle, children }) {
   return (

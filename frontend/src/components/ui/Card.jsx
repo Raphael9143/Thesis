@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../assets/styles/components/ui/Card.css'
+import '../../assets/styles/components/ui/Card.css';
 
 export default function Card({ title, subtitle, children, onClick, className }) {
   const clickClass = onClick ? 'clickable' : '';

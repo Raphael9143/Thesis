@@ -7,7 +7,13 @@ export default function ClassCard({ title, subtitle, image, onClick, badge, desc
     if (e.key === 'Enter' || e.key === ' ') onClick();
   };
 
-  const initials = (title || '').split(' ').filter(Boolean).slice(0,2).map(w => w[0]).join('').toUpperCase();
+  const initials = (title || '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+    .toUpperCase();
 
   return (
     <div
@@ -18,11 +24,7 @@ export default function ClassCard({ title, subtitle, image, onClick, badge, desc
       onKeyPress={handleKeyPress}
     >
       <div className="class-card__thumb">
-        {image ? (
-          <img src={image} alt={title} />
-        ) : (
-          <div className="class-card__placeholder">{initials || 'NA'}</div>
-        )}
+        {image ? <img src={image} alt={title} /> : <div className="class-card__placeholder">{initials || 'NA'}</div>}
 
         {badge && <div className="class-card__badge">{badge}</div>}
       </div>

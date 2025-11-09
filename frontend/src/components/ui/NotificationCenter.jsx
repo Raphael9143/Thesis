@@ -3,7 +3,10 @@ import '../../assets/styles/components/ui/NotificationCenter.css';
 import { useNotifications } from '../../contexts/NotificationContext';
 
 export default function NotificationCenter({ onClose }) {
-  const { notifications, markRead } = useNotifications() || { notifications: [], markRead: () => {} };
+  const { notifications, markRead } = useNotifications() || {
+    notifications: [],
+    markRead: () => {},
+  };
 
   return (
     <div className="notif-center" role="dialog" aria-label="Notifications">
@@ -14,9 +17,7 @@ export default function NotificationCenter({ onClose }) {
         </span>
       </div>
       <div className="notif-center__body">
-        {(!notifications || notifications.length === 0) && (
-          <div className="notif-empty">No notifications</div>
-        )}
+        {(!notifications || notifications.length === 0) && <div className="notif-empty">No notifications</div>}
         {notifications.map((n) => (
           <div key={n.id} className={`notif-item ${n.read ? 'notif-item--read' : ''}`}>
             <div className="notif-item__meta">

@@ -24,7 +24,9 @@ export default function FormField({
         <label htmlFor={id} className="form-label">
           <span>{label}</span>
           {required && (
-            <span aria-hidden="true" className="required-star">*</span>
+            <span aria-hidden="true" className="required-star">
+              *
+            </span>
           )}
         </label>
       )}
