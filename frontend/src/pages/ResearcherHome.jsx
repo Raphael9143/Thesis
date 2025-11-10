@@ -14,8 +14,8 @@ export default function ResearcherHome() {
   const [showAuth, setShowAuth] = useState(false);
   const [authType, setAuthType] = useState('login');
   const [notifyOpen, setNotifyOpen] = useState(false);
-  const [notifyMessage, setNotifyMessage] = useState('');
-  const [notifyType, setNotifyType] = useState('success');
+  const [notifyMessage, _setNotifyMessage] = useState('');
+  const [notifyType, _setNotifyType] = useState('success');
 
   const onSuccessAuth = () => {
     setShowAuth(false);
@@ -108,7 +108,7 @@ export default function ResearcherHome() {
           <div className="researcher-auth-switch">
             {authType === 'login' ? (
               <p>
-                Don't have any account?{' '}
+                Don&apos;t have any account?{' '}
                 <a className="researcher-auth-switch-button" onClick={() => setAuthType('register')}>
                   Register
                 </a>

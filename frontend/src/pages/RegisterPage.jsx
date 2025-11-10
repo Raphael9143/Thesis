@@ -8,8 +8,8 @@ import '../assets/styles/ui.css';
 export default function RegisterPage() {
   const navigate = useNavigate();
   const [notifyOpen, setNotifyOpen] = useState(false);
-  const [notifyMsg, setNotifyMsg] = useState('');
-  const [notifyType, setNotifyType] = useState('info');
+  const [notifyMsg, _setNotifyMsg] = useState('');
+  const [notifyType, _setNotifyType] = useState('info');
 
   const handleSuccess = () => {
     // Redirect to education home

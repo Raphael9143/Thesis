@@ -14,8 +14,8 @@ export default function Home() {
   const navigate = useNavigate();
   const [role, setRole] = useState(() => sessionStorage.getItem('role')?.toLowerCase() || '');
   const [notifyOpen, setNotifyOpen] = useState(false);
-  const [notifyMsg, setNotifyMsg] = useState('');
-  const [notifyType, setNotifyType] = useState('info');
+  const [notifyMsg, _setNotifyMsg] = useState('');
+  const [notifyType, _setNotifyType] = useState('info');
 
   // Attempt to hydrate role from profile if missing
   useEffect(() => {
@@ -39,7 +39,9 @@ export default function Home() {
   useEffect(() => {
     try {
       setPageTitle('Home');
-    } catch (_) {}
+    } catch (err) {
+      console.error('Failed to set page title', err);
+    }
   }, [setPageTitle]);
 
   const title = useMemo(() => {
@@ -83,7 +85,7 @@ export default function Home() {
     if (role === 'teacher') return <TeacherHome />;
     if (role === 'student') return <StudentHome />;
     if (role === 'researcher') return <ResearcherHomePage />;
-    return <Card title="Unknown role">Your role "{role}" is not recognized.</Card>;
+    return <Card title="Unknown role">Your role &quot;{role}&quot; is not recognized.</Card>;
   };
 
   return (

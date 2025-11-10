@@ -4,9 +4,11 @@ import AuthForm from '../components/auth/AuthForm';
 import NotificationPopup from '../components/ui/NotificationPopup';
 import '../assets/styles/auth.css';
 import '../assets/styles/ui.css';
+import { useNotifications } from '../contexts/NotificationContext';
 
 export default function EducationLogin() {
   const navigate = useNavigate();
+  const { push } = useNotifications();
   useEffect(() => {
     // if already logged in, redirect to education home
     try {
@@ -14,7 +16,7 @@ export default function EducationLogin() {
         navigate('/education/home');
       }
     } catch (err) {
-      // ignore
+      console.error('Failed to check login status', err);
     }
   }, [navigate]);
   const [notifyOpen, setNotifyOpen] = useState(false);
@@ -24,6 +26,14 @@ export default function EducationLogin() {
   const handleSuccess = () => {
     // Redirect to role-based home
     navigate('/education/home');
+    setNotifyMsg('Login successful! Redirecting to Education Home...');
+    setNotifyType('success');
+    setNotifyOpen(true);
+    try {
+      push({ title: 'Login Successful', body: 'Welcome to the Education Portal!' });
+    } catch (pushErr) {
+      console.warn('Notification push error', pushErr);
+    }
   };
 
   return (
