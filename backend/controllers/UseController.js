@@ -51,7 +51,41 @@ function runUseCli(filePath, timeout = 5000) {
 
     proc.on("close", (code) => {
       clearTimeout(timer);
-      return resolve({ code, stdout: out, stderr: err });
+      try {
+        let finalOut = out;
+
+        // Prefer the segment that starts at a 'use>' prompt immediately
+        // followed by the model output (e.g. "use> model ..."). This
+        // looks for patterns like: "use> info model" or "use> model".
+        const useModelRe = /use>\s*(?:info\s+model\s*)?model\s+/i;
+        const m = finalOut.match(useModelRe);
+        if (m && m.index != null) {
+          // compute index of the 'model' keyword inside the match
+          const inner = m[0].match(/model\s+/i);
+          const modelOffsetInMatch = inner ? m[0].indexOf(inner[0]) : 0;
+          const modelIdx = m.index + modelOffsetInMatch;
+          finalOut = finalOut.slice(modelIdx);
+        } else {
+          // fallback: start at the first 'model' occurrence
+          const idx = finalOut.search(/\n?model\s+/i);
+          if (idx >= 0) finalOut = finalOut.slice(idx);
+        }
+
+        // Remove trailing 'use>' prompt if present at the end
+        finalOut = finalOut.replace(/\s*use>\s*$/i, "");
+
+        // Drop the last two lines of the returned log as requested
+        const lines = finalOut.split(/\r?\n/);
+        if (lines.length > 2) {
+          lines.splice(-2, 2);
+          finalOut = lines.join('\r\n');
+        }
+
+        return resolve({ code, stdout: finalOut, stderr: err });
+      } catch {
+        // on any error, return the raw output as a safe fallback
+        return resolve({ code, stdout: out, stderr: err });
+      }
     });
 
     // Send commands to the USE process: open <file>, then info model, then quit
