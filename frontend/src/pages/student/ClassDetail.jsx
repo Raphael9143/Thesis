@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Section from '../../components/ui/Section';
-import { usePageInfo } from '../../contexts/PageInfoContext';
+import useTitle from '../../hooks/useTitle';
 import Card from '../../components/ui/Card';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
@@ -17,7 +17,7 @@ export default function StudentClassDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [courseIdState, setCourseIdState] = useState(routeCourseId || null);
-  const { setTitle: setPageTitle } = usePageInfo();
+  // title handled by hooks below
 
   useEffect(() => {
     let mounted = true;
@@ -28,25 +28,7 @@ export default function StudentClassDetailPage() {
         if (!mounted) return;
         if (cls?.success && cls.data) {
           setClassInfo(cls.data);
-          try {
-            if (routeCourseId) {
-              const courseRes = await userAPI.getCourseById(routeCourseId);
-              if (courseRes?.success && courseRes.data) {
-                setPageTitle(courseRes.data.name || courseRes.data.title || courseRes.data.course_name || 'Course');
-              } else {
-                setPageTitle(cls.data.name || 'Class');
-              }
-            } else {
-              setPageTitle(cls.data.name || 'Class');
-            }
-          } catch (err) {
-            console.error('Set Page Title error', err);
-            try {
-              setPageTitle(cls.data.name || 'Class');
-            } catch (err) {
-              console.error('Set Page Title fallback error', err);
-            }
-          }
+          // title handled by hooks below
         }
 
         const courseId =
@@ -68,17 +50,7 @@ export default function StudentClassDetailPage() {
         if (!mounted) return;
         if (lectRes?.success && Array.isArray(lectRes.data)) setLectures(lectRes.data);
         // If we don't yet have the course title, try fetching courses for the class and find matching course name
-        try {
-          if (routeCourseId) {
-            const coursesRes = await userAPI.getCoursesByClass(id);
-            if (coursesRes?.success && Array.isArray(coursesRes.data)) {
-              const found = coursesRes.data.find((c) => (c.id || c.course_id || c.courseId) == routeCourseId);
-              if (found) setPageTitle(found.name || found.title || found.course_name || found.code || 'Course');
-            }
-          }
-        } catch (err) {
-          console.error('Failed to fetch courses for class to resolve course title', err);
-        }
+        // Title resolution for course/class will be handled by hooks
         if (examRes?.success && Array.isArray(examRes.data)) setExams(examRes.data);
         if (assignRes?.success && Array.isArray(assignRes.data)) setAssignments(assignRes.data);
       } catch (err) {
@@ -92,7 +64,10 @@ export default function StudentClassDetailPage() {
     return () => {
       mounted = false;
     };
-  }, [id, routeCourseId, setPageTitle]);
+  }, [id, routeCourseId]);
+
+  // Prefer a single hook: useTitle. If a course route is present, prefer a generic 'Course' fallback.
+  useTitle(classInfo?.name || (routeCourseId ? 'Course' : 'Class'));
 
   return (
     <Section title={classInfo?.name || 'Class'}>

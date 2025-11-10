@@ -5,7 +5,7 @@ import Card from '../../components/ui/Card';
 import ClassCard from '../../components/ui/ClassCard';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
-import { usePageInfo } from '../../contexts/PageInfoContext';
+import useTitle from '../../hooks/useTitle';
 
 export default function StudentClassCoursesPage() {
   const { id } = useParams(); // class id
@@ -13,7 +13,7 @@ export default function StudentClassCoursesPage() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { setTitle: setPageTitle } = usePageInfo();
+  // title handled by useTitle below
 
   useEffect(() => {
     let mounted = true;
@@ -23,11 +23,7 @@ export default function StudentClassCoursesPage() {
         const clsRes = await userAPI.getClassById(id);
         if (!mounted) return;
         if (clsRes?.success && clsRes.data) {
-          try {
-            setPageTitle(clsRes.data.name);
-          } catch (err) {
-            console.error('Set Page Title error', err);
-          }
+          // page title will be handled by hook
           const maybeCourses = clsRes.data.courses || clsRes.data.course_list || clsRes.data.courses_taught;
           if (Array.isArray(maybeCourses) && maybeCourses.length > 0) {
             setCourses(maybeCourses);
@@ -55,15 +51,13 @@ export default function StudentClassCoursesPage() {
     return () => {
       mounted = false;
     };
-  }, [id, setPageTitle]);
+  }, [id]);
+
+  useTitle('Courses');
 
   return (
     <Section>
       <Card>
-        <div className="flex-between">
-          <h3>Subjects / Courses</h3>
-        </div>
-
         <div className="mt-12">
           {loading && <div>Loading courses...</div>}
           {error && <div className="text-error">{error}</div>}

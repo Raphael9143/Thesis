@@ -5,23 +5,19 @@ import ClassCard from '../../components/ui/ClassCard';
 import { useNavigate } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
-import { usePageInfo } from '../../contexts/PageInfoContext';
+import useTitle from '../../hooks/useTitle';
 
 export default function StudentClassesPage() {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { setTitle: setPageTitle } = usePageInfo();
+  // title handled by useTitle
 
   useEffect(() => {
     let mounted = true;
     (async () => {
-      try {
-        setPageTitle('Classes');
-      } catch (err) {
-        console.error('Failed to set page title', err);
-      }
+      // page title handled by useTitle
       setLoading(true);
       try {
         const res = await userAPI.getStudentEnrolledClasses();
@@ -42,7 +38,9 @@ export default function StudentClassesPage() {
     return () => {
       mounted = false;
     };
-  }, [setPageTitle]);
+  }, []);
+
+  useTitle('Classes');
 
   return (
     <Section title="My Classes" subtitle="Classes you are enrolled in">
