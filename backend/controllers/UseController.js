@@ -167,7 +167,20 @@ const UseController = {
         // multer.any() puts files in req.files
         filePath = path.resolve(req.files[0].path);
       } else if (req.body && req.body.path) {
-        filePath = path.resolve(req.body.path);
+        // Support public-style paths like '/uploads/filename.use' or 'uploads/filename.use'
+        // Map them to the project's uploads directory rather than treating a leading
+        // slash as an absolute filesystem root path.
+        const inputPath = String(req.body.path || "");
+        const normalizedInput = inputPath.replace(/\\/g, "/");
+        const uploadsMatch = normalizedInput.match(/^\/?uploads\/(.+)/i);
+        if (uploadsMatch) {
+          // resolve relative to project uploads folder
+          filePath = path.resolve(__dirname, "..", "uploads", uploadsMatch[1]);
+        } else if (path.isAbsolute(inputPath)) {
+          filePath = path.normalize(inputPath);
+        } else {
+          filePath = path.resolve(inputPath);
+        }
       } else {
         return res
           .status(400)
