@@ -4,8 +4,8 @@ import Section from '../../../components/ui/Section';
 import Card from '../../../components/ui/Card';
 import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
-import { usePageInfo } from '../../../contexts/PageInfoContext';
 import { useNotifications } from '../../../contexts/NotificationContext';
+import useTitle from '../../../hooks/useTitle';
 import '../../../assets/styles/components/teacher/course/StudentList.css';
 
 export default function StudentsList() {
@@ -14,7 +14,7 @@ export default function StudentsList() {
   const [pagination, setPagination] = useState({ page: 1, pageSize: 20, total: 0, totalPages: 1 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { setTitle: setPageTitle } = usePageInfo();
+  // page title handled by useTitle below
   const { push } = useNotifications();
   const navigate = useNavigate();
 
@@ -40,24 +40,37 @@ export default function StudentsList() {
               totalPages: res.pagination.totalPages || 1,
             });
           } else {
-            setPagination({ page: pageParam, pageSize: res.data.length || 20, total: res.data.length || 0, totalPages: 1 });
+            setPagination({
+              page: pageParam,
+              pageSize: res.data.length || 20,
+              total: res.data.length || 0,
+              totalPages: 1,
+            });
           }
         } else {
           setStudents([]);
           setPagination({ page: 1, pageSize: 20, total: 0, totalPages: 1 });
         }
-        try { setPageTitle('Students'); } catch (_) { }
+        // title handled via hook below
       } catch (err) {
         if (!mounted) return;
         const msg = err?.response?.data?.message || err.message || 'Failed to load students';
         setError(msg);
-        try { push({ title: 'Error', body: msg }); } catch (_) { }
+        try {
+          push({ title: 'Error', body: msg });
+        } catch (pushErr) {
+          console.warn('Notification push error', pushErr);
+        }
       } finally {
         if (mounted) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
-  }, [id, searchParams]);
+    return () => {
+      mounted = false;
+    };
+  }, [id, searchParams, push]);
+
+  useTitle('Students');
 
   return (
     <Section>
@@ -85,24 +98,20 @@ export default function StudentsList() {
                     {s.student_code || '-'}
                   </td>
                   <td className="table-cell name">
-                    <p>
-                      {s.student_name}
-                    </p>
+                    <p>{s.student_name}</p>
                   </td>
                   <td style={{ width: 140 }} className="table-cell actions">
                     <div className="display-flex gap-8">
                       <button
                         className="btn btn-icon"
                         title="View submissions"
-                        onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseId}/students/${s.id}/submissions`)}
+                        onClick={() =>
+                          navigate(`/education/teacher/classes/${id}/courses/${courseId}/students/${s.id}/submissions`)
+                        }
                       >
                         <i className="fa fa-eye" />
                       </button>
-                      <button
-                        className="btn btn-icon"
-                        title="Remove from class"
-                        onClick={() => { }}
-                      >
+                      <button className="btn btn-icon" title="Remove from class" onClick={() => {}}>
                         <i className="fa fa-trash" />
                       </button>
                     </div>
@@ -120,7 +129,7 @@ export default function StudentsList() {
                 disabled={pagination.page <= 1}
                 onClick={() => setSearchParams({ page: String(Math.max(1, pagination.page - 1)) })}
               >
-                <i class="fa-solid fa-backward"></i>
+                <i className="fa-solid fa-backward"></i>
               </button>
 
               {Array.from({ length: pagination.totalPages }).map((_, i) => {
@@ -140,10 +149,14 @@ export default function StudentsList() {
               <button
                 className="pagination-next"
                 disabled={pagination.page >= pagination.totalPages}
-                onClick={() => setSearchParams({ page: String(Math.min(pagination.totalPages, pagination.page + 1)) })}
+                onClick={() =>
+                  setSearchParams({
+                    page: String(Math.min(pagination.totalPages, pagination.page + 1)),
+                  })
+                }
                 style={{ marginLeft: 8 }}
               >
-                <i class="fa-solid fa-forward"></i>
+                <i className="fa-solid fa-forward"></i>
               </button>
             </div>
             <div className="pagination-info">

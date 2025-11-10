@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Section from '../../../components/ui/Section';
 import Card from '../../../components/ui/Card';
 import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
-import { usePageInfo } from '../../../contexts/PageInfoContext';
+import useTitle from '../../../hooks/useTitle';
 import { useNotifications } from '../../../contexts/NotificationContext';
 import GradeSubmissionModal from '../../../components/teacher/GradeSubmissionModal';
 import toFullUrl from '../../../utils/FullURLFile';
 
 export default function StudentSubmissions() {
-  const { id: classId, courseId, studentId } = useParams();
+  const { courseId, studentId } = useParams();
   const [kind, setKind] = useState('assignments'); // 'assignments' or 'exams'
   const [items, setItems] = useState([]);
   const [assignments, setAssignments] = useState([]);
@@ -19,13 +19,9 @@ export default function StudentSubmissions() {
   const [selectedForGrade, setSelectedForGrade] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { setTitle } = usePageInfo();
   const { push } = useNotifications();
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    try { setTitle('Student submissions'); } catch (_) {}
-  }, [setTitle]);
+  useTitle('Student submissions');
 
   useEffect(() => {
     let mounted = true;
@@ -53,14 +49,20 @@ export default function StudentSubmissions() {
         if (!mounted) return;
         const msg = err?.response?.data?.message || err.message || 'Failed to load submissions';
         setError(msg);
-        try { push({ title: 'Error', body: msg }); } catch (_) {}
+        try {
+          push({ title: 'Error', body: msg });
+        } catch (pushErr) {
+          console.warn('Notification push error', pushErr);
+        }
       } finally {
         if (mounted) setLoading(false);
       }
     };
     loadItems();
-    return () => { mounted = false; };
-  }, [courseId, studentId]);
+    return () => {
+      mounted = false;
+    };
+  }, [courseId, studentId, kind, push]);
 
   // update items when kind changes
   useEffect(() => {
@@ -77,28 +79,44 @@ export default function StudentSubmissions() {
       else res = await userAPI.getSubmissionsByExamId(it.id);
       if (res?.success && Array.isArray(res.data)) {
         const subs = res.data;
-        const found = subs.find((s) => (
-          Number(s.student?.student_id) === Number(studentId) ||
-          Number(s.student?.user?.id) === Number(studentId) ||
-          Number(s.student_id) === Number(studentId)
-        ));
+        const found = subs.find(
+          (s) =>
+            Number(s.student?.student_id) === Number(studentId) ||
+            Number(s.student?.user?.id) === Number(studentId) ||
+            Number(s.student_id) === Number(studentId)
+        );
         if (found) {
           setSelectedForGrade(found);
           setGradeModalOpen(true);
         } else {
-          try { push({ title: 'Info', body: 'No submission found for this student.' }); } catch (_) {}
+          try {
+            push({ title: 'Info', body: 'No submission found for this student.' });
+          } catch (pushErr) {
+            console.warn('Notification push error', pushErr);
+          }
         }
       } else {
-        try { push({ title: 'Error', body: res?.message || 'Failed to fetch submissions.' }); } catch (_) {}
+        try {
+          push({ title: 'Error', body: res?.message || 'Failed to fetch submissions.' });
+        } catch (pushErr) {
+          console.warn('Notification push error', pushErr);
+        }
       }
     } catch (err) {
-      try { push({ title: 'Error', body: err?.response?.data?.message || err.message || 'Failed to fetch submissions.' }); } catch (_) {}
+      try {
+        push({
+          title: 'Error',
+          body: err?.response?.data?.message || err.message || 'Failed to fetch submissions.',
+        });
+      } catch (pushErr) {
+        console.warn('Notification push error', pushErr);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const onGraded = async (updated) => {
+  const onGraded = async () => {
     // refresh the student's assignment/exam list after grading
     try {
       setLoading(true);
@@ -112,8 +130,8 @@ export default function StudentSubmissions() {
         setExams(e);
         setItems(kind === 'assignments' ? a : e);
       }
-    } catch (err) {
-      // ignore refresh errors
+    } catch (refreshErr) {
+      console.warn('Failed to refresh student assignments after grading', refreshErr);
     } finally {
       setLoading(false);
     }
@@ -123,16 +141,21 @@ export default function StudentSubmissions() {
     <Section title="Submissions">
       <Card>
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          <button className={`btn ${kind === 'assignments' ? 'btn-primary' : 'btn-signin'}`} onClick={() => setKind('assignments')}>Assignments</button>
-          <button className={`btn ${kind === 'exams' ? 'btn-primary' : 'btn-signin'}`} onClick={() => setKind('exams')}>Exams</button>
+          <button
+            className={`btn ${kind === 'assignments' ? 'btn-primary' : 'btn-signin'}`}
+            onClick={() => setKind('assignments')}
+          >
+            Assignments
+          </button>
+          <button className={`btn ${kind === 'exams' ? 'btn-primary' : 'btn-signin'}`} onClick={() => setKind('exams')}>
+            Exams
+          </button>
         </div>
 
         {loading && <div>Loading {kind}...</div>}
         {error && <div className="text-error">{error}</div>}
 
-        {!loading && !error && items.length === 0 && (
-          <div>No {kind} found for this student in this course.</div>
-        )}
+        {!loading && !error && items.length === 0 && <div>No {kind} found for this student in this course.</div>}
 
         {!loading && !error && items.length > 0 && (
           <table className="table students-table">
@@ -152,7 +175,9 @@ export default function StudentSubmissions() {
                   <td style={{ width: 48 }}>{idx + 1}</td>
                   <td>{it.title}</td>
                   <td>{it.due_date ? new Date(it.due_date).toLocaleString() : '-'}</td>
-                  <td>{typeof it.submissions_count !== 'undefined' ? `${it.submissions_count}/${it.attempt_limit}` : '-'}</td>
+                  <td>
+                    {typeof it.submissions_count !== 'undefined' ? `${it.submissions_count}/${it.attempt_limit}` : '-'}
+                  </td>
                   <td>
                     <a className="score-btn" onClick={() => handleOpenGrade(it)}>
                       {typeof it.score !== 'undefined' && it.score !== null ? `${String(it.score)}` : 'Not graded'}
@@ -160,8 +185,12 @@ export default function StudentSubmissions() {
                   </td>
                   <td>
                     {it.attachment ? (
-                      <a href={toFullUrl(it.attachment)} target="_blank" rel="noreferrer">Download</a>
-                    ) : '-'}
+                      <a href={toFullUrl(it.attachment)} target="_blank" rel="noreferrer">
+                        Download
+                      </a>
+                    ) : (
+                      '-'
+                    )}
                   </td>
                 </tr>
               ))}

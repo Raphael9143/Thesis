@@ -6,8 +6,8 @@ import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import '../../../assets/styles/pages/ClassDetail.css';
 import CreateExamForm from '../../../components/teacher/CreateExamForm';
-import { usePageInfo } from '../../../contexts/PageInfoContext';
 import { useNotifications } from '../../../contexts/NotificationContext';
+import useTitle from '../../../hooks/useTitle';
 
 export default function ExamsList() {
   const { id, courseId: routeCourseId } = useParams();
@@ -19,7 +19,6 @@ export default function ExamsList() {
   const [courseIdState, setCourseIdState] = useState(routeCourseId || null);
   const [examModalOpen, setExamModalOpen] = useState(false);
   const [editingExam, setEditingExam] = useState(null);
-  const { setTitle: setPageTitle } = usePageInfo();
   const { push } = useNotifications();
 
   useEffect(() => {
@@ -31,16 +30,9 @@ export default function ExamsList() {
         if (!mounted) return;
         if (cls?.success && cls.data) {
           setClassInfo(cls.data);
-          try {
-            if (routeCourseId) {
-              const courseRes = await userAPI.getCourseById(routeCourseId);
-              if (courseRes?.success && courseRes.data) setPageTitle(courseRes.data.name || 'Course');
-              else setPageTitle(cls.data.name || 'Class');
-            } else setPageTitle(cls.data.name || 'Class');
-          } catch (_) { try { setPageTitle(cls.data.name || 'Class'); } catch(_) {} }
         }
 
-        const courseId = routeCourseId || ((cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) || id);
+        const courseId = routeCourseId || (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) || id;
         setCourseIdState(courseId);
 
         const examRes = await userAPI.getExamsByCourse(courseId);
@@ -49,27 +41,39 @@ export default function ExamsList() {
       } catch (err) {
         if (!mounted) return;
         const msg = err?.response?.data?.message || err.message || 'Server error';
-        try { push({ title: 'Error', body: msg }); } catch (_) {}
+        try {
+          push({ title: 'Error', body: msg });
+        } catch (err2) {
+          console.error('Notification push error', err2);
+        }
         setError(msg);
       } finally {
         if (mounted) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
-  }, [id]);
+    return () => {
+      mounted = false;
+    };
+  }, [id, push, routeCourseId]);
+
+  useTitle(`Exams - ${classInfo?.name || (routeCourseId ? 'Course' : '')}`);
 
   const publishExam = async (examId) => {
     try {
       const res = await userAPI.patchExamStatus(examId, 'published');
       if (res?.success) {
-        setExams((s) => s.map(x => (x.id === examId ? res.data : x)));
+        setExams((s) => s.map((x) => (x.id === examId ? res.data : x)));
         push({ title: 'Success', body: 'Exam published.' });
       }
     } catch (err) {
       const msg = err?.response?.data?.message || err.message || 'Failed to publish exam.';
-      try { push({ title: 'Error', body: msg }); } catch (_) { }
+      try {
+        push({ title: 'Error', body: msg });
+      } catch (err) {
+        console.error('Notification push error', err);
+      }
     }
-  }
+  };
 
   const cancelExam = async (e) => {
     if (!confirm('Delete this exam?')) return;
@@ -77,43 +81,60 @@ export default function ExamsList() {
       const idv = e.id || e.exam_id;
       const res = await userAPI.deleteExam(idv);
       if (res?.success) {
-        setExams((s) => s.filter(x => (x.id || x.exam_id) !== idv));
+        setExams((s) => s.filter((x) => (x.id || x.exam_id) !== idv));
         push({ title: 'Success', body: 'Exam deleted.' });
       }
     } catch (err) {
       const msg = err?.response?.data?.message || err.message || 'Failed to delete exam.';
-      try { push({ title: 'Error', body: msg }); } catch (_) { }
+      try {
+        push({ title: 'Error', body: msg });
+      } catch (err) {
+        console.error('Notification push error', err);
+      }
     }
-  }
+  };
 
   const updateExam = async (e) => {
     setEditingExam(e);
     setExamModalOpen(true);
-  }
+  };
 
   return (
-    <Section title={`Exams — ${classInfo?.name || ''}`}>
+    <Section>
       <Card>
         <div className="class-detail__panel">
           <div className="flex-between">
             <h4 className="no-margin">Exams</h4>
-            <div className='create-button-section'>
-              <button className="btn btn-primary btn-sm" onClick={() => setExamModalOpen(true)}>New Exam</button>
+            <div className="create-button-section">
+              <button className="btn btn-primary btn-sm" onClick={() => setExamModalOpen(true)}>
+                New Exam
+              </button>
             </div>
           </div>
           {!loading && !error && exams.length === 0 && <div>No exams.</div>}
           {!loading && !error && exams.length > 0 && (
             <ul className="class-detail__list">
-              {exams.map(ex => (
+              {exams.map((ex) => (
                 <li key={ex.id || ex.exam_id} className="class-detail__list-item">
                   <div className="flex-between full-width">
-                    <div className="clickable" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/exams/${ex.id || ex.exam_id}`)}>
+                    <div
+                      className="clickable"
+                      onClick={() =>
+                        navigate(
+                          `/education/teacher/classes/${id}/courses/${courseIdState}/exams/${ex.id || ex.exam_id}`
+                        )
+                      }
+                    >
                       <div className="font-700 truncate">{ex.title}</div>
                     </div>
                     <div className="display-flex gap-8 ml-12">
                       {ex.status === 'draft' ? (
                         <>
-                          <button className="btn btn-icon" title="Publish" onClick={() => publishExam(ex.id || ex.exam_id)}>
+                          <button
+                            className="btn btn-icon"
+                            title="Publish"
+                            onClick={() => publishExam(ex.id || ex.exam_id)}
+                          >
                             <i className="fa fa-paper-plane" />
                           </button>
                           <button className="btn btn-icon" title="Delete" onClick={() => cancelExam(ex)}>
@@ -143,14 +164,18 @@ export default function ExamsList() {
       </Card>
       <CreateExamForm
         open={examModalOpen}
-        onClose={() => { setExamModalOpen(false); setEditingExam(null); }}
+        onClose={() => {
+          setExamModalOpen(false);
+          setEditingExam(null);
+        }}
         defaultCourseId={courseIdState}
         exam={editingExam}
         onCreated={(newExam) => {
           if (newExam) setExams((s) => [newExam, ...s]);
         }}
         onUpdated={(updated) => {
-          if (updated) setExams((s) => s.map(x => (x.id || x.exam_id) === (updated.id || updated.exam_id) ? updated : x));
+          if (updated)
+            setExams((s) => s.map((x) => ((x.id || x.exam_id) === (updated.id || updated.exam_id) ? updated : x)));
           setEditingExam(null);
         }}
       />

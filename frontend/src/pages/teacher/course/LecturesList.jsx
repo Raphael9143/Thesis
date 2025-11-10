@@ -6,8 +6,8 @@ import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import '../../../assets/styles/pages/ClassDetail.css';
 import CreateLectureForm from '../../../components/teacher/CreateLectureForm';
-import { usePageInfo } from '../../../contexts/PageInfoContext';
 import { useNotifications } from '../../../contexts/NotificationContext';
+import useTitle from '../../../hooks/useTitle';
 
 export default function LecturesList() {
   const { id, courseId: routeCourseId } = useParams();
@@ -19,7 +19,6 @@ export default function LecturesList() {
   const [courseIdState, setCourseIdState] = useState(routeCourseId || null);
   const [lectureModalOpen, setLectureModalOpen] = useState(false);
   const [editingLecture, setEditingLecture] = useState(null);
-  const { setTitle: setPageTitle } = usePageInfo();
   const { push } = useNotifications();
 
   useEffect(() => {
@@ -31,16 +30,10 @@ export default function LecturesList() {
         if (!mounted) return;
         if (cls?.success && cls.data) {
           setClassInfo(cls.data);
-          try {
-            if (routeCourseId) {
-              const courseRes = await userAPI.getCourseById(routeCourseId);
-              if (courseRes?.success && courseRes.data) setPageTitle(courseRes.data.name || 'Course');
-              else setPageTitle(cls.data.name || 'Class');
-            } else setPageTitle(cls.data.name || 'Class');
-          } catch (_) { try { setPageTitle(cls.data.name || 'Class'); } catch(_) {} }
+          // Title for this view will be handled by useClassCourseTitle / useTitle hooks
         }
 
-        const courseId = routeCourseId || ((cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) || id);
+        const courseId = routeCourseId || (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) || id;
         setCourseIdState(courseId);
 
         const lectRes = await userAPI.getLecturesByCourse(courseId);
@@ -49,46 +42,62 @@ export default function LecturesList() {
       } catch (err) {
         if (!mounted) return;
         const msg = err?.response?.data?.message || err.message || 'Server error';
-        try { push({ title: 'Error', body: msg }); } catch (_) {}
+        try {
+          push({ title: 'Error', body: msg });
+        } catch (pushErr) {
+          console.warn('Notification push error', pushErr);
+        }
         setError(msg);
       } finally {
         if (mounted) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
-  }, [id]);
+    return () => {
+      mounted = false;
+    };
+  }, [id, push, routeCourseId]);
+
+  useTitle(`Lectures - ${classInfo?.name || (routeCourseId ? 'Course' : '')}`);
 
   const publishLecture = async (lectureId) => {
     try {
       const res = await userAPI.patchLectureStatus(lectureId, 'published');
       if (res?.success) {
-        setLectures((s) => s.map(x => x.id === lectureId ? res.data : x));
+        setLectures((s) => s.map((x) => (x.id === lectureId ? res.data : x)));
         push({ title: 'Success', body: 'Lecture published.' });
       }
     } catch (error) {
       const msg = error?.response?.data?.message || error.message || 'Failed to publish lecture.';
-      try { push({ title: 'Error', body: msg }); } catch (_) { }
+      try {
+        push({ title: 'Error', body: msg });
+      } catch (pushErr) {
+        console.warn('Notification push error', pushErr);
+      }
     }
-  }
+  };
 
   const cancelLecture = async (l) => {
     if (!confirm('Delete this lecture?')) return;
     try {
       const res = await userAPI.deleteLecture(l.id);
       if (res?.success) {
-        setLectures((s) => s.filter(x => x.id !== l.id));
+        setLectures((s) => s.filter((x) => x.id !== l.id));
         push({ title: 'Success', body: 'Lecture deleted.' });
       }
     } catch (err) {
       const msg = err?.response?.data?.message || err.message || 'Failed to delete lecture.';
-      try { push({ title: 'Error', body: msg }); } catch (_) { }
+      try {
+        push({ title: 'Error', body: msg });
+      } catch (pushErr) {
+        console.warn('Notification push error', pushErr);
+      }
     }
-  }
+  };
 
   const updateLecture = async (l) => {
     setEditingLecture(l);
     setLectureModalOpen(true);
-  }
+  };
 
   return (
     <Section title={`Lectures — ${classInfo?.name || ''}`}>
@@ -96,8 +105,10 @@ export default function LecturesList() {
         <div className="class-detail__panel">
           <div className="flex-between">
             <h4 className="no-margin">Lectures</h4>
-            <div className='create-button-section'>
-              <button className="btn btn-primary btn-sm" onClick={() => setLectureModalOpen(true)}>New Lecture</button>
+            <div className="create-button-section">
+              <button className="btn btn-primary btn-sm" onClick={() => setLectureModalOpen(true)}>
+                New Lecture
+              </button>
             </div>
           </div>
           {loading && <div>Loading contents...</div>}
@@ -105,10 +116,15 @@ export default function LecturesList() {
           {!loading && !error && lectures.length === 0 && <div>No lectures.</div>}
           {!loading && !error && lectures.length > 0 && (
             <ul className="class-detail__list">
-              {lectures.map(l => (
+              {lectures.map((l) => (
                 <li key={l.id} className="class-detail__list-item">
                   <div className="flex-between full-width">
-                    <div className="clickable" onClick={() => navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/lectures/${l.id}`)}>
+                    <div
+                      className="clickable"
+                      onClick={() =>
+                        navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/lectures/${l.id}`)
+                      }
+                    >
                       <div className="font-700 truncate">{l.title}</div>
                     </div>
                     <div className="display-flex gap-8 ml-12">
@@ -144,7 +160,10 @@ export default function LecturesList() {
       </Card>
       <CreateLectureForm
         open={lectureModalOpen}
-        onClose={() => { setLectureModalOpen(false); setEditingLecture(null); }}
+        onClose={() => {
+          setLectureModalOpen(false);
+          setEditingLecture(null);
+        }}
         defaultCourseId={courseIdState}
         defaultClassId={id}
         lecture={editingLecture}
@@ -152,7 +171,7 @@ export default function LecturesList() {
           if (newLecture) setLectures((s) => [newLecture, ...s]);
         }}
         onUpdated={(updated) => {
-          if (updated) setLectures((s) => s.map(x => x.id === updated.id ? updated : x));
+          if (updated) setLectures((s) => s.map((x) => (x.id === updated.id ? updated : x)));
         }}
       />
     </Section>

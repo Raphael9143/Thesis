@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Section from '../../../components/ui/Section';
 import Card from '../../../components/ui/Card';
 import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import '../../../assets/styles/pages/Submissions.css';
-import { usePageInfo } from '../../../contexts/PageInfoContext';
 import { useNotifications } from '../../../contexts/NotificationContext';
+import useTitle from '../../../hooks/useTitle';
 import GradeSubmissionModal from '../../../components/teacher/GradeSubmissionModal';
 import toFullUrl from '../../../utils/FullURLFile';
 
 export default function SubmissionsView() {
   const params = useParams();
-  const navigate = useNavigate();
-  const { id: classId, courseId } = params;
+  // route params are available via `params` when needed
   const assignmentId = params.assignmentId;
   const examId = params.examId;
-  const kind = assignmentId ? 'assignment' : (examId ? 'exam' : null);
+  const kind = assignmentId ? 'assignment' : examId ? 'exam' : null;
   const id = assignmentId || examId;
 
   const [loading, setLoading] = useState(false);
@@ -25,10 +24,9 @@ export default function SubmissionsView() {
   const [gradeModalOpen, setGradeModalOpen] = useState(false);
   const [selectedForGrade, setSelectedForGrade] = useState(null);
 
-  const { setTitle } = usePageInfo();
   const { push } = useNotifications();
 
-  useEffect(() => { try { setTitle('Submissions'); } catch (_) {} }, [setTitle]);
+  useTitle('Submissions');
 
   useEffect(() => {
     if (!kind || !id) return;
@@ -47,13 +45,19 @@ export default function SubmissionsView() {
         if (!mounted) return;
         const msg = err?.response?.data?.message || err.message || 'Failed to load submissions';
         setError(msg);
-        try { push({ title: 'Error', body: msg }); } catch (_) {}
+        try {
+          push({ title: 'Error', body: msg });
+        } catch (pushErr) {
+          console.warn('Notification push error', pushErr);
+        }
       } finally {
         if (mounted) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
-  }, [kind, id]);
+    return () => {
+      mounted = false;
+    };
+  }, [kind, id, push]);
 
   return (
     <Section>
@@ -64,7 +68,13 @@ export default function SubmissionsView() {
         {!loading && !error && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h4>{kind ? (kind === 'assignment' ? `Assignment ${id} - submissions` : `Exam ${id} - submissions`) : 'No activity selected'}</h4>
+              <h4>
+                {kind
+                  ? kind === 'assignment'
+                    ? `Assignment ${id} - submissions`
+                    : `Exam ${id} - submissions`
+                  : 'No activity selected'}
+              </h4>
             </div>
 
             {!kind && <div>Please select an assignment or exam to view its submissions.</div>}
@@ -95,12 +105,23 @@ export default function SubmissionsView() {
                       <td>
                         <a
                           className="score-btn"
-                          onClick={() => { setSelectedForGrade(s); setGradeModalOpen(true); }}
+                          onClick={() => {
+                            setSelectedForGrade(s);
+                            setGradeModalOpen(true);
+                          }}
                         >
                           {typeof s.score !== 'undefined' && s.score !== null ? String(s.score) : 'Not graded'}
                         </a>
                       </td>
-                      <td>{s.attachment ? <a className="score-btn" href={toFullUrl(s.attachment)} target="_blank" rel="noreferrer">Download</a> : '-'}</td>
+                      <td>
+                        {s.attachment ? (
+                          <a className="score-btn" href={toFullUrl(s.attachment)} target="_blank" rel="noreferrer">
+                            Download
+                          </a>
+                        ) : (
+                          '-'
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
