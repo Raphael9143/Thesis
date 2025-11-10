@@ -18,7 +18,11 @@ const StudentController = {
         where: { studentId: studentId },
         include: [{ model: Class }],
       });
-      const classes = classStudents.map((cs) => cs.class);
+      // Sequelize may attach the included model using the model name (e.g. `Class`) or a lowercased
+      // property; normalize by checking known property names.
+      const classes = classStudents
+        .map((cs) => cs.Class || cs.class || null)
+        .filter((c) => c !== null);
       res.json({ success: true, data: { classes } });
     } catch (error) {
       console.error("Get enrolled classes error:", error);
