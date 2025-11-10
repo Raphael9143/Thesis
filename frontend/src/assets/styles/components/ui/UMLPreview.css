@@ -1,0 +1,130 @@
+/* UML preview modal */
+.uml-modal-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+.uml-modal {
+  width: 95%;
+  max-width: 1200px;
+  height: 85%;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.uml-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+.uml-modal-body {
+  position: relative;
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+  background: #fbfbfb;
+}
+.uml-canvas-svg {
+  pointer-events: none;
+}
+.uml-box {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
+  cursor: grab;
+  padding: 6px;
+  box-sizing: border-box;
+}
+.uml-enum {
+  background: #fffbe6;
+}
+.uml-box-title {
+  font-weight: 700;
+  border-bottom: 1px dashed #eee;
+  padding-bottom: 6px;
+  user-select: none;
+}
+.uml-box-body {
+  font-size: 13px;
+  margin-top: 6px;
+}
+.uml-attr,
+.uml-op,
+.uml-enum-var {
+  padding: 0.1rem 0;
+  margin-left: 0.8rem;
+  text-align: left;
+  user-select: none;
+}
+
+/* role labels (draggable handles) */
+.uml-role-label {
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: grab;
+  user-select: none;
+  z-index: 500;
+  pointer-events: auto; /* ensure clickable */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.uml-role-label.dragging {
+  cursor: grabbing;
+  opacity: 0.95;
+}
+.uml-role-name {
+  font-size: 12px;
+  font-weight: 600;
+}
+.uml-mult {
+  font-size: 11px;
+  color: #444;
+}
+
+/* static multiplicity labels (not draggable) */
+.uml-mult-static {
+  position: absolute;
+  font-size: 11px;
+  color: var(--black);
+  padding: 2px 6px;
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 450;
+}
+
+.close-uml-button {
+  cursor: pointer;
+  color: #666;
+  font-size: 18px;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.close-uml-button:hover {
+  color: var(--brand);
+}
+
+details summary a {
+  cursor: pointer;
+  color: #666;
+}
+
+details summary a:hover {
+  color: var(--brand);
+}
