@@ -16,7 +16,6 @@ const UMLRoles = ({
       const part = side === 'left' ? assoc.parts?.[0] : assoc.parts?.[1];
       if (!part) return null;
       const role = part.role || part.name || '';
-      const mult = fmtMultiplicity(part);
       const ownerName = part.class;
       return (
         <div
@@ -28,7 +27,6 @@ const UMLRoles = ({
           onTouchStart={(e) => startRoleDrag(key, ownerName, e)}
         >
           <div className="uml-role-name">{role}</div>
-          {mult && <div className="uml-mult">{mult}</div>}
         </div>
       );
     })}
