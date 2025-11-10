@@ -6,8 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/utils.css';
-import { usePageInfo } from '../../contexts/PageInfoContext';
+import '../../assets/styles/pages/Classes.css';
 import CreateClassModal from '../../components/teacher/CreateClassModal';
+import useTitle from '../../hooks/useTitle';
 
 export default function ClassesPage() {
   const navigate = useNavigate();
@@ -15,16 +16,12 @@ export default function ClassesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const { setTitle: setPageTitle } = usePageInfo();
+
+  useTitle('Classes');
 
   useEffect(() => {
     let mounted = true;
     (async () => {
-      try {
-        setPageTitle('Classes');
-      } catch (err) {
-        console.error('Failed to set page title', err);
-      }
       setLoading(true);
       try {
         const res = await userAPI.getTeacherClasses();
@@ -45,7 +42,7 @@ export default function ClassesPage() {
     return () => {
       mounted = false;
     };
-  }, [setPageTitle]);
+  }, []);
 
   const onCreateClass = (cls) => {
     if (cls) {
@@ -56,13 +53,10 @@ export default function ClassesPage() {
   return (
     <Section>
       <Card>
-        <div className="flex-between">
-          <h3>Your classes</h3>
-          <div>
-            <button type="button" className="btn btn-primary" onClick={() => setModalOpen(true)}>
-              Create class
-            </button>
-          </div>
+        <div className="create-class-header">
+          <button type="button" className="btn btn-primary" onClick={() => setModalOpen(true)}>
+            Create class
+          </button>
         </div>
 
         <div className="mt-12">

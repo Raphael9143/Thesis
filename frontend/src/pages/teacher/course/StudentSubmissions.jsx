@@ -138,7 +138,7 @@ export default function StudentSubmissions() {
   };
 
   return (
-    <Section title="Submissions">
+    <Section>
       <Card>
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
           <button

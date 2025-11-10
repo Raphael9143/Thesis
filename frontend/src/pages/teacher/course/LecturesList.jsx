@@ -100,7 +100,7 @@ export default function LecturesList() {
   };
 
   return (
-    <Section title={`Lectures — ${classInfo?.name || ''}`}>
+    <Section>
       <Card>
         <div className="class-detail__panel">
           <div className="flex-between">

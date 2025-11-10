@@ -206,7 +206,7 @@ export default function CourseOverview() {
   };
 
   return (
-    <Section title={classInfo?.name || 'Class'}>
+    <Section>
       <Card>
         <div className="class-detail">
           <div className="class-detail__sections">

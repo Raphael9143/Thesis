@@ -5,8 +5,9 @@ import Card from '../../components/ui/Card';
 import ClassCard from '../../components/ui/ClassCard';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
-import { usePageInfo } from '../../contexts/PageInfoContext';
+import '../../assets/styles/pages/ClassCourses.css';
 import CreateCourseModal from '../../components/teacher/CreateCourseModal';
+import useTitle from '../../hooks/useTitle';
 
 export default function ClassCoursesPage() {
   const { id } = useParams(); // class id
@@ -16,7 +17,7 @@ export default function ClassCoursesPage() {
   const [createCourseOpen, setCreateCourseOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { setTitle: setPageTitle } = usePageInfo();
+  useTitle('Courses');
 
   useEffect(() => {
     let mounted = true;
@@ -28,11 +29,6 @@ export default function ClassCoursesPage() {
         if (!mounted) return;
         if (clsRes?.success && clsRes.data) {
           setClassInfo(clsRes.data);
-          try {
-            setPageTitle(clsRes.data.name || 'Class');
-          } catch (err) {
-            console.error('Failed to set page title', err);
-          }
           const maybeCourses = clsRes.data.courses || clsRes.data.course_list || clsRes.data.courses_taught;
           if (Array.isArray(maybeCourses) && maybeCourses.length > 0) {
             setCourses(maybeCourses);
@@ -61,18 +57,15 @@ export default function ClassCoursesPage() {
     return () => {
       mounted = false;
     };
-  }, [id, setPageTitle]);
+  }, [id]);
 
   return (
     <Section>
       <Card>
-        <div className="flex-between">
-          <h3>Courses</h3>
-          <div>
-            <button className="btn btn-primary" onClick={() => setCreateCourseOpen(true)}>
-              New Course
-            </button>
-          </div>
+        <div className="create-course-header">
+          <button className="btn btn-primary" onClick={() => setCreateCourseOpen(true)}>
+            New Course
+          </button>
         </div>
 
         <div className="mt-12">

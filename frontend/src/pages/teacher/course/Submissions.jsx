@@ -5,9 +5,7 @@ import Card from '../../../components/ui/Card';
 import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import '../../../assets/styles/pages/Submissions.css';
-import { useNotifications } from '../../../contexts/NotificationContext';
 import useTitle from '../../../hooks/useTitle';
-import GradeSubmissionModal from '../../../components/teacher/GradeSubmissionModal';
 
 export default function Submissions() {
   const params = useParams();
@@ -19,12 +17,6 @@ export default function Submissions() {
   const [visibleActivities, setVisibleActivities] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [, setSelectedActivity] = useState(null);
-  const [, setSubmissions] = useState([]);
-  const [, setSubsLoading] = useState(false);
-  // grade modal state not used in this listing view
-
-  const { push } = useNotifications();
 
   useTitle('Submissions');
 
@@ -76,41 +68,6 @@ export default function Submissions() {
       navigate(`/education/teacher/classes/${classId}/courses/${courseId}/submissions/exam/${a.id}`);
     }
   };
-
-  // If route has assignmentId or examId, load submissions for that activity
-  useEffect(() => {
-    const assignmentId = params.assignmentId;
-    const examId = params.examId;
-    if (!assignmentId && !examId) return;
-    const kind = assignmentId ? 'assignment' : 'exam';
-    const id = assignmentId || examId;
-    setSelectedActivity({
-      id: Number(id),
-      kind,
-      title: kind === 'assignment' ? `Assignment ${id}` : `Exam ${id}`,
-    });
-    setSubmissions([]);
-    setSubsLoading(true);
-    (async () => {
-      try {
-        let res;
-        if (kind === 'assignment') res = await userAPI.getSubmissionsByAssignmentId(id);
-        else res = await userAPI.getSubmissionsByExamId(id);
-        if (res?.success && Array.isArray(res.data)) setSubmissions(res.data);
-        else setSubmissions([]);
-      } catch (err) {
-        const msg = err?.response?.data?.message || err.message || 'Failed to load submissions';
-        try {
-          push({ title: 'Error', body: msg });
-        } catch (pushErr) {
-          console.warn('Notification push error', pushErr);
-        }
-        setSubmissions([]);
-      } finally {
-        setSubsLoading(false);
-      }
-    })();
-  }, [params.assignmentId, params.examId, push]);
 
   return (
     <Section>
