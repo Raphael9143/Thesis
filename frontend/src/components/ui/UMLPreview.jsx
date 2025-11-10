@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import '../../assets/styles/components/ui/UMLPreview.css';
 import { offsetAlong, pushOutward, perpOffset, intersectBorder, fmtMultiplicity } from '../../utils/umlUtils';
+import UMLHeader from './uml/UMLHeader';
+import UMLCanvas from './uml/UMLCanvas';
+import UMLRoles from './uml/UMLRoles';
+import UMLClasses from './uml/UMLClasses';
 
 export default function UMLPreview({ model, cli, onClose }) {
   const containerRef = useRef(null);
@@ -236,167 +240,35 @@ export default function UMLPreview({ model, cli, onClose }) {
   return (
     <div className="uml-modal-overlay">
       <div className="uml-modal">
-        <div className="uml-modal-header">
-          <div style={{ fontWeight: 700 }}>{model?.model || 'Model'}</div>
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-            <a className="close-uml-button" onClick={onClose} title="Close preview">
-              <i className="fa-solid fa-xmark"></i>
-            </a>
-          </div>
-        </div>
+        <UMLHeader model={model} onClose={onClose} />
         <div className="uml-modal-body" ref={containerRef}>
-          <svg
-            className="uml-canvas-svg"
-            style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' }}
-          >
-            {associations.map((a, idx) => {
-              const left = a.parts?.[0];
-              const right = a.parts?.[1];
-              if (!left || !right) return null;
-              const leftName = left.class;
-              const rightName = right.class;
-              const c1 = centerOf(leftName);
-              const c2 = centerOf(rightName);
-              const rect1 = getRect(leftName);
-              const rect2 = getRect(rightName);
-              const p1 = rect1 ? intersectBorder(rect1, c1, c2) : c1;
-              const p2 = rect2 ? intersectBorder(rect2, c2, c1) : c2;
-              // no inline SVG labels here; multiplicities are rendered as fixed HTML elements
-              return (
-                <g key={idx}>
-                  <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="#333" strokeWidth={2} />
-                </g>
-              );
-            })}
-            {roleActiveKey &&
-              rolePositions[roleActiveKey] &&
-              (() => {
-                const [idxStr, side] = roleActiveKey.split(':');
-                const assoc = associations[Number(idxStr)];
-                if (!assoc) return null;
-                const part = side === 'left' ? assoc.parts?.[0] : assoc.parts?.[1];
-                const ownerName = part?.class;
-                const from = rolePositions[roleActiveKey];
-                const targetName = rolePreviewTarget || ownerName;
-                // compute intersection point on target class border so the dashed line points to the class edge
-                const targetRect = getRect(targetName);
-                const tCenter = centerOf(targetName);
-                const pTarget = targetRect ? intersectBorder(targetRect, tCenter, from) : tCenter;
-                return (
-                  <line
-                    x1={from.x}
-                    y1={from.y}
-                    x2={pTarget.x}
-                    y2={pTarget.y}
-                    stroke="#336"
-                    strokeWidth={1.5}
-                    strokeDasharray="6 6"
-                  />
-                );
-              })()}
-          </svg>
+          <UMLCanvas
+            associations={associations}
+            centerOf={centerOf}
+            getRect={getRect}
+            roleActiveKey={roleActiveKey}
+            rolePositions={rolePositions}
+            rolePreviewTarget={rolePreviewTarget}
+          />
 
-          {Object.entries(rolePositions).map(([key, pos]) => {
-            const [idxStr, side] = key.split(':');
-            const assoc = associations[Number(idxStr)];
-            if (!assoc) return null;
-            const part = side === 'left' ? assoc.parts?.[0] : assoc.parts?.[1];
-            if (!part) return null;
-            const role = part.role || part.name || '';
-            const ownerName = part.class;
-            return (
-              <div
-                key={key}
-                className={`uml-role-label ${roleActiveKey === key ? 'dragging' : ''}`}
-                style={{ position: 'absolute', left: pos.x, top: pos.y, transform: 'translate(-50%,-50%)' }}
-                onMouseDown={(e) => startRoleDrag(key, ownerName, e)}
-                onPointerDown={(e) => startRoleDrag(key, ownerName, e)}
-                onTouchStart={(e) => startRoleDrag(key, ownerName, e)}
-              >
-                <div className="uml-role-name">{role}</div>
-              </div>
-            );
-          })}
+          <UMLRoles
+            rolePositions={rolePositions}
+            associations={associations}
+            startRoleDrag={startRoleDrag}
+            fmtMultiplicity={fmtMultiplicity}
+            multiplicityPositions={multiplicityPositions}
+            roleActiveKey={roleActiveKey}
+          />
 
-          {Object.entries(multiplicityPositions).map(([key, pos]) => {
-            const [idxStr, side] = key.split(':');
-            const assoc = associations[Number(idxStr)];
-            if (!assoc) return null;
-            const part = side === 'left' ? assoc.parts?.[0] : assoc.parts?.[1];
-            if (!part) return null;
-            const mult = fmtMultiplicity(part);
-            if (!mult) return null;
-            return (
-              <div
-                key={`mult-${key}`}
-                className="uml-mult-static"
-                style={{ position: 'absolute', left: pos.x, top: pos.y, transform: 'translate(-50%,-50%)' }}
-              >
-                {mult}
-              </div>
-            );
-          })}
-
-          <div style={{ position: 'relative', minHeight: 400 }}>
-            {classes.map((c) => {
-              const pos = positions[c.name] || { x: 0, y: 0 };
-              return (
-                <div
-                  key={c.name}
-                  ref={(el) => (boxRefs.current[c.name] = el)}
-                  className="uml-box"
-                  style={{ left: pos.x, top: pos.y, width: BOX_W, minHeight: BOX_MIN_H }}
-                  onMouseDown={(e) => startDrag(c.name, e)}
-                >
-                  <div className="uml-box-title">{c.name}</div>
-                  <div className="uml-box-body">
-                    <div className="uml-attributes">
-                      {Array.isArray(c.attributes) &&
-                        c.attributes.map((a) => (
-                          <div key={a.name} className="uml-attr">
-                            {a.name}: {a.type}
-                          </div>
-                        ))}
-                    </div>
-                    <div className="uml-ops">
-                      {Array.isArray(c.operations) &&
-                        c.operations.map((op) => (
-                          <div key={op.name} className="uml-op">
-                            {op.name}({op.signature || ''})
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-
-            {enums.map((e) => {
-              const key = `enum:${e.name}`;
-              const pos = positions[key] || { x: 0, y: 0 };
-              return (
-                <div
-                  key={e.name}
-                  ref={(el) => (boxRefs.current[key] = el)}
-                  className="uml-box uml-enum"
-                  style={{ left: pos.x, top: pos.y, width: BOX_W / 1.2, minHeight: BOX_MIN_H }}
-                  onMouseDown={(ev) => startDrag(key, ev)}
-                >
-                  <div className="uml-box-title">
-                    {'<<enumeration>>'} {e.name}
-                  </div>
-                  <div className="uml-box-body">
-                    {Array.isArray(e.values) &&
-                      e.values.map((v) => (
-                        <div key={v} className="uml-enum-var">
-                          {v}
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <UMLClasses
+            classes={classes}
+            enums={enums}
+            positions={positions}
+            boxRefs={boxRefs}
+            startDrag={startDrag}
+            BOX_W={BOX_W}
+            BOX_MIN_H={BOX_MIN_H}
+          />
         </div>
         {cli && (
           <details style={{ padding: 8, borderTop: '1px solid #eee' }}>
