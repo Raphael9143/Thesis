@@ -12,6 +12,8 @@
 
 .exam-preview .preview-body {
   margin-top: 12px;
+  margin-left: 0.5rem;
+  text-align: left;
 }
 
 .exam-preview .model-file {

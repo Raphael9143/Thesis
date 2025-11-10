@@ -173,7 +173,7 @@ export default function LecturePreview() {
                       <img src={url} alt={name} className="img-responsive" />
                     ) : (
                       <div>
-                        <FilePreview url={url} filename={name} mimetype={a.mimetype} />
+                        <FilePreview url={url} filename={name} mimetype={a.mimetype} filePath={raw} />
                       </div>
                     )}
                   </div>

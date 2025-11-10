@@ -33,12 +33,9 @@
 .btn.btn-sm {
   padding: 0.35rem 0.6rem;
   font-size: 0.85rem;
-}
-
-.create-lecture-form .btn-outline {
-  background: transparent;
-  border: 1px solid #9ca3af;
-  color: #111827;
+  &:hover {
+    color: #fff;
+  }
 }
 
 .create-lecture-form input[type="file"] {

@@ -70,6 +70,7 @@ export default function ExamPreview() {
         </Card>
       </Section>
     );
+  console.log(toFullUrl(exam.attachment));
   return (
     <Section title={exam.title || 'Exam'}>
       <Card>
@@ -111,7 +112,7 @@ export default function ExamPreview() {
               <FilePreview
                 url={toFullUrl(exam.attachment)}
                 filename={exam.attachment || ''}
-                allowInlinePreview={false}
+                filePath={exam.attachment}
               />
             ) : (
               <div>No model file attached.</div>

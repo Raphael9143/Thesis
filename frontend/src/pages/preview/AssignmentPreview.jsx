@@ -115,7 +115,7 @@ export default function AssignmentPreview() {
                 <FilePreview
                   url={toFullUrl(assignment.attachment)}
                   filename={assignment.attachment || ''}
-                  allowInlinePreview={false}
+                  filePath={assignment.attachment}
                 />
               </div>
             ) : (
