@@ -9,7 +9,9 @@ export default function ResearcherHomePage() {
   return (
     <>
       <Card title="Explore datasets" subtitle="Collaborate and validate models">
-        <button className="btn btn-primary" onClick={() => navigate('/')}>Go to Research Portal</button>
+        <button className="btn btn-primary" onClick={() => navigate('/')}>
+          Go to Research Portal
+        </button>
       </Card>
     </>
   );
