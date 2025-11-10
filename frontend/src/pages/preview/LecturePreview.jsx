@@ -5,7 +5,7 @@ import Card from '../../components/ui/Card';
 import NotificationPopup from '../../components/ui/NotificationPopup';
 import userAPI from '../../../services/userAPI';
 import resolveAttachmentUrls from '../../utils/resolveAttachmentUrls';
-import { usePageInfo } from '../../contexts/PageInfoContext';
+import useTitle from '../../hooks/useTitle';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/ClassDetail.css';
 import '../../assets/styles/pages/LecturePreview.css';
@@ -25,7 +25,7 @@ export default function LecturePreview() {
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyMsg, setNotifyMsg] = useState('');
   const [notifyType, setNotifyType] = useState('info');
-  const { setTitle: setPageTitle } = usePageInfo();
+  // use hook to set page title
 
   useEffect(() => {
     let mounted = true;
@@ -36,15 +36,7 @@ export default function LecturePreview() {
         if (!mounted) return;
         if (res?.success && res.data) {
           setLecture(res.data);
-          try {
-            setPageTitle(
-              res.data.title ||
-                (res.data.course && (res.data.course.course_name || res.data.course.course_name)) ||
-                'Lecture'
-            );
-          } catch (err) {
-            console.error('Set Page Title error', err);
-          }
+          // title will be set via useTitle below
         } else {
           setError(res?.message || 'Failed to load lecture');
         }
@@ -58,7 +50,9 @@ export default function LecturePreview() {
     return () => {
       mounted = false;
     };
-  }, [resourceId, setPageTitle]);
+  }, [resourceId]);
+
+  useTitle(lecture?.title || 'Lecture');
 
   // When lecture loads, attempt to resolve attachment URLs to a working absolute URL
   useEffect(() => {
