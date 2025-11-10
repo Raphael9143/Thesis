@@ -53,8 +53,7 @@ const userAPI = {
   getStudentsByClass: (classId, params) => axiosClient.get(`class/${classId}/students`, { params }),
   // Get assignments submitted or available for a given student in a course
   // GET /api/student/{studentId}/assignments?course={courseId}
-  getStudentAssignments: (studentId, params) =>
-    axiosClient.get(`student/${studentId}/assignments`, { params }),
+  getStudentAssignments: (studentId, params) => axiosClient.get(`student/${studentId}/assignments`, { params }),
   // Get exams for a given student in a course
   // GET /api/student/{studentId}/exams?course={courseId}
   getStudentExams: (studentId, params) => axiosClient.get(`student/${studentId}/exams`, { params }),
@@ -66,22 +65,20 @@ const userAPI = {
   getSubmissionsByExam: (examId) => axiosClient.get(`submissions`, { params: { exam: examId } }),
   // Some backends expose path-style endpoints for submissions by assignment/exam
   // e.g. GET /api/submissions/assignment/{id} and GET /api/submissions/exam/{id}
-  getSubmissionsByAssignmentId: (assignmentId) =>
-    axiosClient.get(`submissions/assignment/${assignmentId}`),
+  getSubmissionsByAssignmentId: (assignmentId) => axiosClient.get(`submissions/assignment/${assignmentId}`),
   getSubmissionsByExamId: (examId) => axiosClient.get(`submissions/exam/${examId}`),
   // Get single submission by id
   // GET /api/submissions/{id}
   getSubmissionById: (id) => axiosClient.get(`submissions/${id}`),
   // Grade a submission: PATCH /api/submissions/{id}/grade with payload { score, feedback }
-  gradeSubmission: (submissionId, data) =>
-    axiosClient.patch(`submissions/${submissionId}/grade`, data),
+  gradeSubmission: (submissionId, data) => axiosClient.patch(`submissions/${submissionId}/grade`, data),
   // Remove a student from a class
   // DELETE /api/class/{classId}/students/{classStudentId}
   removeStudentFromClass: (classId, classStudentId) =>
     axiosClient.delete(`class/${classId}/students/${classStudentId}`),
   // Get a single course by id
   getCourseById: (courseId) => axiosClient.get(`courses/${courseId}`),
-  // Create a new course (expects { course_name, course_code, description, semester, class_id, start_week, end_week, status })
+  // Create a new course
   createCourse: (data, config) => axiosClient.post('courses', data, config),
 
   // Lectures

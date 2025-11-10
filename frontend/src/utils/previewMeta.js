@@ -1,6 +1,6 @@
-const pad = (n) => { 
-  return n.toString().padStart(2, '0'); 
-}
+const pad = (n) => {
+  return n.toString().padStart(2, '0');
+};
 
 const formatShort = (dateLike) => {
   if (!dateLike) return '';
@@ -13,7 +13,7 @@ const formatShort = (dateLike) => {
   const ampm = hour >= 12 ? 'pm' : 'am';
   hour = hour % 12 || 12;
   return `${month} ${day} at ${hour}:${minute}${ampm}`;
-}
+};
 
 const formatAvailable = (start, end, alwaysAvailableLabel = 'Available') => {
   if (!start && !end) return alwaysAvailableLabel;
@@ -31,13 +31,13 @@ const formatAvailable = (start, end, alwaysAvailableLabel = 'Available') => {
   }
 
   return alwaysAvailableLabel;
-}
+};
 
 const formatDue = (due) => {
   if (!due) return 'No due date';
   const s = formatShort(due);
   return s || 'No due date';
-}
+};
 
 export { formatAvailable, formatDue, formatShort };
 export default { formatAvailable, formatDue, formatShort };

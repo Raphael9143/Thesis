@@ -12,7 +12,7 @@ export function initSocket(token) {
         url = new URL(apiUrl).origin;
       }
     } catch (err) {
-      // ignore
+      console.error('initSocket URL parse error', err);
     }
   }
   if (!url) url = 'http://localhost:3000';
@@ -46,7 +46,7 @@ export function disconnectSocket() {
   try {
     socket?.disconnect();
   } catch (err) {
-    // ignore
+    console.error('disconnectSocket error', err);
   }
   socket = null;
 }
@@ -62,7 +62,9 @@ export function onNotification(handler) {
       // still call ack if provided
       try {
         if (typeof ack === 'function') ack({ ok: false, reason: 'handler_error' });
-      } catch {}
+      } catch (err) {
+        console.error('onNotification ack error', err);
+      }
     }
   };
   socket.on('notification', wrapped);
