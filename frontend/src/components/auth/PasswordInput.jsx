@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
 
-export default function PasswordInput({
-  label = 'Mật khẩu',
-  value,
-  onChange,
-  placeholder = 'Nhập mật khẩu',
-}) {
+export default function PasswordInput({ label = 'Mật khẩu', value, onChange, placeholder = 'Nhập mật khẩu' }) {
   const [show, setShow] = useState(false);
   return (
     <div>

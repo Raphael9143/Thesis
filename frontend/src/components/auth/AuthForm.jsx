@@ -53,10 +53,7 @@ export default function AuthForm({
       }
       if (!data.success) {
         setMessage(
-          data.message ||
-            (type === 'login'
-              ? 'Wrong email or password!'
-              : 'Failed to register, please try again!')
+          data.message || (type === 'login' ? 'Wrong email or password!' : 'Failed to register, please try again!')
         );
         return;
       }
@@ -86,10 +83,15 @@ export default function AuthForm({
       const serverUser = data.data?.user || {};
       // Persist basic profile info for navbar/avatar usage
       if (serverUser.full_name || (type === 'register' && fullName)) {
-        sessionStorage.setItem('full_name', serverUser.full_name || fullName);
-      }
-      if (serverUser.avatar_url) {
-        sessionStorage.setItem('avatar_url', serverUser.avatar_url);
+        const nameToUse = serverUser.full_name || fullName;
+        sessionStorage.setItem('full_name', nameToUse);
+        // Frontend-only avatar: use ui-avatars.com and do not persist backend avatar_url
+        try {
+          const uiAvatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(nameToUse || 'User');
+          sessionStorage.setItem('avatar_url', uiAvatar);
+        } catch (err) {
+          console.warn('Failed to set avatar in sessionStorage', err);
+        }
       }
       if (onSuccess) onSuccess(data);
       // push an example notification: login success
@@ -116,11 +118,7 @@ export default function AuthForm({
       {title && <h3>{title}</h3>}
       {subtitle && <div className="text-muted mb-8">{subtitle}</div>}
       {roles.length > 1 && (
-        <RoleTabs
-          role={role}
-          onChange={setRole}
-          options={roles.map((r) => ({ value: r.value, label: r.label }))}
-        />
+        <RoleTabs role={role} onChange={setRole} options={roles.map((r) => ({ value: r.value, label: r.label }))} />
       )}
       <form onSubmit={handleSubmit} className="auth-line-form">
         {type === 'register' && (
@@ -144,12 +142,7 @@ export default function AuthForm({
           />
         )}
         {type === 'register' && (
-          <select
-            className="auth-line-input"
-            value={gender}
-            onChange={(e) => setGender(e.target.value)}
-            required
-          >
+          <select className="auth-line-input" value={gender} onChange={(e) => setGender(e.target.value)} required>
             <option value="" disabled>
               Select gender
             </option>
@@ -176,13 +169,7 @@ export default function AuthForm({
           required
         />
         <button type="submit" className="auth-line-btn" disabled={loading}>
-          {loading
-            ? type === 'login'
-              ? 'Logging in...'
-              : 'Registering...'
-            : type === 'login'
-              ? 'Login'
-              : 'Register'}
+          {loading ? (type === 'login' ? 'Logging in...' : 'Registering...') : type === 'login' ? 'Login' : 'Register'}
         </button>
         {showSwitch && (
           <p className="switch">

@@ -19,23 +19,31 @@ export default function RegisterPage() {
   return (
     <div className="auth-viewport">
       <div className="auth-2col">
-      <div className="auth-2col-left">
-        <div className="auth-left-content">
-          <h2>Exploring OCL & UML?</h2>
-          <p>
-            <span><Link to="/" className="navigate-community">Research Portal</Link></span> helps you collaborate, analyze, and validate models.
-          </p>
+        <div className="auth-2col-left">
+          <div className="auth-left-content">
+            <h2>Exploring OCL & UML?</h2>
+            <p>
+              <span>
+                <Link to="/" className="navigate-community">
+                  Research Portal
+                </Link>
+              </span>{' '}
+              helps you collaborate, analyze, and validate models.
+            </p>
+          </div>
         </div>
-      </div>
 
-      <div className="auth-2col-right">
-        <AuthForm
-          type="register"
-          roles={[{ value: 'student', label: 'Student' }, { value: 'teacher', label: 'Teacher' }]}
-          title="Register"
-          onSuccess={handleSuccess}
-        />
-      </div>
+        <div className="auth-2col-right">
+          <AuthForm
+            type="register"
+            roles={[
+              { value: 'student', label: 'Student' },
+              { value: 'teacher', label: 'Teacher' },
+            ]}
+            title="Register"
+            onSuccess={handleSuccess}
+          />
+        </div>
       </div>
       <NotificationPopup
         message={notifyMsg}

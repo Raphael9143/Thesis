@@ -17,9 +17,11 @@ export default function StudentClassesPage() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      try { 
-        setPageTitle('Classes'); 
-      } catch(_) {}
+      try {
+        setPageTitle('Classes');
+      } catch (err) {
+        console.error('Failed to set page title', err);
+      }
       setLoading(true);
       try {
         const res = await userAPI.getStudentEnrolledClasses();
@@ -37,20 +39,20 @@ export default function StudentClassesPage() {
         if (mounted) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
-  }, []);
+    return () => {
+      mounted = false;
+    };
+  }, [setPageTitle]);
 
   return (
     <Section title="My Classes" subtitle="Classes you are enrolled in">
       <Card>
         {loading && <div>Loading classes...</div>}
         {error && <div className="text-error">{error}</div>}
-        {!loading && !error && classes.length === 0 && (
-          <div>No classes found.</div>
-        )}
+        {!loading && !error && classes.length === 0 && <div>No classes found.</div>}
         {!loading && !error && classes.length > 0 && (
           <div className="grid-cards">
-            {classes.map(c => (
+            {classes?.map((c) => (
               <ClassCard
                 key={c.id}
                 title={c.name}

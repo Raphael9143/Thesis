@@ -4,8 +4,5 @@ import '../../assets/styles/components/ui/Card.css';
 import Card from '../../components/ui/Card';
 
 export default function StudentHome() {
-  return (
-    <>
-    </>
-  );
+  return <></>;
 }
