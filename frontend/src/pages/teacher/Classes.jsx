@@ -5,7 +5,7 @@ import ClassCard from '../../components/ui/ClassCard';
 import { useNavigate } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
-import '../../assets/styles/utils.css'
+import '../../assets/styles/utils.css';
 import { usePageInfo } from '../../contexts/PageInfoContext';
 import CreateClassModal from '../../components/teacher/CreateClassModal';
 
@@ -20,9 +20,11 @@ export default function ClassesPage() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      try { 
-        setPageTitle('Classes'); 
-      } catch (_) {}
+      try {
+        setPageTitle('Classes');
+      } catch (err) {
+        console.error('Failed to set page title', err);
+      }
       setLoading(true);
       try {
         const res = await userAPI.getTeacherClasses();
@@ -40,14 +42,16 @@ export default function ClassesPage() {
         if (mounted) setLoading(false);
       }
     })();
-    return () => { mounted = false; };
-  }, []);
+    return () => {
+      mounted = false;
+    };
+  }, [setPageTitle]);
 
   const onCreateClass = (cls) => {
     if (cls) {
-      setClasses(s => [cls.class, ...s]);
+      setClasses((s) => [cls.class, ...s]);
     }
-  }
+  };
 
   return (
     <Section>
@@ -55,17 +59,19 @@ export default function ClassesPage() {
         <div className="flex-between">
           <h3>Your classes</h3>
           <div>
-            <button type="button" className="btn btn-primary" onClick={() => setModalOpen(true)}>Create class</button>
+            <button type="button" className="btn btn-primary" onClick={() => setModalOpen(true)}>
+              Create class
+            </button>
           </div>
         </div>
 
         <div className="mt-12">
           {loading && <div>Loading classes...</div>}
           {error && <div className="text-error">{error}</div>}
-          {!loading && !error && classes.length === 0 && (<div>No classes found.</div>)}
+          {!loading && !error && classes.length === 0 && <div>No classes found.</div>}
           {!loading && !error && classes.length > 0 && (
             <div className="grid-cards">
-              {classes.map(c => (
+              {classes.map((c) => (
                 <ClassCard
                   key={c.id}
                   title={c.name}

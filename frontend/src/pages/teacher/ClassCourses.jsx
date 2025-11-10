@@ -11,7 +11,7 @@ import CreateCourseModal from '../../components/teacher/CreateCourseModal';
 export default function ClassCoursesPage() {
   const { id } = useParams(); // class id
   const navigate = useNavigate();
-  const [classInfo, setClassInfo] = useState(null);
+  const [_classInfo, setClassInfo] = useState(null);
   const [courses, setCourses] = useState([]);
   const [createCourseOpen, setCreateCourseOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -28,7 +28,11 @@ export default function ClassCoursesPage() {
         if (!mounted) return;
         if (clsRes?.success && clsRes.data) {
           setClassInfo(clsRes.data);
-          try { setPageTitle(clsRes.data.name || 'Class'); } catch (_) {}
+          try {
+            setPageTitle(clsRes.data.name || 'Class');
+          } catch (err) {
+            console.error('Failed to set page title', err);
+          }
           const maybeCourses = clsRes.data.courses || clsRes.data.course_list || clsRes.data.courses_taught;
           if (Array.isArray(maybeCourses) && maybeCourses.length > 0) {
             setCourses(maybeCourses);
@@ -54,8 +58,10 @@ export default function ClassCoursesPage() {
       }
     })();
 
-    return () => { mounted = false; };
-  }, [id]);
+    return () => {
+      mounted = false;
+    };
+  }, [id, setPageTitle]);
 
   return (
     <Section>
@@ -63,7 +69,9 @@ export default function ClassCoursesPage() {
         <div className="flex-between">
           <h3>Courses</h3>
           <div>
-            <button className="btn btn-primary" onClick={() => setCreateCourseOpen(true)}>New Course</button>
+            <button className="btn btn-primary" onClick={() => setCreateCourseOpen(true)}>
+              New Course
+            </button>
           </div>
         </div>
 
@@ -71,9 +79,7 @@ export default function ClassCoursesPage() {
           {loading && <div>Loading courses...</div>}
           {error && <div className="text-error">{error}</div>}
 
-          {!loading && !error && courses.length === 0 && (
-            <div>No courses found for this class.</div>
-          )}
+          {!loading && !error && courses.length === 0 && <div>No courses found for this class.</div>}
 
           {!loading && !error && courses.length > 0 && (
             <div className="grid-cards">
@@ -91,9 +97,14 @@ export default function ClassCoursesPage() {
           )}
         </div>
       </Card>
-      <CreateCourseModal open={createCourseOpen} onClose={() => setCreateCourseOpen(false)} defaultClassId={id} onCreated={(newCourse) => {
-        if (newCourse) setCourses((s) => [newCourse, ...s]);
-      }} />
+      <CreateCourseModal
+        open={createCourseOpen}
+        onClose={() => setCreateCourseOpen(false)}
+        defaultClassId={id}
+        onCreated={(newCourse) => {
+          if (newCourse) setCourses((s) => [newCourse, ...s]);
+        }}
+      />
     </Section>
   );
 }
