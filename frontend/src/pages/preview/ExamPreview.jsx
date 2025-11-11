@@ -123,7 +123,6 @@ export default function ExamPreview() {
               </div>
             </div>
           </div>
-          <DashedDivider />
           {role === 'student' && (
             <div className="preview-tabs" style={{ margin: '12px 0', display: 'flex', gap: 8 }}>
               <button
@@ -140,8 +139,13 @@ export default function ExamPreview() {
               </button>
             </div>
           )}
+
           {contentTab === 'problem' && (
             <>
+              <DashedDivider />
+              <div>
+                <h2>Problem</h2>
+              </div>
               <div className="preview-body">
                 <div dangerouslySetInnerHTML={{ __html: exam.description || '' }} />
               </div>

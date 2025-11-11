@@ -146,6 +146,10 @@ export default function AssignmentPreview() {
 
           {contentTab === 'problem' && (
             <>
+              <DashedDivider />
+              <div>
+                <h2>Problem</h2>
+              </div>
               <div className="preview-body">
                 <div dangerouslySetInnerHTML={{ __html: assignment.description || '' }} />
               </div>
