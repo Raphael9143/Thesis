@@ -160,4 +160,56 @@ router.get(
  */
 router.get("/exam/:id", auth, SubmissionController.getSubmissionsByExam);
 
+// Remaining attempts for exam
+/**
+ * @swagger
+ * /api/submissions/exam/{id}/remaining-attempts:
+ *   get:
+ *     summary: Lấy số lần nộp còn lại của sinh viên cho exam
+ *     tags: [Submission]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Exam ID
+ *     responses:
+ *       200:
+ *         description: Remaining attempts info
+ */
+router.get(
+  "/exam/:id/remaining-attempts",
+  auth,
+  SubmissionController.getRemainingAttemptsByExam
+);
+
+// Remaining attempts for assignment
+/**
+ * @swagger
+ * /api/submissions/assignment/{id}/remaining-attempts:
+ *   get:
+ *     summary: Lấy số lần nộp còn lại của sinh viên cho assignment
+ *     tags: [Submission]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Assignment ID
+ *     responses:
+ *       200:
+ *         description: Remaining attempts info
+ */
+router.get(
+  "/assignment/:id/remaining-attempts",
+  auth,
+  SubmissionController.getRemainingAttemptsByAssignment
+);
+
 module.exports = router;

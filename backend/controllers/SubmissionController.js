@@ -485,6 +485,153 @@ const SubmissionController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+
+  // Get remaining attempts for authenticated student by assignment id
+  getRemainingAttemptsByAssignment: async (req, res) => {
+    try {
+      if (!req.user || req.user.role !== "STUDENT") {
+        return res.status(403).json({
+          success: false,
+          message: "Only students can view remaining attempts.",
+        });
+      }
+
+      const assignmentId = parseInt(req.params.id, 10);
+      if (Number.isNaN(assignmentId))
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid assignment id" });
+
+      const assignment = await Assignment.findByPk(assignmentId);
+      if (!assignment)
+        return res
+          .status(404)
+          .json({ success: false, message: "Assignment not found" });
+
+      // Confirm the student is enrolled in at least one class linked to the assignment's course
+      const { Op } = require("sequelize");
+      const ClassCourse = require("../models/ClassCourse");
+      const enrolments = await ClassStudent.findAll({
+        where: { studentId: req.user.userId },
+        attributes: ["classId"],
+      });
+      const enrolledClassIds = enrolments.map((e) => e.classId ?? e.class_id);
+      if (!enrolledClassIds || enrolledClassIds.length === 0)
+        return res.status(403).json({
+          success: false,
+          message: "You are not enrolled in any class.",
+        });
+      const courseClass = await ClassCourse.findOne({
+        where: {
+          course_id: assignment.course_id,
+          class_id: { [Op.in]: enrolledClassIds },
+        },
+      });
+      if (!courseClass)
+        return res.status(403).json({
+          success: false,
+          message: "You are not enrolled in a class for this course.",
+        });
+
+      const maxAttempts = Number(assignment.submission_limit || 1) || 1;
+      const usedAttempts = await Submission.count({
+        where: {
+          student_id: req.user.userId,
+          assignment_id: assignmentId,
+        },
+      });
+      const remaining = Math.max(0, maxAttempts - usedAttempts);
+
+      return res.json({
+        success: true,
+        data: {
+          assignment_id: assignmentId,
+          submission_limit: maxAttempts,
+          used_attempts: usedAttempts,
+          remaining_attempts: remaining,
+        },
+      });
+    } catch (error) {
+      console.error("Get remaining attempts error:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
+  // Get remaining attempts for authenticated student by exam id
+  getRemainingAttemptsByExam: async (req, res) => {
+    try {
+      if (!req.user || req.user.role !== "STUDENT") {
+        return res.status(403).json({
+          success: false,
+          message: "Only students can view remaining attempts.",
+        });
+      }
+
+      const examId = parseInt(req.params.id, 10);
+      if (Number.isNaN(examId))
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid exam id" });
+
+      const Exam = require("../models/Exam");
+      const exam = await Exam.findByPk(examId);
+      if (!exam)
+        return res
+          .status(404)
+          .json({ success: false, message: "Exam not found" });
+
+      // Confirm the student is enrolled in a class linked to the exam's course
+      const { Op } = require("sequelize");
+      const ClassCourse = require("../models/ClassCourse");
+      const enrolments = await ClassStudent.findAll({
+        where: { studentId: req.user.userId },
+        attributes: ["classId"],
+      });
+      const enrolledClassIds = enrolments.map((e) => e.classId ?? e.class_id);
+      if (!enrolledClassIds || enrolledClassIds.length === 0)
+        return res.status(403).json({
+          success: false,
+          message: "You are not enrolled in any class.",
+        });
+      const courseClass = await ClassCourse.findOne({
+        where: {
+          course_id: exam.course_id,
+          class_id: { [Op.in]: enrolledClassIds },
+        },
+      });
+      if (!courseClass)
+        return res.status(403).json({
+          success: false,
+          message: "You are not enrolled in a class for this course.",
+        });
+
+      const maxAttempts = Number(exam.submission_limit || 1) || 1;
+      const usedAttempts = await Submission.count({
+        where: {
+          student_id: req.user.userId,
+          exam_id: examId,
+        },
+      });
+      const remaining = Math.max(0, maxAttempts - usedAttempts);
+
+      return res.json({
+        success: true,
+        data: {
+          exam_id: examId,
+          submission_limit: maxAttempts,
+          used_attempts: usedAttempts,
+          remaining_attempts: remaining,
+        },
+      });
+    } catch (error) {
+      console.error("Get remaining attempts (exam) error:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
 };
 
 module.exports = SubmissionController;
