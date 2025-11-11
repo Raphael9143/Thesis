@@ -218,6 +218,37 @@ router.get(
   SubmissionController.getSubmissionHistoryByAssignment
 );
 
+/**
+ * @swagger
+ * /api/submissions/exam/{id}/history:
+ *   get:
+ *     summary: Lấy lịch sử nộp bài của sinh viên cho exam
+ *     tags: [Submission]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Exam ID
+ *       - in: query
+ *         name: student_id
+ *         required: false
+ *         schema:
+ *           type: integer
+ *         description: Required for teacher/admin; ignored for student
+ *     responses:
+ *       200:
+ *         description: List of submissions
+ */
+router.get(
+  "/exam/:id/history",
+  auth,
+  SubmissionController.getSubmissionHistoryByExam
+);
+
 // Remaining attempts for assignment
 /**
  * @swagger
