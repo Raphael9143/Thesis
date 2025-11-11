@@ -8,7 +8,7 @@ const SubmissionController = require("../controllers/SubmissionController");
  * @swagger
  * /api/submissions:
  *   post:
- *     summary: Nộp bài (chỉ sinh viên trong lớp)
+ *     summary: Nộp bài (chỉ sinh viên đã đăng ký lớp của môn học)
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []
@@ -18,8 +18,6 @@ const SubmissionController = require("../controllers/SubmissionController");
  *         multipart/form-data:
  *           schema:
  *             type: object
- *             required:
- *               - class_id
  *             properties:
  *               assignment_id:
  *                 type: integer
@@ -27,17 +25,18 @@ const SubmissionController = require("../controllers/SubmissionController");
  *               exam_id:
  *                 type: integer
  *                 example: 1
- *               class_id:
- *                 type: integer
- *                 example: 1
  *               attachment:
  *                 type: string
  *                 format: binary
  *                 description: File upload (.use only)
+ *             example:
+ *               assignment_id: 1
+ *               attachment: file.use
  *             description: |
- *               Provide either assignment_id or exam_id (mutually exclusive). 
- *               The class_id is required. 
+ *               Provide either assignment_id or exam_id (mutually exclusive).
+ *               class_id is not required; eligibility is inferred from student's enrolled classes.
  *               Attachment must be a .use file.
+ *               Attempts are limited by assignment.submission_limit or exam.submission_limit.
  *     responses:
  *       201:
  *         description: Submission created
@@ -85,6 +84,9 @@ router.post(
  *                 type: number
  *               feedback:
  *                 type: string
+ *           example:
+ *             score: 8.5
+ *             feedback: "Good structure and correct OCL."
  *     responses:
  *       200:
  *         description: Submission graded
