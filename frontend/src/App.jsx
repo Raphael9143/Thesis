@@ -15,6 +15,9 @@ import ClassDetailTeacherPage from './pages/teacher/ClassDetail';
 import LecturesList from './pages/teacher/course/LecturesList';
 import AssignmentsList from './pages/teacher/course/AssignmentsList';
 import ExamsList from './pages/teacher/course/ExamsList';
+import StudentLecturesList from './pages/student/course/LecturesList';
+import StudentAssignmentsList from './pages/student/course/AssignmentsList';
+import StudentExamsList from './pages/student/course/ExamsList';
 import StudentsList from './pages/teacher/course/StudentsList';
 import StudentSubmissions from './pages/teacher/course/StudentSubmissions';
 import Submissions from './pages/teacher/course/Submissions';
@@ -185,7 +188,12 @@ const router = createBrowserRouter(
               </React.Suspense>
             </RequireRole>
           }
-        />
+        >
+          <Route index element={<StudentLecturesList />} />
+          <Route path="lectures" element={<StudentLecturesList />} />
+          <Route path="assignments" element={<StudentAssignmentsList />} />
+          <Route path="exams" element={<StudentExamsList />} />
+        </Route>
         <Route
           path="/education/student/classes/:classId/courses/:courseId/lectures/:lectureId"
           element={
