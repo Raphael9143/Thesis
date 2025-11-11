@@ -97,11 +97,8 @@ export default function AuthForm({
       // push an example notification: login success
       try {
         push({
-          id: `login-${Date.now()}`,
-          title: 'Đăng nhập thành công',
-          body: `Xin chào ${data.data?.user?.full_name || ''}`,
-          ts: Date.now(),
-          data: { type: 'system' },
+          title: 'Login successfully',
+          body: ``,
         });
       } catch (err) {
         console.error('push notification error', err);
