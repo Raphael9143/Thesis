@@ -20,6 +20,7 @@ export default function SubmitWork() {
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [attempts, setAttempts] = useState(null); // {submission_limit, used_attempts, remaining_attempts}
 
   const [mode, setMode] = useState('editor'); // 'editor' | 'file'
   const [code, setCode] = useState('');
@@ -52,6 +53,31 @@ export default function SubmitWork() {
         setError(err?.response?.data?.message || err.message || 'Server error');
       } finally {
         if (mounted) setLoading(false);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [assignmentId, examId, isAssignment, isExam, role]);
+
+  useEffect(() => {
+    // fetch remaining attempts once meta is known
+    let mounted = true;
+    (async () => {
+      if (role !== 'student') return;
+      try {
+        if (isAssignment && assignmentId) {
+          const res = await userAPI.getAssignmentRemainingAttempts(assignmentId);
+          if (!mounted) return;
+          if (res?.success) setAttempts(res.data);
+        }
+        if (isExam && examId) {
+          const res = await userAPI.getExamRemainingAttempts(examId);
+          if (!mounted) return;
+          if (res?.success) setAttempts(res.data);
+        }
+      } catch {
+        // silent
       }
     })();
     return () => {
@@ -148,6 +174,10 @@ export default function SubmitWork() {
     if (role !== 'student') return;
     if (isExpired) {
       push({ title: 'Closed', body: 'Submissions are closed.' });
+      return;
+    }
+    if (attempts && attempts.remaining_attempts <= 0) {
+      push({ title: 'Limit reached', body: 'Bạn đã hết lượt nộp (submission attempts).' });
       return;
     }
     const fd = new FormData();
@@ -269,11 +299,21 @@ export default function SubmitWork() {
             )}
 
             {isExpired && <small className="text-error">Submissions are closed.</small>}
+            {attempts && attempts.remaining_attempts <= 0 && <small className="text-error">Bạn đã hết lượt nộp.</small>}
 
             <div className="submit-actions">
-              <button className="btn btn-primary" onClick={onSubmit} disabled={submitting || isExpired}>
+              <button
+                className="btn btn-primary"
+                onClick={onSubmit}
+                disabled={submitting || isExpired || (attempts && attempts.remaining_attempts <= 0)}
+              >
                 {submitting ? 'Submitting...' : 'Submit'}
               </button>
+              {attempts && attempts.remaining_attempts >= 0 && (
+                <span style={{ marginLeft: 8 }}>
+                  Attempts left: {attempts.remaining_attempts}/{attempts.submission_limit}
+                </span>
+              )}
             </div>
           </div>
         )}

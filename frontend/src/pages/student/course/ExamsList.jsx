@@ -20,6 +20,7 @@ export default function StudentExamsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [courseIdState, setCourseIdState] = useState(routeCourseId || null);
+  const [attemptsMap, setAttemptsMap] = useState({});
 
   useEffect(() => {
     let mounted = true;
@@ -39,6 +40,27 @@ export default function StudentExamsList() {
           const published = examRes.data.filter((e) => e.status === 'published');
           console.log('Published exams:', published);
           setExams(published);
+          try {
+            const results = await Promise.all(
+              published.map(async (ex) => {
+                const eid = ex.id || ex.exam_id;
+                try {
+                  const r = await userAPI.getExamRemainingAttempts(eid);
+                  return { id: eid, rem: r?.success ? r.data?.remaining_attempts : undefined };
+                } catch {
+                  return { id: eid, rem: undefined };
+                }
+              })
+            );
+            if (!mounted) return;
+            const map = {};
+            results.forEach((it) => {
+              if (it && typeof it.rem !== 'undefined') map[it.id] = it.rem;
+            });
+            setAttemptsMap(map);
+          } catch {
+            // ignore
+          }
         } else {
           setExams([]);
         }
@@ -78,6 +100,11 @@ export default function StudentExamsList() {
                       navigate(`/education/student/classes/${id}/courses/${courseIdState}/exams/${idv}`);
                     }}
                   >
+                    {typeof attemptsMap[idv] !== 'undefined' && (
+                      <span className="attempts-badge" title="Attempts left">
+                        {attemptsMap[idv]}
+                      </span>
+                    )}
                     <div className="class-detail__item-title">{ex.title}</div>
                     <small>
                       {ex.start_date

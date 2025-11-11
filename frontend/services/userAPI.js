@@ -70,6 +70,10 @@ const userAPI = {
   // e.g. GET /api/submissions/assignment/{id} and GET /api/submissions/exam/{id}
   getSubmissionsByAssignmentId: (assignmentId) => axiosClient.get(`submissions/assignment/${assignmentId}`),
   getSubmissionsByExamId: (examId) => axiosClient.get(`submissions/exam/${examId}`),
+  // Remaining attempts
+  getExamRemainingAttempts: (examId) => axiosClient.get(`submissions/exam/${examId}/remaining-attempts`),
+  getAssignmentRemainingAttempts: (assignmentId) =>
+    axiosClient.get(`submissions/assignment/${assignmentId}/remaining-attempts`),
   // Get single submission by id
   // GET /api/submissions/{id}
   getSubmissionById: (id) => axiosClient.get(`submissions/${id}`),

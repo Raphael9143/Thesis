@@ -119,10 +119,28 @@
 	gap: 4px;
 	cursor: pointer;
     text-align: left;
+    position: relative;
 }
 
 .class-detail__list-item small {
 	color: #6b7280;
+}
+
+.attempts-badge {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	background: #1e40af;
+	color: #fff;
+	font-size: 10px;
+	line-height: 1;
+	padding: 3px 6px;
+	border-radius: 12px;
+	display: inline-block;
+	min-width: 20px;
+	text-align: center;
+	font-weight: 600;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 
 .btn-icon {

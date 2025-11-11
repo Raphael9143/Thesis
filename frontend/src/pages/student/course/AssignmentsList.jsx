@@ -13,6 +13,7 @@ function isExpired(assignment) {
   return Date.now() > new Date(due).getTime();
 }
 
+// Clean implementation without duplication
 export default function StudentAssignmentsList() {
   const { id, courseId: routeCourseId } = useParams();
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ export default function StudentAssignmentsList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [courseIdState, setCourseIdState] = useState(routeCourseId || null);
+  const [attemptsMap, setAttemptsMap] = useState({});
 
   useEffect(() => {
     let mounted = true;
@@ -29,9 +31,7 @@ export default function StudentAssignmentsList() {
       try {
         const cls = await userAPI.getClassById(id);
         if (!mounted) return;
-        if (cls?.success && cls.data) {
-          setClassInfo(cls.data);
-        }
+        if (cls?.success && cls.data) setClassInfo(cls.data);
         const courseId = routeCourseId || (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) || id;
         setCourseIdState(courseId);
         const assignRes = await userAPI.getAssignmentsByCourse(courseId);
@@ -39,6 +39,27 @@ export default function StudentAssignmentsList() {
         if (assignRes?.success && Array.isArray(assignRes.data)) {
           const published = assignRes.data.filter((a) => a.status === 'published');
           setAssignments(published);
+          try {
+            const results = await Promise.all(
+              published.map(async (a) => {
+                const aid = a.assignment_id || a.id;
+                try {
+                  const r = await userAPI.getAssignmentRemainingAttempts(aid);
+                  return { id: aid, rem: r?.success ? r.data?.remaining_attempts : undefined };
+                } catch {
+                  return { id: aid, rem: undefined };
+                }
+              })
+            );
+            if (!mounted) return;
+            const map = {};
+            results.forEach((it) => {
+              if (it && typeof it.rem !== 'undefined') map[it.id] = it.rem;
+            });
+            setAttemptsMap(map);
+          } catch {
+            // ignore
+          }
         } else {
           setAssignments([]);
         }
@@ -78,6 +99,11 @@ export default function StudentAssignmentsList() {
                       navigate(`/education/student/classes/${id}/courses/${courseIdState}/assignments/${idv}`);
                     }}
                   >
+                    {typeof attemptsMap[idv] !== 'undefined' && (
+                      <span className="attempts-badge" title="Attempts left">
+                        {attemptsMap[idv]}
+                      </span>
+                    )}
                     <div className="class-detail__item-title">{a.title}</div>
                     <small>
                       {a.courses?.[0]?.assignment_course?.due_date
