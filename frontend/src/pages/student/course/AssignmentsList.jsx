@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Section from '../../../components/ui/Section';
 import Card from '../../../components/ui/Card';
 import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import '../../../assets/styles/pages/ClassDetail.css';
+import useAttemptMap from '../../../hooks/useAttemptMap';
 import useTitle from '../../../hooks/useTitle';
 
 function isExpired(assignment) {
@@ -39,27 +40,7 @@ export default function StudentAssignmentsList() {
         if (assignRes?.success && Array.isArray(assignRes.data)) {
           const published = assignRes.data.filter((a) => a.status === 'published');
           setAssignments(published);
-          try {
-            const results = await Promise.all(
-              published.map(async (a) => {
-                const aid = a.assignment_id || a.id;
-                try {
-                  const r = await userAPI.getAssignmentRemainingAttempts(aid);
-                  return { id: aid, rem: r?.success ? r.data?.remaining_attempts : undefined };
-                } catch {
-                  return { id: aid, rem: undefined };
-                }
-              })
-            );
-            if (!mounted) return;
-            const map = {};
-            results.forEach((it) => {
-              if (it && typeof it.rem !== 'undefined') map[it.id] = it.rem;
-            });
-            setAttemptsMap(map);
-          } catch {
-            // ignore
-          }
+          // attempts are now fetched via useAttemptMap below
         } else {
           setAssignments([]);
         }
@@ -74,6 +55,19 @@ export default function StudentAssignmentsList() {
       mounted = false;
     };
   }, [id, routeCourseId]);
+
+  // Use hook to populate attempts for current published assignments
+  const assignmentIds = useMemo(
+    () => (assignments || []).map((a) => a.assignment_id || a.id).filter(Boolean),
+    [assignments]
+  );
+  const { attemptsMap: hookAttemptsMap } = useAttemptMap('assignment', assignmentIds, {
+    enabled: assignmentIds.length > 0,
+  });
+
+  useEffect(() => {
+    setAttemptsMap(hookAttemptsMap || {});
+  }, [hookAttemptsMap]);
 
   useTitle(`Assignments - ${classInfo?.name || (routeCourseId ? 'Course' : '')}`);
 

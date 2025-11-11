@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Section from '../../../components/ui/Section';
 import Card from '../../../components/ui/Card';
 import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import '../../../assets/styles/pages/ClassDetail.css';
+import useAttemptMap from '../../../hooks/useAttemptMap';
 import useTitle from '../../../hooks/useTitle';
 
 function isExpired(exam) {
@@ -40,27 +41,7 @@ export default function StudentExamsList() {
           const published = examRes.data.filter((e) => e.status === 'published');
           console.log('Published exams:', published);
           setExams(published);
-          try {
-            const results = await Promise.all(
-              published.map(async (ex) => {
-                const eid = ex.id || ex.exam_id;
-                try {
-                  const r = await userAPI.getExamRemainingAttempts(eid);
-                  return { id: eid, rem: r?.success ? r.data?.remaining_attempts : undefined };
-                } catch {
-                  return { id: eid, rem: undefined };
-                }
-              })
-            );
-            if (!mounted) return;
-            const map = {};
-            results.forEach((it) => {
-              if (it && typeof it.rem !== 'undefined') map[it.id] = it.rem;
-            });
-            setAttemptsMap(map);
-          } catch {
-            // ignore
-          }
+          // attempts fetched via hook below
         } else {
           setExams([]);
         }
@@ -75,6 +56,15 @@ export default function StudentExamsList() {
       mounted = false;
     };
   }, [id, routeCourseId]);
+
+  const examIds = useMemo(() => (exams || []).map((e) => e.exam_id || e.id).filter(Boolean), [exams]);
+  const { attemptsMap: hookAttemptsMap } = useAttemptMap('exam', examIds, {
+    enabled: examIds.length > 0,
+  });
+
+  useEffect(() => {
+    setAttemptsMap(hookAttemptsMap || {});
+  }, [hookAttemptsMap]);
 
   useTitle(`Exams - ${classInfo?.name || (routeCourseId ? 'Course' : '')}`);
 

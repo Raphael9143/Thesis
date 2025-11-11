@@ -6,6 +6,7 @@ import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/Submit.css';
 import { useNotifications } from '../../contexts/NotificationContext';
+import useAttempt from '../../hooks/useAttempt';
 
 export default function SubmitWork() {
   const params = useParams();
@@ -20,7 +21,7 @@ export default function SubmitWork() {
   const [meta, setMeta] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [attempts, setAttempts] = useState(null); // {submission_limit, used_attempts, remaining_attempts}
+  // attempts via hook
 
   const [mode, setMode] = useState('editor'); // 'editor' | 'file'
   const [code, setCode] = useState('');
@@ -60,30 +61,11 @@ export default function SubmitWork() {
     };
   }, [assignmentId, examId, isAssignment, isExam, role]);
 
-  useEffect(() => {
-    // fetch remaining attempts once meta is known
-    let mounted = true;
-    (async () => {
-      if (role !== 'student') return;
-      try {
-        if (isAssignment && assignmentId) {
-          const res = await userAPI.getAssignmentRemainingAttempts(assignmentId);
-          if (!mounted) return;
-          if (res?.success) setAttempts(res.data);
-        }
-        if (isExam && examId) {
-          const res = await userAPI.getExamRemainingAttempts(examId);
-          if (!mounted) return;
-          if (res?.success) setAttempts(res.data);
-        }
-      } catch {
-        // silent
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [assignmentId, examId, isAssignment, isExam, role]);
+  const resolvedType = isAssignment ? 'assignment' : isExam ? 'exam' : null;
+  const resolvedId = isAssignment ? assignmentId : isExam ? examId : null;
+  const { attempts, refetch: refetchAttempts } = useAttempt(resolvedType, resolvedId, {
+    enabled: role === 'student',
+  });
 
   const endAt = useMemo(() => {
     if (!meta) return null;
@@ -212,6 +194,11 @@ export default function SubmitWork() {
         push({ title: 'Submitted', body: 'Your submission was uploaded successfully.' });
         setCode('');
         setFile(null);
+        try {
+          await refetchAttempts();
+        } catch {
+          // ignore
+        }
         // Navigate back to preview
         if (isAssignment) {
           navigate(`/education/student/classes/${classId}/courses/${courseId}/assignments/${assignmentId}`);
