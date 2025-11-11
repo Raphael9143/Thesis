@@ -127,7 +127,7 @@ export default function LecturePreview() {
   })();
 
   return (
-    <Section title={lecture.title || 'Lecture'}>
+    <Section>
       <Card>
         <div className="lecture-preview">
           <div className="preview-meta">
