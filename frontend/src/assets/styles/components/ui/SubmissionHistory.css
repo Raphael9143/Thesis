@@ -21,10 +21,18 @@
   vertical-align: top;
 }
 
+.submission-history-table tbody td a {
+  cursor: pointer;
+}
+
 .submission-history-feedback {
   white-space: pre-wrap;
   word-wrap: break-word;
   overflow-wrap: anywhere;
   max-height: 60vh;
   overflow: auto;
+}
+
+.submission-history .modal-container {
+  max-width: 720px;
 }

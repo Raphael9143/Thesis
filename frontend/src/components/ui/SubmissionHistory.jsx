@@ -65,23 +65,21 @@ function HistoryTable({ history }) {
                 <td>{s.score != null ? s.score : 'Not Graded'}</td>
                 <td>
                   {s.attachment ? (
-                    <button
-                      type="button"
-                      className="btn btn-sm"
+                    <a
                       onClick={() => {
                         setPreviewAttachment(String(s.attachment || ''));
                         setPreviewOpen(true);
                       }}
                     >
                       Preview
-                    </button>
+                    </a>
                   ) : (
                     '-'
                   )}
                 </td>
                 <td>
                   {s.attachment ? (
-                    <a className="btn btn-sm" href={toFullUrl(s.attachment)} target="_blank" rel="noreferrer">
+                    <a href={toFullUrl(s.attachment)} target="_blank" rel="noreferrer">
                       Download
                     </a>
                   ) : (
