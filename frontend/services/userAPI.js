@@ -51,6 +51,9 @@ const userAPI = {
   // GET /api/class/{id}/students
   // Accepts optional params object, e.g. { page: 2 }
   getStudentsByClass: (classId, params) => axiosClient.get(`class/${classId}/students`, { params }),
+  // Add students to a class
+  // POST /api/class/{id}/students with body { studentEmails: ["a@x","b@x"] }
+  addStudentsToClass: (classId, data) => axiosClient.post(`class/${classId}/students`, data),
   // Get assignments submitted or available for a given student in a course
   // GET /api/student/{studentId}/assignments?course={courseId}
   getStudentAssignments: (studentId, params) => axiosClient.get(`student/${studentId}/assignments`, { params }),
@@ -76,6 +79,9 @@ const userAPI = {
   // DELETE /api/class/{classId}/students/{classStudentId}
   removeStudentFromClass: (classId, classStudentId) =>
     axiosClient.delete(`class/${classId}/students/${classStudentId}`),
+  // Remove multiple students from a class
+  // DELETE /api/class/{classId}/students with body { studentIds: [1,2,3] }
+  removeStudentsFromClass: (classId, data) => axiosClient.delete(`class/${classId}/students`, { data }),
   // Get a single course by id
   getCourseById: (courseId) => axiosClient.get(`courses/${courseId}`),
   // Create a new course

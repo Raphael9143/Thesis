@@ -72,6 +72,28 @@ export default function StudentsList() {
 
   useTitle('Students');
 
+  const removeStudentFromClass = async (s) => {
+    try {
+      const ok = window.confirm('Remove this student from the class?');
+      if (!ok) return;
+      // send delete request with student id array
+      const res = await userAPI.removeStudentsFromClass(id, { studentIds: [s.id] });
+      if (res?.success) {
+        // remove from UI list
+        setStudents((prev) => prev.filter((x) => (x.classStudentId || x.id) !== (s.classStudentId || s.id)));
+        push({ title: 'Removed', body: 'Student removed from class' });
+      } else {
+        push({ title: 'Error', body: res?.message || 'Failed to remove student' });
+      }
+    } catch (err) {
+      console.error('Remove student error', err);
+      push({
+        title: 'Error',
+        body: err?.response?.data?.message || err.message || 'Server error',
+      });
+    }
+  };
+
   return (
     <Section>
       <Card>
@@ -111,7 +133,11 @@ export default function StudentsList() {
                       >
                         <i className="fa fa-eye" />
                       </button>
-                      <button className="btn btn-icon" title="Remove from class" onClick={() => {}}>
+                      <button
+                        className="btn btn-icon"
+                        title="Remove from class"
+                        onClick={() => removeStudentFromClass(s)}
+                      >
                         <i className="fa fa-trash" />
                       </button>
                     </div>
