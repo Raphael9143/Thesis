@@ -1,0 +1,79 @@
+/* Submit work page styles */
+.submit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.submit-toggle {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.editor-pane .code-editor {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 12px;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 6px;
+  background: var(--code-bg, #0f0f0f08);
+  resize: vertical;
+  color: var(--black);
+}
+
+/* Container with gutter for line numbers */
+.code-editor-container {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: stretch;
+  width: 100%;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 6px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.line-numbers {
+  background: #f7f7f7;
+  color: #777;
+  text-align: right;
+  padding: 12px 8px 12px 12px;
+  border-right: 1px solid var(--border-color, #ddd);
+  user-select: none;
+  overflow: hidden; /* we sync scrollTop only */
+}
+
+.line-number {
+  height: 1.5em;
+}
+
+.code-editor {
+  border: none;
+  outline: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.editor-controls {
+  margin-top: 8px;
+}
+
+.file-pane input[type="file"] {
+  display: inline-block;
+}
+
+.submit-actions {
+  margin-top: 8px;
+}
+
+.text-error {
+  color: #c62828;
+}
