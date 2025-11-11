@@ -34,7 +34,7 @@ export default function ClassesPage() {
       } catch (err) {
         console.error('Failed to fetch teacher classes', err);
         if (!mounted) return;
-        setError(err?.response?.data?.message || err.message || 'Server error');
+        setError(err?.response?.message || err.message || 'Server error');
       } finally {
         if (mounted) setLoading(false);
       }
