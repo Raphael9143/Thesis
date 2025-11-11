@@ -487,6 +487,67 @@ const ExamController = {
     }
   },
 
+  // Patch exam status only
+  patchExamStatus: async (req, res) => {
+    try {
+      if (!req.user)
+        return res
+          .status(403)
+          .json({ success: false, message: "Authentication required." });
+      const { id } = req.params;
+      const { status } = req.body;
+      if (!status)
+        return res
+          .status(400)
+          .json({ success: false, message: "Missing status in request body." });
+
+      const allowedStatus = ["draft", "published", "archived"];
+      if (!allowedStatus.includes(status))
+        return res.status(400).json({
+          success: false,
+          message: "Invalid status. Allowed: draft, published, archived",
+        });
+
+      const exam = await Exam.findByPk(id);
+      if (!exam)
+        return res
+          .status(404)
+          .json({ success: false, message: "Exam not found." });
+
+      // Permission: ADMIN or creator or homeroom teacher of the class linked to course
+      const classCourse = await ClassCourse.findOne({
+        where: { course_id: exam.course_id },
+      });
+      let classObj = null;
+      if (classCourse) classObj = await Class.findByPk(classCourse.class_id);
+
+      if (req.user.role === "ADMIN") {
+        // allowed
+      } else if (req.user.role === "TEACHER") {
+        const isCreator = exam.created_by === req.user.userId;
+        const isClassTeacher = classObj && classObj.teacherId === req.user.userId;
+        if (!isCreator && !isClassTeacher)
+          return res.status(403).json({ success: false, message: "Forbidden" });
+      } else {
+        return res
+          .status(403)
+          .json({
+            success: false,
+            message: "Only teachers or admins can change exam status.",
+          });
+      }
+
+      exam.status = status;
+      await exam.save();
+      res.json({ success: true, data: exam });
+    } catch (error) {
+      console.error("Patch exam status error:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   // Delete exam (admin only)
   deleteExam: async (req, res) => {
     try {

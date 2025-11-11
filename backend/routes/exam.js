@@ -173,6 +173,44 @@ router.patch("/:id", auth, conditionalExamUpload, ExamController.patchExam);
 
 /**
  * @swagger
+ * /api/exams/{id}/status:
+ *   patch:
+ *     summary: Update exam status (creator, homeroom teacher, or admin)
+ *     tags: [Exam]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Exam ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published, archived]
+ *                 example: published
+ *     responses:
+ *       200:
+ *         description: Exam status updated
+ */
+router.patch(
+  "/:id/status",
+  auth,
+  ExamController.patchExamStatus
+);
+
+/**
+ * @swagger
  * /api/exams/{id}:
  *   delete:
  *     summary: Delete an exam by id (admin only)
