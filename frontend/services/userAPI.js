@@ -75,6 +75,12 @@ const userAPI = {
   getSubmissionById: (id) => axiosClient.get(`submissions/${id}`),
   // Grade a submission: PATCH /api/submissions/{id}/grade with payload { score, feedback }
   gradeSubmission: (submissionId, data) => axiosClient.patch(`submissions/${submissionId}/grade`, data),
+  // Create a submission (student): POST /api/submissions (multipart/form-data)
+  // Requires exactly one of { assignment_id, exam_id } and an attachment (.use file)
+  submitSubmission: (formData) =>
+    axiosClient.post('submissions', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
   // Remove a student from a class
   // DELETE /api/class/{classId}/students/{classStudentId}
   removeStudentFromClass: (classId, classStudentId) =>
