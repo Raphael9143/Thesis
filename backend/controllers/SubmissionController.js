@@ -632,6 +632,74 @@ const SubmissionController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+
+  // Get submission history for a student by assignment id
+  getSubmissionHistoryByAssignment: async (req, res) => {
+    try {
+      const assignmentId = parseInt(req.params.id, 10);
+      if (Number.isNaN(assignmentId))
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid assignment id" });
+
+      const assignment = await Assignment.findByPk(assignmentId);
+      if (!assignment)
+        return res
+          .status(404)
+          .json({ success: false, message: "Assignment not found" });
+
+      const role = req.user && req.user.role;
+      const userId = req.user && req.user.userId;
+      let targetStudentId = null;
+
+      if (role === "STUDENT") {
+        targetStudentId = userId;
+      } else if (role === "TEACHER" || role === "ADMIN") {
+        const sId = parseInt(req.query.student_id, 10);
+        if (Number.isNaN(sId))
+          return res.status(400).json({
+            success: false,
+            message: "student_id is required as integer",
+          });
+        targetStudentId = sId;
+
+        if (role === "TEACHER") {
+          const ClassCourse = require("../models/ClassCourse");
+          const Class = require("../models/Class");
+          const classCourses = await ClassCourse.findAll({
+            where: { course_id: assignment.course_id },
+            attributes: ["class_id"],
+          });
+          const classIds = classCourses.map((cc) => cc.class_id ?? cc.classId);
+          if (classIds.length === 0)
+            return res.json({ success: true, data: [] });
+          const teacherClass = await Class.findOne({
+            where: { id: classIds, teacherId: userId },
+          });
+          if (!teacherClass)
+            return res
+              .status(403)
+              .json({ success: false, message: "Forbidden" });
+        }
+      } else {
+        return res
+          .status(403)
+          .json({ success: false, message: "Forbidden" });
+      }
+
+      const submissions = await Submission.findAll({
+        where: { assignment_id: assignmentId, student_id: targetStudentId },
+        order: [["created_at", "ASC"]],
+      });
+
+      return res.json({ success: true, data: submissions });
+    } catch (error) {
+      console.error("Get submission history error:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
 };
 
 module.exports = SubmissionController;
