@@ -21,6 +21,7 @@ const ExamController = {
         end_date,
         type,
         submission_limit,
+        status,
       } = req.body;
       if (!course_id || !title)
         return res.status(400).json({
@@ -60,7 +61,7 @@ const ExamController = {
           message: "Invalid type. Allowed: SINGLE or GROUP",
         });
 
-      // handle uploaded single attachment
+  // handle uploaded single attachment
       let attachment = null;
       if (req.file) attachment = "/uploads/exams/" + req.file.filename;
 
@@ -76,6 +77,18 @@ const ExamController = {
         sl = n;
       }
 
+      // validate status if provided
+      let st = "draft";
+      if (status !== undefined) {
+        const allowedStatus = ["draft", "published", "archived"];
+        if (!allowedStatus.includes(status))
+          return res.status(400).json({
+            success: false,
+            message: "Invalid status. Allowed: draft, published, archived",
+          });
+        st = status;
+      }
+
       const exam = await Exam.create({
         course_id,
         title,
@@ -85,6 +98,7 @@ const ExamController = {
         type: type || "SINGLE",
         attachment: attachment || null,
         submission_limit: sl,
+        status: st,
       });
 
       res
@@ -313,6 +327,17 @@ const ExamController = {
         exam.type = req.body.type;
       }
 
+      // allow updating status
+      if (req.body.status !== undefined) {
+        const allowedStatus = ["draft", "published", "archived"];
+        if (!allowedStatus.includes(req.body.status))
+          return res.status(400).json({
+            success: false,
+            message: "Invalid status. Allowed: draft, published, archived",
+          });
+        exam.status = req.body.status;
+      }
+
       // allow updating submission_limit
       if (req.body.submission_limit !== undefined) {
         const n = Number(req.body.submission_limit);
@@ -433,6 +458,17 @@ const ExamController = {
             message: "submission_limit must be an integer >= 1",
           });
         exam.submission_limit = n;
+      }
+
+      // patch: allow updating status
+      if (req.body.status !== undefined) {
+        const allowedStatus = ["draft", "published", "archived"];
+        if (!allowedStatus.includes(req.body.status))
+          return res.status(400).json({
+            success: false,
+            message: "Invalid status. Allowed: draft, published, archived",
+          });
+        exam.status = req.body.status;
       }
 
       if (!exam.start_date || !exam.end_date)

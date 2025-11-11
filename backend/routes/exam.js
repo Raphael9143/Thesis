@@ -33,6 +33,10 @@ const conditionalExamUpload = require("../middlewares/conditionalUpload")(
  *                 type: string
  *               description:
  *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published, archived]
+ *                 example: draft
  *               start_date:
  *                 type: string
  *                 format: date-time
@@ -77,6 +81,10 @@ router.post("/", auth, conditionalExamUpload, ExamController.createExam);
  *                 type: string
  *               description:
  *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published, archived]
+ *                 example: draft
  *               attachment:
  *                 type: string
  *                 format: binary
@@ -98,6 +106,10 @@ router.post("/", auth, conditionalExamUpload, ExamController.createExam);
  *                 type: string
  *               description:
  *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published, archived]
+ *                 example: draft
  *               start_date:
  *                 type: string
  *                 format: date-time
@@ -140,6 +152,10 @@ router.put("/:id", auth, conditionalExamUpload, ExamController.updateExam);
  *                 type: string
  *               description:
  *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [draft, published, archived]
+ *                 example: draft
  *               attachment:
  *                 type: string
  *                 format: binary

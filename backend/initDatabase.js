@@ -178,6 +178,7 @@ const initDatabase = async () => {
     end_date: new Date("2025-10-15T11:00:00Z"),
     type: "SINGLE",
     attachment: "/uploads/exams/banking.use",
+    status: "published",
   });
 
   // Additional sample assignments
@@ -228,6 +229,7 @@ const initDatabase = async () => {
     end_date: new Date("2025-12-10T12:00:00Z"),
     type: "SINGLE",
     attachment: "/uploads/exams/banking.use",
+    status: "published",
   });
 
   // Sample submission (student submitted to the assignment)
