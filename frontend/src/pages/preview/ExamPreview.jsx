@@ -12,6 +12,7 @@ import fmtDate from '../../utils/FormatDate';
 import { formatAvailable, formatDue } from '../../utils/previewMeta';
 import SubmitWork from '../student/SubmitWork';
 import DashedDivider from '../../components/ui/DashedDivider';
+import SubmissionHistory from '../../components/ui/SubmissionHistory';
 
 export default function ExamPreview() {
   const { id, examId } = useParams();
@@ -22,6 +23,7 @@ export default function ExamPreview() {
   const { setTitle: setPageTitle } = usePageInfo();
   const role = (typeof window !== 'undefined' && sessionStorage.getItem('role')) || null;
   // Removed inline submission state (now handled on dedicated submit page)
+  const [contentTab, setContentTab] = useState('problem'); // 'problem' | 'history'
 
   useEffect(() => {
     let mounted = true;
@@ -63,6 +65,8 @@ export default function ExamPreview() {
     return Number.isFinite(t) && Date.now() > t;
   }, [endAt]);
 
+  // History moved to reusable component
+
   // Inline submission removed in favor of dedicated submission page
 
   if (loading)
@@ -89,7 +93,7 @@ export default function ExamPreview() {
     );
   console.log(toFullUrl(exam.attachment));
   return (
-    <Section title={exam.title || 'Exam'}>
+    <Section>
       <Card>
         <div className="exam-preview">
           <div className="preview-meta">
@@ -120,25 +124,42 @@ export default function ExamPreview() {
             </div>
           </div>
           <DashedDivider />
-          <div>
-            <h2>Problem</h2>
-          </div>
-          <div className="preview-body">
-            <div dangerouslySetInnerHTML={{ __html: exam.description || '' }} />
-          </div>
-
-          <div className="model-file">
-            {exam.attachment ? (
-              <FilePreview
-                url={toFullUrl(exam.attachment)}
-                filename={exam.attachment || ''}
-                filePath={exam.attachment}
-              />
-            ) : (
-              <div>No model file attached.</div>
-            )}
-          </div>
-          {!isExpired && role === 'student' && (
+          {role === 'student' && (
+            <div className="preview-tabs" style={{ margin: '12px 0', display: 'flex', gap: 8 }}>
+              <button
+                className={`btn btn-sm ${contentTab === 'problem' ? 'btn-primary' : 'btn-signin'}`}
+                onClick={() => setContentTab('problem')}
+              >
+                Problem
+              </button>
+              <button
+                className={`btn btn-sm ${contentTab === 'history' ? 'btn-primary' : 'btn-signin'}`}
+                onClick={() => setContentTab('history')}
+              >
+                History
+              </button>
+            </div>
+          )}
+          {contentTab === 'problem' && (
+            <>
+              <div className="preview-body">
+                <div dangerouslySetInnerHTML={{ __html: exam.description || '' }} />
+              </div>
+              <div className="model-file">
+                {exam.attachment ? (
+                  <FilePreview
+                    url={toFullUrl(exam.attachment)}
+                    filename={exam.attachment || ''}
+                    filePath={exam.attachment}
+                  />
+                ) : (
+                  <div>No model file attached.</div>
+                )}
+              </div>
+            </>
+          )}
+          {role === 'student' && contentTab === 'history' && <SubmissionHistory type="exam" id={resourceId} />}
+          {!isExpired && role === 'student' && contentTab !== 'history' && (
             <>
               <DashedDivider />
               <div>

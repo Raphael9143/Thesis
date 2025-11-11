@@ -12,6 +12,7 @@ import fmtDate from '../../utils/FormatDate';
 import { formatAvailable, formatDue } from '../../utils/previewMeta';
 import SubmitWork from '../student/SubmitWork';
 import DashedDivider from '../../components/ui/DashedDivider';
+import SubmissionHistory from '../../components/ui/SubmissionHistory';
 
 export default function AssignmentPreview() {
   const { id, assignmentId } = useParams();
@@ -22,6 +23,7 @@ export default function AssignmentPreview() {
   const { setTitle: setPageTitle } = usePageInfo();
   const role = (typeof window !== 'undefined' && sessionStorage.getItem('role')) || null;
   // Removed inline submission state (now handled on dedicated submit page)
+  const [contentTab, setContentTab] = useState('problem'); // 'problem' | 'history'
 
   useEffect(() => {
     let mounted = true;
@@ -62,6 +64,8 @@ export default function AssignmentPreview() {
     const t = new Date(dueAt).getTime();
     return Number.isFinite(t) && Date.now() > t;
   }, [dueAt]);
+
+  // History moved to reusable component
 
   // Inline submission removed in favor of dedicated submission page
 
@@ -122,24 +126,47 @@ export default function AssignmentPreview() {
             </div>
           </div>
 
-          <div className="preview-body">
-            <div dangerouslySetInnerHTML={{ __html: assignment.description || '' }} />
-          </div>
+          {/* Tabs for Problem / History */}
+          {role === 'student' && (
+            <div className="preview-tabs" style={{ margin: '12px 0', display: 'flex', gap: 8 }}>
+              <button
+                className={`btn btn-sm ${contentTab === 'problem' ? 'btn-primary' : 'btn-signin'}`}
+                onClick={() => setContentTab('problem')}
+              >
+                Problem
+              </button>
+              <button
+                className={`btn btn-sm ${contentTab === 'history' ? 'btn-primary' : 'btn-signin'}`}
+                onClick={() => setContentTab('history')}
+              >
+                History
+              </button>
+            </div>
+          )}
 
-          <div className="file-download">
-            {assignment.attachment ? (
-              <div className="file-preview-wrapper">
-                <FilePreview
-                  url={toFullUrl(assignment.attachment)}
-                  filename={assignment.attachment || ''}
-                  filePath={assignment.attachment}
-                />
+          {contentTab === 'problem' && (
+            <>
+              <div className="preview-body">
+                <div dangerouslySetInnerHTML={{ __html: assignment.description || '' }} />
               </div>
-            ) : (
-              <div>No file attached.</div>
-            )}
-          </div>
-          {!isExpired && role === 'student' && (
+              <div className="file-download">
+                {assignment.attachment ? (
+                  <div className="file-preview-wrapper">
+                    <FilePreview
+                      url={toFullUrl(assignment.attachment)}
+                      filename={assignment.attachment || ''}
+                      filePath={assignment.attachment}
+                    />
+                  </div>
+                ) : (
+                  <div>No file attached.</div>
+                )}
+              </div>
+            </>
+          )}
+
+          {role === 'student' && contentTab === 'history' && <SubmissionHistory type="assignment" id={resourceId} />}
+          {!isExpired && role === 'student' && contentTab !== 'history' && (
             <>
               <DashedDivider />
               <div>
