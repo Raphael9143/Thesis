@@ -302,21 +302,21 @@ export default function SubmitWork() {
           {attempts && attempts.remaining_attempts <= 0 && (
             <small className="text-error">You ran out of submissions!</small>
           )}
+          {attempts && attempts.remaining_attempts > 0 && (
+            <div className="submit-actions">
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={onSubmit}
+                disabled={submitting || isExpired || (attempts && attempts.remaining_attempts <= 0)}
+              >
+                {submitting ? 'Submitting...' : 'Submit'}
+              </button>
 
-          <div className="submit-actions">
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={onSubmit}
-              disabled={submitting || isExpired || (attempts && attempts.remaining_attempts <= 0)}
-            >
-              {submitting ? 'Submitting...' : 'Submit'}
-            </button>
-            {attempts && attempts.remaining_attempts >= 0 && (
               <span style={{ marginLeft: 8 }}>
                 Attempts left: {attempts.remaining_attempts}/{attempts.submission_limit}
               </span>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </div>
