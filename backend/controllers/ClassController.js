@@ -341,7 +341,7 @@ const ClassController = {
       if (newStudents.length === 0) {
         return res.status(400).json({
           success: false,
-          message: "Tất cả học sinh đã có trong lớp.",
+          message: "All these students are already in the class.",
         });
       }
 
