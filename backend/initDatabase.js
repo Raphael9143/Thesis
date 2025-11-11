@@ -187,7 +187,7 @@ const initDatabase = async () => {
     title: "Exercise 2: Advanced OCL",
     description: "Advanced exercises to deepen OCL knowledge.",
     created_by: teacherUser.id,
-    attachment: "/uploads/assignments/exercise2.use",
+    attachment: "/uploads/exams/banking.use",
     type: "SINGLE",
     start_date: new Date("2025-10-05T08:00:00Z"),
     end_date: new Date("2025-10-20T23:59:00Z"),
@@ -206,7 +206,7 @@ const initDatabase = async () => {
     title: "Group Project: OCL Use Case",
     description: "A group assignment to model a real-world use case with OCL.",
     created_by: teacherUser.id,
-    attachment: "/uploads/assignments/group_project.use",
+    attachment: "/uploads/exams/banking.use",
     type: "GROUP",
     start_date: new Date("2025-10-25T08:00:00Z"),
     end_date: new Date("2025-11-30T23:59:00Z"),
@@ -239,7 +239,7 @@ const initDatabase = async () => {
     student_id: studentUser.id,
     submission_time: new Date(),
     attempt_number: 1,
-    attachment: "/uploads/submissions/sample.use",
+    attachment: "/uploads/exams/banking.use",
     created_at: new Date(),
   });
 
@@ -263,7 +263,7 @@ const initDatabase = async () => {
         student_id: s.student_id,
         submission_time: new Date(),
         attempt_number: 1,
-        attachment: "/uploads/submissions/sample.use",
+        attachment: "/uploads/exams/banking.use",
         created_at: new Date(),
       });
     } else if (i % 4 === 1) {
@@ -274,7 +274,7 @@ const initDatabase = async () => {
         student_id: s.student_id,
         submission_time: new Date(),
         attempt_number: 1,
-        attachment: "/uploads/submissions/sample.use",
+        attachment: "/uploads/exams/banking.use",
         created_at: new Date(),
       });
     } else if (i % 4 === 2) {
@@ -285,7 +285,7 @@ const initDatabase = async () => {
         student_id: s.student_id,
         submission_time: new Date(),
         attempt_number: 1,
-        attachment: "/uploads/submissions/sample.use",
+        attachment: "/uploads/exams/banking.use",
         created_at: new Date(),
       });
     } else {
@@ -296,7 +296,7 @@ const initDatabase = async () => {
         student_id: s.student_id,
         submission_time: new Date(),
         attempt_number: 1,
-        attachment: "/uploads/submissions/sample.use",
+        attachment: "/uploads/exams/banking.use",
         created_at: new Date(),
       });
     }
