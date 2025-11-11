@@ -49,6 +49,14 @@ const conditionalExamUpload = require("../middlewares/conditionalUpload")(
  *                 example: SINGLE
  *               model_file:
  *                 type: string
+ *           example:
+ *             course_id: 10
+ *             title: "Midterm Exam"
+ *             description: "Midterm covering chapters 1-5"
+ *             status: "draft"
+ *             start_date: "2025-10-15T09:00:00Z"
+ *             end_date: "2025-10-15T11:00:00Z"
+ *             type: "SINGLE"
  *     responses:
  *       201:
  *         description: Exam created
@@ -98,6 +106,15 @@ router.post("/", auth, conditionalExamUpload, ExamController.createExam);
  *                 type: string
  *                 enum: [SINGLE, GROUP]
  *                 example: SINGLE
+ *           examples:
+ *             update_title_and_file:
+ *               summary: Update title and upload new file
+ *               value:
+ *                 title: "Midterm Exam - Updated"
+ *                 status: "published"
+ *                 start_date: "2025-10-15T09:00:00Z"
+ *                 end_date: "2025-10-15T11:00:00Z"
+ *                 type: "SINGLE"
  *         application/json:
  *           schema:
  *             type: object
@@ -120,6 +137,13 @@ router.post("/", auth, conditionalExamUpload, ExamController.createExam);
  *                 type: string
  *                 enum: [SINGLE, GROUP]
  *                 example: SINGLE
+ *           example:
+ *             title: "Midterm Exam - Revised"
+ *             description: "Extended coverage up to chapter 6"
+ *             status: "published"
+ *             start_date: "2025-10-15T09:00:00Z"
+ *             end_date: "2025-10-15T11:10:00Z"
+ *             type: "SINGLE"
  *     responses:
  *       200:
  *         description: Exam updated
@@ -165,6 +189,11 @@ router.put("/:id", auth, conditionalExamUpload, ExamController.updateExam);
  *               end_date:
  *                 type: string
  *                 format: date-time
+ *           examples:
+ *             patch_status_publish:
+ *               summary: Publish exam via multipart
+ *               value:
+ *                 status: "published"
  *     responses:
  *       200:
  *         description: Exam patched
@@ -199,6 +228,15 @@ router.patch("/:id", auth, conditionalExamUpload, ExamController.patchExam);
  *                 type: string
  *                 enum: [draft, published, archived]
  *                 example: published
+ *           examples:
+ *             publish_exam:
+ *               summary: Publish the exam
+ *               value:
+ *                 status: "published"
+ *             archive_exam:
+ *               summary: Archive the exam
+ *               value:
+ *                 status: "archived"
  *     responses:
  *       200:
  *         description: Exam status updated

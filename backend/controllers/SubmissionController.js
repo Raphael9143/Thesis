@@ -1,7 +1,6 @@
 const Submission = require("../models/Submission");
 const Assignment = require("../models/Assignment");
 const AssignmentCourse = require("../models/AssignmentCourse");
-const Class = require("../models/Class");
 const ClassStudent = require("../models/ClassStudent");
 
 const SubmissionController = {
@@ -15,7 +14,7 @@ const SubmissionController = {
         });
       }
 
-      const { assignment_id, exam_id, class_id } = req.body;
+  const { assignment_id, exam_id } = req.body;
 
       // Require either assignment_id or exam_id (but not both)
       if (!assignment_id && !exam_id) {
@@ -31,26 +30,17 @@ const SubmissionController = {
         });
       }
 
-      // Validate class exists
-      if (!class_id)
-        return res
-          .status(400)
-          .json({ success: false, message: "class_id is required." });
-      const classObj = await Class.findByPk(class_id);
-      if (!classObj)
-        return res
-          .status(404)
-          .json({ success: false, message: "Class does not exist." });
-
-      // Check student is member of the class
-      const isMember = await ClassStudent.findOne({
-        where: { classId: class_id, studentId: req.user.userId },
+      // Determine student's enrolled classes for eligibility checks (no class_id in payload)
+      const { Op } = require("sequelize");
+      const enrolments = await ClassStudent.findAll({
+        where: { studentId: req.user.userId },
+        attributes: ["classId"],
       });
-      if (!isMember)
-        return res.status(403).json({
-          success: false,
-          message: "You are not a member of this class.",
-        });
+      const enrolledClassIds = enrolments.map((e) => e.classId ?? e.class_id);
+
+      let maxAttempts = 1;
+      let targetType = null; // 'assignment' | 'exam'
+      let targetId = null;
 
       if (assignment_id) {
         const assignment = await Assignment.findByPk(assignment_id);
@@ -59,7 +49,7 @@ const SubmissionController = {
             .status(404)
             .json({ success: false, message: "Assignment not found." });
 
-        // verify assignment belongs to its course/class mapping (AssignmentCourse)
+        // verify assignment belongs to its course via AssignmentCourse
         const assignmentCourse = await AssignmentCourse.findOne({
           where: {
             assignment_id: assignment_id,
@@ -69,8 +59,33 @@ const SubmissionController = {
         if (!assignmentCourse)
           return res.status(403).json({
             success: false,
-            message: "This assignment does not belong to this class.",
+            message: "This assignment is not linked to a course.",
           });
+
+        // Ensure the student is enrolled in at least one class linked to this course
+        const ClassCourseModel = require("../models/ClassCourse");
+        if (!enrolledClassIds || enrolledClassIds.length === 0) {
+          return res.status(403).json({
+            success: false,
+            message: "You are not enrolled in any class.",
+          });
+        }
+        const courseClass = await ClassCourseModel.findOne({
+          where: {
+            course_id: assignment.course_id,
+            class_id: { [Op.in]: enrolledClassIds },
+          },
+        });
+        if (!courseClass) {
+          return res.status(403).json({
+            success: false,
+            message:
+              "You are not enrolled in a class associated with this course.",
+          });
+        }
+        maxAttempts = Number(assignment.submission_limit || 1) || 1;
+        targetType = "assignment";
+        targetId = assignment_id;
       } else {
         // exam_id path
         const exam = await require("../models/Exam").findByPk(exam_id);
@@ -79,36 +94,63 @@ const SubmissionController = {
             .status(404)
             .json({ success: false, message: "Exam not found." });
 
-        // verify course-class mapping via ClassCourse
+        // Ensure the student is enrolled in at least one class linked to this course
         const ClassCourseModel = require("../models/ClassCourse");
-        const link = await ClassCourseModel.findOne({
-          where: { course_id: exam.course_id, class_id: class_id },
-        });
-        if (!link)
+        if (!enrolledClassIds || enrolledClassIds.length === 0) {
           return res.status(403).json({
             success: false,
-            message: "This exam does not belong to this class.",
+            message: "You are not enrolled in any class.",
           });
+        }
+        const courseClass = await ClassCourseModel.findOne({
+          where: {
+            course_id: exam.course_id,
+            class_id: { [Op.in]: enrolledClassIds },
+          },
+        });
+        if (!courseClass) {
+          return res.status(403).json({
+            success: false,
+            message:
+              "You are not enrolled in a class associated with this course.",
+          });
+        }
+        maxAttempts = Number(exam.submission_limit || 1) || 1;
+        targetType = "exam";
+        targetId = exam_id;
       }
 
       // Attachment (single file) is required and must be a .use file
-      if (!req.file)
+      const uploadedFile = req.file || (req.files && req.files[0]);
+      if (!uploadedFile)
         return res
           .status(400)
           .json({ success: false, message: "Attachment file is required." });
-      const filename = req.file.filename || "";
+      const filename = uploadedFile.filename || "";
       if (!filename.toLowerCase().endsWith(".use"))
         return res
           .status(400)
           .json({ success: false, message: "Attachment must be a .use file." });
-      const attachment = "/uploads/submission/" + filename;
+      const attachment = "/uploads/submissions/" + filename;
 
       // Determine attempt number
       const whereCount = { student_id: req.user.userId };
-      if (assignment_id) whereCount.assignment_id = assignment_id;
-      if (exam_id) whereCount.exam_id = exam_id;
-      const attempt_number =
-        (await Submission.count({ where: whereCount })) + 1;
+      if (targetType === "assignment") whereCount.assignment_id = targetId;
+      if (targetType === "exam") whereCount.exam_id = targetId;
+      const existingAttempts = await Submission.count({ where: whereCount });
+
+      if (existingAttempts >= maxAttempts) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message:
+              `Maximum attempts reached (${maxAttempts}). ` +
+              `No more submissions allowed for this ${targetType}.`,
+          });
+      }
+
+      const attempt_number = existingAttempts + 1;
 
       // Create submission record
       const submission = await Submission.create({
