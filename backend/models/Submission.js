@@ -9,10 +9,6 @@ const Submission = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    class_assignment_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
     assignment_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
