@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import '../../assets/styles/components/ui/UMLPreview.css';
 import { offsetAlong, pushOutward, perpOffset, intersectBorder, fmtMultiplicity } from '../../utils/umlUtils';
 import useBoxMeasurements from '../../hooks/useBoxMeasurements';
@@ -88,7 +89,7 @@ export default function UMLPreview({ model, cli, onClose }) {
 
   // fmtMultiplicity moved to utils
 
-  return (
+  const overlay = (
     <div className="uml-modal-overlay">
       <div className="uml-modal">
         <UMLHeader model={model} onClose={onClose} />
@@ -132,4 +133,7 @@ export default function UMLPreview({ model, cli, onClose }) {
       </div>
     </div>
   );
+
+  // Render overlay at document.body to escape any parent stacking contexts
+  return typeof document !== 'undefined' ? createPortal(overlay, document.body) : overlay;
 }
