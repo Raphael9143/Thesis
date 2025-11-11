@@ -2,6 +2,7 @@ import React from 'react';
 import toFullUrl from '../../utils/FullURLFile';
 import useSubmissionHistory from '../../hooks/useSubmissionHistory';
 import Modal from './Modal';
+import FilePreview from './FilePreview';
 import '../../assets/styles/components/ui/SubmissionHistory.css';
 
 /**
@@ -36,6 +37,8 @@ export default function SubmissionHistory({ type, id }) {
 function HistoryTable({ history }) {
   const [feedbackOpen, setFeedbackOpen] = React.useState(false);
   const [feedbackText, setFeedbackText] = React.useState('');
+  const [previewOpen, setPreviewOpen] = React.useState(false);
+  const [previewAttachment, setPreviewAttachment] = React.useState('');
 
   return (
     <div className="submission-history">
@@ -45,6 +48,7 @@ function HistoryTable({ history }) {
             <th>Attempt</th>
             <th>Submitted At</th>
             <th>Score</th>
+            <th>Preview</th>
             <th>Attachment</th>
             <th>Feedback</th>
           </tr>
@@ -59,6 +63,22 @@ function HistoryTable({ history }) {
                 <td>{s.attempt_number != null ? s.attempt_number : '-'}</td>
                 <td>{ts}</td>
                 <td>{s.score != null ? s.score : 'Not Graded'}</td>
+                <td>
+                  {s.attachment ? (
+                    <button
+                      type="button"
+                      className="btn btn-sm"
+                      onClick={() => {
+                        setPreviewAttachment(String(s.attachment || ''));
+                        setPreviewOpen(true);
+                      }}
+                    >
+                      Preview
+                    </button>
+                  ) : (
+                    '-'
+                  )}
+                </td>
                 <td>
                   {s.attachment ? (
                     <a className="btn btn-sm" href={toFullUrl(s.attachment)} target="_blank" rel="noreferrer">
@@ -91,6 +111,13 @@ function HistoryTable({ history }) {
       </table>
       <Modal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} title="Feedback">
         <pre className="submission-history-feedback">{feedbackText}</pre>
+      </Modal>
+      <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="Submission Preview">
+        {previewAttachment ? (
+          <FilePreview url={toFullUrl(previewAttachment)} filename={previewAttachment} filePath={previewAttachment} />
+        ) : (
+          <div>No file</div>
+        )}
       </Modal>
     </div>
   );
