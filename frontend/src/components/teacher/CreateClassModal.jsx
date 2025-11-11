@@ -141,12 +141,12 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
         onCreated?.(res.data);
         onClose?.();
       } else {
-        setNotifyMsg(res?.message || 'Failed to create class');
+        setNotifyMsg(res?.response?.data?.message || 'Failed to create class');
         setNotifyType('error');
         setNotifyOpen(true);
       }
     } catch (err) {
-      setNotifyMsg(err?.response?.message || 'Server error');
+      setNotifyMsg(err?.response?.data?.message || 'Server error');
       setNotifyType('error');
       setNotifyOpen(true);
     }
