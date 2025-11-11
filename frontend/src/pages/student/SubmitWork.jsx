@@ -216,95 +216,93 @@ export default function SubmitWork() {
   };
 
   return (
-    <Section title={isAssignment ? 'Submit Assignment' : isExam ? 'Submit Exam' : 'Submit'}>
-      <Card>
-        {loading && <div>Loading...</div>}
-        {error && <div className="text-error">{error}</div>}
-        {!loading && !error && (
-          <div className="submit-container">
-            <div className="submit-toggle">
-              <button
-                className={`btn btn-sm ${mode === 'editor' ? 'btn-primary' : ''}`}
-                onClick={() => setMode('editor')}
-                disabled={submitting}
-              >
-                Write Code
-              </button>
-              <button
-                className={`btn btn-sm ${mode === 'file' ? 'btn-primary' : ''}`}
-                onClick={() => setMode('file')}
-                disabled={submitting}
-              >
-                Upload File
-              </button>
-            </div>
+    <div>
+      {loading && <div>Loading...</div>}
+      {error && <div className="text-error">{error}</div>}
+      {!loading && !error && (
+        <div className="submit-container">
+          <div className="submit-toggle">
+            <button
+              className={`btn btn-sm ${mode === 'editor' ? 'btn-primary' : ''}`}
+              onClick={() => setMode('editor')}
+              disabled={submitting}
+            >
+              Write Code
+            </button>
+            <button
+              className={`btn btn-sm ${mode === 'file' ? 'btn-primary' : ''}`}
+              onClick={() => setMode('file')}
+              disabled={submitting}
+            >
+              Upload File
+            </button>
+          </div>
 
-            {mode === 'editor' ? (
-              <div className="editor-pane">
-                <div className="code-editor-container">
-                  <div className="line-numbers" ref={numbersRef} aria-hidden="true">
-                    {Array.from({ length: lineCount }).map((_, idx) => (
-                      <div key={idx} className="line-number">
-                        {idx + 1}
-                      </div>
-                    ))}
-                  </div>
-                  <textarea
-                    ref={textareaRef}
-                    className="code-editor"
-                    placeholder={'// Enter .use code here\n'}
-                    rows={16}
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    onScroll={syncScroll}
-                    onKeyDown={handleTabKey}
-                    disabled={submitting || isExpired}
-                    spellCheck={false}
-                  />
+          {mode === 'editor' ? (
+            <div className="editor-pane">
+              <div className="code-editor-container">
+                <div className="line-numbers" ref={numbersRef} aria-hidden="true">
+                  {Array.from({ length: lineCount }).map((_, idx) => (
+                    <div key={idx} className="line-number">
+                      {idx + 1}
+                    </div>
+                  ))}
                 </div>
-                <div className="editor-controls">
-                  <label className="inline-flex align-center gap-8">
-                    <input
-                      type="checkbox"
-                      checked={useSpaces}
-                      onChange={(e) => setUseSpaces(e.target.checked)}
-                      disabled={submitting || isExpired}
-                    />
-                    Use 4 spaces for Tab
-                  </label>
-                </div>
-              </div>
-            ) : (
-              <div className="file-pane">
-                <input
-                  type="file"
-                  accept=".use"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                <textarea
+                  ref={textareaRef}
+                  className="code-editor"
+                  placeholder={'// Enter .use code here\n'}
+                  rows={16}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  onScroll={syncScroll}
+                  onKeyDown={handleTabKey}
                   disabled={submitting || isExpired}
+                  spellCheck={false}
                 />
               </div>
-            )}
-
-            {isExpired && <small className="text-error">Submissions are closed.</small>}
-            {attempts && attempts.remaining_attempts <= 0 && <small className="text-error">Bạn đã hết lượt nộp.</small>}
-
-            <div className="submit-actions">
-              <button
-                className="btn btn-primary"
-                onClick={onSubmit}
-                disabled={submitting || isExpired || (attempts && attempts.remaining_attempts <= 0)}
-              >
-                {submitting ? 'Submitting...' : 'Submit'}
-              </button>
-              {attempts && attempts.remaining_attempts >= 0 && (
-                <span style={{ marginLeft: 8 }}>
-                  Attempts left: {attempts.remaining_attempts}/{attempts.submission_limit}
-                </span>
-              )}
+              <div className="editor-controls">
+                <label className="inline-flex align-center gap-8">
+                  <input
+                    type="checkbox"
+                    checked={useSpaces}
+                    onChange={(e) => setUseSpaces(e.target.checked)}
+                    disabled={submitting || isExpired}
+                  />
+                  Use 4 spaces for Tab
+                </label>
+              </div>
             </div>
+          ) : (
+            <div className="file-pane">
+              <input
+                type="file"
+                accept=".use"
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                disabled={submitting || isExpired}
+              />
+            </div>
+          )}
+
+          {isExpired && <small className="text-error">Submissions are closed.</small>}
+          {attempts && attempts.remaining_attempts <= 0 && <small className="text-error">Bạn đã hết lượt nộp.</small>}
+
+          <div className="submit-actions">
+            <button
+              className="btn btn-primary"
+              onClick={onSubmit}
+              disabled={submitting || isExpired || (attempts && attempts.remaining_attempts <= 0)}
+            >
+              {submitting ? 'Submitting...' : 'Submit'}
+            </button>
+            {attempts && attempts.remaining_attempts >= 0 && (
+              <span style={{ marginLeft: 8 }}>
+                Attempts left: {attempts.remaining_attempts}/{attempts.submission_limit}
+              </span>
+            )}
           </div>
-        )}
-      </Card>
-    </Section>
+        </div>
+      )}
+    </div>
   );
 }

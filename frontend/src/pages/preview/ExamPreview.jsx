@@ -4,22 +4,21 @@ import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
 import userAPI from '../../../services/userAPI';
 import { usePageInfo } from '../../contexts/PageInfoContext';
-import { useNotifications } from '../../contexts/NotificationContext';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/ExamPreview.css';
 import FilePreview from '../../components/ui/FilePreview';
 import toFullUrl from '../../utils/FullURLFile';
 import fmtDate from '../../utils/FormatDate';
 import { formatAvailable, formatDue } from '../../utils/previewMeta';
+import SubmitWork from '../student/SubmitWork';
 
 export default function ExamPreview() {
-  const { id, examId, classId, courseId } = useParams();
+  const { id, examId } = useParams();
   const resourceId = id || examId;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [exam, setExam] = useState(null);
   const { setTitle: setPageTitle } = usePageInfo();
-  const { push } = useNotifications();
   const role = (typeof window !== 'undefined' && sessionStorage.getItem('role')) || null;
   // Removed inline submission state (now handled on dedicated submit page)
 
@@ -135,10 +134,10 @@ export default function ExamPreview() {
               <div>No model file attached.</div>
             )}
           </div>
-
+          {!isExpired && role === 'student' && <SubmitWork />}
+          {/* 
           {role === 'student' && classId && courseId && (
             <div className="mt-16">
-              <h4 className="no-margin">Submit your work (.use)</h4>
               <div className="mt-8">
                 <Link
                   to={`/education/student/classes/${classId}/courses/${courseId}/exams/${resourceId}/submit`}
@@ -156,7 +155,7 @@ export default function ExamPreview() {
               </div>
               {isExpired && <small className="text-error">Submissions are closed for this exam.</small>}
             </div>
-          )}
+          )} */}
           {role === 'teacher' && (
             <div className="meta-small mt-12">
               <small>

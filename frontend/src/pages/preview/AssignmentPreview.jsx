@@ -1,25 +1,24 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
 import userAPI from '../../../services/userAPI';
 import { usePageInfo } from '../../contexts/PageInfoContext';
-import { useNotifications } from '../../contexts/NotificationContext';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/AssignmentPreview.css';
 import FilePreview from '../../components/ui/FilePreview';
 import toFullUrl from '../../utils/FullURLFile';
 import fmtDate from '../../utils/FormatDate';
 import { formatAvailable, formatDue } from '../../utils/previewMeta';
+import SubmitWork from '../student/SubmitWork';
 
 export default function AssignmentPreview() {
-  const { id, assignmentId, classId, courseId } = useParams();
+  const { id, assignmentId } = useParams();
   const resourceId = id || assignmentId;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [assignment, setAssignment] = useState(null);
   const { setTitle: setPageTitle } = usePageInfo();
-  const { push } = useNotifications();
   const role = (typeof window !== 'undefined' && sessionStorage.getItem('role')) || null;
   // Removed inline submission state (now handled on dedicated submit page)
 
@@ -89,7 +88,7 @@ export default function AssignmentPreview() {
     );
   console.log(toFullUrl(assignment.attachment));
   return (
-    <Section title={assignment.title || 'Assignment'}>
+    <Section>
       <Card>
         <div className="assignment-preview">
           <div className="preview-meta">
@@ -139,8 +138,12 @@ export default function AssignmentPreview() {
               <div>No file attached.</div>
             )}
           </div>
+          <div>
+            <p>Submit</p>
+          </div>
+          {!isExpired && role === 'student' && <SubmitWork />}
 
-          {role === 'student' && classId && courseId && (
+          {/* {role === 'student' && classId && courseId && (
             <div className="mt-16">
               <h4 className="no-margin">Submit your work (.use)</h4>
               <div className="mt-8">
@@ -160,7 +163,7 @@ export default function AssignmentPreview() {
               </div>
               {isExpired && <small className="text-error">Submissions are closed for this assignment.</small>}
             </div>
-          )}
+          )} */}
           <div className="meta-small mt-12">
             <small>
               Created: {fmtDate(assignment.created_at)} • Updated: {fmtDate(assignment.updated_at)}
