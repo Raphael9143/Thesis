@@ -17,9 +17,6 @@ export default function CourseTabs() {
   return (
     <div className="course-tabs">
       <nav className="course-tabs__nav">
-        <NavLink to={base} end className={linkClass}>
-          Overview
-        </NavLink>
         <NavLink to={`${base}/lectures`} className={linkClass}>
           Lectures
         </NavLink>

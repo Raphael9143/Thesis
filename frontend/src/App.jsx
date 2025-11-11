@@ -12,7 +12,6 @@ import StudentProfile from './pages/student/Profile';
 import StudentClassesPage from './pages/student/Classes';
 import ClassesPage from './pages/teacher/Classes';
 import ClassDetailTeacherPage from './pages/teacher/ClassDetail';
-import CourseOverview from './pages/teacher/course/CourseOverview';
 import LecturesList from './pages/teacher/course/LecturesList';
 import AssignmentsList from './pages/teacher/course/AssignmentsList';
 import ExamsList from './pages/teacher/course/ExamsList';
@@ -73,8 +72,7 @@ const router = createBrowserRouter(
             </RequireRole>
           }
         >
-          <Route index element={<CourseOverview />} />
-          <Route path="lectures" element={<LecturesList />} />
+          <Route index path="lectures" element={<LecturesList />} />
           <Route path="assignments" element={<AssignmentsList />} />
           <Route path="exams" element={<ExamsList />} />
           <Route
