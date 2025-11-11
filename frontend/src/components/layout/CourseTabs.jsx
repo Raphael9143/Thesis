@@ -1,16 +1,19 @@
 import React from 'react';
-import { NavLink, useParams } from 'react-router-dom';
+import { NavLink, useLocation, useParams } from 'react-router-dom';
 import '../../assets/styles/components/layout/coursestab.css';
 import { usePageInfo } from '../../contexts/PageInfoContext';
 
 export default function CourseTabs() {
   const { id: classId, courseId } = useParams();
+  const location = useLocation();
   const role = (typeof window !== 'undefined' && sessionStorage.getItem('role')) || null;
   const { showCourseNav } = usePageInfo();
 
   if (!showCourseNav) return null;
 
-  const base = `/education/teacher/classes/${classId}/courses/${courseId}`;
+  const pathRole = location.pathname.includes('/education/student/') ? 'student' : null;
+  const effectiveRole = pathRole || (role === 'student' ? 'student' : 'teacher');
+  const base = `/education/${effectiveRole}/classes/${classId}/courses/${courseId}`;
 
   const linkClass = ({ isActive }) => `course-tab ${isActive ? 'active' : ''}`;
 
