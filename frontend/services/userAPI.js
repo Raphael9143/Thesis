@@ -70,6 +70,11 @@ const userAPI = {
   // e.g. GET /api/submissions/assignment/{id} and GET /api/submissions/exam/{id}
   getSubmissionsByAssignmentId: (assignmentId) => axiosClient.get(`submissions/assignment/${assignmentId}`),
   getSubmissionsByExamId: (examId) => axiosClient.get(`submissions/exam/${examId}`),
+  // History endpoints (student's submission attempts history)
+  // GET /api/submissions/assignment/{id}/history
+  getAssignmentSubmissionHistory: (assignmentId) => axiosClient.get(`submissions/assignment/${assignmentId}/history`),
+  // GET /api/submissions/exam/{id}/history
+  getExamSubmissionHistory: (examId) => axiosClient.get(`submissions/exam/${examId}/history`),
   // Remaining attempts
   getExamRemainingAttempts: (examId) => axiosClient.get(`submissions/exam/${examId}/remaining-attempts`),
   getAssignmentRemainingAttempts: (assignmentId) =>
