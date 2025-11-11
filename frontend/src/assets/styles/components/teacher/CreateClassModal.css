@@ -62,8 +62,22 @@
 }
 
 .create-class-student-emails .input-row .btn {
-    border: none;
-    font-size: 1.6rem;
+  border: none;
+  font-size: 1.6rem;
+}
+
+.add-student-emails {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--brand);
+  cursor: pointer;
+  width: 90%;
+}
+
+.input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 @media (max-width: 600px) {
@@ -75,4 +89,3 @@
     align-items: stretch;
   }
 }
-

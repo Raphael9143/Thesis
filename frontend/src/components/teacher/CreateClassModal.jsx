@@ -191,20 +191,19 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
         <div className="create-class-student-emails">
           <label className="font-600">Student emails</label>
           <div className="input-row">
-            <input
-              className="auth-input"
-              value={studentEmailsInput}
-              onChange={(e) => setStudentEmailsInput(e.target.value)}
-              placeholder="Type to search student emails"
-            />
-            <button className="btn btn-icon" title="Add" onClick={() => addEmail(studentEmailsInput)}>
-              <i className="fa-solid fa-circle-plus"></i>
-            </button>
+            <div className="input-group">
+              <input
+                className="auth-input"
+                value={studentEmailsInput}
+                onChange={(e) => setStudentEmailsInput(e.target.value)}
+                placeholder="Type to search student emails"
+              />
+            </div>
           </div>
           {suggestions.length > 0 && (
             <div className="suggestions">
               {suggestions.map((s) => (
-                <button key={s} className="btn" onClick={() => addEmail(s)}>
+                <button key={s} className="btn btn-signin btn-sm" onClick={() => addEmail(s)} style={{ margin: 4 }}>
                   {s}
                 </button>
               ))}

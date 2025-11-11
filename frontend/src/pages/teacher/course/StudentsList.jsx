@@ -7,6 +7,7 @@ import '../../../assets/styles/ui.css';
 import { useNotifications } from '../../../contexts/NotificationContext';
 import useTitle from '../../../hooks/useTitle';
 import '../../../assets/styles/components/teacher/course/StudentList.css';
+import AddStudentsModal from '../../../components/teacher/AddStudentsModal';
 
 export default function StudentsList() {
   const { id, courseId } = useParams(); // id is class id, courseId available from parent route
@@ -19,6 +20,7 @@ export default function StudentsList() {
   const navigate = useNavigate();
 
   const [searchParams, setSearchParams] = useSearchParams();
+  const [addModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -72,6 +74,26 @@ export default function StudentsList() {
 
   useTitle('Students');
 
+  const refreshStudents = async () => {
+    try {
+      const pageParam = Number(searchParams.get('page')) || 1;
+      const res = await userAPI.getStudentsByClass(id, { page: pageParam });
+      if (res?.success && Array.isArray(res.data)) {
+        setStudents(res.data);
+        if (res.pagination) {
+          setPagination({
+            page: res.pagination.page || pageParam,
+            pageSize: res.pagination.pageSize || (res.pagination.pageSize === 0 ? 0 : 20),
+            total: res.pagination.total || 0,
+            totalPages: res.pagination.totalPages || 1,
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('refreshStudents failed', err);
+    }
+  };
+
   const removeStudentFromClass = async (s) => {
     try {
       const ok = window.confirm('Remove this student from the class?');
@@ -97,6 +119,11 @@ export default function StudentsList() {
   return (
     <Section>
       <Card>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+          <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>
+            Add student
+          </button>
+        </div>
         {loading && <div>Loading students...</div>}
         {error && <div className="text-error">{error}</div>}
         {!loading && !error && students.length === 0 && <div>No students enrolled.</div>}
@@ -193,6 +220,14 @@ export default function StudentsList() {
           </div>
         )}
       </Card>
+      <AddStudentsModal
+        open={addModalOpen}
+        onClose={() => setAddModalOpen(false)}
+        classId={id}
+        onAdded={async () => {
+          await refreshStudents();
+        }}
+      />
     </Section>
   );
 }

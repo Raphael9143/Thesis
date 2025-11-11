@@ -232,6 +232,7 @@
 	border: 1px solid var(--border);
 	border-radius: 12px;
 	background: #fff;
+  color: var(--black);
 }
 
 .login-register-form {
