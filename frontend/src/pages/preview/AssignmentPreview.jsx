@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
 import userAPI from '../../../services/userAPI';
 import { usePageInfo } from '../../contexts/PageInfoContext';
+import { useNotifications } from '../../contexts/NotificationContext';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/AssignmentPreview.css';
 import FilePreview from '../../components/ui/FilePreview';
@@ -12,12 +13,15 @@ import fmtDate from '../../utils/FormatDate';
 import { formatAvailable, formatDue } from '../../utils/previewMeta';
 
 export default function AssignmentPreview() {
-  const { id, assignmentId } = useParams();
+  const { id, assignmentId, classId, courseId } = useParams();
   const resourceId = id || assignmentId;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [assignment, setAssignment] = useState(null);
   const { setTitle: setPageTitle } = usePageInfo();
+  const { push } = useNotifications();
+  const role = (typeof window !== 'undefined' && sessionStorage.getItem('role')) || null;
+  // Removed inline submission state (now handled on dedicated submit page)
 
   useEffect(() => {
     let mounted = true;
@@ -47,6 +51,19 @@ export default function AssignmentPreview() {
       mounted = false;
     };
   }, [id, resourceId, setPageTitle]);
+
+  const dueAt = useMemo(() => {
+    if (!assignment) return null;
+    return assignment.end_date || assignment?.courses?.[0]?.assignment_course?.due_date || assignment.due_date || null;
+  }, [assignment]);
+
+  const isExpired = useMemo(() => {
+    if (!dueAt) return false;
+    const t = new Date(dueAt).getTime();
+    return Number.isFinite(t) && Date.now() > t;
+  }, [dueAt]);
+
+  // Inline submission removed in favor of dedicated submission page
 
   if (loading)
     return (
@@ -123,6 +140,27 @@ export default function AssignmentPreview() {
             )}
           </div>
 
+          {role === 'student' && classId && courseId && (
+            <div className="mt-16">
+              <h4 className="no-margin">Submit your work (.use)</h4>
+              <div className="mt-8">
+                <Link
+                  to={`/education/student/classes/${classId}/courses/${courseId}/assignments/${resourceId}/submit`}
+                  className={`btn btn-primary ${isExpired ? 'disabled' : ''}`}
+                  aria-disabled={isExpired}
+                  onClick={(e) => {
+                    if (isExpired) {
+                      e.preventDefault();
+                      push({ title: 'Closed', body: 'Submissions are closed for this assignment.' });
+                    }
+                  }}
+                >
+                  Go to Submit Page
+                </Link>
+              </div>
+              {isExpired && <small className="text-error">Submissions are closed for this assignment.</small>}
+            </div>
+          )}
           <div className="meta-small mt-12">
             <small>
               Created: {fmtDate(assignment.created_at)} • Updated: {fmtDate(assignment.updated_at)}

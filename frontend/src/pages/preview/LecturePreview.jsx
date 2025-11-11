@@ -27,6 +27,8 @@ export default function LecturePreview() {
   const [notifyType, setNotifyType] = useState('info');
   // use hook to set page title
 
+  const role = (typeof window !== 'undefined' && sessionStorage.getItem('role')) || null;
+
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -183,11 +185,13 @@ export default function LecturePreview() {
               <div>No attachments.</div>
             )}
           </div>
-          <div className="mt-12">
-            <small>
-              Created: {fmtDate(lecture.createdAt)} • Updated: {fmtDate(lecture.updatedAt)}
-            </small>
-          </div>
+          {role === 'teacher' && (
+            <div className="mt-12">
+              <small>
+                Created: {fmtDate(lecture.createdAt)} • Updated: {fmtDate(lecture.updatedAt)}
+              </small>
+            </div>
+          )}
         </div>
       </Card>
 

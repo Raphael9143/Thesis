@@ -28,6 +28,7 @@ import ClassCoursesStudentPage from './pages/student/ClassCourses';
 import LecturePreview from './pages/preview/LecturePreview';
 import AssignmentPreview from './pages/preview/AssignmentPreview';
 import ExamPreview from './pages/preview/ExamPreview';
+import SubmitWork from './pages/student/SubmitWork';
 import RequireAuth from './components/routing/RequireAuth';
 import RequireRole from './components/routing/RequireRole';
 import Unauthorized from './pages/Unauthorized';
@@ -215,6 +216,22 @@ const router = createBrowserRouter(
           element={
             <RequireRole allowed={['student']}>
               <ExamPreview />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/education/student/classes/:classId/courses/:courseId/assignments/:assignmentId/submit"
+          element={
+            <RequireRole allowed={['student']}>
+              <SubmitWork />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/education/student/classes/:classId/courses/:courseId/exams/:examId/submit"
+          element={
+            <RequireRole allowed={['student']}>
+              <SubmitWork />
             </RequireRole>
           }
         />
