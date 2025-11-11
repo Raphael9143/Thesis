@@ -147,7 +147,6 @@ const AssignmentController = {
       });
 
       const data = assignments.map((a) => a.toJSON());
-
       res.json({ success: true, data });
     } catch (error) {
       console.error("Get all assignments error:", error);
@@ -166,21 +165,12 @@ const AssignmentController = {
           .status(400)
           .json({ success: false, message: "Missing classId." });
       }
-      // Find course_ids for this class
       const classCourses = await ClassCourse.findAll({
         where: { class_id: classId },
       });
       const courseIds = classCourses.map((cc) => cc.course_id);
       if (courseIds.length === 0) return res.json({ success: true, data: [] });
 
-      const assignmentCourses = await AssignmentCourse.findAll({
-        where: { course_id: courseIds },
-      });
-      const assignmentIds = assignmentCourses.map((ac) => ac.assignment_id);
-      if (assignmentIds.length === 0)
-        return res.json({ success: true, data: [] });
-
-      // assignments belong to a single course via course_id
       const assignments = await Assignment.findAll({
         where: { course_id: courseIds },
         include: [
@@ -199,7 +189,6 @@ const AssignmentController = {
       });
 
       const data = assignments.map((a) => a.toJSON());
-
       res.json({ success: true, data });
     } catch (error) {
       console.error("Get assignments by class error:", error);
@@ -452,17 +441,13 @@ const AssignmentController = {
     }
   },
 
-  // Get assignment by id
+  // Get assignment by id (admin, related teacher, or enrolled student)
   getAssignmentById: async (req, res) => {
     try {
-      if (
-        !req.user ||
-        (req.user.role !== "ADMIN" && req.user.role !== "TEACHER")
-      )
-        return res.status(403).json({
-          success: false,
-          message: "Only admin or teacher can access.",
-        });
+      if (!req.user)
+        return res
+          .status(403)
+          .json({ success: false, message: "Authentication required." });
       const { id } = req.params;
       const assignment = await Assignment.findByPk(id, {
         include: [
@@ -482,6 +467,42 @@ const AssignmentController = {
         return res
           .status(404)
           .json({ success: false, message: "Assignment not found." });
+
+      const user = req.user;
+      if (user.role === "ADMIN") {
+        // allowed
+      } else if (user.role === "TEACHER") {
+        const classCourse = await ClassCourse.findOne({
+          where: { course_id: assignment.course_id },
+        });
+        let classObj = null;
+        if (classCourse) classObj = await Class.findByPk(classCourse.class_id);
+        const isCreator = assignment.created_by === user.userId;
+        const isClassTeacher = classObj && classObj.teacherId === user.userId;
+        if (!isCreator && !isClassTeacher)
+          return res
+            .status(403)
+            .json({ success: false, message: "Forbidden" });
+      } else if (user.role === "STUDENT") {
+        const links = await ClassCourse.findAll({
+          where: { course_id: assignment.course_id },
+        });
+        const classIds = links.map((l) => l.class_id);
+        if (classIds.length === 0)
+          return res
+            .status(403)
+            .json({ success: false, message: "Forbidden" });
+        const member = await ClassStudent.findOne({
+          where: { classId: classIds, studentId: user.userId },
+        });
+        if (!member)
+          return res
+            .status(403)
+            .json({ success: false, message: "Forbidden" });
+      } else {
+        return res.status(403).json({ success: false, message: "Forbidden" });
+      }
+
       const obj = assignment.toJSON();
       res.json({ success: true, data: obj });
     } catch (error) {
