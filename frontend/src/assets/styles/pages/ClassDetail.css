@@ -74,6 +74,14 @@
 	grid-template-columns: 1fr;
 	gap: 18px;
 }
+.class-detail__list-item.disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.class-detail__list-item.disabled .class-detail__item-title {
+  text-decoration: line-through;
+}
 
 @media (min-width: 880px) {
 	.class-detail__sections {
@@ -110,6 +118,7 @@
 	flex-direction: column;
 	gap: 4px;
 	cursor: pointer;
+    text-align: left;
 }
 
 .class-detail__list-item small {
