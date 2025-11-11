@@ -302,3 +302,12 @@ pre {
 
 /* Course tab styles were moved to components/layout/coursestab.css */
 
+/* Reusable dashed divider */
+.dashed-divider {
+	border: none;
+	border-top: 2px dashed #000;
+	margin: 24px 0;
+	width: 100%;
+	box-sizing: border-box;
+}
+
