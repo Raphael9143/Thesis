@@ -11,6 +11,7 @@ import toFullUrl from '../../utils/FullURLFile';
 import fmtDate from '../../utils/FormatDate';
 import { formatAvailable, formatDue } from '../../utils/previewMeta';
 import SubmitWork from '../student/SubmitWork';
+import DashedDivider from '../../components/ui/DashedDivider';
 
 export default function AssignmentPreview() {
   const { id, assignmentId } = useParams();
@@ -138,10 +139,15 @@ export default function AssignmentPreview() {
               <div>No file attached.</div>
             )}
           </div>
-          <div>
-            <p>Submit</p>
-          </div>
-          {!isExpired && role === 'student' && <SubmitWork />}
+          {!isExpired && role === 'student' && (
+            <>
+              <DashedDivider />
+              <div>
+                <p>Submission</p>
+              </div>
+              <SubmitWork />
+            </>
+          )}
 
           {/* {role === 'student' && classId && courseId && (
             <div className="mt-16">

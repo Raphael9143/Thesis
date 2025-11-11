@@ -229,38 +229,31 @@ export default function SubmitWork() {
             >
               Write Code
             </button>
-            <button
-              className={`btn btn-sm ${mode === 'file' ? 'btn-primary' : ''}`}
-              onClick={() => setMode('file')}
-              disabled={submitting}
-            >
+            <label className={`btn btn-signin btn-sm ${mode === 'file' ? 'btn-primary' : ''}`}>
               Upload File
-            </button>
-          </div>
-
-          {mode === 'editor' ? (
-            <div className="editor-pane">
-              <div className="code-editor-container">
-                <div className="line-numbers" ref={numbersRef} aria-hidden="true">
-                  {Array.from({ length: lineCount }).map((_, idx) => (
-                    <div key={idx} className="line-number">
-                      {idx + 1}
-                    </div>
-                  ))}
-                </div>
-                <textarea
-                  ref={textareaRef}
-                  className="code-editor"
-                  placeholder={'// Enter .use code here\n'}
-                  rows={16}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  onScroll={syncScroll}
-                  onKeyDown={handleTabKey}
-                  disabled={submitting || isExpired}
-                  spellCheck={false}
-                />
-              </div>
+              <input
+                type="file"
+                accept=".use,.txt"
+                style={{ display: 'none' }}
+                disabled={submitting || isExpired}
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  try {
+                    const text = await f.text();
+                    setCode(text || '');
+                    setMode('editor');
+                    setFile(f);
+                  } catch {
+                    push({ title: 'Error', body: 'Failed to read file content.' });
+                  } finally {
+                    // reset input value so selecting the same file again will trigger onChange
+                    e.target.value = '';
+                  }
+                }}
+              />
+            </label>
+            {mode === 'editor' && (
               <div className="editor-controls">
                 <label className="inline-flex align-center gap-8">
                   <input
@@ -272,24 +265,47 @@ export default function SubmitWork() {
                   Use 4 spaces for Tab
                 </label>
               </div>
+            )}
+          </div>
+
+          {mode === 'editor' ? (
+            <div className="editor-pane">
+              <div className="code-editor-container limited-height">
+                <div className="line-numbers" ref={numbersRef} aria-hidden="true">
+                  {Array.from({ length: lineCount }).map((_, idx) => (
+                    <div key={idx} className="line-number">
+                      {idx + 1}
+                    </div>
+                  ))}
+                </div>
+                <textarea
+                  ref={textareaRef}
+                  className="code-editor"
+                  placeholder={'// Enter .use code here\n'}
+                  rows={12}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  onScroll={syncScroll}
+                  onKeyDown={handleTabKey}
+                  disabled={submitting || isExpired}
+                  spellCheck={false}
+                />
+              </div>
             </div>
           ) : (
             <div className="file-pane">
-              <input
-                type="file"
-                accept=".use"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-                disabled={submitting || isExpired}
-              />
+              <p>Select a file using the &quot;Upload File&quot; button above to load its content into the editor.</p>
             </div>
           )}
 
           {isExpired && <small className="text-error">Submissions are closed.</small>}
-          {attempts && attempts.remaining_attempts <= 0 && <small className="text-error">Bạn đã hết lượt nộp.</small>}
+          {attempts && attempts.remaining_attempts <= 0 && (
+            <small className="text-error">You ran out of submissions!</small>
+          )}
 
           <div className="submit-actions">
             <button
-              className="btn btn-primary"
+              className="btn btn-primary btn-sm"
               onClick={onSubmit}
               disabled={submitting || isExpired || (attempts && attempts.remaining_attempts <= 0)}
             >

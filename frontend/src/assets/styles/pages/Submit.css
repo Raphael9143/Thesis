@@ -12,12 +12,10 @@
 
 .editor-pane .code-editor {
   width: 100%;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
   font-size: 14px;
   line-height: 1.5;
   padding: 12px;
-  border: 1px solid var(--border-color, #ddd);
-  border-radius: 6px;
   background: var(--code-bg, #0f0f0f08);
   resize: vertical;
   color: var(--black);
@@ -34,6 +32,16 @@
   border-radius: 6px;
   background: #fff;
   overflow: hidden;
+}
+
+.code-editor-container.limited-height {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.code-editor-container.limited-height .code-editor {
+  height: 100%;
+  overflow-y: auto;
 }
 
 .line-numbers {
@@ -56,7 +64,7 @@
   border-radius: 0;
   background: transparent;
   padding: 12px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
   font-size: 14px;
   line-height: 1.5;
   resize: vertical;
@@ -64,14 +72,17 @@
 
 .editor-controls {
   margin-top: 8px;
+  text-align: right;
 }
 
-.file-pane input[type="file"] {
+.file-pane {
   display: inline-block;
+  text-align: left;
 }
 
 .submit-actions {
   margin-top: 8px;
+  text-align: left;
 }
 
 .text-error {

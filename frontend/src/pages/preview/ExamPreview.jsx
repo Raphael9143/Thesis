@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
 import userAPI from '../../../services/userAPI';
@@ -11,6 +11,7 @@ import toFullUrl from '../../utils/FullURLFile';
 import fmtDate from '../../utils/FormatDate';
 import { formatAvailable, formatDue } from '../../utils/previewMeta';
 import SubmitWork from '../student/SubmitWork';
+import DashedDivider from '../../components/ui/DashedDivider';
 
 export default function ExamPreview() {
   const { id, examId } = useParams();
@@ -118,7 +119,10 @@ export default function ExamPreview() {
               </div>
             </div>
           </div>
-
+          <DashedDivider />
+          <div>
+            <h2>Problem</h2>
+          </div>
           <div className="preview-body">
             <div dangerouslySetInnerHTML={{ __html: exam.description || '' }} />
           </div>
@@ -134,7 +138,15 @@ export default function ExamPreview() {
               <div>No model file attached.</div>
             )}
           </div>
-          {!isExpired && role === 'student' && <SubmitWork />}
+          {!isExpired && role === 'student' && (
+            <>
+              <DashedDivider />
+              <div>
+                <h2>Submission</h2>
+              </div>
+              <SubmitWork />
+            </>
+          )}
           {/* 
           {role === 'student' && classId && courseId && (
             <div className="mt-16">
