@@ -249,6 +249,37 @@ router.get(
   SubmissionController.getSubmissionHistoryByExam
 );
 
+/**
+ * @swagger
+ * /api/submissions/assignment/{id}/latest-score:
+ *   get:
+ *     summary: Lấy điểm của sinh viên (submission cuối cùng) theo assignment
+ *     tags: [Submission]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Assignment ID
+ *       - in: query
+ *         name: student_id
+ *         required: false
+ *         schema:
+ *           type: integer
+ *         description: Bắt buộc với teacher/admin; student tự lấy của mình
+ *     responses:
+ *       200:
+ *         description: Latest score info
+ */
+router.get(
+  "/assignment/:id/latest-score",
+  auth,
+  SubmissionController.getLatestScoreByAssignment
+);
+
 // Remaining attempts for assignment
 /**
  * @swagger
