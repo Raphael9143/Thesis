@@ -190,7 +190,6 @@ const router = createBrowserRouter(
             </RequireRole>
           }
         >
-          <Route index element={<StudentLecturesList />} />
           <Route path="lectures" element={<StudentLecturesList />} />
           <Route path="assignments" element={<StudentAssignmentsList />} />
           <Route path="exams" element={<StudentExamsList />} />

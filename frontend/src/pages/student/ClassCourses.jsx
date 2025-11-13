@@ -73,7 +73,9 @@ export default function StudentClassCoursesPage() {
                   subtitle={course.code || course.course_code || ''}
                   image={course.image || course.thumbnail}
                   description={course.description || ''}
-                  onClick={() => navigate(`/education/student/classes/${id}/courses/${course.id || course.course_id}`)}
+                  onClick={() =>
+                    navigate(`/education/student/classes/${id}/courses/${course.id || course.course_id}/lectures`)
+                  }
                 />
               ))}
             </div>
