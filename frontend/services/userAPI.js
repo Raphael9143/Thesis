@@ -75,6 +75,11 @@ const userAPI = {
   getAssignmentSubmissionHistory: (assignmentId) => axiosClient.get(`submissions/assignment/${assignmentId}/history`),
   // GET /api/submissions/exam/{id}/history
   getExamSubmissionHistory: (examId) => axiosClient.get(`submissions/exam/${examId}/history`),
+  // Latest score endpoints for current student
+  // GET /api/submissions/assignment/{id}/latest-score
+  getAssignmentLatestScore: (assignmentId) => axiosClient.get(`submissions/assignment/${assignmentId}/latest-score`),
+  // GET /api/submissions/exam/{id}/latest-score
+  getExamLatestScore: (examId) => axiosClient.get(`submissions/exam/${examId}/latest-score`),
   // Remaining attempts
   getExamRemainingAttempts: (examId) => axiosClient.get(`submissions/exam/${examId}/remaining-attempts`),
   getAssignmentRemainingAttempts: (assignmentId) =>
