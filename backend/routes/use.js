@@ -126,5 +126,48 @@ router.post("/parse", conditionalUpload, UseController.parse);
  */
 
 router.post("/save", auth, conditionalUpload, UseController.save);
+// GET /api/use/me/models - list models for the authenticated user
+/**
+ * @swagger
+ * /api/use/me/models:
+ *   get:
+ *     summary: List all stored USE models for the authenticated user
+ *     tags:
+ *       - USE
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of models for the current user
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             data:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   name:
+ *                     type: string
+ *                   filePath:
+ *                     type: string
+ *                   ownerId:
+ *                     type: integer
+ *                   createdAt:
+ *                     type: string
+ *                     format: date-time
+ *                   updatedAt:
+ *                     type: string
+ *                     format: date-time
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/models", auth, UseController.listMine);
 
 module.exports = router;

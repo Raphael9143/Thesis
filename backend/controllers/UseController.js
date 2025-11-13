@@ -192,6 +192,39 @@ function parseCliOutput(cliOut) {
 }
 
 const UseController = {
+  listMine: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+      }
+
+      const ownerId = req.user.userId;
+      require("../models/UseAssociations");
+      const UseModel = require("../models/UseModel");
+
+      const models = await UseModel.findAll({
+        where: { ownerId },
+        order: [["createdAt", "DESC"]],
+        attributes: [
+          "id",
+          "name",
+          "filePath",
+          "ownerId",
+          "createdAt",
+          "updatedAt",
+        ],
+      });
+
+      return res.json({ success: true, data: models });
+    } catch (error) {
+      console.error("List my USE models error:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
   parse: async (req, res) => {
     try {
       let filePath = null;
