@@ -7,6 +7,7 @@ import '../../../assets/styles/ui.css';
 import '../../../assets/styles/pages/ClassDetail.css';
 import useAttemptMap from '../../../hooks/useAttemptMap';
 import useTitle from '../../../hooks/useTitle';
+import useLatestScoreMap from '../../../hooks/useLatestScoreMap';
 
 function isExpired(exam) {
   if (!exam?.end_date) return false;
@@ -39,7 +40,6 @@ export default function StudentExamsList() {
         if (!mounted) return;
         if (examRes?.success && Array.isArray(examRes.data)) {
           const published = examRes.data.filter((e) => e.status === 'published');
-          console.log('Published exams:', published);
           setExams(published);
           // attempts fetched via hook below
         } else {
@@ -59,6 +59,11 @@ export default function StudentExamsList() {
 
   const examIds = useMemo(() => (exams || []).map((e) => e.exam_id || e.id).filter(Boolean), [exams]);
   const { attemptsMap: hookAttemptsMap } = useAttemptMap('exam', examIds, {
+    enabled: examIds.length > 0,
+  });
+
+  // Latest scores for exams
+  const { infoMap } = useLatestScoreMap('exam', examIds, {
     enabled: examIds.length > 0,
   });
 
@@ -90,10 +95,19 @@ export default function StudentExamsList() {
                       navigate(`/education/student/classes/${id}/courses/${courseIdState}/exams/${idv}`);
                     }}
                   >
-                    {typeof attemptsMap[idv] !== 'undefined' && (
-                      <span className="attempts-badge" title="Attempts left">
-                        {attemptsMap[idv]}
-                      </span>
+                    {(typeof attemptsMap[idv] !== 'undefined' || infoMap[idv]) && (
+                      <div className="badges">
+                        {typeof attemptsMap[idv] !== 'undefined' && (
+                          <span className="attempts-badge" title="Attempts left">
+                            {attemptsMap[idv]}
+                          </span>
+                        )}
+                        {infoMap[idv]?.hasSubmission && (
+                          <span className="score-chip" title="Latest score">
+                            {typeof infoMap[idv].score === 'number' ? infoMap[idv].score : 'Not graded yet'}
+                          </span>
+                        )}
+                      </div>
                     )}
                     <div className="class-detail__item-title">{ex.title}</div>
                   </li>

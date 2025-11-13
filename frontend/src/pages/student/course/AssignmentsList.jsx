@@ -7,6 +7,7 @@ import '../../../assets/styles/ui.css';
 import '../../../assets/styles/pages/ClassDetail.css';
 import useAttemptMap from '../../../hooks/useAttemptMap';
 import useTitle from '../../../hooks/useTitle';
+import useLatestScoreMap from '../../../hooks/useLatestScoreMap';
 
 function isExpired(assignment) {
   const due = assignment?.end_date;
@@ -65,6 +66,11 @@ export default function StudentAssignmentsList() {
     enabled: assignmentIds.length > 0,
   });
 
+  // Latest scores for assignments
+  const { infoMap } = useLatestScoreMap('assignment', assignmentIds, {
+    enabled: assignmentIds.length > 0,
+  });
+
   useEffect(() => {
     setAttemptsMap(hookAttemptsMap || {});
   }, [hookAttemptsMap]);
@@ -83,7 +89,6 @@ export default function StudentAssignmentsList() {
             <ul className="class-detail__list">
               {assignments.map((a) => {
                 const disabled = isExpired(a);
-                console.log('Assignment', a, 'is expired:', disabled);
                 const idv = a.assignment_id || a.id;
                 return (
                   <li
@@ -94,10 +99,19 @@ export default function StudentAssignmentsList() {
                       navigate(`/education/student/classes/${id}/courses/${courseIdState}/assignments/${idv}`);
                     }}
                   >
-                    {typeof attemptsMap[idv] !== 'undefined' && (
-                      <span className="attempts-badge" title="Attempts left">
-                        {attemptsMap[idv]}
-                      </span>
+                    {(typeof attemptsMap[idv] !== 'undefined' || infoMap[idv]) && (
+                      <div className="badges">
+                        {typeof attemptsMap[idv] !== 'undefined' && (
+                          <span className="attempts-badge" title="Attempts left">
+                            {attemptsMap[idv]}
+                          </span>
+                        )}
+                        {infoMap[idv]?.hasSubmission && (
+                          <span className="score-chip" title="Latest score">
+                            {typeof infoMap[idv].score === 'number' ? infoMap[idv].score : 'Not graded yet'}
+                          </span>
+                        )}
+                      </div>
                     )}
                     <div className="class-detail__item-title">{a.title}</div>
                   </li>
