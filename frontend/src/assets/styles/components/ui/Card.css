@@ -20,6 +20,10 @@
 	margin-top: 8px;
 }
 
+.card-ui__body .modal-container {
+  max-width: 720px;
+}
+
 .card-ui__body p {
 	color: var(--muted);
 }

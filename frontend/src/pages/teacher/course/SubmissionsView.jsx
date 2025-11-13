@@ -9,6 +9,8 @@ import { useNotifications } from '../../../contexts/NotificationContext';
 import useTitle from '../../../hooks/useTitle';
 import GradeSubmissionModal from '../../../components/teacher/GradeSubmissionModal';
 import toFullUrl from '../../../utils/FullURLFile';
+import Modal from '../../../components/ui/Modal';
+import FilePreview from '../../../components/ui/FilePreview';
 
 export default function SubmissionsView() {
   const params = useParams();
@@ -23,6 +25,8 @@ export default function SubmissionsView() {
   const [submissions, setSubmissions] = useState([]);
   const [gradeModalOpen, setGradeModalOpen] = useState(false);
   const [selectedForGrade, setSelectedForGrade] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewAttachment, setPreviewAttachment] = useState('');
 
   const { push } = useNotifications();
 
@@ -91,6 +95,7 @@ export default function SubmissionsView() {
                     <th>Time</th>
                     <th>Attempt</th>
                     <th>Score</th>
+                    <th>Preview</th>
                     <th>Attachment</th>
                   </tr>
                 </thead>
@@ -112,6 +117,21 @@ export default function SubmissionsView() {
                         >
                           {typeof s.score !== 'undefined' && s.score !== null ? String(s.score) : 'Not graded'}
                         </a>
+                      </td>
+                      <td>
+                        {s.attachment ? (
+                          <a
+                            className="score-btn"
+                            onClick={() => {
+                              setPreviewAttachment(String(s.attachment || ''));
+                              setPreviewOpen(true);
+                            }}
+                          >
+                            Preview
+                          </a>
+                        ) : (
+                          '-'
+                        )}
                       </td>
                       <td>
                         {s.attachment ? (
@@ -137,6 +157,17 @@ export default function SubmissionsView() {
                 setSubmissions((prev) => prev.map((p) => (p.id === (updated.id || p.id) ? { ...p, ...updated } : p)));
               }}
             />
+            <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="Submission Preview">
+              {previewAttachment ? (
+                <FilePreview
+                  url={toFullUrl(previewAttachment)}
+                  filename={previewAttachment}
+                  filePath={previewAttachment}
+                />
+              ) : (
+                <div>No file</div>
+              )}
+            </Modal>
           </div>
         )}
       </Card>

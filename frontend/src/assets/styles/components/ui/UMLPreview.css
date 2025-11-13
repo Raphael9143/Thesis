@@ -120,6 +120,10 @@
   color: var(--brand);
 }
 
+details summary {
+  text-align: center;
+}
+
 details summary a {
   cursor: pointer;
   color: #666;

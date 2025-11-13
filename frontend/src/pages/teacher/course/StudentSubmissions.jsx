@@ -7,6 +7,8 @@ import '../../../assets/styles/ui.css';
 import useTitle from '../../../hooks/useTitle';
 import { useNotifications } from '../../../contexts/NotificationContext';
 import GradeSubmissionModal from '../../../components/teacher/GradeSubmissionModal';
+import Modal from '../../../components/ui/Modal';
+import FilePreview from '../../../components/ui/FilePreview';
 import toFullUrl from '../../../utils/FullURLFile';
 
 export default function StudentSubmissions() {
@@ -17,6 +19,8 @@ export default function StudentSubmissions() {
   const [exams, setExams] = useState([]);
   const [gradeModalOpen, setGradeModalOpen] = useState(false);
   const [selectedForGrade, setSelectedForGrade] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewAttachment, setPreviewAttachment] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { push } = useNotifications();
@@ -166,6 +170,7 @@ export default function StudentSubmissions() {
                 <th>Due</th>
                 <th>Submissions</th>
                 <th>Graded</th>
+                <th>Preview</th>
                 <th>Download</th>
               </tr>
             </thead>
@@ -182,6 +187,21 @@ export default function StudentSubmissions() {
                     <a className="score-btn" onClick={() => handleOpenGrade(it)}>
                       {typeof it.score !== 'undefined' && it.score !== null ? `${String(it.score)}` : 'Not graded'}
                     </a>
+                  </td>
+                  <td>
+                    {it.attachment ? (
+                      <a
+                        className="score-btn"
+                        onClick={() => {
+                          setPreviewAttachment(String(it.attachment || ''));
+                          setPreviewOpen(true);
+                        }}
+                      >
+                        Preview
+                      </a>
+                    ) : (
+                      '-'
+                    )}
                   </td>
                   <td>
                     {it.attachment ? (
@@ -203,6 +223,13 @@ export default function StudentSubmissions() {
           submission={selectedForGrade}
           onGraded={onGraded}
         />
+        <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="Submission Preview">
+          {previewAttachment ? (
+            <FilePreview url={toFullUrl(previewAttachment)} filename={previewAttachment} filePath={previewAttachment} />
+          ) : (
+            <div>No file</div>
+          )}
+        </Modal>
       </Card>
     </Section>
   );
