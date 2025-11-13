@@ -9,7 +9,7 @@ import useAttemptMap from '../../../hooks/useAttemptMap';
 import useTitle from '../../../hooks/useTitle';
 
 function isExpired(assignment) {
-  const due = assignment?.courses?.[0]?.assignment_course?.due_date;
+  const due = assignment?.end_date;
   if (!due) return false;
   return Date.now() > new Date(due).getTime();
 }
@@ -83,6 +83,7 @@ export default function StudentAssignmentsList() {
             <ul className="class-detail__list">
               {assignments.map((a) => {
                 const disabled = isExpired(a);
+                console.log('Assignment', a, 'is expired:', disabled);
                 const idv = a.assignment_id || a.id;
                 return (
                   <li
@@ -99,12 +100,6 @@ export default function StudentAssignmentsList() {
                       </span>
                     )}
                     <div className="class-detail__item-title">{a.title}</div>
-                    <small>
-                      {a.courses?.[0]?.assignment_course?.due_date
-                        ? `Due: ${new Date(a.courses[0].assignment_course.due_date).toLocaleString()}`
-                        : ''}
-                      {disabled ? ' (Expired)' : ''}
-                    </small>
                   </li>
                 );
               })}
