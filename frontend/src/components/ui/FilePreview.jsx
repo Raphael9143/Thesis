@@ -89,16 +89,30 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
       const path = filePath || filename || url;
       const res = await axiosClient.post('/use/parse', { path });
       if (!res || res.success === false) {
-        const msg = (res && res.cli && res.cli.stdout) || 'Parse failed';
+        const msg =
+          res?.message ||
+          (Array.isArray(res?.details) && res.details.join('\n')) ||
+          res?.cli?.stdout ||
+          'Invalid .use file. Please fix syntax or model errors.';
         push({ title: 'USE parse', body: msg });
         setUmlLoading(false);
         return;
       }
-      setUmlModel(res.model || null);
+      if (!res.model) {
+        const msg =
+          res?.message ||
+          (Array.isArray(res?.details) && res.details.join('\n')) ||
+          'Parse succeeded but no model returned.';
+        push({ title: 'USE parse', body: msg });
+        setUmlLoading(false);
+        return;
+      }
+      setUmlModel(res.model);
       setUmlCli(res.cli?.stdout || res.cli?.stderr || null);
       setShowUml(true);
     } catch (err) {
-      push({ title: 'Error', body: `Failed to parse model: ${err?.message || String(err)}` });
+      console.log(err);
+      push({ title: 'Error', body: `Failed to parse model: ${err?.response?.data?.message || String(err)}` });
     } finally {
       setUmlLoading(false);
     }
