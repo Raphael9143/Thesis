@@ -43,7 +43,7 @@ export default function StudentClassesPage() {
   useTitle('Classes');
 
   return (
-    <Section title="My Classes" subtitle="Classes you are enrolled in">
+    <Section>
       <Card>
         {loading && <div>Loading classes...</div>}
         {error && <div className="text-error">{error}</div>}
