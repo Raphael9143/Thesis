@@ -88,16 +88,14 @@ function HistoryTable({ history }) {
                 </td>
                 <td>
                   {s.feedback ? (
-                    <button
-                      type="button"
-                      className="btn btn-sm"
+                    <a
                       onClick={() => {
                         setFeedbackText(String(s.feedback || ''));
                         setFeedbackOpen(true);
                       }}
                     >
                       View
-                    </button>
+                    </a>
                   ) : (
                     '-'
                   )}
