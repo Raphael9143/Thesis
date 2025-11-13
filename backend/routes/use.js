@@ -52,7 +52,7 @@ const UseController = require("../controllers/UseController");
  *               type: object
  *               description: Parsed JSON representation (model, enums, classes, associations)
  *       400:
- *         description: Missing file or path
+ *         description: Missing file/path or invalid .use syntax/model
  *       404:
  *         description: File not found
  *       500:

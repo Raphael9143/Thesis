@@ -226,12 +226,33 @@ const UseController = {
           .status(404)
           .json({ success: false, message: "File not found" });
 
-      // Run USE CLI (best-effort) and also parse file locally
+      // Run USE CLI to validate and inspect the model
       let cliResult = null;
       try {
         cliResult = await runUseCli(filePath, 8000);
       } catch (err) {
         cliResult = { error: err.message };
+      }
+
+      // Validation: if USE CLI reports errors or no model can be detected,
+      // return a 400 error indicating invalid .use file
+      const stdoutText = (cliResult && cliResult.stdout) || "";
+      const stderrText = (cliResult && cliResult.stderr) || "";
+      const hasCliError = /error|syntax\s+error|could\s+not\s+open|failed/i.test(
+        stderrText + "\n" + stdoutText
+      );
+      const hasModelLine = /(^|\n)\s*model\s+[A-Za-z0-9_]+/i.test(stdoutText);
+      if (cliResult && (hasCliError || !hasModelLine)) {
+        // extract error-ish lines to help the frontend show details
+        const lines = (stderrText || stdoutText)
+          .split(/\r?\n/)
+          .filter((l) => /error|syntax|could\s+not|failed/i.test(l))
+          .slice(0, 10);
+        return res.status(400).json({
+          success: false,
+          message: "Invalid .use file. Please fix syntax or model errors.",
+          details: lines,
+        });
       }
 
       const content = fs.readFileSync(filePath, "utf8");
