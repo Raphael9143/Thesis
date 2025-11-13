@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import mammoth from 'mammoth';
 import '../../assets/styles/ui.css';
 import { useNotifications } from '../../contexts/NotificationContext';
-import axiosClient from '../../../services/axiosClient';
+import userAPI from '../../../services/userAPI';
 import UMLPreview from './UMLPreview';
 import '../../assets/styles/components/ui/FilePreview.css';
 
@@ -75,6 +75,7 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
   const [umlModel, setUmlModel] = useState(null);
   const [umlCli, setUmlCli] = useState(null);
   const [umlLoading, setUmlLoading] = useState(false);
+  const [saveLoading, setSaveLoading] = useState(false);
 
   if (!url) return <div>No file URL</div>;
   const ext = extFromName(filename || url);
@@ -86,8 +87,7 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
     if (!showPreviewButton) return;
     try {
       setUmlLoading(true);
-      const path = filePath || filename || url;
-      const res = await axiosClient.post('/use/parse', { path });
+      const res = await userAPI.parseUseModel(filePath || filename || url);
       if (!res || res.success === false) {
         const msg =
           res?.message ||
@@ -115,6 +115,26 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
       push({ title: 'Error', body: `Failed to parse model: ${err?.response?.data?.message || String(err)}` });
     } finally {
       setUmlLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!showPreviewButton) return;
+    const ok = window.confirm('Store this UML model into Storage and database?');
+    if (!ok) return;
+    try {
+      setSaveLoading(true);
+      const res = await userAPI.saveUseModel(filePath || filename || url);
+      if (!res || res.success === false) {
+        const msg = res?.message || 'Failed to store model.';
+        push({ title: 'USE storage', body: msg });
+        return;
+      }
+      push({ title: 'USE storage', body: 'Model stored successfully.' });
+    } catch (err) {
+      push({ title: 'Error', body: `Failed to store model: ${err?.response?.data?.message || String(err)}` });
+    } finally {
+      setSaveLoading(false);
     }
   };
 
@@ -197,6 +217,16 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
             title="Preview UML model"
           >
             {umlLoading ? 'Parsing...' : 'UML Preview'}
+          </button>
+        )}
+        {showPreviewButton && (
+          <button
+            className="btn btn-outline btn-sm"
+            onClick={handleSave}
+            disabled={saveLoading}
+            title="Store UML model into Storage"
+          >
+            {saveLoading ? 'Storing...' : 'Storage'}
           </button>
         )}
       </div>
