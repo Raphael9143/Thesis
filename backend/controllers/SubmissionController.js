@@ -863,6 +863,101 @@ const SubmissionController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+
+  // Get latest score for a student by exam id (take the last submission)
+  getLatestScoreByExam: async (req, res) => {
+    try {
+      const examId = parseInt(req.params.id, 10);
+      if (Number.isNaN(examId))
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid exam id" });
+
+      const Exam = require("../models/Exam");
+      const exam = await Exam.findByPk(examId);
+      if (!exam)
+        return res
+          .status(404)
+          .json({ success: false, message: "Exam not found" });
+
+      const role = req.user && req.user.role;
+      const userId = req.user && req.user.userId;
+      let targetStudentId = null;
+
+      if (role === "STUDENT") {
+        targetStudentId = userId;
+      } else if (role === "TEACHER" || role === "ADMIN") {
+        const sId = parseInt(req.query.student_id, 10);
+        if (Number.isNaN(sId))
+          return res.status(400).json({
+            success: false,
+            message: "student_id is required as integer",
+          });
+        targetStudentId = sId;
+
+        if (role === "TEACHER") {
+          const ClassCourse = require("../models/ClassCourse");
+          const Class = require("../models/Class");
+          const classCourses = await ClassCourse.findAll({
+            where: { course_id: exam.course_id },
+            attributes: ["class_id"],
+          });
+          const classIds = classCourses.map((cc) => cc.class_id ?? cc.classId);
+          if (classIds.length === 0)
+            return res.json({ success: true, data: null });
+          const teacherClass = await Class.findOne({
+            where: { id: classIds, teacherId: userId },
+          });
+          if (!teacherClass)
+            return res
+              .status(403)
+              .json({ success: false, message: "Forbidden" });
+        }
+      } else {
+        return res
+          .status(403)
+          .json({ success: false, message: "Forbidden" });
+      }
+
+      const latest = await Submission.findOne({
+        where: { exam_id: examId, student_id: targetStudentId },
+        order: [
+          ["attempt_number", "DESC"],
+          ["created_at", "DESC"],
+          ["id", "DESC"],
+        ],
+      });
+
+      if (!latest)
+        return res.json({
+          success: true,
+          data: {
+            exam_id: examId,
+            student_id: targetStudentId,
+            has_submission: false,
+          },
+        });
+
+      return res.json({
+        success: true,
+        data: {
+          exam_id: examId,
+          student_id: targetStudentId,
+          submission_id: latest.id,
+          attempt_number: latest.attempt_number,
+          submission_time: latest.submission_time,
+          score: latest.score,
+          feedback: latest.feedback,
+          has_submission: true,
+        },
+      });
+    } catch (error) {
+      console.error("Get latest score by exam error:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
 };
 
 module.exports = SubmissionController;
