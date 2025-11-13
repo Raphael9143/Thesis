@@ -201,11 +201,13 @@ export default function AssignmentPreview() {
               {isExpired && <small className="text-error">Submissions are closed for this assignment.</small>}
             </div>
           )} */}
-          <div className="meta-small mt-12">
-            <small>
-              Created: {fmtDate(assignment.created_at)} • Updated: {fmtDate(assignment.updated_at)}
-            </small>
-          </div>
+          {role === 'teacher' && (
+            <div className="meta-small mt-12">
+              <small>
+                Created: {fmtDate(assignment.created_at)} • Updated: {fmtDate(assignment.updated_at)}
+              </small>
+            </div>
+          )}
         </div>
       </Card>
     </Section>
