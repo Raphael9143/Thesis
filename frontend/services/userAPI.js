@@ -142,6 +142,12 @@ const userAPI = {
 
   //notify
   notify: (userId, data) => axiosClient.post(`notify/${userId}`, data),
+
+  // USE model helpers
+  // POST /api/use/parse { path }
+  parseUseModel: (path) => axiosClient.post('use/parse', { path }),
+  // POST /api/use/save { path }
+  saveUseModel: (path) => axiosClient.post('use/save', { path }),
 };
 
 export default userAPI;
