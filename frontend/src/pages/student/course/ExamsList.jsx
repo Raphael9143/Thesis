@@ -96,12 +96,6 @@ export default function StudentExamsList() {
                       </span>
                     )}
                     <div className="class-detail__item-title">{ex.title}</div>
-                    <small>
-                      {ex.start_date
-                        ? `${new Date(ex.start_date).toLocaleString()} - ${new Date(ex.end_date).toLocaleString()}`
-                        : ''}
-                      {disabled ? ' (Expired)' : ''}
-                    </small>
                   </li>
                 );
               })}

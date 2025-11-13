@@ -67,7 +67,6 @@ export default function StudentLecturesList() {
                   onClick={() => navigate(`/education/student/classes/${id}/courses/${courseIdState}/lectures/${l.id}`)}
                 >
                   <div className="class-detail__item-title">{l.title}</div>
-                  <small>{l.publish_date ? new Date(l.publish_date).toLocaleString() : ''}</small>
                 </li>
               ))}
             </ul>
