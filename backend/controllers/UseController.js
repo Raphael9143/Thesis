@@ -289,8 +289,21 @@ const UseController = {
         originalInput = req.files[0].path;
         filePath = path.resolve(req.files[0].path);
       } else if (req.body && req.body.path) {
+        // Support public-style paths like '/uploads/filename.use' or 'uploads/filename.use'
+        // Map them to the project's uploads directory rather than treating a leading
+        // slash as an absolute filesystem root path.
         originalInput = req.body.path;
-        filePath = path.resolve(req.body.path);
+        const inputPath = String(req.body.path || "");
+        const normalizedInput = inputPath.replace(/\\/g, "/");
+        const uploadsMatch = normalizedInput.match(/^\/?uploads\/(.+)/i);
+        if (uploadsMatch) {
+          // resolve relative to project uploads folder
+          filePath = path.resolve(__dirname, "..", "uploads", uploadsMatch[1]);
+        } else if (path.isAbsolute(inputPath)) {
+          filePath = path.normalize(inputPath);
+        } else {
+          filePath = path.resolve(inputPath);
+        }
       } else {
         return res
           .status(400)
@@ -361,10 +374,12 @@ const UseController = {
       const UseConstraint = require("../models/UseConstraint");
 
       const result = await sequelize.transaction(async (t) => {
+        const ownerId = req.user && req.user.userId ? req.user.userId : null;
         const modelRow = await UseModel.create(
           {
             name: parsed.model || null,
             filePath: publicPath,
+            ownerId: ownerId,
             rawText: cliResult && cliResult.stdout ? cliResult.stdout : content,
           },
           { transaction: t }

@@ -7,6 +7,7 @@ const UseOperation = require("./UseOperation");
 const UseAssociation = require("./UseAssociation");
 const UseAssociationPart = require("./UseAssociationPart");
 const UseConstraint = require("./UseConstraint");
+const User = require("./User");
 
 UseModel.hasMany(UseEnum, {
   foreignKey: "use_model_id",
@@ -76,6 +77,16 @@ UseModel.hasMany(UseConstraint, {
 UseConstraint.belongsTo(UseModel, {
   foreignKey: "use_model_id",
   as: "model",
+});
+
+// Ownership: a UseModel optionally belongs to a User (owner)
+UseModel.belongsTo(User, {
+  foreignKey: "owner_id",
+  as: "owner",
+});
+User.hasMany(UseModel, {
+  foreignKey: "owner_id",
+  as: "useModels",
 });
 
 module.exports = {

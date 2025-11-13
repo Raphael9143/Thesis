@@ -18,6 +18,11 @@ const UseModel = sequelize.define(
       allowNull: true,
       field: "file_path",
     },
+    ownerId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "owner_id",
+    },
     rawText: {
       type: DataTypes.TEXT("long"),
       allowNull: true,

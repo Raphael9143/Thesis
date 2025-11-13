@@ -11,6 +11,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 const UseController = require("../controllers/UseController");
+const auth = require("../middlewares/auth");
 
 /**
  * @swagger
@@ -113,6 +114,9 @@ router.post("/parse", conditionalUpload, UseController.parse);
  *             cli:
  *               type: object
  *               description: Best-effort stdout/stderr from the USE CLI
+ *     description: |
+ *       If the request includes a valid Bearer token, the saved UseModel
+ *       will record the authenticated user as `owner_id`.
  *       400:
  *         description: Missing file or path
  *       404:
@@ -121,6 +125,6 @@ router.post("/parse", conditionalUpload, UseController.parse);
  *         description: Internal server error while saving
  */
 
-router.post("/save", conditionalUpload, UseController.save);
+router.post("/save", auth, conditionalUpload, UseController.save);
 
 module.exports = router;
