@@ -6,6 +6,7 @@ import ResearcherHome from './pages/ResearcherHome';
 import ResearcherLayout from './layouts/ResearcherLayout';
 import ResearcherDashboard from './pages/researcher/Dashboard';
 import ResearcherProjects from './pages/researcher/Projects';
+import ResearcherProjectDetail from './pages/researcher/ProjectDetail';
 import ResearcherProfile from './pages/researcher/Profile';
 import Home from './pages/Home';
 import RegisterPage from './pages/RegisterPage';
@@ -66,6 +67,7 @@ const router = createBrowserRouter(
           <Route index element={<ResearcherDashboard />} />
           <Route path="dashboard" element={<ResearcherDashboard />} />
           <Route path="projects" element={<ResearcherProjects />} />
+          <Route path="projects/:projectId" element={<ResearcherProjectDetail />} />
           <Route path="profile" element={<ResearcherProfile />} />
         </Route>
         <Route
