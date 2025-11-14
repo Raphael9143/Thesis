@@ -9,7 +9,7 @@ const UseClass = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    useModelId: {
+    use_model_id: {
       type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
       field: "use_model_id",
@@ -18,13 +18,13 @@ const UseClass = sequelize.define(
       type: DataTypes.STRING(200),
       allowNull: false,
     },
-    createdAt: {
+    created_at: {
       type: DataTypes.DATE,
       allowNull: false,
       field: "created_at",
       defaultValue: DataTypes.NOW,
     },
-    updatedAt: {
+    updated_at: {
       type: DataTypes.DATE,
       allowNull: true,
       field: "updated_at",

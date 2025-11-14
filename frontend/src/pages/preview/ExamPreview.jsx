@@ -196,7 +196,7 @@ export default function ExamPreview() {
           {role === 'teacher' && (
             <div className="meta-small mt-12">
               <small>
-                Created: {fmtDate(exam.createdAt)} • Updated: {fmtDate(exam.updatedAt)}
+                Created: {fmtDate(exam.created_at)} • Updated: {fmtDate(exam.updated_at)}
               </small>
             </div>
           )}

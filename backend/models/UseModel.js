@@ -13,28 +13,28 @@ const UseModel = sequelize.define(
       type: DataTypes.STRING(200),
       allowNull: true,
     },
-    filePath: {
+    file_path: {
       type: DataTypes.STRING(1024),
       allowNull: true,
       field: "file_path",
     },
-    ownerId: {
+    owner_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
       field: "owner_id",
     },
-    rawText: {
+    raw_text: {
       type: DataTypes.TEXT("long"),
       allowNull: true,
       field: "raw_text",
     },
-    createdAt: {
+    created_at: {
       type: DataTypes.DATE,
       allowNull: false,
       field: "created_at",
       defaultValue: DataTypes.NOW,
     },
-    updatedAt: {
+    updated_at: {
       type: DataTypes.DATE,
       allowNull: true,
       field: "updated_at",

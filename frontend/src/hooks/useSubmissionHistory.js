@@ -52,8 +52,8 @@ export default function useSubmissionHistory(type, id, options = {}) {
       if (res?.success && Array.isArray(res.data)) {
         // sort by submission_time or created_at desc if present
         const list = [...res.data].sort((a, b) => {
-          const ta = new Date(a.submission_time || a.created_at || a.createdAt || 0).getTime();
-          const tb = new Date(b.submission_time || b.created_at || b.createdAt || 0).getTime();
+          const ta = new Date(a.submission_time || a.created_at || 0).getTime();
+          const tb = new Date(b.submission_time || b.created_at || 0).getTime();
           return tb - ta;
         });
         setHistory(list);

@@ -9,12 +9,12 @@ const ResearchProjectMember = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    researchProjectId: {
+    research_project_id: {
       type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
       field: "research_project_id",
     },
-    userId: {
+    user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       field: "user_id",
@@ -24,7 +24,7 @@ const ResearchProjectMember = sequelize.define(
       allowNull: false,
       defaultValue: "CONTRIBUTOR",
     },
-    joinedAt: {
+    joined_at: {
       type: DataTypes.DATE,
       allowNull: false,
       field: "joined_at",

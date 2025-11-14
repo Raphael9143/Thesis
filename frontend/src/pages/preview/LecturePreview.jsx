@@ -188,7 +188,7 @@ export default function LecturePreview() {
           {role === 'teacher' && (
             <div className="mt-12">
               <small>
-                Created: {fmtDate(lecture.createdAt)} • Updated: {fmtDate(lecture.updatedAt)}
+                Created: {fmtDate(lecture.created_at)} • Updated: {fmtDate(lecture.updated_at)}
               </small>
             </div>
           )}

@@ -42,7 +42,7 @@ const ClassController = {
           .json({ success: false, message: "Class not found." });
       }
       // Đếm số lượng học sinh
-      const count = await ClassStudent.count({ where: { classId } });
+      const count = await ClassStudent.count({ where: { class_id: classId } });
       res.json({ success: true, classId, studentCount: count });
     } catch (error) {
       console.error("Get student count of class error:", error);
@@ -73,7 +73,7 @@ const ClassController = {
       // Lấy danh sách sinh viên phân trang
       const Student = require("../models/Student");
       const { count, rows } = await ClassStudent.findAndCountAll({
-        where: { classId },
+        where: { class_id: classId },
         include: [
           {
             model: User,
@@ -192,8 +192,8 @@ const ClassController = {
       // Xóa các học sinh khỏi lớp
       const deleted = await ClassStudent.destroy({
         where: {
-          classId,
-          studentId: studentIds,
+          class_id: classId,
+          student_id: studentIds,
         },
       });
 
@@ -347,7 +347,7 @@ const ClassController = {
 
       // Kiểm tra giới hạn max_students
       if (foundClass.max_students !== null && foundClass.max_students > 0) {
-        const currentCount = await ClassStudent.count({ where: { classId } });
+        const currentCount = await ClassStudent.count({ where: { class_id: classId } });
         const availableSlots = foundClass.max_students - currentCount;
         if (availableSlots <= 0) {
           return res
@@ -370,7 +370,7 @@ const ClassController = {
       const created = await ClassStudent.bulkCreate(classStudents);
 
       // Sau khi thêm học sinh, cập nhật current_students
-      const updatedCount = await ClassStudent.count({ where: { classId } });
+      const updatedCount = await ClassStudent.count({ where: { class_id: classId } });
       foundClass.current_students = updatedCount;
       await foundClass.save();
 
@@ -575,7 +575,7 @@ const ClassController = {
       if (user.role === "STUDENT") {
         // Kiểm tra sinh viên có trong lớp không
         const isMember = await ClassStudent.findOne({
-          where: { classId, studentId: user.userId },
+          where: { class_id: classId, student_id: user.userId },
         });
         if (isMember) {
           return res.json({ success: true, data: foundClass });

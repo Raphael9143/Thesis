@@ -37,7 +37,7 @@ const ResearchController = {
           .json({ success: false, message: "Project not found" });
 
       const member = await ResearchProjectMember.findOne({
-        where: { researchProjectId: id, userId: req.user.userId },
+        where: { research_project_id: id, user_id: req.user.userId },
       });
       if (!member)
         return res.status(403).json({ success: false, message: "Forbidden" });
@@ -79,14 +79,14 @@ const ResearchController = {
 
       // Projects owned by user
       const owned = await ResearchProject.findAll({
-        where: { ownerId: userId },
+        where: { owner_id: userId },
         order: [["created_at", "DESC"]],
         raw: true,
       });
 
       // Projects where user is a member (moderator/contributor/owner)
       const memberships = await ResearchProjectMember.findAll({
-        where: { userId },
+        where: { user_id: userId },
         include: [
           {
             model: ResearchProject,
@@ -192,7 +192,7 @@ const ResearchController = {
 
       // require membership (owner/moderator/contributor)
       const membership = await ResearchProjectMember.findOne({
-        where: { researchProjectId: projectId, userId: req.user.userId },
+        where: { research_project_id: projectId, user_id: req.user.userId },
       });
       if (!membership)
         return res
@@ -282,12 +282,12 @@ const ResearchController = {
 
       // membership required
       const isMember = await ResearchProjectMember.findOne({
-        where: { researchProjectId: projectId, userId: req.user.userId },
+        where: { research_project_id: projectId, user_id: req.user.userId },
       });
       if (!isMember)
         return res.status(403).json({ success: false, message: "Forbidden" });
 
-      const where = { researchProjectId: projectId };
+      const where = { research_project_id: projectId };
       if (req.query.status) where.status = req.query.status.toUpperCase();
 
       const list = await ResearchContribution.findAll({
@@ -332,13 +332,13 @@ const ResearchController = {
           .json({ success: false, message: "Project not found" });
 
       const member = await ResearchProjectMember.findOne({
-        where: { researchProjectId: projectId, userId: req.user.userId },
+        where: { research_project_id: projectId, user_id: req.user.userId },
       });
       if (!member)
         return res.status(403).json({ success: false, message: "Forbidden" });
 
       const members = await ResearchProjectMember.findAll({
-        where: { researchProjectId: projectId },
+        where: { research_project_id: projectId },
         include: [
           { model: User, as: "user", attributes: ["id", "full_name"] },
         ],
@@ -606,6 +606,15 @@ const ResearchController = {
       next = Array.from(new Set(next)).sort((a, b) => a - b);
       user.star_projects = next;
       await user.save();
+
+      // Update project star_count
+      const wasStarred = idx !== -1;
+      const isStarred = next.includes(projectId);
+      if (!wasStarred && isStarred) {
+        await project.increment("starCount");
+      } else if (wasStarred && !isStarred) {
+        await project.decrement("starCount");
+      }
 
       return res.json({ success: true, data: { starred_ids: next } });
     } catch (err) {

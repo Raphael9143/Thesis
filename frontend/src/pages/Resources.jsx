@@ -67,12 +67,12 @@ export default function ResourcesPage() {
                 <tr key={m.id}>
                   <td style={{ width: 48 }}>{idx + 1}</td>
                   <td>{m.name || '-'}</td>
-                  <td>{m.createdAt ? new Date(m.createdAt).toLocaleString() : '-'}</td>
+                  <td>{m.created_at ? new Date(m.created_at).toLocaleString() : '-'}</td>
                   <td>
-                    {m.filePath ? (
+                    {m.file_path ? (
                       <a
                         onClick={() => {
-                          setPreviewPath(String(m.filePath));
+                          setPreviewPath(String(m.file_path));
                           setPreviewOpen(true);
                         }}
                       >
@@ -83,8 +83,8 @@ export default function ResourcesPage() {
                     )}
                   </td>
                   <td>
-                    {m.filePath ? (
-                      <a href={toFullUrl(m.filePath)} target="_blank" rel="noreferrer">
+                    {m.file_path ? (
+                      <a href={toFullUrl(m.file_path)} target="_blank" rel="noreferrer">
                         Download
                       </a>
                     ) : (

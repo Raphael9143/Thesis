@@ -38,7 +38,7 @@ const LectureController = {
           success: false,
           message: "No classes linked to this course.",
         });
-      const owned = await Class.findOne({ where: { id: classIds, teacherId } });
+      const owned = await Class.findOne({ where: { id: classIds, teacher_id: teacherId } });
       if (!owned)
         return res.status(403).json({
           success: false,
@@ -242,7 +242,7 @@ const LectureController = {
           });
           const classIds = links.map((l) => l.class_id);
           const owned = await Class.findOne({
-            where: { id: classIds, teacherId: user.userId },
+            where: { id: classIds, teacher_id: user.userId },
           });
           if (!owned)
             return res
@@ -258,7 +258,7 @@ const LectureController = {
         if (classIds.length === 0)
           return res.status(403).json({ success: false, message: "Forbidden" });
         const member = await ClassStudent.findOne({
-          where: { classId: classIds, studentId: user.userId },
+          where: { class_id: classIds, student_id: user.userId },
         });
         if (!member)
           return res.status(403).json({ success: false, message: "Forbidden" });

@@ -22,7 +22,7 @@ const Class = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    teacherId: {
+    teacher_id: {
       type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
       field: "teacher_id",
@@ -53,13 +53,13 @@ const Class = sequelize.define(
       allowNull: false,
       defaultValue: "draft",
     },
-    createdAt: {
+    created_at: {
       type: DataTypes.DATE,
       allowNull: false,
       field: "created_at",
       defaultValue: DataTypes.NOW,
     },
-    updatedAt: {
+    updated_at: {
       type: DataTypes.DATE,
       allowNull: true,
       field: "updated_at",

@@ -162,7 +162,7 @@ const ExamController = {
           });
           const classIds = links.map((l) => l.class_id);
           const owned = await Class.findOne({
-            where: { id: classIds, teacherId: user.userId },
+            where: { id: classIds, teacher_id: user.userId },
           });
           if (!owned)
             return res
@@ -178,7 +178,7 @@ const ExamController = {
         if (classIds.length === 0)
           return res.status(403).json({ success: false, message: "Forbidden" });
         const member = await ClassStudent.findOne({
-          where: { classId: classIds, studentId: user.userId },
+          where: { class_id: classIds, student_id: user.userId },
         });
         if (!member)
           return res.status(403).json({ success: false, message: "Forbidden" });

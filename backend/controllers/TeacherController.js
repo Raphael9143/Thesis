@@ -25,7 +25,7 @@ const TeacherController = {
       }
       // Lấy các lớp đã/đang dạy
       const courses = await Class.findAll({
-        where: { teacherId: userId },
+        where: { teacher_id: userId },
         attributes: ["id"],
       });
       res.json({
@@ -84,7 +84,7 @@ const TeacherController = {
       }
       // Lấy danh sách lớp
       const classes = await Class.findAll({
-        where: { teacherId: userId },
+        where: { teacher_id: userId },
         attributes: [
           "id",
           "name",
@@ -122,7 +122,7 @@ const TeacherController = {
 
       // Lấy danh sách các lớp do giáo viên làm chủ nhiệm (đã và đang)
       const classes = await Class.findAll({
-        where: { teacherId: userId },
+        where: { teacher_id: userId },
         attributes: ["id"],
       });
       const classIds = classes.map((c) => c.id);

@@ -28,8 +28,8 @@ export default function CreateLectureForm({
     if (open) {
       if (lecture) {
         setForm({
-          course_id: lecture.course_id || lecture.courseId || defaultCourseId || '',
-          class_id: lecture.class_id || lecture.classId || defaultClassId || '',
+          course_id: lecture.course_id || defaultCourseId || '',
+          class_id: lecture.class_id || defaultClassId || '',
           title: lecture.title || '',
         });
         if (fileRef.current) fileRef.current.value = null;

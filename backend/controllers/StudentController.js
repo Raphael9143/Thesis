@@ -15,7 +15,7 @@ const StudentController = {
       }
       // Lấy danh sách class đã enrolled
       const classStudents = await ClassStudent.findAll({
-        where: { studentId: studentId },
+        where: { student_id: studentId },
         include: [{ model: Class }],
       });
       // Sequelize may attach the included model using the model name (e.g. `Class`) or a lowercased
@@ -57,7 +57,7 @@ const StudentController = {
 
       // Lấy danh sách lớp đã/enrolled (chỉ lấy id để gọn nhẹ)
       const classLinks = await ClassStudent.findAll({
-        where: { studentId: userId },
+        where: { student_id: userId },
         attributes: ["classId"],
       });
       const enrolled_classes = classLinks.map((link) => link.classId);
@@ -136,7 +136,7 @@ const StudentController = {
       // Lấy danh sách lớp của sinh viên
       const ClassStudent = require("../models/ClassStudent");
       const classLinks = await ClassStudent.findAll({
-        where: { studentId: targetStudentId },
+        where: { student_id: targetStudentId },
         attributes: ["classId"],
       });
       const classIds = classLinks.map((l) => l.classId);

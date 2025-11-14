@@ -9,17 +9,17 @@ const ClassStudent = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    classId: {
+    class_id: {
       type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
       field: "class_id",
     },
-    studentId: {
+    student_id: {
       type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
       field: "student_id",
     },
-    joinedAt: {
+    joined_at: {
       type: DataTypes.DATE,
       allowNull: false,
       field: "joined_at",

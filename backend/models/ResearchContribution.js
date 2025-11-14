@@ -9,18 +9,18 @@ const ResearchContribution = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    researchProjectId: {
+    research_project_id: {
       type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
       field: "research_project_id",
     },
-    useModelId: {
+    use_model_id: {
       type: DataTypes.BIGINT.UNSIGNED,
       allowNull: true,
       field: "use_model_id",
       comment: "Reference to a UseModel copy containing the contribution (optional)",
     },
-    contributorId: {
+    contributor_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       field: "contributor_id",
@@ -38,23 +38,23 @@ const ResearchContribution = sequelize.define(
       allowNull: false,
       defaultValue: "PENDING",
     },
-    validationReport: {
+    validation_report: {
       type: DataTypes.TEXT("long"),
       allowNull: true,
       field: "validation_report",
     },
-    reviewNotes: {
+    review_notes: {
       type: DataTypes.TEXT,
       allowNull: true,
       field: "review_notes",
     },
-    createdAt: {
+    created_at: {
       type: DataTypes.DATE,
       allowNull: false,
       field: "created_at",
       defaultValue: DataTypes.NOW,
     },
-    updatedAt: {
+    updated_at: {
       type: DataTypes.DATE,
       allowNull: true,
       field: "updated_at",

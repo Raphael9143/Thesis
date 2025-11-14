@@ -22,25 +22,32 @@ const ResearchProject = sequelize.define(
       allowNull: false,
       defaultValue: "DRAFT",
     },
-    ownerId: {
+    owner_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
       field: "owner_id",
       comment: "User id of project owner",
     },
-    mainUseModelId: {
+    main_use_model_id: {
       type: DataTypes.BIGINT.UNSIGNED,
       allowNull: true,
       field: "main_use_model_id",
       comment: "Reference to primary UseModel for this project",
     },
-    createdAt: {
+    star_count: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      field: "star_count",
+      comment: "Number of users who starred this project",
+    },
+    created_at: {
       type: DataTypes.DATE,
       allowNull: false,
       field: "created_at",
       defaultValue: DataTypes.NOW,
     },
-    updatedAt: {
+    updated_at: {
       type: DataTypes.DATE,
       allowNull: true,
       field: "updated_at",

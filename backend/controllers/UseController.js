@@ -300,8 +300,8 @@ const UseController = {
       const UseModel = require("../models/UseModel");
 
       const models = await UseModel.findAll({
-        where: { ownerId },
-        order: [["createdAt", "DESC"]],
+        where: { owner_id: ownerId },
+        order: [["created_at", "DESC"]],
         attributes: [
           "id",
           "name",
@@ -506,9 +506,9 @@ const UseController = {
         const modelRow = await UseModel.create(
           {
             name: parsed.model || null,
-            filePath: publicPath,
-            ownerId: ownerId,
-            rawText: cliResult && cliResult.stdout ? cliResult.stdout : content,
+            file_path: publicPath,
+            owner_id: ownerId,
+            raw_text: cliResult && cliResult.stdout ? cliResult.stdout : content,
           },
           { transaction: t }
         );
@@ -518,7 +518,7 @@ const UseController = {
           for (const en of parsed.enums) {
             await UseEnum.create(
               {
-                useModelId: modelRow.id,
+                use_model_id: modelRow.id,
                 name: en.name,
                 values: (en.values || []).join(","),
               },
@@ -532,7 +532,7 @@ const UseController = {
         if (parsed.classes && parsed.classes.length) {
           for (const cls of parsed.classes) {
             const c = await UseClass.create(
-              { useModelId: modelRow.id, name: cls.name },
+              { use_model_id: modelRow.id, name: cls.name },
               { transaction: t }
             );
             classMap[cls.name] = c.id;
@@ -541,7 +541,7 @@ const UseController = {
               for (const attr of cls.attributes) {
                 await UseAttribute.create(
                   {
-                    useClassId: c.id,
+                    use_class_id: c.id,
                     name: attr.name,
                     type: attr.type || null,
                   },
@@ -554,7 +554,7 @@ const UseController = {
               for (const op of cls.operations) {
                 await UseOperation.create(
                   {
-                    useClassId: c.id,
+                    use_class_id: c.id,
                     name: op.name,
                     signature: op.signature || null,
                   },
@@ -569,15 +569,15 @@ const UseController = {
         if (parsed.associations && parsed.associations.length) {
           for (const assoc of parsed.associations) {
             const a = await UseAssociation.create(
-              { useModelId: modelRow.id, name: assoc.name },
+              { use_model_id: modelRow.id, name: assoc.name },
               { transaction: t }
             );
             if (assoc.parts && assoc.parts.length) {
               for (const p of assoc.parts) {
                 await UseAssociationPart.create(
                   {
-                    useAssociationId: a.id,
-                    className: p.class,
+                    use_association_id: a.id,
+                    class_name: p.class,
                     multiplicity: p.multiplicity,
                     role: p.role,
                   },
@@ -624,7 +624,7 @@ const UseController = {
               }
               await UseConstraint.create(
                 {
-                  useModelId: modelRow.id,
+                  use_model_id: modelRow.id,
                   context: contextName,
                   kind,
                   name,

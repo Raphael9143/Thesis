@@ -55,9 +55,7 @@ function HistoryTable({ history }) {
         </thead>
         <tbody>
           {history.map((s) => {
-            const ts = new Date(
-              s.submission_time || s.created_at || s.createdAt || s.updated_at || s.updatedAt || Date.now()
-            ).toLocaleString();
+            const ts = new Date(s.submission_time || s.created_at || s.updated_at || Date.now()).toLocaleString();
             return (
               <tr key={s.id}>
                 <td>{s.attempt_number != null ? s.attempt_number : '-'}</td>

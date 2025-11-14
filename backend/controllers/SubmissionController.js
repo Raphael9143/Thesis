@@ -33,7 +33,7 @@ const SubmissionController = {
       // Determine student's enrolled classes for eligibility checks (no class_id in payload)
       const { Op } = require("sequelize");
       const enrolments = await ClassStudent.findAll({
-        where: { studentId: req.user.userId },
+        where: { student_id: req.user.userId },
         attributes: ["classId"],
       });
       const enrolledClassIds = enrolments.map((e) => e.classId ?? e.class_id);
@@ -321,7 +321,7 @@ const SubmissionController = {
         const classIds = classCourses.map((cc) => cc.class_id ?? cc.classId);
         if (classIds.length === 0) return res.json({ success: true, data: [] });
         const teacherClass = await Class.findOne({
-          where: { id: classIds, teacherId: userId },
+          where: { id: classIds, teacher_id: userId },
         });
         if (!teacherClass)
           return res.status(403).json({ success: false, message: "Forbidden" });

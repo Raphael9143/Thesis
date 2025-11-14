@@ -71,10 +71,10 @@ export default function ResearcherProjectDetail() {
               <h2 className="no-margin">Model</h2>
               {model ? (
                 <div style={{ marginTop: 12 }}>
-                  <FilePreview url={toFullUrl(model.filePath)} filename={model.filePath} filePath={model.filePath} />
-                  {model.filePath && (
+                  <FilePreview url={toFullUrl(model.file_path)} filename={model.file_path} filePath={model.file_path} />
+                  {model.file_path && (
                     <div style={{ marginTop: 8 }}>
-                      <a className="btn btn--secondary" href={toFullUrl(model.filePath)} download>
+                      <a className="btn btn--secondary" href={toFullUrl(model.file_path)} download>
                         Download
                       </a>
                     </div>
