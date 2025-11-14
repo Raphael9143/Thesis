@@ -170,4 +170,38 @@ router.post("/save", auth, conditionalUpload, UseController.save);
  */
 router.get("/models", auth, UseController.listMine);
 
+// GET /api/use/models/:id - get a specific model with details
+/**
+ * @swagger
+ * /api/use/models/{id}:
+ *   get:
+ *     summary: Get a stored USE model by id with related entities
+ *     tags:
+ *       - USE
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: integer
+ *         description: The id of the UseModel
+ *     responses:
+ *       200:
+ *         description: The requested model with nested details
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             data:
+ *               type: object
+ *               description: UseModel with enums, classes, associations, constraints
+ *       400:
+ *         description: Invalid id
+ *       404:
+ *         description: Model not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/models/:id", UseController.getById);
+
 module.exports = router;

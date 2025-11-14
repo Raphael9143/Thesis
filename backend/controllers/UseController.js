@@ -192,6 +192,101 @@ function parseCliOutput(cliOut) {
 }
 
 const UseController = {
+  // Get a stored USE model by id with related entities
+  getById: async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (!id) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid id" });
+      }
+
+      // Ensure associations
+      require("../models/UseAssociations");
+      const UseModel = require("../models/UseModel");
+      const UseEnum = require("../models/UseEnum");
+      const UseClass = require("../models/UseClass");
+      const UseAttribute = require("../models/UseAttribute");
+      const UseOperation = require("../models/UseOperation");
+      const UseAssociation = require("../models/UseAssociation");
+      const UseAssociationPart = require("../models/UseAssociationPart");
+      const UseConstraint = require("../models/UseConstraint");
+
+      const model = await UseModel.findByPk(id, {
+        include: [
+          { model: UseEnum, as: "enums" },
+          {
+            model: UseClass,
+            as: "classes",
+            include: [
+              { model: UseAttribute, as: "attributes" },
+              { model: UseOperation, as: "operations" },
+            ],
+          },
+          {
+            model: UseAssociation,
+            as: "associations",
+            include: [{ model: UseAssociationPart, as: "parts" }],
+          },
+          { model: UseConstraint, as: "constraints" },
+        ],
+      });
+
+      if (!model)
+        return res
+          .status(404)
+          .json({ success: false, message: "Model not found" });
+
+      // Normalize: remove camelCase duplicates when snake_case exists
+      const plain = model.get({ plain: true });
+      const stripCamelDuplicates = (node) => {
+        if (Array.isArray(node)) {
+          node.forEach(stripCamelDuplicates);
+          return;
+        }
+        if (!node || typeof node !== "object") return;
+
+        if (
+          Object.prototype.hasOwnProperty.call(node, "owner_id") &&
+          Object.prototype.hasOwnProperty.call(node, "ownerId")
+        ) {
+          delete node.ownerId;
+        }
+        if (
+          Object.prototype.hasOwnProperty.call(node, "use_model_id") &&
+          Object.prototype.hasOwnProperty.call(node, "useModelId")
+        ) {
+          delete node.useModelId;
+        }
+        if (
+          Object.prototype.hasOwnProperty.call(node, "use_class_id") &&
+          Object.prototype.hasOwnProperty.call(node, "useClassId")
+        ) {
+          delete node.useClassId;
+        }
+        if (
+          Object.prototype.hasOwnProperty.call(node, "use_association_id") &&
+          Object.prototype.hasOwnProperty.call(node, "useAssociationId")
+        ) {
+          delete node.useAssociationId;
+        }
+
+        // Recurse into all object properties
+        for (const k of Object.keys(node)) {
+          stripCamelDuplicates(node[k]);
+        }
+      };
+
+      stripCamelDuplicates(plain);
+      return res.json({ success: true, data: plain });
+    } catch (error) {
+      console.error("Get USE model by id error:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
   listMine: async (req, res) => {
     try {
       if (!req.user || !req.user.userId) {
