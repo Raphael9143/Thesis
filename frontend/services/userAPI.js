@@ -150,6 +150,9 @@ const userAPI = {
   saveUseModel: (path) => axiosClient.post('use/save', { path }),
   // GET /api/use/models
   getUseModels: () => axiosClient.get('use/models'),
+  // Researcher projects
+  // GET /api/research/projects/mine
+  getResearchProjectsMine: () => axiosClient.get('research/projects/mine'),
 };
 
 export default userAPI;
