@@ -19,8 +19,8 @@ export default function ResearcherHome() {
 
   const onSuccessAuth = () => {
     setShowAuth(false);
-    // Redirect to community home
-    navigate('/community/home');
+    // Redirect to authenticated researcher workspace
+    navigate('/researcher');
   };
 
   return (

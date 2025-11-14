@@ -3,6 +3,10 @@ import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, O
 import MainLayout from './layouts/MainLayout';
 import EducationLogin from './pages/EducationLogin';
 import ResearcherHome from './pages/ResearcherHome';
+import ResearcherLayout from './layouts/ResearcherLayout';
+import ResearcherDashboard from './pages/researcher/Dashboard';
+import ResearcherProjects from './pages/researcher/Projects';
+import ResearcherProfile from './pages/researcher/Profile';
 import Home from './pages/Home';
 import RegisterPage from './pages/RegisterPage';
 import NotFound from './pages/NotFound';
@@ -49,6 +53,21 @@ const router = createBrowserRouter(
         }
       >
         <Route path="/education/home" element={<Home />} />
+        <Route
+          path="/researcher"
+          element={
+            <RequireAuth>
+              <RequireRole allowed={['researcher']}>
+                <ResearcherLayout />
+              </RequireRole>
+            </RequireAuth>
+          }
+        >
+          <Route index element={<ResearcherDashboard />} />
+          <Route path="dashboard" element={<ResearcherDashboard />} />
+          <Route path="projects" element={<ResearcherProjects />} />
+          <Route path="profile" element={<ResearcherProfile />} />
+        </Route>
         <Route
           path="/education/resources"
           element={
