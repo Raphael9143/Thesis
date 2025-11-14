@@ -19,7 +19,7 @@ const UseModel = sequelize.define(
       field: "file_path",
     },
     owner_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: true,
       field: "owner_id",
     },

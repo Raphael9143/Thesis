@@ -7,7 +7,7 @@ const User = sequelize.define(
   "User",
   {
     id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       primaryKey: true,
       autoIncrement: true,
     },
@@ -89,10 +89,21 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: "ACTIVE",
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      field: "created_at",
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: "updated_at",
+    },
   },
   {
     tableName: "users",
-    timestamps: true, // Tự động tạo createdAt và updatedAt
+    timestamps: true, // Tự động tạo created_at và updated_at
     indexes: [
       {
         unique: true,

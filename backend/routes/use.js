@@ -157,10 +157,10 @@ router.post("/save", auth, conditionalUpload, UseController.save);
  *                     type: string
  *                   ownerId:
  *                     type: integer
- *                   createdAt:
+ *                   created_at:
  *                     type: string
  *                     format: date-time
- *                   updatedAt:
+ *                   updated_at:
  *                     type: string
  *                     format: date-time
  *       401:

@@ -47,7 +47,7 @@ const CourseController = {
           .json({ success: false, message: "Class không tồn tại." });
       }
       // Kiểm tra giáo viên đứng lớp có đúng không
-      if (foundClass.teacherId !== user.id) {
+      if (foundClass.teacher_id !== user.id) {
         return res.status(403).json({
           success: false,
           message: "Bạn không phải giáo viên chủ nhiệm của lớp này.",
@@ -125,7 +125,7 @@ const CourseController = {
           .json({ success: false, message: "Class not found." });
       }
       // Chỉ giáo viên chủ nhiệm hoặc admin mới được sửa
-      if (userRole !== "ADMIN" && foundClass.teacherId !== userId) {
+      if (userRole !== "ADMIN" && foundClass.teacher_id !== userId) {
         return res.status(403).json({
           success: false,
           message: "Bạn không có quyền cập nhật lớp môn học này.",

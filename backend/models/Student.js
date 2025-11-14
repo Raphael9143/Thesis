@@ -5,7 +5,7 @@ const Student = sequelize.define(
   "Student",
   {
     student_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       primaryKey: true,
       references: {
         model: "users",
@@ -31,6 +31,17 @@ const Student = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
       defaultValue: 0,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      field: "created_at",
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: "updated_at",
     },
   },
   {

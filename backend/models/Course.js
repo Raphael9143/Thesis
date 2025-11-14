@@ -23,7 +23,7 @@ const Course = sequelize.define(
       allowNull: true,
     },
     created_by: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
     },
     semester: {

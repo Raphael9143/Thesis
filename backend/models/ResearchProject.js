@@ -23,7 +23,7 @@ const ResearchProject = sequelize.define(
       defaultValue: "DRAFT",
     },
     owner_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
       field: "owner_id",
       comment: "User id of project owner",

@@ -34,9 +34,9 @@ const SubmissionController = {
       const { Op } = require("sequelize");
       const enrolments = await ClassStudent.findAll({
         where: { student_id: req.user.userId },
-        attributes: ["classId"],
+        attributes: ["class_id"],
       });
-      const enrolledClassIds = enrolments.map((e) => e.classId ?? e.class_id);
+      const enrolledClassIds = enrolments.map((e) => e.class_id);
 
       let maxAttempts = 1;
       let targetType = null; // 'assignment' | 'exam'
@@ -318,7 +318,7 @@ const SubmissionController = {
           where: { course_id: assignment.course_id },
           attributes: ["class_id"],
         });
-        const classIds = classCourses.map((cc) => cc.class_id ?? cc.classId);
+        const classIds = classCourses.map((cc) => cc.class_id);
         if (classIds.length === 0) return res.json({ success: true, data: [] });
         const teacherClass = await Class.findOne({
           where: { id: classIds, teacher_id: userId },
@@ -416,10 +416,10 @@ const SubmissionController = {
           where: { course_id: exam.course_id },
           attributes: ["class_id"],
         });
-        const classIds = classCourses.map((cc) => cc.class_id ?? cc.classId);
+        const classIds = classCourses.map((cc) => cc.class_id);
         if (classIds.length === 0) return res.json({ success: true, data: [] });
         const teacherClass = await Class.findOne({
-          where: { id: classIds, teacherId: userId },
+          where: { id: classIds, teacher_id: userId },
         });
         if (!teacherClass)
           return res.status(403).json({ success: false, message: "Forbidden" });
@@ -512,10 +512,10 @@ const SubmissionController = {
       const { Op } = require("sequelize");
       const ClassCourse = require("../models/ClassCourse");
       const enrolments = await ClassStudent.findAll({
-        where: { studentId: req.user.userId },
-        attributes: ["classId"],
+        where: { student_id: req.user.userId },
+        attributes: ["class_id"],
       });
-      const enrolledClassIds = enrolments.map((e) => e.classId ?? e.class_id);
+      const enrolledClassIds = enrolments.map((e) => e.class_id);
       if (!enrolledClassIds || enrolledClassIds.length === 0)
         return res.status(403).json({
           success: false,

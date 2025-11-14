@@ -18,7 +18,7 @@ const Submission = sequelize.define(
       allowNull: true,
     },
     student_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
     },
     submission_time: {

@@ -22,7 +22,7 @@ const UseEnum = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     }, // comma-separated values
-    createdAt: {
+    created_at: {
       type: DataTypes.DATE,
       allowNull: false,
       field: "created_at",

@@ -305,10 +305,10 @@ const UseController = {
         attributes: [
           "id",
           "name",
-          "filePath",
-          "ownerId",
-          "createdAt",
-          "updatedAt",
+          "file_path",
+          "owner_id",
+          "created_at",
+          "updated_at",
         ],
       });
 

@@ -14,7 +14,7 @@ const Lecture = sequelize.define(
       allowNull: false,
     },
     teacher_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
     },
     title: {

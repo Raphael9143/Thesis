@@ -15,7 +15,7 @@ const ResearchProjectMember = sequelize.define(
       field: "research_project_id",
     },
     user_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
       field: "user_id",
     },

@@ -222,10 +222,10 @@ const AssignmentController = {
       if (req.user.role === "ADMIN") {
         // allowed
       } else if (req.user.role === "TEACHER") {
-        const isCreator = assignment.created_by === req.user.userId;
-        const isClassTeacher =
-          classObj && classObj.teacherId === req.user.userId;
-        if (!isCreator && !isClassTeacher)
+      const isCreator = assignment.created_by === req.user.userId;
+      const isClassTeacher =
+        classObj && classObj.teacher_id === req.user.userId;
+      if (!isCreator && !isClassTeacher)
           return res.status(403).json({
             success: false,
             message: "You do not have permission to update this assignment.",
@@ -361,7 +361,7 @@ const AssignmentController = {
           .status(404)
           .json({ success: false, message: "No class found for this course." });
       const classObj = await Class.findByPk(classCourse.class_id);
-      if (!classObj || classObj.teacherId !== req.user.userId)
+      if (!classObj || classObj.teacher_id !== req.user.userId)
         return res.status(403).json({
           success: false,
           message: "You do not have permission to remove this assignment.",
@@ -478,7 +478,7 @@ const AssignmentController = {
         let classObj = null;
         if (classCourse) classObj = await Class.findByPk(classCourse.class_id);
         const isCreator = assignment.created_by === user.userId;
-        const isClassTeacher = classObj && classObj.teacherId === user.userId;
+        const isClassTeacher = classObj && classObj.teacher_id === user.userId;
         if (!isCreator && !isClassTeacher)
           return res
             .status(403)
@@ -589,7 +589,7 @@ const AssignmentController = {
           attributes: ["class_id"],
         });
         if (cc) {
-          const cls = await Class.findByPk(cc.class_id ?? cc.classId);
+          const cls = await Class.findByPk(cc.class_id);
           if (cls) classSize = cls.current_students;
         }
       } catch (err) {
@@ -669,7 +669,7 @@ const AssignmentController = {
       } else if (req.user.role === "TEACHER") {
         const isCreator = assignment.created_by === req.user.userId;
         const isClassTeacher =
-          classObj && classObj.teacherId === req.user.userId;
+          classObj && classObj.teacher_id === req.user.userId;
         if (!isCreator && !isClassTeacher)
           return res.status(403).json({
             success: false,

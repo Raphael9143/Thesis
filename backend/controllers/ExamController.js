@@ -201,7 +201,7 @@ const ExamController = {
           attributes: ["class_id"],
         });
         if (cc) {
-          const cls = await Class.findByPk(cc.class_id ?? cc.classId);
+          const cls = await Class.findByPk(cc.class_id);
           if (cls) classSize = cls.current_students;
         }
       } catch (err) {
@@ -269,7 +269,7 @@ const ExamController = {
       } else if (req.user.role === "TEACHER") {
         const isCreator = exam.created_by === req.user.userId;
         const isClassTeacher =
-          classObj && classObj.teacherId === req.user.userId;
+          classObj && classObj.teacher_id === req.user.userId;
         if (!isCreator && !isClassTeacher)
           return res.status(403).json({
             success: false,
@@ -392,7 +392,7 @@ const ExamController = {
       } else if (req.user.role === "TEACHER") {
         const isCreator = exam.created_by === req.user.userId;
         const isClassTeacher =
-          classObj && classObj.teacherId === req.user.userId;
+          classObj && classObj.teacher_id === req.user.userId;
         if (!isCreator && !isClassTeacher)
           return res.status(403).json({
             success: false,
@@ -525,7 +525,7 @@ const ExamController = {
         // allowed
       } else if (req.user.role === "TEACHER") {
         const isCreator = exam.created_by === req.user.userId;
-        const isClassTeacher = classObj && classObj.teacherId === req.user.userId;
+        const isClassTeacher = classObj && classObj.teacher_id === req.user.userId;
         if (!isCreator && !isClassTeacher)
           return res.status(403).json({ success: false, message: "Forbidden" });
       } else {
@@ -574,7 +574,7 @@ const ExamController = {
       } else if (req.user.role === "TEACHER") {
         const isCreator = exam.created_by === req.user.userId;
         const isClassTeacher =
-          classObj && classObj.teacherId === req.user.userId;
+          classObj && classObj.teacher_id === req.user.userId;
         if (!isCreator && !isClassTeacher)
           return res.status(403).json({
             success: false,

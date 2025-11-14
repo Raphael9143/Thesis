@@ -80,10 +80,10 @@ const StudentController = require('../controllers/StudentController');
  *           nullable: true
  *         completed_assignments:
  *           type: integer
- *         createdAt:
+ *         created_at:
  *           type: string
  *           format: date-time
- *         updatedAt:
+ *         updated_at:
  *           type: string
  *           format: date-time
  *     StudentProfile:
@@ -114,10 +114,10 @@ const StudentController = require('../controllers/StudentController');
  *         status:
  *           type: string
  *           enum: [ACTIVE, INACTIVE, BANNED, PENDING_VERIFICATION]
- *         createdAt:
+ *         created_at:
  *           type: string
  *           format: date-time
- *         updatedAt:
+ *         updated_at:
  *           type: string
  *           format: date-time
  *         student_id:

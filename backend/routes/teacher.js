@@ -37,10 +37,10 @@ const TeacherController = require("../controllers/TeacherController");
  *           type: array
  *           items:
  *             type: string
- *         createdAt:
+ *         created_at:
  *           type: string
  *           format: date-time
- *         updatedAt:
+ *         updated_at:
  *           type: string
  *           format: date-time
  *       */
@@ -86,10 +86,10 @@ const TeacherController = require("../controllers/TeacherController");
  *                         type: integer
  *                       current_students:
  *                         type: integer
- *                       createdAt:
+ *                       created_at:
  *                         type: string
  *                         format: date-time
- *                       updatedAt:
+ *                       updated_at:
  *                         type: string
  *                         format: date-time
  *       401:

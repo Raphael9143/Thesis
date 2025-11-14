@@ -42,10 +42,10 @@ const ResearcherController = require("../controllers/ResearcherController");
  *         years_of_experience:
  *           type: integer
  *           nullable: true
- *         createdAt:
+ *         created_at:
  *           type: string
  *           format: date-time
- *         updatedAt:
+ *         updated_at:
  *           type: string
  *           format: date-time
  */

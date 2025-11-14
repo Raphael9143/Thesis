@@ -58,9 +58,9 @@ const StudentController = {
       // Lấy danh sách lớp đã/enrolled (chỉ lấy id để gọn nhẹ)
       const classLinks = await ClassStudent.findAll({
         where: { student_id: userId },
-        attributes: ["classId"],
+        attributes: ["class_id"],
       });
-      const enrolled_classes = classLinks.map((link) => link.classId);
+      const enrolled_classes = classLinks.map((link) => link.class_id);
 
       res.json({
         success: true,
@@ -137,9 +137,9 @@ const StudentController = {
       const ClassStudent = require("../models/ClassStudent");
       const classLinks = await ClassStudent.findAll({
         where: { student_id: targetStudentId },
-        attributes: ["classId"],
+        attributes: ["class_id"],
       });
-      const classIds = classLinks.map((l) => l.classId);
+      const classIds = classLinks.map((l) => l.class_id);
       if (classIds.length === 0) return res.json({ success: true, data: [] });
 
       // Lấy courses của các lớp
@@ -149,7 +149,7 @@ const StudentController = {
         attributes: ["course_id"],
       });
       let courseIds = [
-        ...new Set(classCourses.map((cc) => cc.course_id ?? cc.courseId)),
+        ...new Set(classCourses.map((cc) => cc.course_id)),
       ];
 
       // Optional course filter from query string: ?course=1
@@ -216,8 +216,8 @@ const StudentController = {
           attempt_limit: a.submission_limit,
           score: latestSub ? latestSub.score : null,
           attachment: latestSub ? latestSub.attachment : null,
-          course_id: ac.course_id ?? ac.courseId,
-          due_date: ac.due_date ?? ac.dueDate,
+          course_id: ac.course_id,
+          due_date: ac.due_date,
         });
       }
 

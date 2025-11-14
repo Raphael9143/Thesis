@@ -5,7 +5,7 @@ const Teacher = sequelize.define(
   "Teacher",
   {
     teacher_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       primaryKey: true,
       references: {
         model: "users",
@@ -26,6 +26,17 @@ const Teacher = sequelize.define(
     research_papers: {
       type: DataTypes.JSON,
       allowNull: true,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      field: "created_at",
+      defaultValue: DataTypes.NOW,
+    },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: "updated_at",
     },
   },
   {

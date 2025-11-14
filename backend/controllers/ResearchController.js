@@ -124,8 +124,8 @@ const ResearchController = {
       });
 
       const sorted = normalized.sort((a, b) => {
-        const da = new Date(a.created_at || a.createdAt || 0).getTime();
-        const db = new Date(b.created_at || b.createdAt || 0).getTime();
+        const da = new Date(a.created_at || 0).getTime();
+        const db = new Date(b.created_at || 0).getTime();
         return db - da;
       });
 
@@ -398,8 +398,8 @@ const ResearchController = {
       // membership check
       const isMember = await ResearchProjectMember.findOne({
         where: {
-          researchProjectId: contrib.researchProjectId,
-          userId: req.user.userId,
+          research_project_id: contrib.research_project_id,
+          user_id: req.user.userId,
         },
       });
       if (!isMember)
@@ -477,15 +477,15 @@ const ResearchController = {
       // create new UseModel copy
       const useModel = await UseModel.create({
         name: req.body.name || null,
-        filePath: publicPath,
-        rawText: content,
-        ownerId: req.user.userId,
+        file_path: publicPath,
+        raw_text: content,
+        owner_id: req.user.userId,
       });
 
-      contrib.useModelId = useModel.id;
+      contrib.use_model_id = useModel.id;
       contrib.status = "PENDING";
-      contrib.reviewNotes = null;
-      contrib.validationReport = null;
+      contrib.review_notes = null;
+      contrib.validation_report = null;
       await contrib.save();
 
       return res.json({ success: true, data: contrib });
@@ -515,8 +515,8 @@ const ResearchController = {
       // only owner or moderator can review
       const member = await ResearchProjectMember.findOne({
         where: {
-          researchProjectId: contrib.researchProjectId,
-          userId: req.user.userId,
+          research_project_id: contrib.research_project_id,
+          user_id: req.user.userId,
         },
       });
       if (!member || !["OWNER", "MODERATOR"].includes(member.role))
@@ -528,26 +528,26 @@ const ResearchController = {
           .status(400)
           .json({ success: false, message: "Invalid action" });
 
-      contrib.reviewNotes = notes || null;
+      contrib.review_notes = notes || null;
       if (action === "REJECT") {
         contrib.status = "REJECTED";
       } else if (action === "NEEDS_EDIT") {
         contrib.status = "NEEDS_EDIT";
       } else if (action === "ACCEPT") {
         contrib.status = "ACCEPTED";
-        // Merge policy: set project's main_use_model_id to this contribution's useModelId
+        // Merge policy: set project's main_use_model_id to this contribution's use_model_id
         const project = await ResearchProject.findByPk(
-          contrib.researchProjectId
+          contrib.research_project_id
         );
         if (project) {
-          project.mainUseModelId = contrib.useModelId;
+          project.main_use_model_id = contrib.use_model_id;
           await project.save();
         }
       }
 
       // optionally run validation and store report (omitted heavy CLI run here)
-      if (req.body.validationReport)
-        contrib.validationReport = req.body.validationReport;
+      if (req.body.validation_report)
+        contrib.validation_report = req.body.validation_report;
 
       await contrib.save();
       return res.json({ success: true, data: contrib });

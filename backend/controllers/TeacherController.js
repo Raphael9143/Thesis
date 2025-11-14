@@ -94,8 +94,8 @@ const TeacherController = {
           "status",
           "max_students",
           "current_students",
-          "createdAt",
-          "updatedAt",
+          "created_at",
+          "updated_at",
         ],
       });
       res.json({

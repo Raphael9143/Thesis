@@ -21,7 +21,7 @@ const ResearchContribution = sequelize.define(
       comment: "Reference to a UseModel copy containing the contribution (optional)",
     },
     contributor_id: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
       field: "contributor_id",
     },

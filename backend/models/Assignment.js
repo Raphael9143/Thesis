@@ -22,7 +22,7 @@ const Assignment = sequelize.define(
       allowNull: true,
     },
     created_by: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
     },
     attachment: {

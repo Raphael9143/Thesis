@@ -19,8 +19,8 @@ const ClassController = {
             as: "teacher",
             attributes: ["id", "full_name", "email"],
           },
-        ],
-        order: [["createdAt", "DESC"]],
+          ],
+          order: [["created_at", "DESC"]],
       });
       res.json({ success: true, data: classes });
     } catch (error) {
@@ -33,17 +33,17 @@ const ClassController = {
   // Lấy số lượng học sinh của lớp
   getStudentCountOfClass: async (req, res) => {
     try {
-      const classId = req.params.id;
+      const class_id = req.params.id;
       // Kiểm tra lớp tồn tại
-      const foundClass = await Class.findByPk(classId);
+      const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
         return res
           .status(404)
           .json({ success: false, message: "Class not found." });
       }
       // Đếm số lượng học sinh
-      const count = await ClassStudent.count({ where: { class_id: classId } });
-      res.json({ success: true, classId, studentCount: count });
+      const count = await ClassStudent.count({ where: { class_id } });
+      res.json({ success: true, class_id, student_count: count });
     } catch (error) {
       console.error("Get student count of class error:", error);
       res
@@ -55,10 +55,10 @@ const ClassController = {
   // Query params: page (integer, default 1). Page size fixed to 20.
   getStudentsOfClass: async (req, res) => {
     try {
-      const classId = req.params.id;
+      const class_id = req.params.id;
 
       // Kiểm tra lớp tồn tại
-      const foundClass = await Class.findByPk(classId);
+      const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
         return res
           .status(404)
@@ -73,19 +73,19 @@ const ClassController = {
       // Lấy danh sách sinh viên phân trang
       const Student = require("../models/Student");
       const { count, rows } = await ClassStudent.findAndCountAll({
-        where: { class_id: classId },
+        where: { class_id },
         include: [
           {
             model: User,
             as: "student",
             attributes: [
-              "id",
-              "full_name",
-              "email",
-              "role",
-              "createdAt",
-              "updatedAt",
-            ],
+                  "id",
+                  "full_name",
+                  "email",
+                  "role",
+                  "created_at",
+                  "updated_at",
+                ],
           },
           {
             model: Student,
@@ -116,8 +116,8 @@ const ClassController = {
             : null,
           email: cs.student.email,
           role: cs.student.role,
-          joinedAt: cs.joinedAt,
-          classStudentId: cs.id,
+          joined_at: cs.joined_at,
+          class_student_id: cs.id,
         })),
       });
     } catch (error) {
@@ -130,7 +130,7 @@ const ClassController = {
   // Xóa lớp học (chỉ admin)
   deleteClass: async (req, res) => {
     try {
-      const classId = req.params.id;
+      const class_id = req.params.id;
       const userRole = req.user.role;
 
       if (userRole !== "admin") {
@@ -141,7 +141,7 @@ const ClassController = {
         });
       }
 
-      const foundClass = await Class.findByPk(classId);
+      const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
         return res
           .status(404)
@@ -161,19 +161,19 @@ const ClassController = {
   // Xóa nhiều học sinh khỏi lớp học
   removeStudentFromClass: async (req, res) => {
     try {
-      const classId = req.params.id;
-      const userId = req.user.userId;
+      const class_id = req.params.id;
+      const user_id = req.user.userId;
       const userRole = req.user.role;
-      const { studentIds } = req.body;
+      const { student_ids } = req.body;
 
-      if (!Array.isArray(studentIds) || studentIds.length === 0) {
+      if (!Array.isArray(student_ids) || student_ids.length === 0) {
         return res
           .status(400)
-          .json({ success: false, message: "studentIds (array) is required." });
+          .json({ success: false, message: "student_ids (array) is required." });
       }
 
       // Tìm lớp học
-      const foundClass = await Class.findByPk(classId);
+      const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
         return res
           .status(404)
@@ -181,7 +181,7 @@ const ClassController = {
       }
 
       // Chỉ admin hoặc giáo viên chủ nhiệm mới được xóa học sinh
-      if (userRole !== "admin" && foundClass.teacherId !== userId) {
+      if (userRole !== "admin" && foundClass.teacher_id !== user_id) {
         return res.status(403).json({
           success: false,
           message:
@@ -192,8 +192,8 @@ const ClassController = {
       // Xóa các học sinh khỏi lớp
       const deleted = await ClassStudent.destroy({
         where: {
-          class_id: classId,
-          student_id: studentIds,
+          class_id,
+          student_id: student_ids,
         },
       });
 
@@ -219,8 +219,8 @@ const ClassController = {
   // Sửa trạng thái lớp học
   updateClassStatus: async (req, res) => {
     try {
-      const classId = req.params.id;
-      const userId = req.user.userId;
+      const class_id = req.params.id;
+      const user_id = req.user.userId;
       const userRole = req.user.role;
       const { status } = req.body;
 
@@ -240,7 +240,7 @@ const ClassController = {
       }
 
       // Tìm lớp học
-      const foundClass = await Class.findByPk(classId);
+      const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
         return res
           .status(404)
@@ -248,7 +248,7 @@ const ClassController = {
       }
 
       // Chỉ admin hoặc giáo viên chủ nhiệm mới được sửa
-      if (userRole !== "admin" && foundClass.teacherId !== userId) {
+      if (userRole !== "admin" && foundClass.teacher_id !== user_id) {
         return res.status(403).json({
           success: false,
           message: "You do not have permission to update this class.",
@@ -265,7 +265,7 @@ const ClassController = {
           class: {
             id: foundClass.id,
             status: foundClass.status,
-            updatedAt: foundClass.updatedAt,
+            updated_at: foundClass.updated_at,
           },
         },
       });
@@ -279,8 +279,8 @@ const ClassController = {
   // Thêm học sinh vào lớp học
   addStudentToClass: async (req, res) => {
     try {
-      const classId = req.params.id;
-      const userId = req.user.userId;
+      const class_id = req.params.id;
+      const user_id = req.user.userId;
       const userRole = req.user.role;
 
       if (!req.body || typeof req.body !== "object") {
@@ -297,7 +297,7 @@ const ClassController = {
       }
 
       // Tìm lớp học
-      const foundClass = await Class.findByPk(classId);
+      const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
         return res
           .status(404)
@@ -305,7 +305,7 @@ const ClassController = {
       }
 
       // Chỉ admin hoặc giáo viên chủ nhiệm mới được thêm học sinh
-      if (userRole !== "admin" && foundClass.teacherId !== userId) {
+      if (userRole !== "admin" && foundClass.teacher_id !== user_id) {
         return res.status(403).json({
           success: false,
           message: "You do not have permission to add students to this class.",
@@ -332,11 +332,11 @@ const ClassController = {
       // Kiểm tra học sinh đã có trong lớp chưa
       const existed = await ClassStudent.findAll({
         where: {
-          classId: classId,
-          studentId: students.map((s) => s.id),
+          class_id,
+          student_id: students.map((s) => s.id),
         },
       });
-      const existedIds = existed.map((e) => e.studentId);
+      const existedIds = existed.map((e) => e.student_id);
       let newStudents = students.filter((s) => !existedIds.includes(s.id));
       if (newStudents.length === 0) {
         return res.status(400).json({
@@ -347,7 +347,7 @@ const ClassController = {
 
       // Kiểm tra giới hạn max_students
       if (foundClass.max_students !== null && foundClass.max_students > 0) {
-        const currentCount = await ClassStudent.count({ where: { class_id: classId } });
+        const currentCount = await ClassStudent.count({ where: { class_id } });
         const availableSlots = foundClass.max_students - currentCount;
         if (availableSlots <= 0) {
           return res
@@ -362,15 +362,15 @@ const ClassController = {
       // Thêm vào bảng class_students
       const now = new Date();
       const classStudents = newStudents.map((s) => ({
-        classId: classId,
-        studentId: s.id,
+        class_id,
+        student_id: s.id,
         role: "student",
-        joinedAt: now,
+        joined_at: now,
       }));
       const created = await ClassStudent.bulkCreate(classStudents);
 
       // Sau khi thêm học sinh, cập nhật current_students
-      const updatedCount = await ClassStudent.count({ where: { class_id: classId } });
+      const updatedCount = await ClassStudent.count({ where: { class_id } });
       foundClass.current_students = updatedCount;
       await foundClass.save();
 
@@ -380,10 +380,10 @@ const ClassController = {
         data: {
           added: created.map((cs) => ({
             id: cs.id,
-            classId: cs.classId,
-            studentId: cs.studentId,
+            class_id: cs.class_id,
+            student_id: cs.student_id,
             role: cs.role,
-            joinedAt: cs.joinedAt,
+            joined_at: cs.joined_at,
           })),
         },
       });
@@ -410,7 +410,7 @@ const ClassController = {
       }
 
       // Chỉ admin hoặc giáo viên chủ nhiệm mới được sửa
-      if (userRole !== "admin" && foundClass.teacherId !== userId) {
+      if (userRole !== "admin" && foundClass.teacher_id !== userId) {
         return res.status(403).json({
           success: false,
           message: "You do not have permission to update this class.",
@@ -436,12 +436,12 @@ const ClassController = {
             name: foundClass.name,
             code: foundClass.code,
             description: foundClass.description,
-            teacherId: foundClass.teacherId,
+            teacher_id: foundClass.teacher_id,
             // semester removed from Class schema
             year: foundClass.year,
             status: foundClass.status,
-            createdAt: foundClass.createdAt,
-            updatedAt: foundClass.updatedAt,
+            created_at: foundClass.created_at,
+            updated_at: foundClass.updated_at,
           },
         },
       });
@@ -488,7 +488,7 @@ const ClassController = {
         description,
         year,
         status: status || "active",
-        teacherId: req.user.userId,
+        teacher_id: req.user.userId,
         max_students,
       });
       // Thêm học sinh vào lớp nếu có
@@ -512,8 +512,8 @@ const ClassController = {
           });
         }
         const classStudents = students.map((s) => ({
-          classId: newClass.id,
-          studentId: s.id,
+          class_id: newClass.id,
+          student_id: s.id,
         }));
         await ClassStudent.bulkCreate(classStudents);
       }
@@ -526,11 +526,11 @@ const ClassController = {
             name: newClass.name,
             code: newClass.code,
             description: newClass.description,
-            teacherId: newClass.teacherId,
+            teacher_id: newClass.teacher_id,
             year: newClass.year,
             status: newClass.status,
-            createdAt: newClass.createdAt,
-            updatedAt: newClass.updatedAt,
+            created_at: newClass.created_at,
+            updated_at: newClass.updated_at,
           },
         },
       });
@@ -568,7 +568,7 @@ const ClassController = {
       // Chỉ admin, giáo viên chủ nhiệm, hoặc sinh viên thuộc lớp mới được lấy
       if (
         user.role === "admin" ||
-        (user.role === "TEACHER" && foundClass.teacherId === user.userId)
+        (user.role === "TEACHER" && foundClass.teacher_id === user.userId)
       ) {
         return res.json({ success: true, data: foundClass });
       }
@@ -583,7 +583,7 @@ const ClassController = {
       }
       return res.status(403).json({
         success: false,
-        message: "Bạn không có quyền truy cập lớp này.",
+        message: "You don't have permission to view this class.",
       });
     } catch (error) {
       console.error("Get class by id error:", error);

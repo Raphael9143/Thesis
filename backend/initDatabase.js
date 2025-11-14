@@ -97,7 +97,7 @@ const initDatabase = async () => {
     name: "OCL Basic",
     code: "OCL2025",
     description: "OCL Basic class for 1st year students",
-    teacherId: teacherUser.id,
+    teacher_id: teacherUser.id,
     year: 2025,
     max_students: 50,
     current_students: 30,
@@ -110,9 +110,9 @@ const initDatabase = async () => {
   });
 
   await ClassStudent.create({
-    classId: class1.id,
-    studentId: studentUser.id,
-    joinedAt: new Date(),
+    class_id: class1.id,
+    student_id: studentUser.id,
+    joined_at: new Date(),
   });
 
   for (let i = 2; i <= 30; i++) {
@@ -131,9 +131,9 @@ const initDatabase = async () => {
       year: 3,
     });
     await ClassStudent.create({
-      classId: class1.id,
-      studentId: u.id,
-      joinedAt: new Date(),
+      class_id: class1.id,
+      student_id: u.id,
+      joined_at: new Date(),
     });
   }
 
@@ -367,9 +367,9 @@ context Member inv hasName: self.name <> ''
 
   const mainModel = await UseModel.create({
     name: "Library",
-    filePath: "/uploads/research/library_main.use",
-    rawText: baseUse,
-    ownerId: owner.id,
+    file_path: "/uploads/research/library_main.use",
+    raw_text: baseUse,
+    owner_id: owner.id,
   });
 
   // Helper to parse simple USE content to create child rows
@@ -420,19 +420,19 @@ context Member inv hasName: self.name <> ''
   }
 
   async function populateModel(useModelRow) {
-    const parsed = parseUse(useModelRow.rawText || '');
+    const parsed = parseUse(useModelRow.raw_text || '');
     for (const cls of parsed.classes) {
-      const clsRow = await UseClass.create({ useModelId: useModelRow.id, name: cls.name });
+      const clsRow = await UseClass.create({ use_model_id: useModelRow.id, name: cls.name });
       for (const attr of cls.attributes) {
-        await UseAttribute.create({ useClassId: clsRow.id, name: attr.name, type: attr.type });
+        await UseAttribute.create({ use_class_id: clsRow.id, name: attr.name, type: attr.type });
       }
     }
     for (const assoc of parsed.associations) {
-      const aRow = await UseAssociation.create({ useModelId: useModelRow.id, name: assoc.name });
+      const aRow = await UseAssociation.create({ use_model_id: useModelRow.id, name: assoc.name });
       for (const part of assoc.parts) {
         await UseAssociationPart.create({
-          useAssociationId: aRow.id,
-          className: part.className,
+          use_association_id: aRow.id,
+          class_name: part.className,
           multiplicity: part.multiplicity,
           role: part.role,
         });
@@ -440,7 +440,7 @@ context Member inv hasName: self.name <> ''
     }
     for (const cons of parsed.constraints) {
       await UseConstraint.create({
-        useModelId: useModelRow.id,
+        use_model_id: useModelRow.id,
         context: cons.context,
         kind: 'invariant',
         name: cons.name,
@@ -455,23 +455,23 @@ context Member inv hasName: self.name <> ''
     title: "UML/OCL Library Project",
     description: "Community project to model a library domain.",
     status: "ACTIVE",
-    ownerId: owner.id,
-    mainUseModelId: mainModel.id,
+    owner_id: owner.id,
+    main_use_model_id: mainModel.id,
   });
 
   await ResearchProjectMember.create({
-    researchProjectId: project.id,
-    userId: owner.id,
+    research_project_id: project.id,
+    user_id: owner.id,
     role: "OWNER",
   });
   await ResearchProjectMember.create({
-    researchProjectId: project.id,
-    userId: moderator.id,
+    research_project_id: project.id,
+    user_id: moderator.id,
     role: "MODERATOR",
   });
   await ResearchProjectMember.create({
-    researchProjectId: project.id,
-    userId: contributor.id,
+    research_project_id: project.id,
+    user_id: contributor.id,
     role: "CONTRIBUTOR",
   });
 
@@ -483,15 +483,15 @@ context Member inv hasName: self.name <> ''
   fs.writeFileSync(path.join(researchUploadsDir, 'library_add_author.use'), contrib1Text, 'utf8');
   const contrib1Model = await UseModel.create({
     name: "Library",
-    filePath: "/uploads/research/library_add_author.use",
-    rawText: contrib1Text,
-    ownerId: contributor.id,
+    file_path: "/uploads/research/library_add_author.use",
+    raw_text: contrib1Text,
+    owner_id: contributor.id,
   });
   await populateModel(contrib1Model);
   await ResearchContribution.create({
-    researchProjectId: project.id,
-    useModelId: contrib1Model.id,
-    contributorId: contributor.id,
+    research_project_id: project.id,
+    use_model_id: contrib1Model.id,
+    contributor_id: contributor.id,
     title: "Add Author entity",
     description: "Introduce Author class and Wrote association.",
     status: "PENDING",
@@ -504,19 +504,19 @@ context Member inv hasName: self.name <> ''
   fs.writeFileSync(path.join(researchUploadsDir, 'library_invariant.use'), contrib2Text, 'utf8');
   const contrib2Model = await UseModel.create({
     name: "Library",
-    filePath: "/uploads/research/library_invariant.use",
-    rawText: contrib2Text,
-    ownerId: contributor.id,
+    file_path: "/uploads/research/library_invariant.use",
+    raw_text: contrib2Text,
+    owner_id: contributor.id,
   });
   await populateModel(contrib2Model);
   await ResearchContribution.create({
-    researchProjectId: project.id,
-    useModelId: contrib2Model.id,
-    contributorId: contributor.id,
+    research_project_id: project.id,
+    use_model_id: contrib2Model.id,
+    contributor_id: contributor.id,
     title: "Add title invariant",
     description: "Ensure title not empty.",
     status: "NEEDS_EDIT",
-    reviewNotes: "Please refactor to use <> '' for consistency.",
+    review_notes: "Please refactor to use <> '' for consistency.",
   });
 
   // Contribution 3: Rejected sample
@@ -526,20 +526,20 @@ context Member inv hasName: self.name <> ''
   fs.writeFileSync(path.join(researchUploadsDir, 'library_broken.use'), contrib3Text, 'utf8');
   const contrib3Model = await UseModel.create({
     name: "Library",
-    filePath: "/uploads/research/library_broken.use",
-    rawText: contrib3Text,
-    ownerId: contributor.id,
+    file_path: "/uploads/research/library_broken.use",
+    raw_text: contrib3Text,
+    owner_id: contributor.id,
   });
   await populateModel(contrib3Model);
   await ResearchContribution.create({
-    researchProjectId: project.id,
-    useModelId: contrib3Model.id,
-    contributorId: contributor.id,
+    research_project_id: project.id,
+    use_model_id: contrib3Model.id,
+    contributor_id: contributor.id,
     title: "Broken constraint",
     description: "This demonstrates a rejected submission.",
     status: "REJECTED",
-    reviewNotes: "Syntax error in constraint expression.",
-    validationReport: "Error: unexpected token at 'self.'",
+    review_notes: "Syntax error in constraint expression.",
+    validation_report: "Error: unexpected token at 'self.'",
   });
 
   console.log("✅ Seeded sample data!");
