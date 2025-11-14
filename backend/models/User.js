@@ -37,6 +37,28 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: "STUDENT",
     },
+    star_projects: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: "JSON array of starred research_project ids",
+      get() {
+        const raw = this.getDataValue("star_projects");
+        try {
+          const arr = raw ? JSON.parse(raw) : [];
+          return Array.isArray(arr) ? arr : [];
+        } catch {
+          return [];
+        }
+      },
+      set(v) {
+        try {
+          const arr = Array.isArray(v) ? v : [];
+          this.setDataValue("star_projects", JSON.stringify(arr));
+        } catch {
+          this.setDataValue("star_projects", JSON.stringify([]));
+        }
+      },
+    },
     avatar_url: {
       type: DataTypes.STRING(255),
       allowNull: true,
