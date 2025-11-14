@@ -56,6 +56,9 @@ export default function ResearcherSidebar({ collapsed = false, onToggleCollapse 
           <i className="fa fa-project-diagram" aria-hidden />
           <span>Projects</span>
         </button>
+      </nav>
+
+      <div className="leftsidebar__bottom">
         <button className="leftsidebar__link" onClick={() => goto('/researcher/profile')}>
           <i className="fa fa-user" aria-hidden />
           <span>Profile</span>
@@ -68,7 +71,7 @@ export default function ResearcherSidebar({ collapsed = false, onToggleCollapse 
           <i className="fa fa-sign-out-alt" aria-hidden />
           <span>Logout</span>
         </button>
-      </nav>
+      </div>
     </aside>
   );
 }
