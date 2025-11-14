@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
 import ClassCard from '../../components/ui/ClassCard';
@@ -8,6 +9,7 @@ import { useNotifications } from '../../contexts/NotificationContext';
 import useTitle from '../../hooks/useTitle';
 
 export default function ResearcherProjects() {
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -58,6 +60,7 @@ export default function ResearcherProjects() {
                 subtitle={`${p.my_role || 'Member'}`}
                 description={p.description || ''}
                 badge={p.status || ''}
+                onClick={() => navigate(`/researcher/projects/${p.id}`, { state: { project: p } })}
               />
             ))}
           </div>
