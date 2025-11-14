@@ -305,6 +305,71 @@ router.get(
  */
 router.get("/projects/:id", auth, ResearchController.getProjectById);
 
+// POST /api/research/projects/:projectId/star - star/unstar a project
+/**
+ * @swagger
+ * /api/research/projects/{projectId}/star:
+ *   post:
+ *     summary: Star or unstar a project for current user
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         type: integer
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               star:
+ *                 type: boolean
+ *                 description: true to star, false to unstar; if omitted, toggles
+ *     responses:
+ *       200:
+ *         description: Updated starred id list
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Project or user not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+  "/projects/:projectId/star",
+  auth,
+  ResearchController.toggleStarProject
+);
+
+// GET /api/research/projects/starred/ids - list starred ids for current user
+/**
+ * @swagger
+ * /api/research/projects/starred/ids:
+ *   get:
+ *     summary: Get starred project ids for current user
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Starred IDs
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/projects/starred/ids",
+  auth,
+  ResearchController.getStarredProjectIds
+);
+
 // Get contribution detail
 /**
  * @swagger

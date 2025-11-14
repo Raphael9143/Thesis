@@ -558,6 +558,87 @@ const ResearchController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+
+  // Star/unstar a project for current user
+  toggleStarProject: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+      const projectId = parseInt(req.params.projectId, 10);
+      if (!projectId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid project id" });
+
+      // Ensure project exists
+      const project = await ResearchProject.findByPk(projectId);
+      if (!project)
+        return res
+          .status(404)
+          .json({ success: false, message: "Project not found" });
+
+      const User = require("../models/User");
+      const user = await User.findByPk(req.user.userId);
+      if (!user)
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
+
+      const current = user.star_projects || [];
+      const want =
+        typeof req.body?.star === "boolean" ? req.body.star : null;
+
+      let next = current.slice();
+      const idx = next.indexOf(projectId);
+      if (want === true) {
+        if (idx === -1) next.push(projectId);
+      } else if (want === false) {
+        if (idx !== -1) next.splice(idx, 1);
+      } else {
+        // toggle when not specified
+        if (idx === -1) next.push(projectId);
+        else next.splice(idx, 1);
+      }
+
+      // Ensure uniqueness and sort ascending
+      next = Array.from(new Set(next)).sort((a, b) => a - b);
+      user.star_projects = next;
+      await user.save();
+
+      return res.json({ success: true, data: { starred_ids: next } });
+    } catch (err) {
+      console.error("toggleStarProject error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
+  // Get starred project id list for current user
+  getStarredProjectIds: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+      const User = require("../models/User");
+      const user = await User.findByPk(req.user.userId);
+      if (!user)
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
+
+      const ids = user.star_projects || [];
+      return res.json({ success: true, data: { starred_ids: ids } });
+    } catch (err) {
+      console.error("getStarredProjectIds error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
 };
 
 module.exports = ResearchController;
