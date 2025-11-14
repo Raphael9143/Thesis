@@ -1,0 +1,296 @@
+const express = require("express");
+const multer = require("multer");
+const path = require("path");
+const auth = require("../middlewares/auth");
+const ResearchController = require("../controllers/ResearchController");
+
+const router = express.Router();
+
+const uploadDir = path.resolve(__dirname, "..", "uploads");
+const storage = multer.diskStorage({
+  destination: uploadDir,
+  filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
+});
+const upload = multer({ storage });
+
+function conditionalUpload(req, res, next) {
+  const ct = (req.headers["content-type"] || "").toLowerCase();
+  if (ct.startsWith("multipart/form-data")) return upload.any()(req, res, next);
+  return next();
+}
+
+// Create project
+/**
+ * @swagger
+ * /api/research/projects:
+ *   post:
+ *     summary: Create a new research project
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - title
+ *           properties:
+ *             title:
+ *               type: string
+ *             description:
+ *               type: string
+ *     responses:
+ *       201:
+ *         description: Project created
+ *       400:
+ *         description: Missing or invalid input
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.post("/projects", auth, ResearchController.createProject);
+
+// Create contribution (file or path or rawText)
+/**
+ * @swagger
+ * /api/research/projects/{projectId}/contributions:
+ *   post:
+ *     summary: Create a contribution for a project
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     consumes:
+ *       - multipart/form-data
+ *       - application/json
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         type: integer
+ *         description: Target project ID
+ *       - in: formData
+ *         name: file
+ *         type: file
+ *         description: .use file to upload (alternative to body.path/rawText)
+ *       - in: body
+ *         name: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             path:
+ *               type: string
+ *               description: Server path like /uploads/file.use
+ *             rawText:
+ *               type: string
+ *               description: Raw .use content (if no file)
+ *             name:
+ *               type: string
+ *               description: Optional model name
+ *             title:
+ *               type: string
+ *             description:
+ *               type: string
+ *     responses:
+ *       201:
+ *         description: Contribution created (PENDING)
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Not a project member
+ *       404:
+ *         description: Project or file not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+  "/projects/:projectId/contributions",
+  auth,
+  conditionalUpload,
+  ResearchController.createContribution
+);
+
+// List contributions in project
+/**
+ * @swagger
+ * /api/research/projects/{projectId}/contributions:
+ *   get:
+ *     summary: List contributions in a project
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         type: integer
+ *       - in: query
+ *         name: status
+ *         required: false
+ *         type: string
+ *         enum: [PENDING, NEEDS_EDIT, ACCEPTED, REJECTED]
+ *     responses:
+ *       200:
+ *         description: List of contributions
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Not a project member
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/projects/:projectId/contributions",
+  auth,
+  ResearchController.listContributions
+);
+
+// Get contribution detail
+/**
+ * @swagger
+ * /api/research/contributions/{id}:
+ *   get:
+ *     summary: Get contribution detail
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: integer
+ *     responses:
+ *       200:
+ *         description: Contribution detail (includes useModel)
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Not a project member
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/contributions/:id", auth, ResearchController.getContribution);
+
+// Resubmit contribution (new file/path/rawText)
+/**
+ * @swagger
+ * /api/research/contributions/{id}/resubmit:
+ *   post:
+ *     summary: Resubmit contribution content (PENDING/NEEDS_EDIT only)
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     consumes:
+ *       - multipart/form-data
+ *       - application/json
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: integer
+ *       - in: formData
+ *         name: file
+ *         type: file
+ *         description: .use file (alternative to body.path/rawText)
+ *       - in: body
+ *         name: body
+ *         required: false
+ *         schema:
+ *           type: object
+ *           properties:
+ *             path:
+ *               type: string
+ *             rawText:
+ *               type: string
+ *             name:
+ *               type: string
+ *               description: Optional model name
+ *     responses:
+ *       200:
+ *         description: Contribution updated and reset to PENDING
+ *       400:
+ *         description: Invalid state or input
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (not the contributor)
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+  "/contributions/:id/resubmit",
+  auth,
+  conditionalUpload,
+  ResearchController.resubmitContribution
+);
+
+// Review contribution (accept/reject/needs_edit)
+/**
+ * @swagger
+ * /api/research/contributions/{id}/review:
+ *   post:
+ *     summary: Review a contribution (OWNER/MODERATOR)
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: integer
+ *       - in: body
+ *         name: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           required:
+ *             - action
+ *           properties:
+ *             action:
+ *               type: string
+ *               enum: [ACCEPT, REJECT, NEEDS_EDIT]
+ *             notes:
+ *               type: string
+ *             validationReport:
+ *               type: string
+ *               description: Optional validation report to store
+ *     responses:
+ *       200:
+ *         description: Contribution reviewed (status updated)
+ *       400:
+ *         description: Invalid action
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (not owner/moderator)
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+  "/contributions/:id/review",
+  auth,
+  ResearchController.reviewContribution
+);
+
+module.exports = router;
