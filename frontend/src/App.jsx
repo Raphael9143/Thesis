@@ -32,6 +32,7 @@ import SubmitWork from './pages/student/SubmitWork';
 import RequireAuth from './components/routing/RequireAuth';
 import RequireRole from './components/routing/RequireRole';
 import Unauthorized from './pages/Unauthorized';
+import ResourcesPage from './pages/Resources';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -48,6 +49,14 @@ const router = createBrowserRouter(
         }
       >
         <Route path="/education/home" element={<Home />} />
+        <Route
+          path="/education/resources"
+          element={
+            <RequireAuth>
+              <ResourcesPage />
+            </RequireAuth>
+          }
+        />
         <Route
           path="/education/teacher/classes"
           element={

@@ -47,11 +47,7 @@ export default function LeftSidebar({ isLoggedIn = false, collapsed = false, onT
           <i className="fa fa-book" aria-hidden />
           <span>Classes</span>
         </button>
-        <button className="leftsidebar__link" onClick={() => goto('#')}>
-          <i className="fa fa-tasks" aria-hidden />
-          <span>Assignments</span>
-        </button>
-        <button className="leftsidebar__link" onClick={() => goto('#')}>
+        <button className="leftsidebar__link" onClick={() => goto('/education/resources')}>
           <i className="fa fa-folder-open" aria-hidden />
           <span>Resources</span>
         </button>
