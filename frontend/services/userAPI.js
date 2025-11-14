@@ -153,6 +153,12 @@ const userAPI = {
   // Researcher projects
   // GET /api/research/projects/mine
   getResearchProjectsMine: () => axiosClient.get('research/projects/mine'),
+  // GET /api/research/projects/{id}
+  getResearchProject: (id) => axiosClient.get(`research/projects/${id}`),
+  // GET use/models/{id} -> returns USE model details for the project
+  getResearchProjectModel: (id) => axiosClient.get(`use/models/${id}`),
+  // GET /api/research/projects/{id}/members -> returns owner, moderators, contributors
+  getResearchProjectMembers: (id) => axiosClient.get(`research/projects/${id}/members`),
 };
 
 export default userAPI;
