@@ -242,6 +242,69 @@ router.get(
   ResearchController.listProjectMembers
 );
 
+// GET /api/research/projects/:id - get project by id
+/**
+ * @swagger
+ * /api/research/projects/{id}:
+ *   get:
+ *     summary: Get research project by id
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: integer
+ *         description: Project ID
+ *     responses:
+ *       200:
+ *         description: Project detail
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             data:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 title:
+ *                   type: string
+ *                 description:
+ *                   type: string
+ *                   nullable: true
+ *                 status:
+ *                   type: string
+ *                 owner_id:
+ *                   type: integer
+ *                 main_use_model_id:
+ *                   type: integer
+ *                   nullable: true
+ *                 owner:
+ *                   type: object
+ *                   nullable: true
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     full_name:
+ *                       type: string
+ *                 my_role:
+ *                   type: string
+ *                   description: Role of current user in this project
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (not a project member)
+ *       404:
+ *         description: Project not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/projects/:id", auth, ResearchController.getProjectById);
+
 // Get contribution detail
 /**
  * @swagger

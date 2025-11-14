@@ -9,6 +9,64 @@ const ResearchContribution = require("../models/ResearchContribution");
 const UseModel = require("../models/UseModel");
 
 const ResearchController = {
+  // Get a project by id with owner (requires membership)
+  getProjectById: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+      const id = parseInt(req.params.id, 10);
+      if (!id)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid project id" });
+
+      // Ensure associations
+      require("../models/UseAssociations");
+      const User = require("../models/User");
+
+      const project = await ResearchProject.findByPk(id, {
+        include: [
+          { model: User, as: "owner", attributes: ["id", "full_name"] },
+        ],
+      });
+      if (!project)
+        return res
+          .status(404)
+          .json({ success: false, message: "Project not found" });
+
+      const member = await ResearchProjectMember.findOne({
+        where: { researchProjectId: id, userId: req.user.userId },
+      });
+      if (!member)
+        return res.status(403).json({ success: false, message: "Forbidden" });
+
+      // Normalize: drop camelCase duplicates and add my_role
+      const plain = project.get({ plain: true });
+      if (
+        Object.prototype.hasOwnProperty.call(plain, "ownerId") &&
+        Object.prototype.hasOwnProperty.call(plain, "owner_id")
+      )
+        delete plain.ownerId;
+      if (
+        Object.prototype.hasOwnProperty.call(plain, "mainUseModelId") &&
+        Object.prototype.hasOwnProperty.call(plain, "main_use_model_id")
+      )
+        delete plain.mainUseModelId;
+      plain.owner = plain.owner
+        ? { id: plain.owner.id, full_name: plain.owner.full_name }
+        : null;
+      plain.my_role = member.role || null;
+
+      return res.json({ success: true, data: plain });
+    } catch (err) {
+      console.error("getProjectById error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
   // List projects related to the authenticated user (owner or member)
   listMyProjects: async (req, res) => {
     try {
