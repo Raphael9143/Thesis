@@ -19,6 +19,26 @@ function conditionalUpload(req, res, next) {
   return next();
 }
 
+// List projects related to current user (owner or member)
+/**
+ * @swagger
+ * /api/research/projects/mine:
+ *   get:
+ *     summary: List projects related to current user (owner/mod/contrib)
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of projects the user is related to
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/projects/mine", auth, ResearchController.listMyProjects);
+
 // Create project
 /**
  * @swagger

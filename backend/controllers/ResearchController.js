@@ -9,6 +9,76 @@ const ResearchContribution = require("../models/ResearchContribution");
 const UseModel = require("../models/UseModel");
 
 const ResearchController = {
+  // List projects related to the authenticated user (owner or member)
+  listMyProjects: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+
+      const userId = req.user.userId;
+
+      // Projects owned by user
+      const owned = await ResearchProject.findAll({
+        where: { ownerId: userId },
+        order: [["created_at", "DESC"]],
+        raw: true,
+      });
+
+      // Projects where user is a member (moderator/contributor/owner)
+      const memberships = await ResearchProjectMember.findAll({
+        where: { userId },
+        include: [
+          {
+            model: ResearchProject,
+            as: "project",
+          },
+        ],
+        order: [["joined_at", "DESC"]],
+      });
+
+      // Merge and deduplicate by project id; compute myRole
+      const map = new Map();
+      for (const p of owned) {
+        map.set(p.id, { ...p, myRole: "OWNER" });
+      }
+      for (const m of memberships) {
+        const proj = m.project && m.project.get ? m.project.get({ plain: true }) : m.project;
+        if (!proj) continue;
+        const existing = map.get(proj.id);
+        if (!existing) map.set(proj.id, { ...proj, myRole: m.role || "CONTRIBUTOR" });
+        else if (existing.myRole !== "OWNER") existing.myRole = m.role || existing.myRole;
+      }
+
+      // Normalize shape: drop camelCase ownerId/mainUseModelId; rename myRole -> my_role
+      const normalized = Array.from(map.values()).map((p) => {
+        const plain = p && p.get ? p.get({ plain: true }) : p;
+        const { myRole, ...restRaw } = plain || {};
+        // Remove camelCase duplicates
+        if (Object.prototype.hasOwnProperty.call(restRaw, "ownerId")) {
+          delete restRaw.ownerId;
+        }
+        if (Object.prototype.hasOwnProperty.call(restRaw, "mainUseModelId")) {
+          delete restRaw.mainUseModelId;
+        }
+        return { ...restRaw, my_role: myRole || null };
+      });
+
+      const sorted = normalized.sort((a, b) => {
+        const da = new Date(a.created_at || a.createdAt || 0).getTime();
+        const db = new Date(b.created_at || b.createdAt || 0).getTime();
+        return db - da;
+      });
+
+      return res.json({ success: true, data: sorted });
+    } catch (err) {
+      console.error("listMyProjects error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
   createProject: async (req, res) => {
     try {
       if (!req.user || !req.user.userId)
