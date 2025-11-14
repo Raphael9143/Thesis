@@ -148,6 +148,8 @@ const userAPI = {
   parseUseModel: (path) => axiosClient.post('use/parse', { path }),
   // POST /api/use/save { path }
   saveUseModel: (path) => axiosClient.post('use/save', { path }),
+  // GET /api/use/models
+  getUseModels: () => axiosClient.get('use/models'),
 };
 
 export default userAPI;
