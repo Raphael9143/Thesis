@@ -126,10 +126,10 @@ router.post("/parse", conditionalUpload, UseController.parse);
  */
 
 router.post("/save", auth, conditionalUpload, UseController.save);
-// GET /api/use/me/models - list models for the authenticated user
+// GET /api/use/models - list models for the authenticated user
 /**
  * @swagger
- * /api/use/me/models:
+ * /api/use/models:
  *   get:
  *     summary: List all stored USE models for the authenticated user
  *     tags:
