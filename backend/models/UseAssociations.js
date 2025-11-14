@@ -8,6 +8,9 @@ const UseAssociation = require("./UseAssociation");
 const UseAssociationPart = require("./UseAssociationPart");
 const UseConstraint = require("./UseConstraint");
 const User = require("./User");
+const ResearchProject = require("./ResearchProject");
+const ResearchProjectMember = require("./ResearchProjectMember");
+const ResearchContribution = require("./ResearchContribution");
 
 UseModel.hasMany(UseEnum, {
   foreignKey: "use_model_id",
@@ -87,6 +90,64 @@ UseModel.belongsTo(User, {
 User.hasMany(UseModel, {
   foreignKey: "owner_id",
   as: "useModels",
+});
+
+// Research project associations
+ResearchProject.belongsTo(User, {
+  foreignKey: "owner_id",
+  as: "owner",
+});
+User.hasMany(ResearchProject, {
+  foreignKey: "owner_id",
+  as: "researchProjects",
+});
+
+// Project main model (optional)
+ResearchProject.belongsTo(UseModel, {
+  foreignKey: "main_use_model_id",
+  as: "mainModel",
+});
+UseModel.hasMany(ResearchProject, {
+  foreignKey: "main_use_model_id",
+  as: "projectsUsingThisModel",
+});
+
+// Project members
+ResearchProject.hasMany(ResearchProjectMember, {
+  foreignKey: "research_project_id",
+  as: "members",
+  onDelete: "CASCADE",
+});
+ResearchProjectMember.belongsTo(ResearchProject, {
+  foreignKey: "research_project_id",
+  as: "project",
+});
+ResearchProjectMember.belongsTo(User, {
+  foreignKey: "user_id",
+  as: "user",
+});
+User.hasMany(ResearchProjectMember, {
+  foreignKey: "user_id",
+  as: "projectMemberships",
+});
+
+// Contributions
+ResearchProject.hasMany(ResearchContribution, {
+  foreignKey: "research_project_id",
+  as: "contributions",
+  onDelete: "CASCADE",
+});
+ResearchContribution.belongsTo(ResearchProject, {
+  foreignKey: "research_project_id",
+  as: "project",
+});
+ResearchContribution.belongsTo(UseModel, {
+  foreignKey: "use_model_id",
+  as: "useModel",
+});
+UseModel.hasMany(ResearchContribution, {
+  foreignKey: "use_model_id",
+  as: "contributions",
 });
 
 module.exports = {
