@@ -245,6 +245,81 @@ const ResearchController = {
     }
   },
 
+  // List project members grouped by role: owner, moderators, contributors
+  listProjectMembers: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+      const projectId = parseInt(req.params.projectId, 10);
+      if (!projectId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid project id" });
+
+      // Ensure associations
+      require("../models/UseAssociations");
+      const User = require("../models/User");
+
+      // Verify project exists and requester is a member
+      const project = await ResearchProject.findByPk(projectId, {
+        include: [
+          { model: User, as: "owner", attributes: ["id", "full_name"] },
+        ],
+      });
+      if (!project)
+        return res
+          .status(404)
+          .json({ success: false, message: "Project not found" });
+
+      const member = await ResearchProjectMember.findOne({
+        where: { researchProjectId: projectId, userId: req.user.userId },
+      });
+      if (!member)
+        return res.status(403).json({ success: false, message: "Forbidden" });
+
+      const members = await ResearchProjectMember.findAll({
+        where: { researchProjectId: projectId },
+        include: [
+          { model: User, as: "user", attributes: ["id", "full_name"] },
+        ],
+        order: [["joined_at", "ASC"]],
+      });
+
+      const owner = project.owner ? project.owner.get({ plain: true }) : null;
+      const moderators = [];
+      const contributors = [];
+
+      for (const m of members) {
+        const u = m.user ? m.user.get({ plain: true }) : null;
+        if (!u) continue;
+        if (m.role === "MODERATOR")
+          moderators.push({ id: u.id, full_name: u.full_name });
+        else if (m.role === "CONTRIBUTOR")
+          contributors.push({ id: u.id, full_name: u.full_name });
+      }
+
+      // Normalize: prefer snake_case keys in payload for membership objects
+      const ownerOut = owner
+        ? { id: owner.id, full_name: owner.full_name }
+        : null;
+
+      const payload = {
+        owner: ownerOut,
+        moderators,
+        contributors,
+      };
+
+      return res.json({ success: true, data: payload });
+    } catch (err) {
+      console.error("listProjectMembers error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   // Get contribution detail
   getContribution: async (req, res) => {
     try {

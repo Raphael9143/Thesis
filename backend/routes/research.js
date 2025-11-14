@@ -174,6 +174,73 @@ router.get(
   auth,
   ResearchController.listContributions
 );
+// GET /api/research/projects/:projectId/members - list contributors, owner, moderators
+/**
+ * @swagger
+ * /api/research/projects/{projectId}/members:
+ *   get:
+ *     summary: Get project owner, moderators, and contributors
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         type: integer
+ *         description: Project ID
+ *     responses:
+ *       200:
+ *         description: Members grouped by role (id and name)
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             data:
+ *               type: object
+ *               properties:
+ *                 owner:
+ *                   type: object
+ *                   nullable: true
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     full_name:
+ *                       type: string
+ *                 moderators:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       full_name:
+ *                         type: string
+ *                 contributors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       full_name:
+ *                         type: string
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Project not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/projects/:projectId/members",
+  auth,
+  ResearchController.listProjectMembers
+);
 
 // Get contribution detail
 /**
