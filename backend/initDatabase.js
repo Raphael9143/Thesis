@@ -12,6 +12,10 @@ const Lecture = require("./models/Lecture");
 const Exam = require("./models/Exam");
 const Submission = require("./models/Submission");
 const AssignmentCourse = require("./models/AssignmentCourse");
+const UseModel = require("./models/UseModel");
+const ResearchProject = require("./models/ResearchProject");
+const ResearchProjectMember = require("./models/ResearchProjectMember");
+const ResearchContribution = require("./models/ResearchContribution");
 
 const initDatabase = async () => {
   await User.create({
@@ -301,6 +305,242 @@ const initDatabase = async () => {
       });
     }
   }
+
+  // Research community sample data
+  const owner = await User.create({
+    full_name: "Owner User",
+    email: "owner@demo.local",
+    password: await bcrypt.hash("Password@123", 10),
+    role: "RESEARCHER",
+    status: "ACTIVE",
+  });
+
+  const moderator = await User.create({
+    full_name: "Moderator User",
+    email: "moderator@demo.local",
+    password: await bcrypt.hash("Password@123", 10),
+    role: "RESEARCHER",
+    status: "ACTIVE",
+  });
+
+  const contributor = await User.create({
+    full_name: "Contributor User",
+    email: "contributor@demo.local",
+    password: await bcrypt.hash("Password@123", 10),
+    role: "RESEARCHER",
+    status: "ACTIVE",
+  });
+
+  // Base USE content for main model (Library domain)
+  const baseUse = `model Library
+
+class Book
+attributes
+    title : String
+operations
+end
+
+class Member
+attributes
+    memberId : Integer
+    name : String
+end
+
+association Borrows between
+    Member [1..*] role borrower
+    Book   [0..*] role book
+end
+
+constraints
+context Book inv hasTitle: self.title <> ''
+context Member inv hasName: self.name <> ''
+`;
+
+  // Ensure uploads/research directory exists and write physical .use files
+  const fs = require('fs');
+  const path = require('path');
+  // Use process.cwd() for base since __dirname may not be defined in some bundlers
+  // resolve uploads directory relative to project root (assuming execution from backend dir)
+  const researchUploadsDir = path.resolve('uploads', 'research');
+  if (!fs.existsSync(researchUploadsDir)) fs.mkdirSync(researchUploadsDir, { recursive: true });
+  fs.writeFileSync(path.join(researchUploadsDir, 'library_main.use'), baseUse, 'utf8');
+
+  const mainModel = await UseModel.create({
+    name: "Library",
+    filePath: "/uploads/research/library_main.use",
+    rawText: baseUse,
+    ownerId: owner.id,
+  });
+
+  // Helper to parse simple USE content to create child rows
+  const UseClass = require('./models/UseClass');
+  const UseAttribute = require('./models/UseAttribute');
+  // const UseOperation = require('./models/UseOperation'); // operations not parsed in sample
+  const UseAssociation = require('./models/UseAssociation');
+  const UseAssociationPart = require('./models/UseAssociationPart');
+  const UseConstraint = require('./models/UseConstraint');
+
+  function parseUse(raw) {
+    const result = { classes: [], associations: [], constraints: [] };
+    // Classes
+    const classBlockRe = /^class\s+([A-Za-z0-9_]+)[\s\S]*?^end$/gmi;
+    let cb; while ((cb = classBlockRe.exec(raw)) !== null) {
+      const block = cb[0];
+      const nameMatch = block.match(/^class\s+([A-Za-z0-9_]+)/i);
+      const name = nameMatch ? nameMatch[1] : 'Unknown';
+      const cls = { name, attributes: [], operations: [] };
+      const attrMatch = block.match(/attributes\s*([\s\S]*?)(?:operations|end)/i);
+      if (attrMatch) {
+        const lines = attrMatch[1].split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        for (const line of lines) {
+          const m = line.match(/^([A-Za-z0-9_]+)\s*:\s*([A-Za-z0-9_:<>]+)/);
+          if (m) cls.attributes.push({ name: m[1], type: m[2] });
+        }
+      }
+      result.classes.push(cls);
+    }
+    // Associations
+    const assocRe = /association\s+([A-Za-z0-9_]+)\s+between([\s\S]*?)end/gmi;
+    let am; while ((am = assocRe.exec(raw)) !== null) {
+      const name = am[1]; const body = am[2];
+      const lines = body.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+      const parts = [];
+      for (const line of lines) {
+        const pm = line.match(/([A-Za-z0-9_]+)\s*\[([^\]]+)\]\s*role\s*([A-Za-z0-9_]+)/i);
+        if (pm) parts.push({ className: pm[1], multiplicity: pm[2], role: pm[3] });
+      }
+      result.associations.push({ name, parts });
+    }
+    // Constraints
+    const constraintRe = /^context\s+([A-Za-z0-9_]+)\s+inv\s+([A-Za-z0-9_]+)\s*:(.*)$/gmi;
+    let cm; while ((cm = constraintRe.exec(raw)) !== null) {
+      result.constraints.push({ context: cm[1], name: cm[2], expression: cm[3].trim() });
+    }
+    return result;
+  }
+
+  async function populateModel(useModelRow) {
+    const parsed = parseUse(useModelRow.rawText || '');
+    for (const cls of parsed.classes) {
+      const clsRow = await UseClass.create({ useModelId: useModelRow.id, name: cls.name });
+      for (const attr of cls.attributes) {
+        await UseAttribute.create({ useClassId: clsRow.id, name: attr.name, type: attr.type });
+      }
+    }
+    for (const assoc of parsed.associations) {
+      const aRow = await UseAssociation.create({ useModelId: useModelRow.id, name: assoc.name });
+      for (const part of assoc.parts) {
+        await UseAssociationPart.create({
+          useAssociationId: aRow.id,
+          className: part.className,
+          multiplicity: part.multiplicity,
+          role: part.role,
+        });
+      }
+    }
+    for (const cons of parsed.constraints) {
+      await UseConstraint.create({
+        useModelId: useModelRow.id,
+        context: cons.context,
+        kind: 'invariant',
+        name: cons.name,
+        expression: cons.expression,
+      });
+    }
+  }
+
+  await populateModel(mainModel);
+
+  const project = await ResearchProject.create({
+    title: "UML/OCL Library Project",
+    description: "Community project to model a library domain.",
+    status: "ACTIVE",
+    ownerId: owner.id,
+    mainUseModelId: mainModel.id,
+  });
+
+  await ResearchProjectMember.create({
+    researchProjectId: project.id,
+    userId: owner.id,
+    role: "OWNER",
+  });
+  await ResearchProjectMember.create({
+    researchProjectId: project.id,
+    userId: moderator.id,
+    role: "MODERATOR",
+  });
+  await ResearchProjectMember.create({
+    researchProjectId: project.id,
+    userId: contributor.id,
+    role: "CONTRIBUTOR",
+  });
+
+  // Contribution 1: Add Author class (PENDING)
+  const contrib1Text =
+    "model Library\n\nclass Book\nattributes\n    title : String\nend\n\n" +
+    "class Author\nattributes\n    name : String\nend\n\n" +
+    "association Wrote between\n    Author [1..*] role writer\n    Book [1..*] role work\nend\n";
+  fs.writeFileSync(path.join(researchUploadsDir, 'library_add_author.use'), contrib1Text, 'utf8');
+  const contrib1Model = await UseModel.create({
+    name: "Library",
+    filePath: "/uploads/research/library_add_author.use",
+    rawText: contrib1Text,
+    ownerId: contributor.id,
+  });
+  await populateModel(contrib1Model);
+  await ResearchContribution.create({
+    researchProjectId: project.id,
+    useModelId: contrib1Model.id,
+    contributorId: contributor.id,
+    title: "Add Author entity",
+    description: "Introduce Author class and Wrote association.",
+    status: "PENDING",
+  });
+
+  // Contribution 2: Add invariant (NEEDS_EDIT)
+  const contrib2Text =
+    "model Library\n\nclass Book\nattributes\n    title : String\nend\n\n" +
+    "constraints\ncontext Book inv titleNotEmpty: self.title.size() > 0\n";
+  fs.writeFileSync(path.join(researchUploadsDir, 'library_invariant.use'), contrib2Text, 'utf8');
+  const contrib2Model = await UseModel.create({
+    name: "Library",
+    filePath: "/uploads/research/library_invariant.use",
+    rawText: contrib2Text,
+    ownerId: contributor.id,
+  });
+  await populateModel(contrib2Model);
+  await ResearchContribution.create({
+    researchProjectId: project.id,
+    useModelId: contrib2Model.id,
+    contributorId: contributor.id,
+    title: "Add title invariant",
+    description: "Ensure title not empty.",
+    status: "NEEDS_EDIT",
+    reviewNotes: "Please refactor to use <> '' for consistency.",
+  });
+
+  // Contribution 3: Rejected sample
+  const contrib3Text =
+    "model Library\n\nclass Book\nattributes\n    title : String\nend\n\n" +
+    "-- bad syntax below\ncontext Book inv broken: self.\n";
+  fs.writeFileSync(path.join(researchUploadsDir, 'library_broken.use'), contrib3Text, 'utf8');
+  const contrib3Model = await UseModel.create({
+    name: "Library",
+    filePath: "/uploads/research/library_broken.use",
+    rawText: contrib3Text,
+    ownerId: contributor.id,
+  });
+  await populateModel(contrib3Model);
+  await ResearchContribution.create({
+    researchProjectId: project.id,
+    useModelId: contrib3Model.id,
+    contributorId: contributor.id,
+    title: "Broken constraint",
+    description: "This demonstrates a rejected submission.",
+    status: "REJECTED",
+    reviewNotes: "Syntax error in constraint expression.",
+    validationReport: "Error: unexpected token at 'self.'",
+  });
 
   console.log("✅ Seeded sample data!");
 };
