@@ -1,0 +1,13 @@
+.create-project-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 70%;
+}
+
+.create-project-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 12px;
+}
