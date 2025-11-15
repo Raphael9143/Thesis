@@ -34,7 +34,7 @@ export default function StudentAssignmentsList() {
         const cls = await userAPI.getClassById(id);
         if (!mounted) return;
         if (cls?.success && cls.data) setClassInfo(cls.data);
-        const courseId = routeCourseId || (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) || id;
+        const courseId = routeCourseId || (cls?.success && cls.data && cls.data.course_id) || id;
         setCourseIdState(courseId);
         const assignRes = await userAPI.getAssignmentsByCourse(courseId);
         if (!mounted) return;
