@@ -161,6 +161,8 @@ const userAPI = {
   getResearchProjectMembers: (id) => axiosClient.get(`research/projects/${id}/members`),
   // POST /api/research/projects { title, description }
   createResearchProject: (data) => axiosClient.post('research/projects', data),
+  // PATCH /api/research/projects/{id}/status { status }
+  patchResearchProjectStatus: (id, status) => axiosClient.patch(`research/projects/${id}/status`, { status }),
 };
 
 export default userAPI;
