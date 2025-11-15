@@ -706,6 +706,42 @@ const ResearchController = {
     }
   },
 
+  // Check if a project is starred by current user
+  checkProjectStarred: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+
+      const projectId = parseInt(req.params.projectId, 10);
+      if (!projectId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid project id" });
+
+      const User = require("../models/User");
+      const user = await User.findByPk(req.user.userId);
+      if (!user)
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
+
+      const starredIds = user.star_projects || [];
+      const isStarred = starredIds.includes(projectId);
+
+      return res.json({
+        success: true,
+        data: { project_id: projectId, is_starred: isStarred },
+      });
+    } catch (err) {
+      console.error("checkProjectStarred error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   // Update project status (OWNER or MODERATOR only)
   updateProjectStatus: async (req, res) => {
     try {

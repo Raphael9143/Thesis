@@ -415,6 +415,52 @@ router.get(
   ResearchController.getStarredProjectIds
 );
 
+// GET /api/research/projects/:projectId/starred - check if project is starred
+/**
+ * @swagger
+ * /api/research/projects/{projectId}/starred:
+ *   get:
+ *     summary: Check if a project is starred by current user
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         type: integer
+ *         description: Project ID to check
+ *     responses:
+ *       200:
+ *         description: Star status
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             data:
+ *               type: object
+ *               properties:
+ *                 project_id:
+ *                   type: integer
+ *                 is_starred:
+ *                   type: boolean
+ *       400:
+ *         description: Invalid project id
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/projects/:projectId/starred",
+  auth,
+  ResearchController.checkProjectStarred
+);
+
 // Get contribution detail
 /**
  * @swagger
