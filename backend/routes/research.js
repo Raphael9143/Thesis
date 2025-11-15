@@ -444,6 +444,76 @@ router.get(
  */
 router.get("/contributions/:id", auth, ResearchController.getContribution);
 
+// Get contribution history for a project (public access)
+/**
+ * @swagger
+ * /api/research/projects/{projectId}/contributions/history:
+ *   get:
+ *     summary: Get contribution history sorted from oldest to newest (public access)
+ *     tags:
+ *       - Research
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         type: integer
+ *         description: Project ID
+ *     responses:
+ *       200:
+ *         description: List of contributions with contributor info, sorted by created_at ASC
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             data:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   research_project_id:
+ *                     type: integer
+ *                   use_model_id:
+ *                     type: integer
+ *                   contributor_id:
+ *                     type: integer
+ *                   status:
+ *                     type: string
+ *                   title:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   validation_report:
+ *                     type: string
+ *                   review_notes:
+ *                     type: string
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                   updated_at:
+ *                     type: string
+ *                     format: date-time
+ *                   contributor:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       full_name:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *       400:
+ *         description: Invalid project id
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/projects/:projectId/contributions/history",
+  ResearchController.getContributionHistory
+);
+
 // Resubmit contribution (new file/path/rawText)
 /**
  * @swagger

@@ -439,6 +439,38 @@ const ResearchController = {
     }
   },
 
+  // Get contribution history for a specific project (public access)
+  getContributionHistory: async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId, 10);
+      if (!projectId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid project id" });
+
+      // Get all contributions sorted from oldest to newest
+      const User = require("../models/User");
+      const contributions = await ResearchContribution.findAll({
+        where: { research_project_id: projectId },
+        include: [
+          {
+            model: User,
+            as: "contributor",
+            attributes: ["id", "full_name", "email"],
+          },
+        ],
+        order: [["created_at", "ASC"]],
+      });
+
+      return res.json({ success: true, data: contributions });
+    } catch (err) {
+      console.error("getContributionHistory error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   // Contributor resubmits (edit) a contribution: allowed when PENDING or NEEDS_EDIT
   resubmitContribution: async (req, res) => {
     try {
@@ -636,9 +668,9 @@ const ResearchController = {
       const wasStarred = idx !== -1;
       const isStarred = next.includes(projectId);
       if (!wasStarred && isStarred) {
-        await project.increment("starCount");
+        await project.increment("star_count");
       } else if (wasStarred && !isStarred) {
-        await project.decrement("starCount");
+        await project.decrement("star_count");
       }
 
       return res.json({ success: true, data: { starred_ids: next } });

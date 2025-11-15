@@ -149,6 +149,14 @@ UseModel.hasMany(ResearchContribution, {
   foreignKey: "use_model_id",
   as: "contributions",
 });
+ResearchContribution.belongsTo(User, {
+  foreignKey: "contributor_id",
+  as: "contributor",
+});
+User.hasMany(ResearchContribution, {
+  foreignKey: "contributor_id",
+  as: "contributions",
+});
 
 module.exports = {
   UseModel,
