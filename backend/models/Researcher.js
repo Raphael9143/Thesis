@@ -71,6 +71,7 @@ const Researcher = sequelize.define(
   {
     tableName: "researchers",
     timestamps: true,
+    underscored: true,
   }
 );
 

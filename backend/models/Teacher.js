@@ -42,6 +42,7 @@ const Teacher = sequelize.define(
   {
     tableName: "teachers",
     timestamps: true,
+    underscored: true,
   }
 );
 

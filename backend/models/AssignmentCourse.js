@@ -33,6 +33,7 @@ const AssignmentCourse = sequelize.define(
   {
     tableName: "assignment_courses",
     timestamps: false,
+    underscored: true,
   }
 );
 

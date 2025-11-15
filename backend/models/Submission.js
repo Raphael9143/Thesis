@@ -56,6 +56,7 @@ const Submission = sequelize.define(
   {
     tableName: "submissions",
     timestamps: false,
+    underscored: true,
   }
 );
 

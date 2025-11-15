@@ -21,6 +21,7 @@ const ClassCourse = sequelize.define(
   {
     tableName: "class_courses",
     timestamps: false,
+    underscored: true,
   }
 );
 

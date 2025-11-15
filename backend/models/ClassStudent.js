@@ -29,6 +29,7 @@ const ClassStudent = sequelize.define(
   {
     tableName: "class_students",
     timestamps: false,
+    underscored: true,
   }
 );
 module.exports = ClassStudent;

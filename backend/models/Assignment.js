@@ -65,6 +65,7 @@ const Assignment = sequelize.define(
   {
     tableName: "assignments",
     timestamps: false,
+    underscored: true,
   }
 );
 

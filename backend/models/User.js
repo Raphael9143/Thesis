@@ -103,7 +103,8 @@ const User = sequelize.define(
   },
   {
     tableName: "users",
-    timestamps: true, // Tự động tạo created_at và updated_at
+    timestamps: true,
+    underscored: true,
     indexes: [
       {
         unique: true,
