@@ -332,7 +332,7 @@ router.get("/projects/:id", auth, ResearchController.getProjectById);
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [ACTIVE, ARCHIVED, COMPLETED, DRAFT]
+ *                 enum: [ACTIVE, ARCHIVED, DRAFT]
  *                 description: New status for the project
  *     responses:
  *       200:
