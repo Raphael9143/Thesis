@@ -673,6 +673,63 @@ const ResearchController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+
+  // Update project status (OWNER or MODERATOR only)
+  updateProjectStatus: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+
+      const projectId = parseInt(req.params.id, 10);
+      if (!projectId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid project id" });
+
+      const { status } = req.body;
+      const validStatuses = ["ACTIVE", "ARCHIVED", "COMPLETED", "DRAFT"];
+      if (!status || !validStatuses.includes(status))
+        return res.status(400).json({
+          success: false,
+          message: "Invalid status. Must be one of: ACTIVE, ARCHIVED, COMPLETED, DRAFT",
+        });
+
+      const project = await ResearchProject.findByPk(projectId);
+      if (!project)
+        return res
+          .status(404)
+          .json({ success: false, message: "Project not found" });
+
+      // Check permission: only OWNER or MODERATOR can update status
+      const member = await ResearchProjectMember.findOne({
+        where: {
+          research_project_id: projectId,
+          user_id: req.user.userId,
+        },
+      });
+      if (!member || !["OWNER", "MODERATOR"].includes(member.role))
+        return res.status(403).json({
+          success: false,
+          message: "Only project owner or moderator can update status",
+        });
+
+      project.status = status;
+      await project.save();
+
+      return res.json({
+        success: true,
+        message: "Project status updated",
+        data: { id: project.id, status: project.status },
+      });
+    } catch (err) {
+      console.error("updateProjectStatus error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
 };
 
 module.exports = ResearchController;

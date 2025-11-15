@@ -305,6 +305,51 @@ router.get(
  */
 router.get("/projects/:id", auth, ResearchController.getProjectById);
 
+// PATCH /api/research/projects/:id/status - update project status
+/**
+ * @swagger
+ * /api/research/projects/{id}/status:
+ *   patch:
+ *     summary: Update project status (OWNER or MODERATOR only)
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: integer
+ *         description: Project ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [ACTIVE, ARCHIVED, COMPLETED, DRAFT]
+ *                 description: New status for the project
+ *     responses:
+ *       200:
+ *         description: Status updated successfully
+ *       400:
+ *         description: Invalid status value
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (not owner or moderator)
+ *       404:
+ *         description: Project not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch("/projects/:id/status", auth, ResearchController.updateProjectStatus);
+
 // POST /api/research/projects/:projectId/star - star/unstar a project
 /**
  * @swagger
