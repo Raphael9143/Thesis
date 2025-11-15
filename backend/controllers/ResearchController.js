@@ -149,16 +149,41 @@ const ResearchController = {
           .status(400)
           .json({ success: false, message: "title required" });
 
+      // Create empty .use file for the project
+      const fs = require("fs");
+      const path = require("path");
+      const uploadsDir = path.resolve(__dirname, "..", "uploads", "research");
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      const sanitizedTitle = title.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+      const timestamp = Date.now();
+      const fileName = `${sanitizedTitle}_${timestamp}.use`;
+      const filePath = path.join(uploadsDir, fileName);
+      const emptyUseContent = "model EmptyModel\n";
+      fs.writeFileSync(filePath, emptyUseContent, "utf8");
+      const publicPath = `/uploads/research/${fileName}`;
+
+      // Create empty UseModel as main model for this project
+      const UseModel = require("../models/UseModel");
+      const emptyModel = await UseModel.create({
+        name: `${title} - Main Model`,
+        file_path: publicPath,
+        raw_text: emptyUseContent,
+        owner_id: req.user.userId,
+      });
+
       const proj = await ResearchProject.create({
         title,
         description: description || null,
-        ownerId: req.user.userId,
+        owner_id: req.user.userId,
+        main_use_model_id: emptyModel.id,
       });
 
       // create owner membership
       await ResearchProjectMember.create({
-        researchProjectId: proj.id,
-        userId: req.user.userId,
+        research_project_id: proj.id,
+        user_id: req.user.userId,
         role: "OWNER",
       });
 
