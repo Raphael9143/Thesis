@@ -22,7 +22,7 @@ export default function CreateProjectModal({ open, onClose, onCreated }) {
     }
   }, [open]);
 
-  const onSubmit = async (e) => {
+  const onSubmit = async (e, shouldPublish = false) => {
     if (e?.preventDefault) e.preventDefault();
     if (!title.trim()) {
       setNotifyMsg('Please enter a project title');
@@ -39,7 +39,21 @@ export default function CreateProjectModal({ open, onClose, onCreated }) {
 
       const res = await userAPI.createResearchProject(payload);
       if (res?.success) {
-        setNotifyMsg('Project created successfully');
+        const projectId = res.data?.id;
+
+        // If publish, patch status to ACTIVE
+        if (shouldPublish && projectId) {
+          try {
+            await userAPI.patchResearchProjectStatus(projectId, 'ACTIVE');
+            setNotifyMsg('Project published successfully');
+          } catch (patchErr) {
+            console.error('Patch status error', patchErr);
+            setNotifyMsg('Project created but failed to publish');
+          }
+        } else {
+          setNotifyMsg('Project saved as draft');
+        }
+
         setNotifyType('success');
         setNotifyOpen(true);
 
@@ -68,16 +82,19 @@ export default function CreateProjectModal({ open, onClose, onCreated }) {
 
   return (
     <Modal open={open} onClose={onClose} title="Create Project">
-      <form onSubmit={onSubmit} className="create-project-modal-form">
+      <form onSubmit={(e) => onSubmit(e, false)} className="create-project-modal-form">
         <FormField label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required={true} />
         <FormField label="Description" value={description} onChange={(e) => setDescription(e.target.value)} textarea />
 
         <div className="create-project-modal-actions">
-          <button type="submit" className="btn btn-primary" disabled={submitting}>
-            {submitting ? 'Creating...' : 'Create'}
-          </button>
           <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
             Cancel
+          </button>
+          <button type="submit" className="btn btn-signin" disabled={submitting}>
+            {submitting ? 'Saving...' : 'Save as Draft'}
+          </button>
+          <button type="button" className="btn btn-primary" onClick={(e) => onSubmit(e, true)} disabled={submitting}>
+            {submitting ? 'Publishing...' : 'Publish'}
           </button>
         </div>
       </form>
