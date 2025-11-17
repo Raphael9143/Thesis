@@ -266,15 +266,15 @@ const ResearchController = {
 
       const useModel = await UseModel.create({
         name: req.body.name || null,
-        filePath: publicPath,
-        rawText: content,
-        ownerId: req.user.userId,
+        file_path: publicPath,
+        raw_text: content,
+        owner_id: req.user.userId,
       });
 
       const contrib = await ResearchContribution.create({
-        researchProjectId: projectId,
-        useModelId: useModel.id,
-        contributorId: req.user.userId,
+        research_project_id: projectId,
+        use_model_id: useModel.id,
+        contributor_id: req.user.userId,
         title: req.body.title || null,
         description: req.body.description || null,
         status: "PENDING",
