@@ -3,7 +3,7 @@ import FilePreview from '../../components/ui/FilePreview';
 import DashedDivider from '../../components/ui/DashedDivider';
 import toFullUrl from '../../utils/FullURLFile';
 
-export default function ContributionDetailsTab({ contribution, useModel }) {
+export default function ContributionDetailsTab({ contribution, useModel, onValidationError }) {
   return (
     <div className="contribution-detail-tab-content">
       <div className="contribution-detail-description">
@@ -21,6 +21,7 @@ export default function ContributionDetailsTab({ contribution, useModel }) {
               url={toFullUrl(useModel.file_path)}
               filename={useModel.file_path}
               filePath={useModel.file_path}
+              onValidationError={onValidationError}
             />
           </div>
         </div>

@@ -11,6 +11,7 @@ export default function ContributionChangesTab({
   setReviewNotes,
   submitting,
   handleReview,
+  validationError,
 }) {
   const renderDiff = () => {
     if (!originalModel || !useModel) {
@@ -52,11 +53,28 @@ export default function ContributionChangesTab({
         {renderDiff()}
       </div>
 
+      {(contribution.validation_report || validationError) && (
+        <>
+          <DashedDivider />
+          <div className="contribution-detail-validation-section">
+            <h3>Validation Report</h3>
+            <div className="contribution-detail-validation-error">
+              <i className="fa fa-exclamation-triangle" /> {validationError || contribution.validation_report}
+            </div>
+            {validationError && (
+              <div style={{ marginTop: '8px', fontSize: '13px', color: '#991b1b' }}>
+                <i className="fa fa-info-circle" /> This validation error will be saved when you submit your review.
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
       <DashedDivider />
 
       {canReview && contribution.status === 'PENDING' && (
         <div className="contribution-detail-review-form">
-          <h3>Add a Comment</h3>
+          <h3>Add Review Notes</h3>
           <textarea
             className="contribution-detail-textarea"
             placeholder="Add review notes (required for requesting edits or rejection)..."
