@@ -169,6 +169,13 @@ const userAPI = {
   getResearchProjectStarred: (id) => axiosClient.get(`research/projects/${id}/starred`),
   // POST /api/research/projects/{id}/moderator { email }
   addResearchProjectModerator: (id, email) => axiosClient.post(`research/projects/${id}/moderator`, { email }),
+  // POST /api/research/projects/{id}/contribute - FormData with file, title, description, name
+  postProjectContribution: (id, formData) =>
+    axiosClient.post(`research/projects/${id}/contribute`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    }),
+  // GET /api/use/models/{id} - Get specific model file content
+  getUseModelById: (id) => axiosClient.get(`use/models/${id}`),
 };
 
 export default userAPI;
