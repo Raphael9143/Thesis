@@ -163,6 +163,10 @@ const userAPI = {
   createResearchProject: (data) => axiosClient.post('research/projects', data),
   // PATCH /api/research/projects/{id}/status { status }
   patchResearchProjectStatus: (id, status) => axiosClient.patch(`research/projects/${id}/status`, { status }),
+  // POST /api/research/projects/{id}/star -> toggles star, returns { star: boolean }
+  toggleResearchProjectStar: (id) => axiosClient.post(`research/projects/${id}/star`),
+  // GET /api/research/projects/{id}/starred -> returns { project_id, is_starred }
+  getResearchProjectStarred: (id) => axiosClient.get(`research/projects/${id}/starred`),
 };
 
 export default userAPI;

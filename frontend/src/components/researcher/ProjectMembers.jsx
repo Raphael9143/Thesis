@@ -17,7 +17,7 @@ export default function ProjectMembers({ members }) {
             {Array.isArray(members.moderators) && members.moderators.length > 0 ? (
               members.moderators.map((m) => <UserRow key={m.id} user={m} role="Moderator" />)
             ) : (
-              <div>None</div>
+              <div></div>
             )}
           </div>
 
@@ -25,7 +25,7 @@ export default function ProjectMembers({ members }) {
             {Array.isArray(members.contributors) && members.contributors.length > 0 ? (
               members.contributors.map((m) => <UserRow key={m.id} user={m} role="Contributor" />)
             ) : (
-              <div>None</div>
+              <div></div>
             )}
           </div>
         </div>
