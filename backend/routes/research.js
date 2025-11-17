@@ -133,6 +133,29 @@ router.get("/projects/starred", auth, ResearchController.listMyStarredProjects);
  */
 router.get("/statistics", ResearchController.getStatistics);
 
+// GET /api/research/projects/recent
+/**
+ * @swagger
+ * /api/research/projects/recent:
+ *   get:
+ *     summary: Get recent PUBLIC projects (default 10)
+ *     tags:
+ *       - Research
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         type: integer
+ *         default: 10
+ *         description: Number of recent projects to retrieve
+ *     responses:
+ *       200:
+ *         description: List of recent projects sorted by created_at DESC
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/projects/recent", ResearchController.listRecentProjects);
+
 // Create project
 /**
  * @swagger

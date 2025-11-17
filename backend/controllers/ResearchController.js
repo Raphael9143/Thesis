@@ -293,6 +293,37 @@ const ResearchController = {
     }
   },
 
+  // List recent PUBLIC projects (default 10, max configurable via query)
+  listRecentProjects: async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const User = require("../models/User");
+
+      const projects = await ResearchProject.findAll({
+        where: { visibility: "PUBLIC" },
+        include: [
+          {
+            model: User,
+            as: "owner",
+            attributes: ["id", "full_name"],
+          },
+        ],
+        order: [["created_at", "DESC"]],
+        limit,
+      });
+
+      return res.json({
+        success: true,
+        data: projects,
+      });
+    } catch (err) {
+      console.error("listRecentProjects error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   createProject: async (req, res) => {
     try {
       if (!req.user || !req.user.userId)
