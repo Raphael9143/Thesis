@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
+import formatStatus from '../../utils/FormatStatus';
 import '../../assets/styles/pages/ContributionHistory.css';
+import '../../assets/styles/components/ContributionCard.css';
 
 export default function ContributionHistory() {
   const { projectId } = useParams();
@@ -31,6 +33,7 @@ export default function ContributionHistory() {
   }, [projectId]);
 
   const getStatusColor = (status) => {
+    console.log('Status:', formatStatus(status));
     switch (status) {
       case 'PENDING':
         return '#f59e0b'; // amber
@@ -60,7 +63,7 @@ export default function ContributionHistory() {
           <div className="contribution-card-header">
             <h3 className="contribution-card-title">{contrib.title}</h3>
             <span className="contribution-card-status" style={{ backgroundColor: getStatusColor(contrib.status) }}>
-              {contrib.status}
+              {formatStatus(contrib.status)}
             </span>
           </div>
           {contrib.description && <p className="contribution-card-description">{contrib.description}</p>}
