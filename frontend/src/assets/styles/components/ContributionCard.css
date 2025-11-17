@@ -9,7 +9,6 @@
 .contribution-card {
   background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
   padding: 16px;
   transition: box-shadow 0.2s;
 }
@@ -38,7 +37,6 @@
   font-size: 12px;
   font-weight: 600;
   color: #fff;
-  text-transform: uppercase;
 }
 
 .contribution-card-description {
@@ -69,7 +67,6 @@
   padding: 12px;
   background: #f9fafb;
   border-left: 3px solid #3b82f6;
-  border-radius: 4px;
   font-size: 13px;
 }
 
