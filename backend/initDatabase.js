@@ -830,7 +830,62 @@ context Member inv hasName: self.name <> ''
     status: "PENDING",
   });
 
-  console.log("✅ Seeded sample data with 15 contributions for project ID 1!");
+  // Seed comments for some contributions
+  const ContributionComment = require("./models/ContributionComment");
+  
+  // Comments for contribution 1 (Add Author entity)
+  await ContributionComment.create({
+    contribution_id: 1,
+    user_id: teacherUser.id,
+    comment_text: "Good idea! But should we add nationality for Author?",
+  });
+  
+  await ContributionComment.create({
+    contribution_id: 1,
+    user_id: studentUser.id,
+    comment_text: "I agree with adding nationality field.",
+  });
+  
+  await ContributionComment.create({
+    contribution_id: 1,
+    user_id: researcherUser.id,
+    comment_text: "We could also add birth_date and death_date for historical authors.",
+  });
+
+  // Comments for contribution 5 (Add email to Member)
+  await ContributionComment.create({
+    contribution_id: 5,
+    user_id: teacherUser.id,
+    comment_text: "Email is essential for notifications. Approved!",
+  });
+  
+  await ContributionComment.create({
+    contribution_id: 5,
+    user_id: researcherUser.id,
+    comment_text: "Should we validate email format in the constraint?",
+  });
+
+  // Comments for contribution 8 (Add Loan entity)
+  await ContributionComment.create({
+    contribution_id: 8,
+    user_id: moderator.id,
+    comment_text: "We need to track loan duration. Can you add due_date attribute?",
+  });
+  
+  await ContributionComment.create({
+    contribution_id: 8,
+    user_id: owner.id,
+    comment_text: "Also add return_date and late_fee fields please.",
+  });
+
+  // Comments for contribution 12 (Track availability)
+  await ContributionComment.create({
+    contribution_id: 12,
+    user_id: studentUser.id,
+    comment_text: "This is really useful for checking book availability!",
+  });
+
+  console.log("✅ Seeded sample data with 15 contributions and comments for project ID 1!");
 };
 
 module.exports = initDatabase;
