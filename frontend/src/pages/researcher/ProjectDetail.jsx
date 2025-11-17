@@ -30,8 +30,24 @@ export default function ResearcherProjectDetail() {
   const [starred, setStarred] = useState(false);
   const [starLoading, setStarLoading] = useState(false);
   const [addModeratorOpen, setAddModeratorOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('project');
   // inline preview handled by FilePreview; no modal state required
+
+  // Determine active tab from URL
+  const activeTab = useMemo(() => {
+    const path = location.pathname;
+    if (path.includes('/contributions')) return 'contributions';
+    if (path.includes('/settings')) return 'settings';
+    return 'project';
+  }, [location.pathname]);
+
+  const handleTabChange = (tab) => {
+    const routes = {
+      project: `/researcher/projects/${projectId}/details`,
+      contributions: `/researcher/projects/${projectId}/contributions`,
+      settings: `/researcher/projects/${projectId}/settings`,
+    };
+    navigate(routes[tab]);
+  };
 
   const titleText = useMemo(() => {
     const name = project?.title || project?.name || model?.name || 'Project';
@@ -155,7 +171,7 @@ export default function ResearcherProjectDetail() {
                     ]
               }
               activeTab={activeTab}
-              onChange={setActiveTab}
+              onChange={handleTabChange}
             />
 
             {activeTab === 'project' && (

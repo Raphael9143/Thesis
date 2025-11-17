@@ -71,7 +71,7 @@ export default function ResearcherProjects() {
                 subtitle={`${p.my_role || 'Member'}`}
                 description={p.description || ''}
                 badge={p.status || ''}
-                onClick={() => navigate(`/researcher/projects/${p.id}`, { state: { project: p } })}
+                onClick={() => navigate(`/researcher/projects/${p.id}/details`, { state: { project: p } })}
               />
             ))}
           </div>
