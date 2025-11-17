@@ -179,6 +179,8 @@ const userAPI = {
     }),
   // GET /api/research/projects/{id}/contributions/history
   getResearchProjectContributions: (id) => axiosClient.get(`research/projects/${id}/contributions/history`),
+  // GET /api/research/projects/{id}/contributions/mine - Get current user's contributions
+  getMyProjectContributions: (id) => axiosClient.get(`research/projects/${id}/contributions/mine`),
   // GET /api/research/contributions/{id} - Get contribution details
   getContributionById: (id) => axiosClient.get(`research/contributions/${id}`),
   // POST /api/research/contributions/{id}/review - Submit review { action, notes, validationReport }
