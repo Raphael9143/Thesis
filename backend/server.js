@@ -63,7 +63,7 @@ async function startServer() {
           .then(async () => {
             const initDatabase = require("./initDatabase");
             await initDatabase();
-            console.log("✅ Database synced (models -> tables)");
+            console.log("Database synced (models -> tables)");
           })
           .catch((error) => {
             console.error("❌ Database sync failed:", error.message);

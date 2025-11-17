@@ -885,7 +885,7 @@ context Member inv hasName: self.name <> ''
     comment_text: "This is really useful for checking book availability!",
   });
 
-  console.log("✅ Seeded sample data with 15 contributions and comments for project ID 1!");
+  console.log("Seeded sample data with 15 contributions and comments for project ID 1!");
 };
 
 module.exports = initDatabase;

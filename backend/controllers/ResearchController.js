@@ -264,6 +264,35 @@ const ResearchController = {
     }
   },
 
+  // Get statistics: count of projects, contributions, use models, researchers
+  getStatistics: async (req, res) => {
+    try {
+      const User = require("../models/User");
+
+      const projectCount = await ResearchProject.count();
+      const contributionCount = await ResearchContribution.count();
+      const useModelCount = await UseModel.count();
+      const researcherCount = await User.count({
+        where: { role: "RESEARCHER" },
+      });
+
+      return res.json({
+        success: true,
+        data: {
+          projects: projectCount,
+          contributions: contributionCount,
+          use_models: useModelCount,
+          researchers: researcherCount,
+        },
+      });
+    } catch (err) {
+      console.error("getStatistics error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   createProject: async (req, res) => {
     try {
       if (!req.user || !req.user.userId)

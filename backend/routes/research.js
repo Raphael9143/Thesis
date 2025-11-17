@@ -101,6 +101,38 @@ router.get("/projects/most-starred", ResearchController.listMostStarredProjects)
  */
 router.get("/projects/starred", auth, ResearchController.listMyStarredProjects);
 
+// GET /api/research/statistics
+/**
+ * @swagger
+ * /api/research/statistics:
+ *   get:
+ *     summary: Get platform statistics (counts of projects, contributions, use models, researchers)
+ *     tags:
+ *       - Research
+ *     responses:
+ *       200:
+ *         description: Statistics data
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             data:
+ *               type: object
+ *               properties:
+ *                 projects:
+ *                   type: integer
+ *                 contributions:
+ *                   type: integer
+ *                 use_models:
+ *                   type: integer
+ *                 researchers:
+ *                   type: integer
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/statistics", ResearchController.getStatistics);
+
 // Create project
 /**
  * @swagger
