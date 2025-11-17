@@ -153,6 +153,8 @@ const userAPI = {
   // Researcher projects
   // GET /api/research/projects/mine
   getResearchProjectsMine: () => axiosClient.get('research/projects/mine'),
+  searchProjects: (query, page = 1, limit = 10) =>
+    axiosClient.get('research/projects/search', { params: { q: query, page, limit } }),
   // GET /api/research/projects/starred - Get all starred projects
   getStarredProjects: () => axiosClient.get('research/projects/starred'),
   // GET /api/research/statistics
