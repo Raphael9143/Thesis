@@ -167,6 +167,8 @@ const userAPI = {
   toggleResearchProjectStar: (id) => axiosClient.post(`research/projects/${id}/star`),
   // GET /api/research/projects/{id}/starred -> returns { project_id, is_starred }
   getResearchProjectStarred: (id) => axiosClient.get(`research/projects/${id}/starred`),
+  // POST /api/research/projects/{id}/moderator { email }
+  addResearchProjectModerator: (id, email) => axiosClient.post(`research/projects/${id}/moderator`, { email }),
 };
 
 export default userAPI;

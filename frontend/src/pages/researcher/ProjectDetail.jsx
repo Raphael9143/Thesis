@@ -9,6 +9,8 @@ import ProjectMembers from '../../components/researcher/ProjectMembers';
 import toFullUrl from '../../utils/FullURLFile';
 import DashedDivider from '../../components/ui/DashedDivider';
 import { useNotifications } from '../../contexts/NotificationContext';
+import AddModeratorModal from '../../components/researcher/AddModeratorModal';
+import '../../assets/styles/pages/ProjectDetail.css';
 
 export default function ResearcherProjectDetail() {
   const { projectId } = useParams();
@@ -23,12 +25,21 @@ export default function ResearcherProjectDetail() {
   const [error, setError] = useState(null);
   const [starred, setStarred] = useState(false);
   const [starLoading, setStarLoading] = useState(false);
+  const [addModeratorOpen, setAddModeratorOpen] = useState(false);
   // inline preview handled by FilePreview; no modal state required
 
   const titleText = useMemo(() => {
     const name = project?.title || project?.name || model?.name || 'Project';
     return `${name}`;
   }, [project, model]);
+
+  const isOwner = useMemo(() => {
+    if (!members || !members.owner) return false;
+    const currentUserId = sessionStorage.getItem('userId');
+    console.log(members.owner.id, Number(currentUserId));
+    return members.owner.id === Number(currentUserId);
+  }, [members]);
+  console.log('isOwner:', isOwner);
 
   useTitle(titleText);
 
@@ -67,6 +78,15 @@ export default function ResearcherProjectDetail() {
       }
     } finally {
       setStarLoading(false);
+    }
+  };
+
+  const fetchMembers = async () => {
+    try {
+      const membersRes = await userAPI.getResearchProjectMembers(projectId);
+      if (membersRes?.success) setMembers(membersRes.data);
+    } catch (err) {
+      console.error('Fetch members error:', err);
     }
   };
 
@@ -115,34 +135,36 @@ export default function ResearcherProjectDetail() {
         {error && <div className="text-error">{error}</div>}
         {!loading && !error && (
           <>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-              <button
+            <div className="project-detail-actions">
+              {isOwner && (
+                <button className="btn btn-primary btn-sm" onClick={() => setAddModeratorOpen(true)}>
+                  <i className="fa fa-user-plus project-detail-moderator-icon" />
+                  Add Moderator
+                </button>
+              )}
+              <a
                 onClick={handleToggleStar}
                 disabled={starLoading}
                 title={starred ? 'Unstar project' : 'Star project'}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  cursor: starLoading ? 'default' : 'pointer',
-                  padding: 8,
-                  fontSize: 20,
-                }}
+                className="project-detail-star-btn"
               >
-                <i className={`fa${starred ? 's' : 'r'} fa-star`} style={{ color: starred ? '#fbbf24' : '#000' }} />
-              </button>
+                <i
+                  className={`fa${starred ? 's' : 'r'} fa-star ${starred ? 'project-detail-star-icon-starred' : 'project-detail-star-icon-unstarred'}`}
+                />
+              </a>
             </div>
-            <div className="display-flex flex-wrap gap-12">
-              <div style={{ flex: '1 1 640px', minWidth: 360, borderRight: '1px solid #e5e7eb', paddingRight: 16 }}>
+            <div className="project-detail-content">
+              <div className="project-detail-model-section">
                 <h2 className="no-margin">Model</h2>
                 {model ? (
-                  <div style={{ marginTop: 12 }}>
+                  <div className="project-detail-model-preview">
                     <FilePreview
                       url={toFullUrl(model.file_path)}
                       filename={model.file_path}
                       filePath={model.file_path}
                     />
                     {model.file_path && (
-                      <div style={{ marginTop: 8 }}>
+                      <div className="project-detail-model-download">
                         <a className="btn btn--secondary" href={toFullUrl(model.file_path)} download>
                           Download
                         </a>
@@ -150,23 +172,13 @@ export default function ResearcherProjectDetail() {
                     )}
                   </div>
                 ) : (
-                  <div style={{ marginTop: 12 }}>No model found for this project.</div>
+                  <div className="project-detail-model-preview">No model found for this project.</div>
                 )}
               </div>
 
-              <div
-                style={{
-                  flex: '1 1 320px',
-                  minWidth: 280,
-                  borderLeft: '1px solid #f3f4f6',
-                  paddingLeft: 16,
-                  textAlign: 'left',
-                }}
-              >
-                <div className="font-700" style={{ marginBottom: 8 }}>
-                  About
-                </div>
-                {project?.description && <p style={{ marginTop: 6 }}>{project.description}</p>}
+              <div className="project-detail-about-section">
+                <div className="project-detail-about-title">About</div>
+                {project?.description && <p className="project-detail-about-description">{project.description}</p>}
                 <DashedDivider />
                 <ProjectMembers members={members} />
               </div>
@@ -175,7 +187,12 @@ export default function ResearcherProjectDetail() {
         )}
       </Card>
 
-      {/* Inline preview above; no separate modal preview here */}
+      <AddModeratorModal
+        open={addModeratorOpen}
+        onClose={() => setAddModeratorOpen(false)}
+        onAdded={fetchMembers}
+        projectId={projectId}
+      />
     </Section>
   );
 }
