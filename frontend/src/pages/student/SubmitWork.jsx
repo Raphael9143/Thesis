@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
+import CodeEditor from '../../components/ui/CodeEditor';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/Submit.css';
@@ -27,10 +28,6 @@ export default function SubmitWork() {
   const [code, setCode] = useState('');
   const [file, setFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [useSpaces, setUseSpaces] = useState(true); // true: 4 spaces, false: \t
-  const [lineCount, setLineCount] = useState(1);
-  const numbersRef = React.useRef(null);
-  const textareaRef = React.useRef(null);
 
   useEffect(() => {
     let mounted = true;
@@ -79,77 +76,6 @@ export default function SubmitWork() {
     const t = new Date(endAt).getTime();
     return Number.isFinite(t) && Date.now() > t;
   }, [endAt]);
-
-  useEffect(() => {
-    // Update line count when code changes
-    const lines = (code || '').split('\n').length;
-    setLineCount(lines);
-  }, [code]);
-
-  const syncScroll = (e) => {
-    if (!numbersRef.current) return;
-    numbersRef.current.scrollTop = e.target.scrollTop;
-  };
-
-  const handleTabKey = (e) => {
-    if (e.key !== 'Tab') return;
-    e.preventDefault();
-    const el = textareaRef.current;
-    if (!el) return;
-    const indent = useSpaces ? '    ' : '\t';
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    const value = code || '';
-
-    if (start !== end) {
-      // Multi-line selection: indent or outdent on Tab / Shift+Tab
-      const before = value.substring(0, start);
-      const selected = value.substring(start, end);
-      const after = value.substring(end);
-      const lines = selected.split('\n');
-      if (e.shiftKey) {
-        // Outdent: remove one indent from each selected line if present
-        const outdented = lines
-          .map((ln) => {
-            if (ln.startsWith(indent)) return ln.substring(indent.length);
-            if (useSpaces && ln.startsWith('    ')) return ln.substring(4);
-            if (ln.startsWith('\t')) return ln.substring(1);
-            return ln;
-          })
-          .join('\n');
-        const newVal = before + outdented + after;
-        const newStart = start;
-        const newEnd = start + outdented.length;
-        setCode(newVal);
-        requestAnimationFrame(() => {
-          el.selectionStart = newStart;
-          el.selectionEnd = newEnd;
-        });
-      } else {
-        // Indent: add indent to each line
-        const indented = lines.map((ln) => indent + ln).join('\n');
-        const newVal = before + indented + after;
-        const newStart = start + indent.length;
-        const newEnd = start + indented.length;
-        setCode(newVal);
-        requestAnimationFrame(() => {
-          el.selectionStart = newStart;
-          el.selectionEnd = newEnd;
-        });
-      }
-    } else {
-      // Single caret insert
-      const before = value.substring(0, start);
-      const after = value.substring(end);
-      const newVal = before + indent + after;
-      setCode(newVal);
-      requestAnimationFrame(() => {
-        const pos = start + indent.length;
-        el.selectionStart = pos;
-        el.selectionEnd = pos;
-      });
-    }
-  };
 
   const onSubmit = async (e) => {
     e?.preventDefault?.();
@@ -253,44 +179,18 @@ export default function SubmitWork() {
                 }}
               />
             </label>
-            {mode === 'editor' && (
-              <div className="editor-controls">
-                <label className="inline-flex align-center gap-8">
-                  <input
-                    type="checkbox"
-                    checked={useSpaces}
-                    onChange={(e) => setUseSpaces(e.target.checked)}
-                    disabled={submitting || isExpired}
-                  />
-                  Use 4 spaces for Tab
-                </label>
-              </div>
-            )}
           </div>
 
           {mode === 'editor' ? (
             <div className="editor-pane">
-              <div className="code-editor-container limited-height">
-                <div className="line-numbers" ref={numbersRef} aria-hidden="true">
-                  {Array.from({ length: lineCount }).map((_, idx) => (
-                    <div key={idx} className="line-number">
-                      {idx + 1}
-                    </div>
-                  ))}
-                </div>
-                <textarea
-                  ref={textareaRef}
-                  className="code-editor"
-                  placeholder={'// Enter .use code here\n'}
-                  rows={12}
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  onScroll={syncScroll}
-                  onKeyDown={handleTabKey}
-                  disabled={submitting || isExpired}
-                  spellCheck={false}
-                />
-              </div>
+              <CodeEditor
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                placeholder="// Enter .use code here\n"
+                rows={12}
+                disabled={submitting || isExpired}
+                className="limited-height"
+              />
             </div>
           ) : (
             <div className="file-pane">
