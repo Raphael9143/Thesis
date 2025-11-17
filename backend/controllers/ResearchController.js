@@ -227,9 +227,8 @@ const ResearchController = {
             message: "You are not a member of this project",
           });
 
-      // Accept file upload (req.file or req.files) or body.path or body.rawText
+      // Accept file upload only (req.file or req.files)
       let filePath = null;
-      let rawText = null;
       if (req.file) filePath = path.resolve(req.file.path);
       else if (req.files && req.files.length)
         filePath = path.resolve(req.files[0].path);
@@ -241,12 +240,10 @@ const ResearchController = {
         else if (path.isAbsolute(inputPath))
           filePath = path.normalize(inputPath);
         else filePath = path.resolve(inputPath);
-      } else if (req.body && req.body.rawText) {
-        rawText = String(req.body.rawText);
       } else {
         return res
           .status(400)
-          .json({ success: false, message: "file, path or rawText required" });
+          .json({ success: false, message: "file or path required" });
       }
 
       if (filePath && !fs.existsSync(filePath))
@@ -255,7 +252,7 @@ const ResearchController = {
           .json({ success: false, message: "file not found" });
 
       // create a UseModel copy for this contribution
-      const content = rawText || (filePath ? fs.readFileSync(filePath, "utf8") : null) || "";
+      const content = filePath ? fs.readFileSync(filePath, "utf8") : "";
 
       // Always store contribution copies under /uploads/research
       const researchDir = path.resolve(__dirname, "..", "uploads", "research");

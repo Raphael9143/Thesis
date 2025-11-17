@@ -76,10 +76,10 @@ router.get("/projects/mine", auth, ResearchController.listMyProjects);
  */
 router.post("/projects", auth, ResearchController.createProject);
 
-// Create contribution (file or path or rawText)
+// Create contribution (file or path only)
 /**
  * @swagger
- * /api/research/projects/{projectId}/contributions:
+ * /api/research/projects/{projectId}/contribute:
  *   post:
  *     summary: Create a contribution for a project
  *     tags:
@@ -98,7 +98,7 @@ router.post("/projects", auth, ResearchController.createProject);
  *       - in: formData
  *         name: file
  *         type: file
- *         description: .use file to upload (alternative to body.path/rawText)
+ *         description: .use file to upload (alternative to body.path)
  *       - in: body
  *         name: body
  *         required: false
@@ -108,9 +108,6 @@ router.post("/projects", auth, ResearchController.createProject);
  *             path:
  *               type: string
  *               description: Server path like /uploads/file.use
- *             rawText:
- *               type: string
- *               description: Raw .use content (if no file)
  *             name:
  *               type: string
  *               description: Optional model name
@@ -133,7 +130,7 @@ router.post("/projects", auth, ResearchController.createProject);
  *         description: Internal server error
  */
 router.post(
-  "/projects/:projectId/contributions",
+  "/projects/:projectId/contribute",
   auth,
   conditionalUpload,
   ResearchController.createContribution
