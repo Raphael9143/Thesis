@@ -242,6 +242,73 @@ router.get(
   ResearchController.listProjectMembers
 );
 
+// POST /api/research/projects/:projectId/moderator - add moderator to project
+/**
+ * @swagger
+ * /api/research/projects/{projectId}/moderator:
+ *   post:
+ *     summary: Add moderator to project (owner only, max 1 moderator)
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         type: integer
+ *         description: Project ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email of user to add as moderator
+ *     responses:
+ *       201:
+ *         description: Moderator added successfully
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             message:
+ *               type: string
+ *             data:
+ *               type: object
+ *               properties:
+ *                 user_id:
+ *                   type: integer
+ *                 full_name:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *       200:
+ *         description: User role updated to moderator (if already member)
+ *       400:
+ *         description: Missing email, invalid project id, or moderator already exists
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Only project owner can add moderator
+ *       404:
+ *         description: Project or user not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+  "/projects/:projectId/moderator",
+  auth,
+  ResearchController.addModerator
+);
+
 // GET /api/research/projects/:id - get project by id
 /**
  * @swagger

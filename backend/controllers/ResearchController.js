@@ -798,6 +798,111 @@ const ResearchController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+
+  // Add moderator to project (only owner can add, only one moderator allowed)
+  addModerator: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+
+      const projectId = parseInt(req.params.projectId, 10);
+      if (!projectId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid project id" });
+
+      const { email } = req.body;
+      if (!email)
+        return res
+          .status(400)
+          .json({ success: false, message: "Email is required" });
+
+      const User = require("../models/User");
+
+      // Check if project exists and requester is the owner
+      const project = await ResearchProject.findByPk(projectId);
+      if (!project)
+        return res
+          .status(404)
+          .json({ success: false, message: "Project not found" });
+
+      if (project.owner_id !== req.user.userId)
+        return res.status(403).json({
+          success: false,
+          message: "Only project owner can add moderator",
+        });
+
+      // Check if moderator already exists
+      const existingModerator = await ResearchProjectMember.findOne({
+        where: {
+          research_project_id: projectId,
+          role: "MODERATOR",
+        },
+      });
+
+      if (existingModerator)
+        return res.status(400).json({
+          success: false,
+          message: "Project already has a moderator",
+        });
+
+      // Find user by email
+      const moderatorUser = await User.findOne({ where: { email } });
+      if (!moderatorUser)
+        return res.status(404).json({
+          success: false,
+          message: "User with this email not found",
+        });
+
+      // Check if user is already a member
+      const existingMembership = await ResearchProjectMember.findOne({
+        where: {
+          research_project_id: projectId,
+          user_id: moderatorUser.id,
+        },
+      });
+
+      if (existingMembership) {
+        // Update existing membership to moderator
+        existingMembership.role = "MODERATOR";
+        await existingMembership.save();
+        return res.json({
+          success: true,
+          message: "User role updated to moderator",
+          data: {
+            user_id: moderatorUser.id,
+            full_name: moderatorUser.full_name,
+            role: "MODERATOR",
+          },
+        });
+      }
+
+      // Create new membership
+      await ResearchProjectMember.create({
+        research_project_id: projectId,
+        user_id: moderatorUser.id,
+        role: "MODERATOR",
+        joined_at: new Date(),
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "Moderator added successfully",
+        data: {
+          user_id: moderatorUser.id,
+          full_name: moderatorUser.full_name,
+          role: "MODERATOR",
+        },
+      });
+    } catch (err) {
+      console.error("addModerator error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
 };
 
 module.exports = ResearchController;
