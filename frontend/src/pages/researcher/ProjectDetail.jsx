@@ -43,7 +43,7 @@ export default function ResearcherProjectDetail() {
   const handleTabChange = (tab) => {
     const routes = {
       project: `/researcher/projects/${projectId}/details`,
-      contributions: `/researcher/projects/${projectId}/contributions`,
+      contributions: `/researcher/projects/${projectId}/contributions?page=1`,
       settings: `/researcher/projects/${projectId}/settings`,
     };
     navigate(routes[tab]);
