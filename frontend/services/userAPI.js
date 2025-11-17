@@ -189,6 +189,10 @@ const userAPI = {
   reviewContribution: (id, reviewData) => axiosClient.post(`research/contributions/${id}/review`, reviewData),
   // GET /api/use/models/{id} - Get specific model file content
   getUseModelById: (id) => axiosClient.get(`use/models/${id}`),
+  // GET /api/research/contributions/{id}/comments - Get comments for a contribution
+  getContributionComments: (id) => axiosClient.get(`research/contributions/${id}/comments`),
+  // POST /api/research/contributions/{id}/comments - Add comment { comment_text }
+  addContributionComment: (id, data) => axiosClient.post(`research/contributions/${id}/comments`, data),
 };
 
 export default userAPI;
