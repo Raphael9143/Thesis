@@ -600,6 +600,23 @@ const ResearchController = {
           project.main_use_model_id = contrib.use_model_id;
           await project.save();
         }
+
+        // Add contributor to project members if not already a member
+        const existingMembership = await ResearchProjectMember.findOne({
+          where: {
+            research_project_id: contrib.research_project_id,
+            user_id: contrib.contributor_id,
+          },
+        });
+
+        if (!existingMembership) {
+          await ResearchProjectMember.create({
+            research_project_id: contrib.research_project_id,
+            user_id: contrib.contributor_id,
+            role: "CONTRIBUTOR",
+            joined_at: new Date(),
+          });
+        }
       }
 
       // optionally run validation and store report (omitted heavy CLI run here)
