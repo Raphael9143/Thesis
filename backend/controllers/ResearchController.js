@@ -842,6 +842,57 @@ const ResearchController = {
     }
   },
 
+  // Update project visibility (OWNER only)
+  updateProjectVisibility: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+
+      const projectId = parseInt(req.params.id, 10);
+      if (!projectId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid project id" });
+
+      const { visibility } = req.body;
+      const validVisibilities = ["PUBLIC", "PRIVATE"];
+      if (!visibility || !validVisibilities.includes(visibility))
+        return res.status(400).json({
+          success: false,
+          message: "Invalid visibility. Must be PUBLIC or PRIVATE",
+        });
+
+      const project = await ResearchProject.findByPk(projectId);
+      if (!project)
+        return res
+          .status(404)
+          .json({ success: false, message: "Project not found" });
+
+      // Check permission: only OWNER can update visibility
+      if (project.owner_id !== req.user.userId)
+        return res.status(403).json({
+          success: false,
+          message: "Only project owner can update visibility",
+        });
+
+      project.visibility = visibility;
+      await project.save();
+
+      return res.json({
+        success: true,
+        message: "Project visibility updated",
+        data: { id: project.id, visibility: project.visibility },
+      });
+    } catch (err) {
+      console.error("updateProjectVisibility error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   // Add moderator to project (only owner can add, only one moderator allowed)
   addModerator: async (req, res) => {
     try {

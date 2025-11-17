@@ -415,6 +415,51 @@ router.get("/projects/:id", ResearchController.getProjectById);
  */
 router.patch("/projects/:id/status", auth, ResearchController.updateProjectStatus);
 
+// PATCH /api/research/projects/:id/visibility - update project visibility
+/**
+ * @swagger
+ * /api/research/projects/{id}/visibility:
+ *   patch:
+ *     summary: Update project visibility (OWNER only)
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         type: integer
+ *         description: Project ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - visibility
+ *             properties:
+ *               visibility:
+ *                 type: string
+ *                 enum: [PUBLIC, PRIVATE]
+ *                 description: New visibility for the project
+ *     responses:
+ *       200:
+ *         description: Visibility updated successfully
+ *       400:
+ *         description: Invalid visibility value
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (not owner)
+ *       404:
+ *         description: Project not found
+ *       500:
+ *         description: Internal server error
+ */
+router.patch("/projects/:id/visibility", auth, ResearchController.updateProjectVisibility);
+
 // POST /api/research/projects/:projectId/star - star/unstar a project
 /**
  * @swagger
