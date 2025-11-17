@@ -11,6 +11,7 @@ import DashedDivider from '../../components/ui/DashedDivider';
 import { useNotifications } from '../../contexts/NotificationContext';
 import AddModeratorModal from '../../components/researcher/AddModeratorModal';
 import ContributionHistory from './ContributionHistory';
+import ProjectSettings from './ProjectSettings';
 import Tabs from '../../components/ui/Tabs';
 import '../../assets/styles/pages/ProjectDetail.css';
 
@@ -144,6 +145,7 @@ export default function ResearcherProjectDetail() {
               tabs={[
                 { value: 'project', label: 'Project' },
                 { value: 'contributions', label: 'Contributions' },
+                { value: 'settings', label: 'Settings' },
               ]}
               activeTab={activeTab}
               onChange={setActiveTab}
@@ -212,6 +214,16 @@ export default function ResearcherProjectDetail() {
             {activeTab === 'contributions' && (
               <div className="project-detail-contributions">
                 <ContributionHistory />
+              </div>
+            )}
+
+            {activeTab === 'settings' && (
+              <div className="project-detail-settings">
+                <ProjectSettings
+                  project={project}
+                  isOwner={isOwner}
+                  onProjectUpdate={(updatedProject) => setProject(updatedProject)}
+                />
               </div>
             )}
           </>
