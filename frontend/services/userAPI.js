@@ -193,6 +193,8 @@ const userAPI = {
   getContributionComments: (id) => axiosClient.get(`research/contributions/${id}/comments`),
   // POST /api/research/contributions/{id}/comments - Add comment { comment_text }
   addContributionComment: (id, data) => axiosClient.post(`research/contributions/${id}/comments`, data),
+  // POST /api/research/contributions/{id}/resubmit - Resubmit contribution { path, rawText }
+  resubmitContribution: (id, data) => axiosClient.patch(`research/contributions/${id}`, data),
 };
 
 export default userAPI;
