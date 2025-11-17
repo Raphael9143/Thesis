@@ -20,3 +20,13 @@
   color: #6b7280;
   font-size: 14px;
 }
+
+.contributions-pagination {
+  margin-top: 24px;
+}
+
+.contributions-pagination-info {
+  font-size: 14px;
+  color: #6b7280;
+  margin-top: 8px;
+}
