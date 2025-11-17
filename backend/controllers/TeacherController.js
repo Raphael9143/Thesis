@@ -45,7 +45,7 @@ const TeacherController = {
   updateProfile: async (req, res) => {
     try {
       const teacherId = req.user.userId;
-      const { teacher_code, department, expertise, research_papers } = req.body;
+      const { teacher_code, department, description, reference_links } = req.body;
       const teacher = await Teacher.findByPk(teacherId);
       if (!teacher) {
         return res
@@ -55,9 +55,27 @@ const TeacherController = {
       // Cập nhật các trường cho phép
       if (teacher_code !== undefined) teacher.teacher_code = teacher_code;
       if (department !== undefined) teacher.department = department;
-      if (expertise !== undefined) teacher.expertise = expertise;
-      if (research_papers !== undefined)
-        teacher.research_papers = research_papers;
+      if (description !== undefined) teacher.description = description;
+      if (reference_links !== undefined) {
+        // Validate reference_links is array of https URLs
+        if (Array.isArray(reference_links)) {
+          const invalidLinks = reference_links.filter(
+            (link) => typeof link !== "string" || !link.startsWith("https://")
+          );
+          if (invalidLinks.length > 0) {
+            return res.status(400).json({
+              success: false,
+              message: "All reference links must be HTTPS URLs",
+            });
+          }
+          teacher.reference_links = reference_links;
+        } else {
+          return res.status(400).json({
+            success: false,
+            message: "reference_links must be an array",
+          });
+        }
+      }
       await teacher.save();
       res.json({
         success: true,

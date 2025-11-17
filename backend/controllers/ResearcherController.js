@@ -23,14 +23,10 @@ const ResearcherController = {
     try {
       const researcherId = req.user.userId;
       const {
-        researcher_code,
         department,
         field_of_study,
-        research_interests,
-        publications,
-        current_projects,
-        academic_rank,
-        years_of_experience,
+        description,
+        reference_links,
       } = req.body;
 
       const researcher = await Researcher.findByPk(researcherId);
@@ -41,19 +37,30 @@ const ResearcherController = {
       }
 
       // Cập nhật các trường cho phép
-      if (researcher_code !== undefined)
-        researcher.researcher_code = researcher_code;
       if (department !== undefined) researcher.department = department;
       if (field_of_study !== undefined)
         researcher.field_of_study = field_of_study;
-      if (research_interests !== undefined)
-        researcher.research_interests = research_interests;
-      if (publications !== undefined) researcher.publications = publications;
-      if (current_projects !== undefined)
-        researcher.current_projects = current_projects;
-      if (academic_rank !== undefined) researcher.academic_rank = academic_rank;
-      if (years_of_experience !== undefined)
-        researcher.years_of_experience = years_of_experience;
+      if (description !== undefined) researcher.description = description;
+      if (reference_links !== undefined) {
+        // Validate reference_links is array of https URLs
+        if (Array.isArray(reference_links)) {
+          const invalidLinks = reference_links.filter(
+            (link) => typeof link !== "string" || !link.startsWith("https://")
+          );
+          if (invalidLinks.length > 0) {
+            return res.status(400).json({
+              success: false,
+              message: "All reference links must be HTTPS URLs",
+            });
+          }
+          researcher.reference_links = reference_links;
+        } else {
+          return res.status(400).json({
+            success: false,
+            message: "reference_links must be an array",
+          });
+        }
+      }
 
       await researcher.save();
       res.json({

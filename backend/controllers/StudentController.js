@@ -81,17 +81,8 @@ const StudentController = {
     try {
       const Student = require("../models/Student");
       const studentId = req.user.userId;
-      const { student_code, major, year } = req.body;
-      // Không cho phép cập nhật completed_assignments từ API
-      if (
-        Object.prototype.hasOwnProperty.call(req.body, "completed_assignments")
-      ) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "Field completed_assignments is read-only and cannot be updated.",
-        });
-      }
+      const { student_code, major, year, description, reference_links } = req.body;
+      
       const student = await Student.findByPk(studentId);
       if (!student) {
         return res
@@ -102,6 +93,27 @@ const StudentController = {
       if (student_code !== undefined) student.student_code = student_code;
       if (major !== undefined) student.major = major;
       if (year !== undefined) student.year = year;
+      if (description !== undefined) student.description = description;
+      if (reference_links !== undefined) {
+        // Validate reference_links is array of https URLs
+        if (Array.isArray(reference_links)) {
+          const invalidLinks = reference_links.filter(
+            (link) => typeof link !== "string" || !link.startsWith("https://")
+          );
+          if (invalidLinks.length > 0) {
+            return res.status(400).json({
+              success: false,
+              message: "All reference links must be HTTPS URLs",
+            });
+          }
+          student.reference_links = reference_links;
+        } else {
+          return res.status(400).json({
+            success: false,
+            message: "reference_links must be an array",
+          });
+        }
+      }
       await student.save();
       res.json({
         success: true,
