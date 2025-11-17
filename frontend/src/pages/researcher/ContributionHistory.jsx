@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
 import formatStatus from '../../utils/FormatStatus';
 import '../../assets/styles/pages/ContributionHistory.css';
@@ -7,6 +7,7 @@ import '../../assets/styles/components/ContributionCard.css';
 
 export default function ContributionHistory() {
   const { projectId } = useParams();
+  const navigate = useNavigate();
   const [contributions, setContributions] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -59,7 +60,12 @@ export default function ContributionHistory() {
   return (
     <div className="contributions-list">
       {contributions.map((contrib) => (
-        <div key={contrib.id} className="contribution-card">
+        <div
+          key={contrib.id}
+          className="contribution-card"
+          onClick={() => navigate(`/researcher/contributions/${contrib.id}`)}
+          style={{ cursor: 'pointer' }}
+        >
           <div className="contribution-card-header">
             <h3 className="contribution-card-title">{contrib.title}</h3>
             <span className="contribution-card-status" style={{ backgroundColor: getStatusColor(contrib.status) }}>
