@@ -516,8 +516,7 @@ context Member inv hasName: self.name <> ''
     contributor_id: contributor.id,
     title: "Add title invariant",
     description: "Ensure title not empty.",
-    status: "NEEDS_EDIT",
-    review_notes: "Please refactor to use <> '' for consistency.",
+    status: "PENDING",
   });
 
   // Contribution 3: Rejected sample
@@ -538,12 +537,300 @@ context Member inv hasName: self.name <> ''
     contributor_id: contributor.id,
     title: "Broken constraint",
     description: "This demonstrates a rejected submission.",
-    status: "REJECTED",
-    review_notes: "Syntax error in constraint expression.",
-    validation_report: "Error: unexpected token at 'self.'",
+    status: "PENDING",
   });
 
-  console.log("✅ Seeded sample data!");
+  // Additional 7 contributions from various users to test pagination
+  // Contribution 4: From teacher (PENDING)
+  const contrib4Text =
+    "model Library\n\nclass Book\nattributes\n    title : String\n    isbn : String\nend\n";
+  fs.writeFileSync(path.join(researchUploadsDir, 'library_add_isbn.use'), contrib4Text, 'utf8');
+  const contrib4Model = await UseModel.create({
+    name: "Library",
+    file_path: "/uploads/research/library_add_isbn.use",
+    raw_text: contrib4Text,
+    owner_id: teacherUser.id,
+  });
+  await populateModel(contrib4Model);
+  await ResearchContribution.create({
+    research_project_id: project.id,
+    use_model_id: contrib4Model.id,
+    contributor_id: teacherUser.id,
+    title: "Add ISBN attribute",
+    description: "Added ISBN to Book class.",
+    status: "PENDING",
+  });
+
+  // Contribution 5: From student (ACCEPTED)
+  const contrib5Text =
+    "model Library\n\n" +
+    "class Member\nattributes\n    memberId : Integer\n" +
+    "    name : String\n    email : String\nend\n";
+  fs.writeFileSync(path.join(researchUploadsDir, 'library_add_email.use'), contrib5Text, 'utf8');
+  const contrib5Model = await UseModel.create({
+    name: "Library",
+    file_path: "/uploads/research/library_add_email.use",
+    raw_text: contrib5Text,
+    owner_id: studentUser.id,
+  });
+  await populateModel(contrib5Model);
+  await ResearchContribution.create({
+    research_project_id: project.id,
+    use_model_id: contrib5Model.id,
+    contributor_id: studentUser.id,
+    title: "Add email to Member",
+    description: "Member now has email attribute.",
+    status: "PENDING",
+  });
+
+  // Contribution 6: From moderator (PENDING)
+  const contrib6Text =
+    "model Library\n\nclass Librarian\nattributes\n" +
+    "    employeeId : Integer\n    name : String\nend\n";
+  fs.writeFileSync(
+    path.join(researchUploadsDir, 'library_add_librarian.use'),
+    contrib6Text,
+    'utf8'
+  );
+  const contrib6Model = await UseModel.create({
+    name: "Library",
+    file_path: "/uploads/research/library_add_librarian.use",
+    raw_text: contrib6Text,
+    owner_id: moderator.id,
+  });
+  await populateModel(contrib6Model);
+  await ResearchContribution.create({
+    research_project_id: project.id,
+    use_model_id: contrib6Model.id,
+    contributor_id: moderator.id,
+    title: "Add Librarian entity",
+    description: "Introduce Librarian class.",
+    status: "PENDING",
+  });
+
+  // Contribution 7: From researcher (NEEDS_EDIT)
+  const contrib7Text =
+    "model Library\n\nclass Book\nattributes\n    title : String\n    publishYear : Integer\nend\n";
+  fs.writeFileSync(path.join(researchUploadsDir, 'library_add_year.use'), contrib7Text, 'utf8');
+  const contrib7Model = await UseModel.create({
+    name: "Library",
+    file_path: "/uploads/research/library_add_year.use",
+    raw_text: contrib7Text,
+    owner_id: researcherUser.id,
+  });
+  await populateModel(contrib7Model);
+  await ResearchContribution.create({
+    research_project_id: project.id,
+    use_model_id: contrib7Model.id,
+    contributor_id: researcherUser.id,
+    title: "Add publish year",
+    description: "Track publication year of books.",
+    status: "PENDING",
+  });
+
+  // Contribution 8: From another student (PENDING)
+  const student2 = await User.findOne({ where: { email: 'student2@example.com' } });
+  if (student2) {
+    const contrib8Text =
+      "model Library\n\nclass Book\nattributes\n    title : String\n    genre : String\nend\n";
+    fs.writeFileSync(path.join(researchUploadsDir, 'library_add_genre.use'), contrib8Text, 'utf8');
+    const contrib8Model = await UseModel.create({
+      name: "Library",
+      file_path: "/uploads/research/library_add_genre.use",
+      raw_text: contrib8Text,
+      owner_id: student2.id,
+    });
+    await populateModel(contrib8Model);
+    await ResearchContribution.create({
+      research_project_id: project.id,
+      use_model_id: contrib8Model.id,
+      contributor_id: student2.id,
+      title: "Add genre to Book",
+      description: "Categorize books by genre.",
+      status: "PENDING",
+    });
+  }
+
+  // Contribution 9: From another student (ACCEPTED)
+  const student3 = await User.findOne({ where: { email: 'student3@example.com' } });
+  if (student3) {
+    const contrib9Text =
+      "model Library\n\nclass Loan\nattributes\n" +
+      "    loanDate : String\n    returnDate : String\nend\n";
+    fs.writeFileSync(path.join(researchUploadsDir, 'library_add_loan.use'), contrib9Text, 'utf8');
+    const contrib9Model = await UseModel.create({
+      name: "Library",
+      file_path: "/uploads/research/library_add_loan.use",
+      raw_text: contrib9Text,
+      owner_id: student3.id,
+    });
+    await populateModel(contrib9Model);
+    await ResearchContribution.create({
+      research_project_id: project.id,
+      use_model_id: contrib9Model.id,
+      contributor_id: student3.id,
+      title: "Add Loan entity",
+      description: "Track book loans.",
+      status: "PENDING",
+    });
+  }
+
+  // Contribution 10: From owner (ACCEPTED)
+  const contrib10Text =
+    "model Library\n\nclass Publisher\nattributes\n    name : String\n    country : String\nend\n";
+  fs.writeFileSync(
+    path.join(researchUploadsDir, 'library_add_publisher.use'),
+    contrib10Text,
+    'utf8'
+  );
+  const contrib10Model = await UseModel.create({
+    name: "Library",
+    file_path: "/uploads/research/library_add_publisher.use",
+    raw_text: contrib10Text,
+    owner_id: owner.id,
+  });
+  await populateModel(contrib10Model);
+  await ResearchContribution.create({
+    research_project_id: project.id,
+    use_model_id: contrib10Model.id,
+    contributor_id: owner.id,
+    title: "Add Publisher entity",
+    description: "Track book publishers.",
+    status: "PENDING",
+  });
+
+  // Contribution 11: From student4 (PENDING)
+  const student4 = await User.findOne({ where: { email: 'student4@example.com' } });
+  if (student4) {
+    const contrib11Text =
+      "model Library\n\nclass Book\nattributes\n    title : String\n" +
+      "    pageCount : Integer\nend\n";
+    fs.writeFileSync(
+      path.join(researchUploadsDir, 'library_add_pagecount.use'),
+      contrib11Text,
+      'utf8'
+    );
+    const contrib11Model = await UseModel.create({
+      name: "Library",
+      file_path: "/uploads/research/library_add_pagecount.use",
+      raw_text: contrib11Text,
+      owner_id: student4.id,
+    });
+    await populateModel(contrib11Model);
+    await ResearchContribution.create({
+      research_project_id: project.id,
+      use_model_id: contrib11Model.id,
+      contributor_id: student4.id,
+      title: "Add page count",
+      description: "Track number of pages in books.",
+      status: "PENDING",
+    });
+  }
+
+  // Contribution 12: From student5 (REJECTED)
+  const student5 = await User.findOne({ where: { email: 'student5@example.com' } });
+  if (student5) {
+    const contrib12Text =
+      "model Library\n\nclass Member\nattributes\n" +
+      "    password : String\nend\n";
+    fs.writeFileSync(
+      path.join(researchUploadsDir, 'library_add_password.use'),
+      contrib12Text,
+      'utf8'
+    );
+    const contrib12Model = await UseModel.create({
+      name: "Library",
+      file_path: "/uploads/research/library_add_password.use",
+      raw_text: contrib12Text,
+      owner_id: student5.id,
+    });
+    await populateModel(contrib12Model);
+    await ResearchContribution.create({
+      research_project_id: project.id,
+      use_model_id: contrib12Model.id,
+      contributor_id: student5.id,
+      title: "Add password field",
+      description: "Security credential for members.",
+      status: "PENDING",
+    });
+  }
+
+  // Contribution 13: From teacher (ACCEPTED)
+  const contrib13Text =
+    "model Library\n\nclass Category\nattributes\n    name : String\n" +
+    "    description : String\nend\n";
+  fs.writeFileSync(
+    path.join(researchUploadsDir, 'library_add_category.use'),
+    contrib13Text,
+    'utf8'
+  );
+  const contrib13Model = await UseModel.create({
+    name: "Library",
+    file_path: "/uploads/research/library_add_category.use",
+    raw_text: contrib13Text,
+    owner_id: teacherUser.id,
+  });
+  await populateModel(contrib13Model);
+  await ResearchContribution.create({
+    research_project_id: project.id,
+    use_model_id: contrib13Model.id,
+    contributor_id: teacherUser.id,
+    title: "Add Category entity",
+    description: "Organize books into categories.",
+    status: "PENDING",
+  });
+
+  // Contribution 14: From moderator (NEEDS_EDIT)
+  const contrib14Text =
+    "model Library\n\nclass Book\nattributes\n    title : String\n" +
+    "    availability : Boolean\nend\n";
+  fs.writeFileSync(
+    path.join(researchUploadsDir, 'library_add_availability.use'),
+    contrib14Text,
+    'utf8'
+  );
+  const contrib14Model = await UseModel.create({
+    name: "Library",
+    file_path: "/uploads/research/library_add_availability.use",
+    raw_text: contrib14Text,
+    owner_id: moderator.id,
+  });
+  await populateModel(contrib14Model);
+  await ResearchContribution.create({
+    research_project_id: project.id,
+    use_model_id: contrib14Model.id,
+    contributor_id: moderator.id,
+    title: "Track book availability",
+    description: "Boolean flag for book availability.",
+    status: "PENDING",
+  });
+
+  // Contribution 15: From researcher (PENDING)
+  const contrib15Text =
+    "model Library\n\nclass Review\nattributes\n    rating : Integer\n" +
+    "    comment : String\nend\n";
+  fs.writeFileSync(
+    path.join(researchUploadsDir, 'library_add_review.use'),
+    contrib15Text,
+    'utf8'
+  );
+  const contrib15Model = await UseModel.create({
+    name: "Library",
+    file_path: "/uploads/research/library_add_review.use",
+    raw_text: contrib15Text,
+    owner_id: researcherUser.id,
+  });
+  await populateModel(contrib15Model);
+  await ResearchContribution.create({
+    research_project_id: project.id,
+    use_model_id: contrib15Model.id,
+    contributor_id: researcherUser.id,
+    title: "Add Review entity",
+    description: "Members can review books.",
+    status: "PENDING",
+  });
+
+  console.log("✅ Seeded sample data with 15 contributions for project ID 1!");
 };
 
 module.exports = initDatabase;
