@@ -184,6 +184,57 @@ router.get(
   ResearchController.listContributions
 );
 
+// GET /api/research/projects/:projectId/contributions/by-status
+/**
+ * @swagger
+ * /api/research/projects/{projectId}/contributions/by-status:
+ *   get:
+ *     summary: List contributions by specific status with pagination
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         type: integer
+ *       - in: query
+ *         name: status
+ *         required: true
+ *         type: string
+ *         enum: [PENDING, NEEDS_EDIT, ACCEPTED, REJECTED]
+ *         description: Contribution status to filter by
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         type: integer
+ *         default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         type: integer
+ *         default: 10
+ *         description: Items per page
+ *     responses:
+ *       200:
+ *         description: List of contributions with pagination
+ *       400:
+ *         description: Invalid or missing status
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Not a project member
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/projects/:projectId/contributions/by-status",
+  auth,
+  ResearchController.listContributionsByStatus
+);
+
 // GET /api/research/projects/:projectId/contributions/mine
 /**
  * @swagger

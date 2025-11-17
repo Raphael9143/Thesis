@@ -432,6 +432,73 @@ const ResearchController = {
     }
   },
 
+  // List contributions by specific status with pagination
+  listContributionsByStatus: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+
+      const projectId = parseInt(req.params.projectId, 10);
+      if (!projectId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid project id" });
+
+      const { status } = req.query;
+      const validStatuses = ["PENDING", "NEEDS_EDIT", "ACCEPTED", "REJECTED"];
+      if (!status || !validStatuses.includes(status))
+        return res
+          .status(400)
+          .json({ success: false, message: "Valid status required" });
+
+      // Verify project membership
+      const isMember = await ResearchProjectMember.findOne({
+        where: { research_project_id: projectId, user_id: req.user.userId },
+      });
+      if (!isMember)
+        return res.status(403).json({ success: false, message: "Forbidden" });
+
+      const User = require("../models/User");
+
+      // Pagination
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const offset = (page - 1) * limit;
+
+      const { count, rows } = await ResearchContribution.findAndCountAll({
+        where: { research_project_id: projectId, status },
+        include: [
+          {
+            model: User,
+            as: "contributor",
+            attributes: ["id", "full_name", "email"],
+          },
+        ],
+        order: [["created_at", "DESC"]],
+        limit,
+        offset,
+      });
+
+      return res.json({
+        success: true,
+        data: rows,
+        pagination: {
+          total: count,
+          page,
+          limit,
+          totalPages: Math.ceil(count / limit),
+        },
+      });
+    } catch (err) {
+      console.error("listContributionsByStatus error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   // List project members grouped by role: owner, moderators, contributors
   listProjectMembers: async (req, res) => {
     try {
