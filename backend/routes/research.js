@@ -675,9 +675,21 @@ router.get("/contributions/:id", auth, ResearchController.getContribution);
  *         required: true
  *         type: integer
  *         description: Project ID
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         type: integer
+ *         default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         type: integer
+ *         default: 10
+ *         description: Items per page
  *     responses:
  *       200:
- *         description: List of contributions with contributor info, sorted by created_at ASC
+ *         description: List of contributions with contributor info and pagination
  *         schema:
  *           type: object
  *           properties:

@@ -554,7 +554,13 @@ const ResearchController = {
 
       // Get all contributions sorted from newest to oldest
       const User = require("../models/User");
-      const contributions = await ResearchContribution.findAll({
+      
+      // Pagination
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const offset = (page - 1) * limit;
+
+      const { count, rows } = await ResearchContribution.findAndCountAll({
         where: { research_project_id: projectId },
         include: [
           {
@@ -564,9 +570,20 @@ const ResearchController = {
           },
         ],
         order: [["created_at", "DESC"]],
+        limit,
+        offset,
       });
 
-      return res.json({ success: true, data: contributions });
+      return res.json({
+        success: true,
+        data: rows,
+        pagination: {
+          total: count,
+          page,
+          limit,
+          totalPages: Math.ceil(count / limit),
+        },
+      });
     } catch (err) {
       console.error("getContributionHistory error:", err);
       return res
