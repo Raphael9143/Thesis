@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
 import Modal from '../components/ui/Modal';
 import AuthForm from '../components/auth/AuthForm';
 import NotificationPopup from '../components/ui/NotificationPopup';
+import RecentProjectsCarousel from '../components/researcher/RecentProjectsCarousel';
+import userAPI from '../../services/userAPI';
 import '../assets/styles/home.css';
 import '../assets/styles/ui.css';
 import '../assets/styles/pages/ResearcherHome.css';
@@ -16,6 +18,33 @@ export default function ResearcherHome() {
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyMessage, _setNotifyMessage] = useState('');
   const [notifyType, _setNotifyType] = useState('success');
+  const [stats, setStats] = useState({ projects: 0, contributions: 0, use_models: 0, researchers: 0 });
+  const [recentProjects, setRecentProjects] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const [statsRes, projectsRes] = await Promise.all([
+          userAPI.getResearchStatistics(),
+          userAPI.getRecentProjects(10),
+        ]);
+        if (mounted) {
+          if (statsRes?.success && statsRes.data) {
+            setStats(statsRes.data);
+          }
+          if (projectsRes?.success && Array.isArray(projectsRes.data)) {
+            setRecentProjects(projectsRes.data);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load data:', err);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const onSuccessAuth = () => {
     setShowAuth(false);
@@ -65,16 +94,32 @@ export default function ResearcherHome() {
             </div>
             <div className="stats">
               <div className="stat-box">
-                <h3>2.3K+</h3>
+                <div className="stat-icon">
+                  <i className="fa fa-users"></i>
+                </div>
+                <h3>{stats.researchers.toLocaleString()}+</h3>
                 <p>Active Researchers</p>
               </div>
               <div className="stat-box">
-                <h3>480+</h3>
-                <p>Published Models</p>
+                <div className="stat-icon">
+                  <i className="fa fa-project-diagram"></i>
+                </div>
+                <h3>{stats.projects.toLocaleString()}+</h3>
+                <p>Research Projects</p>
               </div>
               <div className="stat-box">
-                <h3>1.2K+</h3>
-                <p>OCL Constraints</p>
+                <div className="stat-icon">
+                  <i className="fa fa-code-branch"></i>
+                </div>
+                <h3>{stats.contributions.toLocaleString()}+</h3>
+                <p>Contributions</p>
+              </div>
+              <div className="stat-box">
+                <div className="stat-icon">
+                  <i className="fa fa-cube"></i>
+                </div>
+                <h3>{stats.use_models.toLocaleString()}+</h3>
+                <p>USE Models</p>
               </div>
             </div>
           </div>
@@ -124,41 +169,54 @@ export default function ResearcherHome() {
           </div>
         </Modal>
 
+        {/* Recent Projects Carousel */}
+        <RecentProjectsCarousel
+          projects={recentProjects}
+          onJoinClick={() => {
+            setAuthType('login');
+            setShowAuth(true);
+          }}
+        />
+
         {/* Sections below hero */}
         <div className="sections">
-          <Section title="Featured Collections">
+          <Section title="Why Join Our Research Community?">
             <div className="grid grid--3">
-              <Card title="Projects">
+              <Card>
                 <div className="feature-card">
-                  <h4>500+ projects</h4>
-                  <p>Hands-on projects with real constraint testing.</p>
+                  <div className="feature-icon">
+                    <i className="fa fa-share-alt"></i>
+                  </div>
+                  <h4>Collaborative Research</h4>
+                  <p>
+                    Work with researchers worldwide on cutting-edge UML and OCL projects. Share models, constraints, and
+                    insights.
+                  </p>
                 </div>
               </Card>
-              <Card title="OCL constraints">
+              <Card>
                 <div className="feature-card">
-                  <h4>2000+ constraints</h4>
-                  <p>Well-documented and verified constraints.</p>
+                  <div className="feature-icon">
+                    <i className="fa fa-star"></i>
+                  </div>
+                  <h4>Quality Models</h4>
+                  <p>
+                    Access {stats.use_models.toLocaleString()}+ validated USE models with comprehensive documentation
+                    and testing.
+                  </p>
                 </div>
               </Card>
-              <Card title="OCL Contributors">
+              <Card>
                 <div className="feature-card">
-                  <h4>5000+ contributors</h4>
-                  <p>Contributing classes, constraints, and associations.</p>
+                  <div className="feature-icon">
+                    <i className="fa fa-rocket"></i>
+                  </div>
+                  <h4>Innovation Hub</h4>
+                  <p>
+                    Contribute to {stats.projects.toLocaleString()}+ active projects and advance model-driven
+                    engineering research.
+                  </p>
                 </div>
-              </Card>
-            </div>
-          </Section>
-
-          <Section title="Latest Publications">
-            <div className="grid grid--3">
-              <Card title="Constraint Inference">
-                <p>Inferring OCL constraints from examples.</p>
-              </Card>
-              <Card title="Model Repair">
-                <p>Automated repair of inconsistent UML models.</p>
-              </Card>
-              <Card title="Specification Mining">
-                <p>Mining invariants for software models.</p>
               </Card>
             </div>
           </Section>
