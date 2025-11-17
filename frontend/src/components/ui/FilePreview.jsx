@@ -9,7 +9,8 @@ import '../../assets/styles/components/ui/FilePreview.css';
 // url: absolute URL to the file
 // filename: optional filename to derive extension when mimetype is missing
 // filePath: optional backend-relative path used by the parse API (e.g. 'uploads/...')
-export default function FilePreview({ url, filename, mimetype, filePath }) {
+// onValidationError: callback to pass validation error message up to parent
+export default function FilePreview({ url, filename, mimetype, filePath, onValidationError }) {
   const { push } = useNotifications();
 
   const [loading, setLoading] = useState(false);
@@ -95,6 +96,10 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
           res?.cli?.stdout ||
           'Invalid .use file. Please fix syntax or model errors.';
         push({ title: 'USE parse', body: msg });
+        // Pass validation error to parent
+        if (onValidationError) {
+          onValidationError(msg);
+        }
         setUmlLoading(false);
         return;
       }
@@ -104,15 +109,28 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
           (Array.isArray(res?.details) && res.details.join('\n')) ||
           'Parse succeeded but no model returned.';
         push({ title: 'USE parse', body: msg });
+        // Pass validation error to parent
+        if (onValidationError) {
+          onValidationError(msg);
+        }
         setUmlLoading(false);
         return;
+      }
+      // Clear validation error on success
+      if (onValidationError) {
+        onValidationError(null);
       }
       setUmlModel(res.model);
       setUmlCli(res.cli?.stdout || res.cli?.stderr || null);
       setShowUml(true);
     } catch (err) {
       console.log(err);
-      push({ title: 'Error', body: `Failed to parse model: ${err?.response?.data?.message || String(err)}` });
+      const errorMsg = err?.response?.data?.message || String(err);
+      push({ title: 'Error', body: `Failed to parse model: ${errorMsg}` });
+      // Pass validation error to parent
+      if (onValidationError) {
+        onValidationError(errorMsg);
+      }
     } finally {
       setUmlLoading(false);
     }
