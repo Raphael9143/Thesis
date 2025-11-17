@@ -366,20 +366,22 @@ const UseController = {
       // return a 400 error indicating invalid .use file
       const stdoutText = (cliResult && cliResult.stdout) || "";
       const stderrText = (cliResult && cliResult.stderr) || "";
-      const hasCliError = /error|syntax\s+error|could\s+not\s+open|failed/i.test(
-        stderrText + "\n" + stdoutText
-      );
+      const errorPattern =
+        /error|syntax\s+error|could\s+not\s+open|failed|no viable alternative/i;
+      const hasCliError = errorPattern.test(stderrText + "\n" + stdoutText);
       const hasModelLine = /(^|\n)\s*model\s+[A-Za-z0-9_]+/i.test(stdoutText);
       if (cliResult && (hasCliError || !hasModelLine)) {
-        // extract error-ish lines to help the frontend show details
-        const lines = (stderrText || stdoutText)
-          .split(/\r?\n/)
-          .filter((l) => /error|syntax|could\s+not|failed/i.test(l))
-          .slice(0, 10);
+        // Extract error message like "line 9:0 no viable alternative at input 'context'"
+        const errorMatch = (stderrText + "\n" + stdoutText).match(
+          /line\s+\d+:\d+\s+.+/i
+        );
+        const errorMessage = errorMatch
+          ? errorMatch[0]
+          : "Invalid .use file. Please fix syntax or model errors.";
+
         return res.status(400).json({
           success: false,
-          message: "Invalid .use file. Please fix syntax or model errors.",
-          details: lines,
+          message: errorMessage,
         });
       }
 
