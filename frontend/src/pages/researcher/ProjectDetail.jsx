@@ -142,73 +142,82 @@ export default function ResearcherProjectDetail() {
         {!loading && !error && (
           <>
             <Tabs
-              tabs={[
-                { value: 'project', label: 'Project' },
-                { value: 'contributions', label: 'Contributions' },
-                { value: 'settings', label: 'Settings' },
-              ]}
+              tabs={
+                isOwner
+                  ? [
+                      { value: 'project', label: 'Project' },
+                      { value: 'contributions', label: 'Contributions' },
+                      { value: 'settings', label: 'Settings' },
+                    ]
+                  : [
+                      { value: 'project', label: 'Project' },
+                      { value: 'contributions', label: 'Contributions' },
+                    ]
+              }
               activeTab={activeTab}
               onChange={setActiveTab}
             />
-            <div className="project-detail-actions">
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => navigate(`/researcher/projects/${projectId}/contribute/${model?.id || ''}`)}
-                disabled={!model?.id}
-                title={!model?.id ? 'No model available' : 'Post contribution'}
-              >
-                <i className="fa fa-code-branch project-detail-moderator-icon" />
-                Contribute
-              </button>
-              {isOwner && (
-                <button className="btn btn-primary btn-sm" onClick={() => setAddModeratorOpen(true)}>
-                  <i className="fa fa-user-plus project-detail-moderator-icon" />
-                  Add Moderator
-                </button>
-              )}
-              <a
-                onClick={handleToggleStar}
-                disabled={starLoading}
-                title={starred ? 'Unstar project' : 'Star project'}
-                className="project-detail-star-btn"
-              >
-                <i
-                  className={`fa${starred ? 's' : 'r'} fa-star ${starred ? 'project-detail-star-icon-starred' : 'project-detail-star-icon-unstarred'}`}
-                />
-              </a>
-            </div>
 
             {activeTab === 'project' && (
-              <div className="project-detail-content">
-                <div className="project-detail-model-section">
-                  <h2 className="no-margin">Model</h2>
-                  {model ? (
-                    <div className="project-detail-model-preview">
-                      <FilePreview
-                        url={toFullUrl(model.file_path)}
-                        filename={model.file_path}
-                        filePath={model.file_path}
-                      />
-                      {model.file_path && (
-                        <div className="project-detail-model-download">
-                          <a className="btn btn--secondary" href={toFullUrl(model.file_path)} download>
-                            Download
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="project-detail-model-preview">No model found for this project.</div>
+              <>
+                <div className="project-detail-actions">
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => navigate(`/researcher/projects/${projectId}/contribute/${model?.id || ''}`)}
+                    disabled={!model?.id}
+                    title={!model?.id ? 'No model available' : 'Post contribution'}
+                  >
+                    <i className="fa fa-code-branch project-detail-moderator-icon" />
+                    Contribute
+                  </button>
+                  {isOwner && (
+                    <button className="btn btn-primary btn-sm" onClick={() => setAddModeratorOpen(true)}>
+                      <i className="fa fa-user-plus project-detail-moderator-icon" />
+                      Add Moderator
+                    </button>
                   )}
+                  <a
+                    onClick={handleToggleStar}
+                    disabled={starLoading}
+                    title={starred ? 'Unstar project' : 'Star project'}
+                    className="project-detail-star-btn"
+                  >
+                    <i
+                      className={`fa${starred ? 's' : 'r'} fa-star ${starred ? 'project-detail-star-icon-starred' : 'project-detail-star-icon-unstarred'}`}
+                    />
+                  </a>
                 </div>
+                <div className="project-detail-content">
+                  <div className="project-detail-model-section">
+                    <h2 className="no-margin">Model</h2>
+                    {model ? (
+                      <div className="project-detail-model-preview">
+                        <FilePreview
+                          url={toFullUrl(model.file_path)}
+                          filename={model.file_path}
+                          filePath={model.file_path}
+                        />
+                        {model.file_path && (
+                          <div className="project-detail-model-download">
+                            <a className="btn btn--secondary" href={toFullUrl(model.file_path)} download>
+                              Download
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="project-detail-model-preview">No model found for this project.</div>
+                    )}
+                  </div>
 
-                <div className="project-detail-about-section">
-                  <div className="project-detail-about-title">About</div>
-                  {project?.description && <p className="project-detail-about-description">{project.description}</p>}
-                  <DashedDivider />
-                  <ProjectMembers members={members} />
+                  <div className="project-detail-about-section">
+                    <div className="project-detail-about-title">About</div>
+                    {project?.description && <p className="project-detail-about-description">{project.description}</p>}
+                    <DashedDivider />
+                    <ProjectMembers members={members} />
+                  </div>
                 </div>
-              </div>
+              </>
             )}
 
             {activeTab === 'contributions' && (
@@ -217,7 +226,7 @@ export default function ResearcherProjectDetail() {
               </div>
             )}
 
-            {activeTab === 'settings' && (
+            {activeTab === 'settings' && isOwner && (
               <div className="project-detail-settings">
                 <ProjectSettings
                   project={project}
