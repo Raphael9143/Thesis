@@ -76,7 +76,7 @@ export default function PostContribution() {
       if (res?.success) {
         push({ title: 'Success', body: 'Contribution posted successfully' });
         setTimeout(() => {
-          navigate(`/researcher/projects/${projectId}`);
+          navigate(`/researcher/projects/${projectId}/contributions`);
         }, 1000);
       } else {
         push({ title: 'Error', body: res?.message || 'Failed to post contribution' });
@@ -90,7 +90,7 @@ export default function PostContribution() {
   };
 
   const handleCancel = () => {
-    navigate(`/researcher/projects/${projectId}`);
+    navigate(`/researcher/projects/${projectId}/details`);
   };
 
   if (loading) {
