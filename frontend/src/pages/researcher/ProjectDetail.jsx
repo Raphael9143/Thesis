@@ -11,6 +11,7 @@ import DashedDivider from '../../components/ui/DashedDivider';
 import { useNotifications } from '../../contexts/NotificationContext';
 import AddModeratorModal from '../../components/researcher/AddModeratorModal';
 import ContributionHistory from './ContributionHistory';
+import Tabs from '../../components/ui/Tabs';
 import '../../assets/styles/pages/ProjectDetail.css';
 
 export default function ResearcherProjectDetail() {
@@ -139,20 +140,14 @@ export default function ResearcherProjectDetail() {
         {error && <div className="text-error">{error}</div>}
         {!loading && !error && (
           <>
-            <div className="project-detail-tabs">
-              <button
-                className={`project-detail-tab ${activeTab === 'project' ? 'active' : ''}`}
-                onClick={() => setActiveTab('project')}
-              >
-                Project
-              </button>
-              <button
-                className={`project-detail-tab ${activeTab === 'contributions' ? 'active' : ''}`}
-                onClick={() => setActiveTab('contributions')}
-              >
-                Contributions
-              </button>
-            </div>
+            <Tabs
+              tabs={[
+                { value: 'project', label: 'Project' },
+                { value: 'contributions', label: 'Contributions' },
+              ]}
+              activeTab={activeTab}
+              onChange={setActiveTab}
+            />
             <div className="project-detail-actions">
               <button
                 className="btn btn-primary btn-sm"

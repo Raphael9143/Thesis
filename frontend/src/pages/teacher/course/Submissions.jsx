@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Section from '../../../components/ui/Section';
 import Card from '../../../components/ui/Card';
+import Tabs from '../../../components/ui/Tabs';
 import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import '../../../assets/styles/pages/Submissions.css';
@@ -77,22 +78,17 @@ export default function Submissions() {
 
         {!loading && !error && (
           <div>
-            <div className="submissions-tabs">
-              <button
-                className={`btn tab-button ${tab === 'assignments' ? 'btn-primary' : 'btn-signin'}`}
-                onClick={() => {
-                  setVisibleActivities([]);
-                  setTab('assignments');
-                }}
-              >{`Assignments`}</button>
-              <button
-                className={`btn tab-button ${tab === 'exams' ? 'btn-primary' : 'btn-signin'}`}
-                onClick={() => {
-                  setVisibleActivities([]);
-                  setTab('exams');
-                }}
-              >{`Exams`}</button>
-            </div>
+            <Tabs
+              tabs={[
+                { value: 'assignments', label: 'Assignments' },
+                { value: 'exams', label: 'Exams' },
+              ]}
+              activeTab={tab}
+              onChange={(value) => {
+                setVisibleActivities([]);
+                setTab(value);
+              }}
+            />
 
             <div className="activity-list">
               {visibleActivities.map((a) => {

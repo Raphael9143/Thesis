@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
+import Tabs from '../../components/ui/Tabs';
 import userAPI from '../../../services/userAPI';
 import { usePageInfo } from '../../contexts/PageInfoContext';
 import '../../assets/styles/ui.css';
@@ -128,25 +129,18 @@ export default function AssignmentPreview() {
 
           {/* Tabs for Problem / History */}
           {role === 'student' && (
-            <div className="preview-tabs" style={{ margin: '12px 0', display: 'flex', gap: 8 }}>
-              <button
-                className={`btn btn-sm ${contentTab === 'problem' ? 'btn-primary' : 'btn-signin'}`}
-                onClick={() => setContentTab('problem')}
-              >
-                Problem
-              </button>
-              <button
-                className={`btn btn-sm ${contentTab === 'history' ? 'btn-primary' : 'btn-signin'}`}
-                onClick={() => setContentTab('history')}
-              >
-                History
-              </button>
-            </div>
+            <Tabs
+              tabs={[
+                { value: 'problem', label: 'Problem' },
+                { value: 'history', label: 'History' },
+              ]}
+              activeTab={contentTab}
+              onChange={setContentTab}
+            />
           )}
 
           {contentTab === 'problem' && (
             <>
-              <DashedDivider />
               <div>
                 <h2>Problem</h2>
               </div>
