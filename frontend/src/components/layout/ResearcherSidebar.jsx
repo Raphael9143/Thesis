@@ -56,6 +56,14 @@ export default function ResearcherSidebar({ collapsed = false, onToggleCollapse 
           <i className="fa fa-project-diagram" aria-hidden />
           <span>Projects</span>
         </button>
+        <button className="leftsidebar__link" onClick={() => goto('/researcher/starred')}>
+          <i className="fa fa-star" aria-hidden />
+          <span>Starred</span>
+        </button>
+        <button className="leftsidebar__link" onClick={() => goto('/researcher/resources')}>
+          <i className="fa fa-book" aria-hidden />
+          <span>Resources</span>
+        </button>
       </nav>
 
       <div className="leftsidebar__bottom">
