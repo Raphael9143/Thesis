@@ -183,6 +183,9 @@ const userAPI = {
   // GET /api/research/projects/{id}/contributions/mine?page=1 - Get current user's contributions
   getMyProjectContributions: (id, page = 1) =>
     axiosClient.get(`research/projects/${id}/contributions/mine?page=${page}`),
+  // GET /api/research/projects/{id}/contributions/by-status?status=PENDING&page=1
+  getContributionsByStatus: (id, status, page = 1) =>
+    axiosClient.get(`research/projects/${id}/contributions/by-status?status=${status}&page=${page}`),
   // GET /api/research/contributions/{id} - Get contribution details
   getContributionById: (id) => axiosClient.get(`research/contributions/${id}`),
   // POST /api/research/contributions/{id}/review - Submit review { action, notes, validationReport }
