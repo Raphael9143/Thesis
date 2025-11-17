@@ -11,6 +11,7 @@ import Tabs from '../../components/ui/Tabs';
 import DashedDivider from '../../components/ui/DashedDivider';
 import ContributionDetailsTab from './ContributionDetailsTab';
 import ContributionChangesTab from './ContributionChangesTab';
+import ContributionComments from '../../components/researcher/ContributionComments';
 import '../../assets/styles/pages/ContributionDetail.css';
 
 export default function ContributionDetail() {
@@ -256,6 +257,8 @@ export default function ContributionDetail() {
               validationError={validationError}
             />
           )}
+
+          {activeTab === 'details' && <ContributionComments contributionId={contributionId} />}
         </div>
       </Card>
     </Section>
