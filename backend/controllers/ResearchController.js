@@ -324,6 +324,62 @@ const ResearchController = {
     }
   },
 
+  // Search PUBLIC projects by title with pagination
+  searchProjects: async (req, res) => {
+    try {
+      const { q } = req.query;
+      if (!q || !q.trim())
+        return res
+          .status(400)
+          .json({ success: false, message: "Search query (q) is required" });
+
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const offset = (page - 1) * limit;
+
+      const User = require("../models/User");
+      const { Op } = require("sequelize");
+
+      const { count, rows } = await ResearchProject.findAndCountAll({
+        where: {
+          visibility: "PUBLIC",
+          title: {
+            [Op.like]: `%${q.trim()}%`,
+          },
+        },
+        include: [
+          {
+            model: User,
+            as: "owner",
+            attributes: ["id", "full_name"],
+          },
+        ],
+        order: [
+          ["star_count", "DESC"],
+          ["created_at", "DESC"],
+        ],
+        limit,
+        offset,
+      });
+
+      return res.json({
+        success: true,
+        data: rows,
+        pagination: {
+          total: count,
+          page,
+          limit,
+          totalPages: Math.ceil(count / limit),
+        },
+      });
+    } catch (err) {
+      console.error("searchProjects error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   createProject: async (req, res) => {
     try {
       if (!req.user || !req.user.userId)
@@ -666,10 +722,6 @@ const ResearchController = {
   // List project members grouped by role: owner, moderators, contributors
   listProjectMembers: async (req, res) => {
     try {
-      if (!req.user || !req.user.userId)
-        return res
-          .status(401)
-          .json({ success: false, message: "Unauthorized" });
       const projectId = parseInt(req.params.projectId, 10);
       if (!projectId)
         return res
@@ -680,7 +732,7 @@ const ResearchController = {
       require("../models/UseAssociations");
       const User = require("../models/User");
 
-      // Verify project exists and requester is a member
+      // Verify project exists
       const project = await ResearchProject.findByPk(projectId, {
         include: [
           { model: User, as: "owner", attributes: ["id", "full_name"] },
@@ -691,11 +743,19 @@ const ResearchController = {
           .status(404)
           .json({ success: false, message: "Project not found" });
 
-      const member = await ResearchProjectMember.findOne({
-        where: { research_project_id: projectId, user_id: req.user.userId },
-      });
-      if (!member)
-        return res.status(403).json({ success: false, message: "Forbidden" });
+      // If project is PRIVATE, require authentication and membership
+      if (project.visibility === "PRIVATE") {
+        if (!req.user || !req.user.userId)
+          return res
+            .status(401)
+            .json({ success: false, message: "Unauthorized" });
+
+        const member = await ResearchProjectMember.findOne({
+          where: { research_project_id: projectId, user_id: req.user.userId },
+        });
+        if (!member)
+          return res.status(403).json({ success: false, message: "Forbidden" });
+      }
 
       const members = await ResearchProjectMember.findAll({
         where: { research_project_id: projectId },

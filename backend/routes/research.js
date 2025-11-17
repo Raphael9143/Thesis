@@ -156,6 +156,42 @@ router.get("/statistics", ResearchController.getStatistics);
  */
 router.get("/projects/recent", ResearchController.listRecentProjects);
 
+// GET /api/research/projects/search
+/**
+ * @swagger
+ * /api/research/projects/search:
+ *   get:
+ *     summary: Search PUBLIC projects by title with pagination
+ *     tags:
+ *       - Research
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         type: string
+ *         description: Search query (title)
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         type: integer
+ *         default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         type: integer
+ *         default: 10
+ *         description: Items per page
+ *     responses:
+ *       200:
+ *         description: Search results with pagination
+ *       400:
+ *         description: Missing search query
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/projects/search", ResearchController.searchProjects);
+
 // Create project
 /**
  * @swagger
@@ -405,11 +441,10 @@ router.get(
  * @swagger
  * /api/research/projects/{projectId}/members:
  *   get:
- *     summary: Get project owner, moderators, and contributors
+ *     summary: Get project members (PUBLIC projects accessible without auth)
+ *     description: Returns owner, moderators, and contributors
  *     tags:
  *       - Research
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: projectId
@@ -464,7 +499,6 @@ router.get(
  */
 router.get(
   "/projects/:projectId/members",
-  auth,
   ResearchController.listProjectMembers
 );
 
