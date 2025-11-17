@@ -11,6 +11,8 @@ import PostContribution from './pages/researcher/PostContribution';
 import ContributionDetail from './pages/researcher/ContributionDetail';
 import ResubmitContribution from './pages/researcher/ResubmitContribution';
 import ResearcherProfile from './pages/researcher/Profile';
+import ResearcherResources from './pages/researcher/Resources';
+import StarredProjects from './pages/researcher/StarredProjects';
 import Home from './pages/Home';
 import RegisterPage from './pages/RegisterPage';
 import NotFound from './pages/NotFound';
@@ -74,6 +76,8 @@ const router = createBrowserRouter(
           <Route path="projects/:projectId/contribute/:modelId" element={<PostContribution />} />
           <Route path="projects/:projectId/contributions/:contributionId" element={<ContributionDetail />} />
           <Route path="projects/:projectId/contributions/:contributionId/resubmit" element={<ResubmitContribution />} />
+          <Route path="resources" element={<ResearcherResources />} />
+          <Route path="starred" element={<StarredProjects />} />
           <Route path="profile" element={<ResearcherProfile />} />
         </Route>
         <Route
