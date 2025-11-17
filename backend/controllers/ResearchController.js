@@ -445,7 +445,7 @@ const ResearchController = {
           .status(400)
           .json({ success: false, message: "Invalid project id" });
 
-      // Get all contributions sorted from oldest to newest
+      // Get all contributions sorted from newest to oldest
       const User = require("../models/User");
       const contributions = await ResearchContribution.findAll({
         where: { research_project_id: projectId },
@@ -456,7 +456,7 @@ const ResearchController = {
             attributes: ["id", "full_name", "email"],
           },
         ],
-        order: [["created_at", "ASC"]],
+        order: [["created_at", "DESC"]],
       });
 
       return res.json({ success: true, data: contributions });
