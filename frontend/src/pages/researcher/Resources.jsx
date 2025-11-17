@@ -50,7 +50,6 @@ export default function ResearcherResources() {
   return (
     <Section>
       <Card>
-        <h4 style={{ marginTop: 0 }}>Resources</h4>
         {loading && <div>Loading models...</div>}
         {error && <div className="text-error">{error}</div>}
         {!loading && !error && items.length === 0 && <div>No stored models.</div>}
