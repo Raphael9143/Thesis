@@ -255,6 +255,7 @@ export default function ContributionDetail() {
               submitting={submitting}
               handleReview={handleReview}
               validationError={validationError}
+              currentUserId={currentUserId}
             />
           )}
 
