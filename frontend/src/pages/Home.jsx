@@ -8,7 +8,7 @@ import AdminHome from './admin/Home';
 import TeacherHome from './teacher/Home';
 import StudentHome from './student/Home';
 import ResearcherHomePage from './researcher/Home';
-import { usePageInfo } from '../contexts/PageInfoContext';
+import useTitle from '../hooks/useTitle';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -36,14 +36,7 @@ export default function Home() {
     hydrate();
   }, [role]);
 
-  const { setTitle: setPageTitle } = usePageInfo();
-  useEffect(() => {
-    try {
-      setPageTitle('Home');
-    } catch (err) {
-      console.error('Failed to set page title', err);
-    }
-  }, [setPageTitle]);
+  useTitle('Dashboard');
 
   // Determine if we're in education portal or researcher dashboard
   const isEducationPortal = location.pathname.startsWith('/education');
