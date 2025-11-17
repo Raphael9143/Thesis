@@ -543,6 +543,118 @@ const ResearchController = {
     }
   },
 
+  // Add comment to contribution (public for PUBLIC projects)
+  addContributionComment: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+
+      const contributionId = parseInt(req.params.contributionId, 10);
+      if (!contributionId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid contribution id" });
+
+      const { comment_text } = req.body;
+      if (!comment_text || !comment_text.trim())
+        return res
+          .status(400)
+          .json({ success: false, message: "Comment text is required" });
+
+      const ContributionComment = require("../models/ContributionComment");
+      const contrib = await ResearchContribution.findByPk(contributionId);
+      if (!contrib)
+        return res
+          .status(404)
+          .json({ success: false, message: "Contribution not found" });
+
+      // Check project visibility
+      const project = await ResearchProject.findByPk(contrib.research_project_id);
+      if (!project)
+        return res
+          .status(404)
+          .json({ success: false, message: "Project not found" });
+
+      // If project is PRIVATE, require membership
+      if (project.visibility === "PRIVATE") {
+        const isMember = await ResearchProjectMember.findOne({
+          where: {
+            research_project_id: contrib.research_project_id,
+            user_id: req.user.userId,
+          },
+        });
+        if (!isMember)
+          return res.status(403).json({ success: false, message: "Forbidden" });
+      }
+
+      const comment = await ContributionComment.create({
+        contribution_id: contributionId,
+        user_id: req.user.userId,
+        comment_text: comment_text.trim(),
+      });
+
+      // Fetch with user info
+      const User = require("../models/User");
+      const commentWithUser = await ContributionComment.findByPk(comment.id, {
+        include: [
+          {
+            model: User,
+            as: "user",
+            attributes: ["id", "full_name", "email"],
+          },
+        ],
+      });
+
+      return res.status(201).json({ success: true, data: commentWithUser });
+    } catch (err) {
+      console.error("addContributionComment error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
+  // Get comments for a contribution
+  getContributionComments: async (req, res) => {
+    try {
+      const contributionId = parseInt(req.params.contributionId, 10);
+      if (!contributionId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid contribution id" });
+
+      const contrib = await ResearchContribution.findByPk(contributionId);
+      if (!contrib)
+        return res
+          .status(404)
+          .json({ success: false, message: "Contribution not found" });
+
+      const ContributionComment = require("../models/ContributionComment");
+      const User = require("../models/User");
+
+      const comments = await ContributionComment.findAll({
+        where: { contribution_id: contributionId },
+        include: [
+          {
+            model: User,
+            as: "user",
+            attributes: ["id", "full_name", "email"],
+          },
+        ],
+        order: [["created_at", "ASC"]],
+      });
+
+      return res.json({ success: true, data: comments });
+    } catch (err) {
+      console.error("getContributionComments error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   // Get contribution history for a specific project (public access)
   getContributionHistory: async (req, res) => {
     try {

@@ -661,6 +661,83 @@ router.get(
  */
 router.get("/contributions/:id", auth, ResearchController.getContribution);
 
+// POST /api/research/contributions/:contributionId/comments - add comment to contribution
+/**
+ * @swagger
+ * /api/research/contributions/{contributionId}/comments:
+ *   post:
+ *     summary: Add a comment to a contribution
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contributionId
+ *         required: true
+ *         type: integer
+ *         description: Contribution ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - comment_text
+ *             properties:
+ *               comment_text:
+ *                 type: string
+ *                 description: Comment content
+ *     responses:
+ *       201:
+ *         description: Comment added successfully
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Not a project member
+ *       404:
+ *         description: Contribution not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+  "/contributions/:contributionId/comments",
+  auth,
+  ResearchController.addContributionComment
+);
+
+// GET /api/research/contributions/:contributionId/comments - get comments
+/**
+ * @swagger
+ * /api/research/contributions/{contributionId}/comments:
+ *   get:
+ *     summary: Get all comments for a contribution
+ *     tags:
+ *       - Research
+ *     parameters:
+ *       - in: path
+ *         name: contributionId
+ *         required: true
+ *         type: integer
+ *         description: Contribution ID
+ *     responses:
+ *       200:
+ *         description: List of comments with user info
+ *       400:
+ *         description: Invalid contribution id
+ *       404:
+ *         description: Contribution not found
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/contributions/:contributionId/comments",
+  ResearchController.getContributionComments
+);
+
 // Get contribution history for a project (public access)
 /**
  * @swagger
