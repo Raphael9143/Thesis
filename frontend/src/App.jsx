@@ -59,9 +59,7 @@ const router = createBrowserRouter(
           path="/researcher"
           element={
             <RequireAuth>
-              <RequireRole allowed={['researcher']}>
-                <ResearcherLayout />
-              </RequireRole>
+              <ResearcherLayout />
             </RequireAuth>
           }
         >
@@ -269,7 +267,6 @@ const router = createBrowserRouter(
       </Route>
 
       <Route path="/unauthorized" element={<Unauthorized />} />
-      <Route path="/community/home" element={<Home />} />
       <Route path="*" element={<NotFound />} />
     </Route>
   )
