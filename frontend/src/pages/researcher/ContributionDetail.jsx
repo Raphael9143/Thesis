@@ -25,6 +25,7 @@ export default function ContributionDetail() {
   const [reviewNotes, setReviewNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
+  const [validationError, setValidationError] = useState(null);
 
   const currentUserId = Number(sessionStorage.getItem('userId'));
 
@@ -103,7 +104,7 @@ export default function ContributionDetail() {
       const reviewData = {
         action,
         notes: reviewNotes.trim() || null,
-        validationReport: null, // Will be computed later
+        validation_report: validationError || null,
       };
 
       const res = await userAPI.reviewContribution(contributionId, reviewData);
@@ -118,14 +119,33 @@ export default function ContributionDetail() {
           setContribution(updated.data);
         }
       } else {
-        throw new Error('Failed to submit review');
+        throw new Error(res?.message || 'Failed to submit review');
       }
     } catch (err) {
       console.error('Review error:', err);
-      push({
-        title: 'Error',
-        body: err?.response?.data?.message || 'Failed to submit review',
-      });
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to submit review';
+
+      // If error is validation error, refresh to show validation_report
+      if (err?.response?.data?.success === false && err?.response?.data?.message) {
+        push({
+          title: 'Validation Error',
+          body: 'UML validation failed. See validation report for details.',
+        });
+        // Refresh to get updated contribution with validation_report
+        try {
+          const updated = await userAPI.getContributionById(contributionId);
+          if (updated?.success && updated.data) {
+            setContribution(updated.data);
+          }
+        } catch (refreshErr) {
+          console.error('Failed to refresh contribution:', refreshErr);
+        }
+      } else {
+        push({
+          title: 'Error',
+          body: errorMessage,
+        });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -215,7 +235,13 @@ export default function ContributionDetail() {
             onChange={setActiveTab}
           />
 
-          {activeTab === 'details' && <ContributionDetailsTab contribution={contribution} useModel={useModel} />}
+          {activeTab === 'details' && (
+            <ContributionDetailsTab
+              contribution={contribution}
+              useModel={useModel}
+              onValidationError={setValidationError}
+            />
+          )}
 
           {activeTab === 'changes' && (
             <ContributionChangesTab
@@ -227,6 +253,7 @@ export default function ContributionDetail() {
               setReviewNotes={setReviewNotes}
               submitting={submitting}
               handleReview={handleReview}
+              validationError={validationError}
             />
           )}
         </div>

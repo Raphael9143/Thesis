@@ -124,6 +124,26 @@
   white-space: pre-wrap;
 }
 
+.contribution-detail-validation-section {
+  margin-bottom: 32px;
+}
+
+.contribution-detail-validation-error {
+  padding: 16px;
+  background: #fee2e2;
+  border-left: 4px solid #ef4444;
+  border-radius: 4px;
+  color: #7f1d1d;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.contribution-detail-validation-error i {
+  margin-right: 8px;
+  color: #ef4444;
+}
+
 .contribution-detail-textarea {
   width: 100%;
   padding: 12px;
