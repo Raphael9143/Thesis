@@ -820,12 +820,12 @@ router.get(
   ResearchController.getContributionHistory
 );
 
-// Resubmit contribution (new file/path/rawText)
+// Update contribution (resubmit with new file/path/rawText)
 /**
  * @swagger
- * /api/research/contributions/{id}/resubmit:
- *   post:
- *     summary: Resubmit contribution content (PENDING/NEEDS_EDIT only)
+ * /api/research/contributions/{id}:
+ *   patch:
+ *     summary: Update contribution content (PENDING/NEEDS_EDIT only)
  *     description: |
  *       Upload new .use file to update contribution.
  *       Model name is automatically set from project's main model.
@@ -854,7 +854,7 @@ router.get(
  *             path:
  *               type: string
  *               description: Path to existing .use file in uploads/
- *             rawText:
+ *             raw_text:
  *               type: string
  *               description: Raw .use file content as string
  *     responses:
@@ -871,11 +871,11 @@ router.get(
  *       500:
  *         description: Internal server error
  */
-router.post(
-  "/contributions/:id/resubmit",
+router.patch(
+  "/contributions/:id",
   auth,
   conditionalUpload,
-  ResearchController.resubmitContribution
+  ResearchController.updateContribution
 );
 
 // Review contribution (accept/reject/needs_edit)

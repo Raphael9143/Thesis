@@ -704,8 +704,8 @@ const ResearchController = {
     }
   },
 
-  // Contributor resubmits (edit) a contribution: allowed when PENDING or NEEDS_EDIT
-  resubmitContribution: async (req, res) => {
+  // Update contribution: upload new file content (allowed when PENDING or NEEDS_EDIT)
+  updateContribution: async (req, res) => {
     try {
       if (!req.user || !req.user.userId)
         return res
@@ -718,17 +718,17 @@ const ResearchController = {
       const contrib = await ResearchContribution.findByPk(id);
       if (!contrib)
         return res.status(404).json({ success: false, message: "Not found" });
-      if (contrib.contributorId !== req.user.userId)
+      if (contrib.contributor_id !== req.user.userId)
         return res.status(403).json({ success: false, message: "Forbidden" });
       if (!["PENDING", "NEEDS_EDIT"].includes(contrib.status))
         return res
           .status(400)
           .json({
             success: false,
-            message: "Cannot resubmit in current status",
+            message: "Cannot update in current status",
           });
 
-      // Accept new file/rawText
+      // Accept new file/raw_text
       let filePath = null;
       let rawText = null;
       if (req.file) filePath = path.resolve(req.file.path);
@@ -742,12 +742,12 @@ const ResearchController = {
         else if (path.isAbsolute(inputPath))
           filePath = path.normalize(inputPath);
         else filePath = path.resolve(inputPath);
-      } else if (req.body && req.body.rawText)
-        rawText = String(req.body.rawText);
+      } else if (req.body && req.body.raw_text)
+        rawText = String(req.body.raw_text);
       else
         return res
           .status(400)
-          .json({ success: false, message: "file, path or rawText required" });
+          .json({ success: false, message: "file, path or raw_text required" });
 
       if (filePath && !fs.existsSync(filePath))
         return res
@@ -791,7 +791,7 @@ const ResearchController = {
 
       return res.json({ success: true, data: contrib });
     } catch (err) {
-      console.error("resubmitContribution error:", err);
+      console.error("updateContribution error:", err);
       return res
         .status(500)
         .json({ success: false, message: "Internal Server Error" });
