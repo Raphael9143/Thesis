@@ -179,6 +179,10 @@ const userAPI = {
     }),
   // GET /api/research/projects/{id}/contributions/history
   getResearchProjectContributions: (id) => axiosClient.get(`research/projects/${id}/contributions/history`),
+  // GET /api/research/contributions/{id} - Get contribution details
+  getContributionById: (id) => axiosClient.get(`research/contributions/${id}`),
+  // POST /api/research/contributions/{id}/review - Submit review { action, notes, validationReport }
+  reviewContribution: (id, reviewData) => axiosClient.post(`research/contributions/${id}/review`, reviewData),
   // GET /api/use/models/{id} - Get specific model file content
   getUseModelById: (id) => axiosClient.get(`use/models/${id}`),
 };
