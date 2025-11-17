@@ -71,7 +71,7 @@ const router = createBrowserRouter(
           <Route path="projects/:projectId/contributions" element={<ResearcherProjectDetail />} />
           <Route path="projects/:projectId/settings" element={<ResearcherProjectDetail />} />
           <Route path="projects/:projectId/contribute/:modelId" element={<PostContribution />} />
-          <Route path="contributions/:contributionId" element={<ContributionDetail />} />
+          <Route path="projects/:projectId/contributions/:contributionId" element={<ContributionDetail />} />
           <Route path="profile" element={<ResearcherProfile />} />
         </Route>
         <Route

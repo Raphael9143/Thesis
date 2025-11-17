@@ -75,7 +75,7 @@ export default function MyContributions() {
           <div
             key={contrib.id}
             className="contribution-card"
-            onClick={() => navigate(`/researcher/contributions/${contrib.id}`)}
+            onClick={() => navigate(`/researcher/projects/${projectId}/contributions/${contrib.id}`)}
             style={{ cursor: 'pointer' }}
           >
             <div className="contribution-card-header">
