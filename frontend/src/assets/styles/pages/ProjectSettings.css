@@ -1,0 +1,105 @@
+/* Project Settings Styles */
+.project-settings {
+  padding: 16px 0;
+}
+
+.settings-section {
+  padding: 24px;
+  margin-bottom: 24px;
+  background: #fff;
+  text-align: left;
+}
+
+.settings-section-title {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.settings-section-description {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.5;
+  padding: 0 0.8rem;
+}
+
+.settings-visibility-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-visibility-contents {
+  padding: 0 0.8rem;
+}
+
+.settings-radio-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border: 2px solid #e5e7eb;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.settings-radio-option:hover {
+  border-color: #3b82f6;
+}
+
+.settings-radio-option input[type='radio'] {
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+.settings-radio-option input[type='radio']:disabled {
+  cursor: not-allowed;
+}
+
+.settings-radio-option strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #111827;
+}
+
+.settings-radio-option .text-muted {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.settings-danger-zone {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.settings-danger-zone .settings-section-title {
+  color: #991b1b;
+}
+
+.btn-danger {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.btn-danger:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.text-muted {
+  color: #6b7280;
+}
