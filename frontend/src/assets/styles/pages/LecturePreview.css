@@ -23,10 +23,8 @@
 }
 
 .lecture-preview .attachment-item {
-  border: 1px solid var(--border, #e5e7eb);
   padding: 12px;
   background: var(--surface, #fff);
-  border-radius: 6px;
   gap: 8px;
 }
 
