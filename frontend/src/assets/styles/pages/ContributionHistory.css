@@ -1,4 +1,12 @@
 /* Contribution History Styles */
+.contribution-history-container {
+  margin-top: 16px;
+}
+
+.contribution-history-content {
+  margin-top: 16px;
+}
+
 .contributions-list {
   display: flex;
   flex-direction: column;
