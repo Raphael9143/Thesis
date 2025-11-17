@@ -456,6 +456,7 @@ context Member inv hasName: self.name <> ''
     description: "Community project to model a library domain.",
     status: "ACTIVE",
     owner_id: owner.id,
+    visibility: "PUBLIC",
     main_use_model_id: mainModel.id,
   });
 
