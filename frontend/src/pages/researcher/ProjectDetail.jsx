@@ -10,6 +10,7 @@ import toFullUrl from '../../utils/FullURLFile';
 import DashedDivider from '../../components/ui/DashedDivider';
 import { useNotifications } from '../../contexts/NotificationContext';
 import AddModeratorModal from '../../components/researcher/AddModeratorModal';
+import ContributionHistory from './ContributionHistory';
 import '../../assets/styles/pages/ProjectDetail.css';
 
 export default function ResearcherProjectDetail() {
@@ -27,6 +28,7 @@ export default function ResearcherProjectDetail() {
   const [starred, setStarred] = useState(false);
   const [starLoading, setStarLoading] = useState(false);
   const [addModeratorOpen, setAddModeratorOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('project');
   // inline preview handled by FilePreview; no modal state required
 
   const titleText = useMemo(() => {
@@ -137,6 +139,20 @@ export default function ResearcherProjectDetail() {
         {error && <div className="text-error">{error}</div>}
         {!loading && !error && (
           <>
+            <div className="project-detail-tabs">
+              <button
+                className={`project-detail-tab ${activeTab === 'project' ? 'active' : ''}`}
+                onClick={() => setActiveTab('project')}
+              >
+                Project
+              </button>
+              <button
+                className={`project-detail-tab ${activeTab === 'contributions' ? 'active' : ''}`}
+                onClick={() => setActiveTab('contributions')}
+              >
+                Contributions
+              </button>
+            </div>
             <div className="project-detail-actions">
               <button
                 className="btn btn-primary btn-sm"
@@ -164,36 +180,45 @@ export default function ResearcherProjectDetail() {
                 />
               </a>
             </div>
-            <div className="project-detail-content">
-              <div className="project-detail-model-section">
-                <h2 className="no-margin">Model</h2>
-                {model ? (
-                  <div className="project-detail-model-preview">
-                    <FilePreview
-                      url={toFullUrl(model.file_path)}
-                      filename={model.file_path}
-                      filePath={model.file_path}
-                    />
-                    {model.file_path && (
-                      <div className="project-detail-model-download">
-                        <a className="btn btn--secondary" href={toFullUrl(model.file_path)} download>
-                          Download
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="project-detail-model-preview">No model found for this project.</div>
-                )}
-              </div>
 
-              <div className="project-detail-about-section">
-                <div className="project-detail-about-title">About</div>
-                {project?.description && <p className="project-detail-about-description">{project.description}</p>}
-                <DashedDivider />
-                <ProjectMembers members={members} />
+            {activeTab === 'project' && (
+              <div className="project-detail-content">
+                <div className="project-detail-model-section">
+                  <h2 className="no-margin">Model</h2>
+                  {model ? (
+                    <div className="project-detail-model-preview">
+                      <FilePreview
+                        url={toFullUrl(model.file_path)}
+                        filename={model.file_path}
+                        filePath={model.file_path}
+                      />
+                      {model.file_path && (
+                        <div className="project-detail-model-download">
+                          <a className="btn btn--secondary" href={toFullUrl(model.file_path)} download>
+                            Download
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="project-detail-model-preview">No model found for this project.</div>
+                  )}
+                </div>
+
+                <div className="project-detail-about-section">
+                  <div className="project-detail-about-title">About</div>
+                  {project?.description && <p className="project-detail-about-description">{project.description}</p>}
+                  <DashedDivider />
+                  <ProjectMembers members={members} />
+                </div>
               </div>
-            </div>
+            )}
+
+            {activeTab === 'contributions' && (
+              <div className="project-detail-contributions">
+                <ContributionHistory />
+              </div>
+            )}
           </>
         )}
       </Card>
