@@ -2,6 +2,8 @@ import React from 'react';
 import DashedDivider from '../../components/ui/DashedDivider';
 import computeDiff from '../../utils/ComputeDiff';
 
+import { useNavigate } from 'react-router-dom';
+
 export default function ContributionChangesTab({
   contribution,
   originalModel,
@@ -12,7 +14,11 @@ export default function ContributionChangesTab({
   submitting,
   handleReview,
   validationError,
+  currentUserId,
 }) {
+  const navigate = useNavigate();
+  const canResubmit =
+    contribution.contributor_id === currentUserId && ['PENDING', 'NEEDS_EDIT'].includes(contribution.status);
   const renderDiff = () => {
     if (!originalModel || !useModel) {
       return <div className="contribution-diff-error">Unable to show changes - missing model data</div>;
@@ -71,6 +77,27 @@ export default function ContributionChangesTab({
       )}
 
       <DashedDivider />
+
+      {canResubmit && (
+        <div className="contribution-detail-resubmit-section">
+          <h3>Edit Contribution</h3>
+          <p className="contribution-detail-resubmit-hint">
+            You can edit and resubmit this contribution to address feedback or fix validation errors.
+          </p>
+          <button
+            className="btn btn-primary"
+            onClick={() =>
+              navigate(
+                `/researcher/projects/${contribution.research_project_id}/contributions/${contribution.id}/resubmit`
+              )
+            }
+          >
+            <i className="fa fa-edit" /> Resubmit
+          </button>
+        </div>
+      )}
+
+      {canResubmit && <DashedDivider />}
 
       {canReview && contribution.status === 'PENDING' && (
         <div className="contribution-detail-review-form">
