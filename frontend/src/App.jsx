@@ -67,7 +67,9 @@ const router = createBrowserRouter(
           <Route index element={<ResearcherDashboard />} />
           <Route path="dashboard" element={<ResearcherDashboard />} />
           <Route path="projects" element={<ResearcherProjects />} />
-          <Route path="projects/:projectId" element={<ResearcherProjectDetail />} />
+          <Route path="projects/:projectId/details" element={<ResearcherProjectDetail />} />
+          <Route path="projects/:projectId/contributions" element={<ResearcherProjectDetail />} />
+          <Route path="projects/:projectId/settings" element={<ResearcherProjectDetail />} />
           <Route path="projects/:projectId/contribute/:modelId" element={<PostContribution />} />
           <Route path="contributions/:contributionId" element={<ContributionDetail />} />
           <Route path="profile" element={<ResearcherProfile />} />
