@@ -156,9 +156,21 @@ router.post(
  *         required: false
  *         type: string
  *         enum: [PENDING, NEEDS_EDIT, ACCEPTED, REJECTED]
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         type: integer
+ *         default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         type: integer
+ *         default: 10
+ *         description: Items per page
  *     responses:
  *       200:
- *         description: List of contributions
+ *         description: List of contributions with pagination
  *       401:
  *         description: Unauthorized
  *       403:
@@ -194,9 +206,21 @@ router.get(
  *         type: string
  *         enum: [PENDING, NEEDS_EDIT, ACCEPTED, REJECTED]
  *         description: Filter by contribution status
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         type: integer
+ *         default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         type: integer
+ *         default: 10
+ *         description: Items per page
  *     responses:
  *       200:
- *         description: List of user's contributions in this project
+ *         description: List of user's contributions in this project with pagination
  *       401:
  *         description: Unauthorized
  *       500:

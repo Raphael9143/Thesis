@@ -341,11 +341,28 @@ const ResearchController = {
       const where = { research_project_id: projectId };
       if (req.query.status) where.status = req.query.status.toUpperCase();
 
-      const list = await ResearchContribution.findAll({
+      // Pagination
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const offset = (page - 1) * limit;
+
+      const { count, rows } = await ResearchContribution.findAndCountAll({
         where,
         order: [["created_at", "DESC"]],
+        limit,
+        offset,
       });
-      return res.json({ success: true, data: list });
+
+      return res.json({
+        success: true,
+        data: rows,
+        pagination: {
+          total: count,
+          page,
+          limit,
+          totalPages: Math.ceil(count / limit),
+        },
+      });
     } catch (err) {
       console.error("listContributions error:", err);
       return res
@@ -378,7 +395,12 @@ const ResearchController = {
         where.status = req.query.status.toUpperCase();
       }
 
-      const contributions = await ResearchContribution.findAll({
+      // Pagination
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const offset = (page - 1) * limit;
+
+      const { count, rows } = await ResearchContribution.findAndCountAll({
         where,
         include: [
           {
@@ -388,9 +410,20 @@ const ResearchController = {
           },
         ],
         order: [["created_at", "DESC"]],
+        limit,
+        offset,
       });
 
-      return res.json({ success: true, data: contributions });
+      return res.json({
+        success: true,
+        data: rows,
+        pagination: {
+          total: count,
+          page,
+          limit,
+          totalPages: Math.ceil(count / limit),
+        },
+      });
     } catch (err) {
       console.error("listMyContributions error:", err);
       return res
