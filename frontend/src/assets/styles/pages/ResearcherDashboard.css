@@ -1,0 +1,137 @@
+.researcher-dashboard {
+	padding: 24px;
+}
+
+.dashboard-header {
+	margin-bottom: 32px;
+}
+
+.dashboard-title {
+	font-size: 28px;
+	font-weight: 700;
+	margin-bottom: 8px;
+	color: #1f2937;
+}
+
+.dashboard-subtitle {
+	color: #6b7280;
+	margin-bottom: 24px;
+}
+
+.search-container {
+	position: relative;
+	max-width: 600px;
+}
+
+.search-container-centered {
+	position: relative;
+	max-width: 800px;
+	margin: 0 auto;
+}
+
+.search-input {
+	width: 100%;
+	padding: 12px 16px 12px 44px;
+	font-size: 16px;
+	border: 2px solid #e5e7eb;
+	outline: none;
+	transition: all 0.3s ease;
+  background-color: #fff;
+  color: var(--black);
+}
+
+.search-input:focus {
+	border-color: #667eea;
+}
+
+.search-icon {
+	position: absolute;
+	left: 16px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: #9ca3af;
+	font-size: 16px;
+}
+
+.loading-state {
+	text-align: center;
+	padding: 40px;
+	color: #6b7280;
+}
+
+.loading-spinner {
+	font-size: 32px;
+	margin-bottom: 16px;
+}
+
+.results-count {
+	margin-bottom: 16px;
+	color: #6b7280;
+}
+
+.projects-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+	gap: 24px;
+	margin-bottom: 32px;
+}
+
+.pagination {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 24px;
+}
+
+.pagination-btn {
+	padding: 8px 16px;
+	border: 1px solid #e5e7eb;
+	border-radius: 6px;
+	background: white;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.pagination-btn:hover:not(:disabled) {
+	background: #f3f4f6;
+}
+
+.pagination-btn:disabled {
+	cursor: not-allowed;
+	opacity: 0.5;
+}
+
+.pagination-page-btn {
+	padding: 8px 12px;
+	border: 1px solid #e5e7eb;
+	border-radius: 6px;
+	background: white;
+	color: #374151;
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.pagination-page-btn:hover {
+	background: #f3f4f6;
+}
+
+.pagination-page-btn.active {
+	background: #667eea;
+	color: white;
+	border-color: #667eea;
+}
+
+.empty-state {
+	text-align: center;
+	padding: 60px 20px;
+	color: #9ca3af;
+}
+
+.empty-state-icon {
+	font-size: 48px;
+	margin-bottom: 16px;
+}
+
+.empty-state-text {
+	font-size: 18px;
+}

@@ -4,7 +4,6 @@ import MainLayout from './layouts/MainLayout';
 import EducationLogin from './pages/EducationLogin';
 import ResearcherHome from './pages/ResearcherHome';
 import ResearcherLayout from './layouts/ResearcherLayout';
-import ResearcherDashboard from './pages/researcher/Dashboard';
 import ResearcherProjects from './pages/researcher/Projects';
 import ResearcherProjectDetail from './pages/researcher/ProjectDetail';
 import PostContribution from './pages/researcher/PostContribution';
@@ -67,8 +66,8 @@ const router = createBrowserRouter(
             </RequireAuth>
           }
         >
-          <Route index element={<ResearcherDashboard />} />
-          <Route path="dashboard" element={<ResearcherDashboard />} />
+          <Route index element={<Home />} />
+          <Route path="dashboard" element={<Home />} />
           <Route path="projects" element={<ResearcherProjects />} />
           <Route path="projects/:projectId/details" element={<ResearcherProjectDetail />} />
           <Route path="projects/:projectId/contributions" element={<ResearcherProjectDetail />} />

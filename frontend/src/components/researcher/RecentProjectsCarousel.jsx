@@ -65,7 +65,7 @@ export default function RecentProjectsCarousel({ projects, onJoinClick }) {
                         <span>{new Date(project.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <button className="btn btn-join" onClick={onJoinClick}>
+                    <button className="btn btn-join" onClick={() => onJoinClick(project.id)}>
                       <i className="fa fa-sign-in-alt"></i> Join Now
                     </button>
                   </div>

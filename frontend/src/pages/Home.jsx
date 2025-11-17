@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
 import NotificationPopup from '../components/ui/NotificationPopup';
@@ -12,6 +12,7 @@ import { usePageInfo } from '../contexts/PageInfoContext';
 
 export default function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [role, setRole] = useState(() => sessionStorage.getItem('role')?.toLowerCase() || '');
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyMsg, _setNotifyMsg] = useState('');
@@ -44,25 +45,9 @@ export default function Home() {
     }
   }, [setPageTitle]);
 
-  const title = useMemo(() => {
-    switch (role) {
-      case 'admin':
-        return 'Admin Home';
-      case 'teacher':
-        return 'Teacher Home';
-      case 'student':
-        return 'Student Home';
-      case 'researcher':
-        return 'Researcher Home';
-      default:
-        return 'Welcome';
-    }
-  }, [role]);
-
-  const subtitle = useMemo(() => {
-    if (!role) return 'Please log in to see role-specific content.';
-    return `You are signed in as ${role}.`;
-  }, [role]);
+  // Determine if we're in education portal or researcher dashboard
+  const isEducationPortal = location.pathname.startsWith('/education');
+  const isResearcherDashboard = location.pathname.startsWith('/researcher');
 
   const goToEducation = () => navigate('/education');
 
@@ -81,18 +66,24 @@ export default function Home() {
         </Card>
       );
     }
-    if (role === 'admin') return <AdminHome />;
-    if (role === 'teacher') return <TeacherHome />;
-    if (role === 'student') return <StudentHome />;
-    if (role === 'researcher') return <ResearcherHomePage />;
+
+    // Researcher dashboard always shows researcher home
+    if (isResearcherDashboard) return <ResearcherHomePage />;
+
+    // Education portal shows role-specific content
+    if (isEducationPortal) {
+      if (role === 'admin') return <AdminHome />;
+      if (role === 'teacher') return <TeacherHome />;
+      if (role === 'student') return <StudentHome />;
+    }
+
+    // Fallback
     return <Card title="Unknown role">Your role &quot;{role}&quot; is not recognized.</Card>;
   };
 
   return (
     <div>
-      <Section title={title} subtitle={subtitle}>
-        {content()}
-      </Section>
+      <Section>{content()}</Section>
 
       <NotificationPopup
         message={notifyMsg}
