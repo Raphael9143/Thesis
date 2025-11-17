@@ -764,9 +764,20 @@ const ResearchController = {
       fs.writeFileSync(targetPath, content, "utf8");
       const publicPath = "/uploads/research/" + filename;
 
-      // create new UseModel copy
+      // Get project to determine model name
+      const project = await ResearchProject.findByPk(contrib.research_project_id);
+      if (!project)
+        return res
+          .status(404)
+          .json({ success: false, message: "Project not found" });
+
+      // Get main model to extract name
+      const mainModel = await UseModel.findByPk(project.main_use_model_id);
+      const modelName = mainModel ? mainModel.name : null;
+
+      // create new UseModel copy with project's model name
       const useModel = await UseModel.create({
-        name: req.body.name || null,
+        name: modelName,
         file_path: publicPath,
         raw_text: content,
         owner_id: req.user.userId,

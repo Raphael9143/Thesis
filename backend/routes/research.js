@@ -826,6 +826,9 @@ router.get(
  * /api/research/contributions/{id}/resubmit:
  *   post:
  *     summary: Resubmit contribution content (PENDING/NEEDS_EDIT only)
+ *     description: |
+ *       Upload new .use file to update contribution.
+ *       Model name is automatically set from project's main model.
  *     tags:
  *       - Research
  *     security:
@@ -850,11 +853,10 @@ router.get(
  *           properties:
  *             path:
  *               type: string
+ *               description: Path to existing .use file in uploads/
  *             rawText:
  *               type: string
- *             name:
- *               type: string
- *               description: Optional model name
+ *               description: Raw .use file content as string
  *     responses:
  *       200:
  *         description: Contribution updated and reset to PENDING
