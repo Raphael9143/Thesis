@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams, useNavigate } from 'react-router-dom';
 import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
 import FilePreview from '../../components/ui/FilePreview';
@@ -15,6 +15,7 @@ import '../../assets/styles/pages/ProjectDetail.css';
 export default function ResearcherProjectDetail() {
   const { projectId } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const initialProject = location.state?.project || null;
   const { push } = useNotifications();
 
@@ -36,10 +37,8 @@ export default function ResearcherProjectDetail() {
   const isOwner = useMemo(() => {
     if (!members || !members.owner) return false;
     const currentUserId = sessionStorage.getItem('userId');
-    console.log(members.owner.id, Number(currentUserId));
     return members.owner.id === Number(currentUserId);
   }, [members]);
-  console.log('isOwner:', isOwner);
 
   useTitle(titleText);
 
@@ -96,14 +95,17 @@ export default function ResearcherProjectDetail() {
       setLoading(true);
       setError(null);
       try {
+        let projectData = project;
         if (!project) {
           const prjRes = await userAPI.getResearchProject(projectId);
           if (mounted && prjRes?.success) {
             setProject(prjRes.data);
+            projectData = prjRes.data;
           }
         }
+        const modelId = projectData?.main_use_model_id;
         const [modelRes, membersRes, starredRes] = await Promise.all([
-          userAPI.getResearchProjectModel(projectId),
+          modelId ? userAPI.getResearchProjectModel(modelId) : Promise.resolve(null),
           userAPI.getResearchProjectMembers(projectId),
           userAPI.getResearchProjectStarred(projectId),
         ]);
@@ -136,6 +138,15 @@ export default function ResearcherProjectDetail() {
         {!loading && !error && (
           <>
             <div className="project-detail-actions">
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => navigate(`/researcher/projects/${projectId}/contribute/${model?.id || ''}`)}
+                disabled={!model?.id}
+                title={!model?.id ? 'No model available' : 'Post contribution'}
+              >
+                <i className="fa fa-code-branch project-detail-moderator-icon" />
+                Contribute
+              </button>
               {isOwner && (
                 <button className="btn btn-primary btn-sm" onClick={() => setAddModeratorOpen(true)}>
                   <i className="fa fa-user-plus project-detail-moderator-icon" />
