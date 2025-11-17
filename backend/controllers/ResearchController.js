@@ -160,6 +160,110 @@ const ResearchController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+
+  // List most starred projects with pagination
+  listMostStarredProjects: async (req, res) => {
+    try {
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const offset = (page - 1) * limit;
+
+      const User = require("../models/User");
+
+      const { count, rows } = await ResearchProject.findAndCountAll({
+        where: { visibility: "PUBLIC" },
+        include: [
+          {
+            model: User,
+            as: "owner",
+            attributes: ["id", "full_name"],
+          },
+        ],
+        order: [
+          ["star_count", "DESC"],
+          ["created_at", "DESC"],
+        ],
+        limit,
+        offset,
+      });
+
+      return res.json({
+        success: true,
+        data: rows,
+        pagination: {
+          total: count,
+          page,
+          limit,
+          totalPages: Math.ceil(count / limit),
+        },
+      });
+    } catch (err) {
+      console.error("listMostStarredProjects error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
+  // List user's starred projects with pagination
+  listMyStarredProjects: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+
+      const User = require("../models/User");
+      const user = await User.findByPk(req.user.userId);
+      if (!user)
+        return res
+          .status(404)
+          .json({ success: false, message: "User not found" });
+
+      const starredIds = user.star_projects || [];
+      if (!starredIds.length)
+        return res.json({
+          success: true,
+          data: [],
+          pagination: { total: 0, page: 1, limit: 10, totalPages: 0 },
+        });
+
+      const page = parseInt(req.query.page, 10) || 1;
+      const limit = parseInt(req.query.limit, 10) || 10;
+      const offset = (page - 1) * limit;
+
+      const { count, rows } = await ResearchProject.findAndCountAll({
+        where: { id: starredIds },
+        include: [
+          {
+            model: User,
+            as: "owner",
+            attributes: ["id", "full_name"],
+          },
+        ],
+        order: [["created_at", "DESC"]],
+        limit,
+        offset,
+      });
+
+      return res.json({
+        success: true,
+        data: rows,
+        pagination: {
+          total: count,
+          page,
+          limit,
+          totalPages: Math.ceil(count / limit),
+        },
+      });
+    } catch (err) {
+      console.error("listMyStarredProjects error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   createProject: async (req, res) => {
     try {
       if (!req.user || !req.user.userId)

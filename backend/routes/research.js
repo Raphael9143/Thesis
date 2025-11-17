@@ -39,6 +39,68 @@ function conditionalUpload(req, res, next) {
  */
 router.get("/projects/mine", auth, ResearchController.listMyProjects);
 
+// GET /api/research/projects/most-starred
+/**
+ * @swagger
+ * /api/research/projects/most-starred:
+ *   get:
+ *     summary: List most starred PUBLIC projects with pagination
+ *     tags:
+ *       - Research
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         type: integer
+ *         default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         type: integer
+ *         default: 10
+ *         description: Items per page
+ *     responses:
+ *       200:
+ *         description: List of projects sorted by star_count DESC
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/projects/most-starred", ResearchController.listMostStarredProjects);
+
+// GET /api/research/projects/starred
+/**
+ * @swagger
+ * /api/research/projects/starred:
+ *   get:
+ *     summary: List user's starred projects with pagination
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         required: false
+ *         type: integer
+ *         default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         required: false
+ *         type: integer
+ *         default: 10
+ *         description: Items per page
+ *     responses:
+ *       200:
+ *         description: List of starred projects
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.get("/projects/starred", auth, ResearchController.listMyStarredProjects);
+
 // Create project
 /**
  * @swagger
