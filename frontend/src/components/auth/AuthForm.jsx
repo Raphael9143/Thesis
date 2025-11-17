@@ -78,9 +78,13 @@ export default function AuthForm({
       } catch (err) {
         console.error('socket init after auth error', err);
       }
-      const resolvedRole = (data.data?.user?.role ?? role ?? '').toString().toLowerCase();
-      if (resolvedRole) sessionStorage.setItem('role', resolvedRole);
       const serverUser = data.data?.user || {};
+      const resolvedRole = (serverUser.role ?? role ?? '').toString().toLowerCase();
+      if (resolvedRole) sessionStorage.setItem('role', resolvedRole);
+      // Save userId
+      if (serverUser.id) {
+        sessionStorage.setItem('userId', serverUser.id.toString());
+      }
       // Persist basic profile info for navbar/avatar usage
       if (serverUser.full_name || (type === 'register' && fullName)) {
         const nameToUse = serverUser.full_name || fullName;
