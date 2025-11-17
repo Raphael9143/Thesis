@@ -11,6 +11,7 @@ const User = require("./User");
 const ResearchProject = require("./ResearchProject");
 const ResearchProjectMember = require("./ResearchProjectMember");
 const ResearchContribution = require("./ResearchContribution");
+const ContributionComment = require("./ContributionComment");
 
 UseModel.hasMany(UseEnum, {
   foreignKey: "use_model_id",
@@ -156,6 +157,25 @@ ResearchContribution.belongsTo(User, {
 User.hasMany(ResearchContribution, {
   foreignKey: "contributor_id",
   as: "contributions",
+});
+
+// Contribution comments
+ResearchContribution.hasMany(ContributionComment, {
+  foreignKey: "contribution_id",
+  as: "comments",
+  onDelete: "CASCADE",
+});
+ContributionComment.belongsTo(ResearchContribution, {
+  foreignKey: "contribution_id",
+  as: "contribution",
+});
+ContributionComment.belongsTo(User, {
+  foreignKey: "user_id",
+  as: "user",
+});
+User.hasMany(ContributionComment, {
+  foreignKey: "user_id",
+  as: "contributionComments",
 });
 
 module.exports = {
