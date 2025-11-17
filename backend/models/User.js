@@ -148,3 +148,29 @@ User.hasOne(Researcher, {
   as: "researcherProfile",
   onDelete: "CASCADE",
 });
+
+// Một user có thể có một profile teacher (1-1)
+const Teacher = require("./Teacher");
+User.hasOne(Teacher, {
+  foreignKey: "teacher_id",
+  as: "teacherProfile",
+  onDelete: "CASCADE",
+});
+
+// Many-to-many: User <-> ResearchProject through ResearchProjectMember
+const ResearchProject = require("./ResearchProject");
+const ResearchProjectMember = require("./ResearchProjectMember");
+
+User.belongsToMany(ResearchProject, {
+  through: ResearchProjectMember,
+  foreignKey: "user_id",
+  otherKey: "research_project_id",
+  as: "joinedProjects",
+});
+
+ResearchProject.belongsToMany(User, {
+  through: ResearchProjectMember,
+  foreignKey: "research_project_id",
+  otherKey: "user_id",
+  as: "projectMembers",
+});

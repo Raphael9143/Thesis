@@ -13,11 +13,6 @@ const Researcher = sequelize.define(
       },
       onDelete: "CASCADE",
     },
-    researcher_code: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-      unique: true,
-    },
     department: {
       type: DataTypes.STRING(100),
       allowNull: true,
@@ -26,35 +21,15 @@ const Researcher = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
-    research_interests: {
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: "Profile description",
+    },
+    reference_links: {
       type: DataTypes.JSON,
       allowNull: true,
-      comment: "Array of research interest topics",
-    },
-    publications: {
-      type: DataTypes.JSON,
-      allowNull: true,
-      comment: "Array of publication titles",
-    },
-    current_projects: {
-      type: DataTypes.JSON,
-      allowNull: true,
-      comment: "Array of current research projects",
-    },
-    academic_rank: {
-      type: DataTypes.ENUM(
-        "RESEARCH_ASSISTANT",
-        "RESEARCHER",
-        "SENIOR_RESEARCHER",
-        "PRINCIPAL_RESEARCHER"
-      ),
-      allowNull: true,
-      defaultValue: "RESEARCHER",
-    },
-    years_of_experience: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      defaultValue: 0,
+      comment: "Array of HTTPS reference links",
     },
     created_at: {
       type: DataTypes.DATE,
@@ -76,3 +51,10 @@ const Researcher = sequelize.define(
 );
 
 module.exports = Researcher;
+
+// Associations
+const User = require("./User");
+Researcher.belongsTo(User, {
+  foreignKey: "researcher_id",
+  as: "user",
+});

@@ -27,10 +27,15 @@ const Student = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true,
     },
-    completed_assignments: {
-      type: DataTypes.INTEGER,
+    description: {
+      type: DataTypes.TEXT,
       allowNull: true,
-      defaultValue: 0,
+      comment: "Profile description",
+    },
+    reference_links: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      comment: "Array of HTTPS reference links",
     },
     created_at: {
       type: DataTypes.DATE,

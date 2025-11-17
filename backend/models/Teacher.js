@@ -23,9 +23,15 @@ const Teacher = sequelize.define(
       type: DataTypes.STRING(100),
       allowNull: true,
     },
-    research_papers: {
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      comment: "Profile description",
+    },
+    reference_links: {
       type: DataTypes.JSON,
       allowNull: true,
+      comment: "Array of HTTPS reference links",
     },
     created_at: {
       type: DataTypes.DATE,
@@ -46,8 +52,12 @@ const Teacher = sequelize.define(
   }
 );
 
+module.exports = Teacher;
+
 // Associations
 const Class = require("./Class");
+const User = require("./User");
+
 // Một teacher có thể dạy nhiều lớp
 Teacher.hasMany(Class, {
   foreignKey: "teacher_id",
@@ -61,4 +71,7 @@ Class.belongsTo(Teacher, {
   onDelete: "CASCADE",
 });
 
-module.exports = Teacher;
+Teacher.belongsTo(User, {
+  foreignKey: "teacher_id",
+  as: "user",
+});
