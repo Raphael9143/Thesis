@@ -41,6 +41,13 @@ const ResearchProject = sequelize.define(
       field: "star_count",
       comment: "Number of users who starred this project",
     },
+    visibility: {
+      type: DataTypes.ENUM("PUBLIC", "PRIVATE"),
+      allowNull: false,
+      defaultValue: "PRIVATE",
+      field: "visibility",
+      comment: "Project visibility: PUBLIC can be viewed by anyone, PRIVATE only by members",
+    },
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,
