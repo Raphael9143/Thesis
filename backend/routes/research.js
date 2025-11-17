@@ -171,6 +171,43 @@ router.get(
   auth,
   ResearchController.listContributions
 );
+
+// GET /api/research/projects/:projectId/contributions/mine
+/**
+ * @swagger
+ * /api/research/projects/{projectId}/contributions/mine:
+ *   get:
+ *     summary: List current user's contributions in a specific project
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         type: integer
+ *         description: Project ID
+ *       - in: query
+ *         name: status
+ *         required: false
+ *         type: string
+ *         enum: [PENDING, NEEDS_EDIT, ACCEPTED, REJECTED]
+ *         description: Filter by contribution status
+ *     responses:
+ *       200:
+ *         description: List of user's contributions in this project
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
+router.get(
+  "/projects/:projectId/contributions/mine",
+  auth,
+  ResearchController.listMyContributions
+);
+
 // GET /api/research/projects/:projectId/members - list contributors, owner, moderators
 /**
  * @swagger

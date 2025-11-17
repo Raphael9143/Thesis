@@ -354,6 +354,51 @@ const ResearchController = {
     }
   },
 
+  // List current user's contributions in a specific project
+  listMyContributions: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+
+      const projectId = parseInt(req.params.projectId, 10);
+      if (!projectId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid project id" });
+
+      const where = { 
+        contributor_id: req.user.userId,
+        research_project_id: projectId 
+      };
+      
+      // Optional filter by status
+      if (req.query.status) {
+        where.status = req.query.status.toUpperCase();
+      }
+
+      const contributions = await ResearchContribution.findAll({
+        where,
+        include: [
+          {
+            model: UseModel,
+            as: "useModel",
+            attributes: ["id", "name", "file_path"],
+          },
+        ],
+        order: [["created_at", "DESC"]],
+      });
+
+      return res.json({ success: true, data: contributions });
+    } catch (err) {
+      console.error("listMyContributions error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   // List project members grouped by role: owner, moderators, contributors
   listProjectMembers: async (req, res) => {
     try {
