@@ -1,0 +1,342 @@
+/* Contribution Detail Styles */
+
+.contribution-detail-loading,
+.contribution-detail-error {
+  padding: 24px;
+  text-align: left;
+  color: #6b7280;
+}
+
+.contribution-detail-error {
+  color: #ef4444;
+}
+
+.contribution-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.contribution-detail-status-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.contribution-detail-content {
+  padding: 0 4px;
+}
+
+.contribution-detail-title {
+  margin: 0 0 16px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  text-align: left;
+}
+
+.contribution-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.contribution-detail-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.contribution-detail-meta-item i {
+  color: #9ca3af;
+}
+
+.contribution-detail-description,
+.contribution-detail-model-section,
+.contribution-detail-preview-section,
+.contribution-detail-review-notes,
+.contribution-detail-validation,
+.contribution-detail-review-form {
+  margin-bottom: 32px;
+}
+
+.contribution-detail-description h3,
+.contribution-detail-model-section h3,
+.contribution-detail-preview-section h3,
+.contribution-detail-review-notes h3,
+.contribution-detail-validation h3,
+.contribution-detail-review-form h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.contribution-detail-description p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.contribution-detail-model-preview {
+  margin-top: 16px;
+}
+
+.contribution-detail-review-notes {
+  padding: 16px;
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  border-radius: 4px;
+}
+
+.contribution-detail-review-notes p {
+  margin: 8px 0 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #78350f;
+}
+
+.contribution-detail-validation {
+  padding: 16px;
+  background: #fee2e2;
+  border-left: 4px solid #ef4444;
+  border-radius: 4px;
+}
+
+.contribution-detail-validation pre {
+  margin: 8px 0 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #7f1d1d;
+  white-space: pre-wrap;
+}
+
+.contribution-detail-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  background-color: #fff;
+  color: var(--black);
+  font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+
+.contribution-detail-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.contribution-detail-textarea:disabled {
+  background: #f3f4f6;
+  cursor: not-allowed;
+}
+
+.contribution-detail-review-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.contribution-detail-review-actions .btn {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.contribution-detail-review-actions .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.contribution-detail-review-actions .btn i {
+  margin-right: 6px;
+}
+
+.btn-success {
+  background: #22c55e;
+  color: #fff;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #16a34a;
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: #d97706;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: #fff;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.contribution-detail-info {
+  padding: 16px;
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
+  border-radius: 4px;
+  color: #1e40af;
+  font-size: 14px;
+}
+
+.contribution-detail-info i {
+  margin-right: 8px;
+}
+
+/* Tab Content */
+.contribution-detail-tab-content {
+  padding: 24px 0;
+}
+
+.contribution-detail-tab-content h3 {
+  text-align: left;
+}
+
+.contribution-detail-tab-content p,
+.contribution-detail-tab-content textarea {
+  text-align: left;
+}
+
+/* Changes Tab - Diff Styles */
+.contribution-detail-changes-section {
+  margin-bottom: 32px;
+}
+
+.contribution-diff-error {
+  padding: 16px;
+  background: #fee2e2;
+  border-left: 4px solid #ef4444;
+  border-radius: 4px;
+  color: #7f1d1d;
+  text-align: left;
+}
+
+.contribution-diff-container {
+  margin-top: 16px;
+}
+
+.contribution-diff-header {
+  padding: 12px 16px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.contribution-diff-legend {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.contribution-diff-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.contribution-diff-legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+
+.contribution-diff-legend-added {
+  background: #dcfce7;
+  border: 1px solid #22c55e;
+}
+
+.contribution-diff-legend-removed {
+  background: #fee2e2;
+  border: 1px solid #ef4444;
+}
+
+.contribution-diff-content {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0 0 8px 8px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-x: auto;
+}
+
+.contribution-diff-line {
+  display: flex;
+  padding: 4px 0;
+  min-height: 24px;
+}
+
+.contribution-diff-line-unchanged {
+  background: #ffffff;
+}
+
+.contribution-diff-line-added {
+  background: #dcfce7;
+  border-left: 3px solid #22c55e;
+}
+
+.contribution-diff-line-removed {
+  background: #fee2e2;
+  border-left: 3px solid #ef4444;
+}
+
+.contribution-diff-line-num {
+  display: inline-block;
+  width: 50px;
+  padding: 0 12px;
+  text-align: right;
+  color: #9ca3af;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.contribution-diff-line-text {
+  padding: 0 16px 0 12px;
+  white-space: pre;
+  flex: 1;
+  text-align: left;
+}
+
+.contribution-diff-line-added .contribution-diff-line-text {
+  color: #166534;
+}
+
+.contribution-diff-line-removed .contribution-diff-line-text {
+  color: #991b1b;
+  text-decoration: line-through;
+}
