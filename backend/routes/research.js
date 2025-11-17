@@ -342,11 +342,9 @@ router.get(
  * @swagger
  * /api/research/projects/{projectId}/contributions/by-status:
  *   get:
- *     summary: List contributions by specific status with pagination
+ *     summary: List contributions by status (PUBLIC projects accessible without auth)
  *     tags:
  *       - Research
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: projectId
@@ -384,7 +382,6 @@ router.get(
  */
 router.get(
   "/projects/:projectId/contributions/by-status",
-  auth,
   ResearchController.listContributionsByStatus
 );
 

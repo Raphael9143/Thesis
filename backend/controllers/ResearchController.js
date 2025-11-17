@@ -655,11 +655,6 @@ const ResearchController = {
   // List contributions by specific status with pagination
   listContributionsByStatus: async (req, res) => {
     try {
-      if (!req.user || !req.user.userId)
-        return res
-          .status(401)
-          .json({ success: false, message: "Unauthorized" });
-
       const projectId = parseInt(req.params.projectId, 10);
       if (!projectId)
         return res
@@ -673,12 +668,26 @@ const ResearchController = {
           .status(400)
           .json({ success: false, message: "Valid status required" });
 
-      // Verify project membership
-      const isMember = await ResearchProjectMember.findOne({
-        where: { research_project_id: projectId, user_id: req.user.userId },
-      });
-      if (!isMember)
-        return res.status(403).json({ success: false, message: "Forbidden" });
+      // Check if project exists and get visibility
+      const project = await ResearchProject.findByPk(projectId);
+      if (!project)
+        return res
+          .status(404)
+          .json({ success: false, message: "Project not found" });
+
+      // If project is PRIVATE, require authentication and membership
+      if (project.visibility === "PRIVATE") {
+        if (!req.user || !req.user.userId)
+          return res
+            .status(401)
+            .json({ success: false, message: "Unauthorized" });
+
+        const isMember = await ResearchProjectMember.findOne({
+          where: { research_project_id: projectId, user_id: req.user.userId },
+        });
+        if (!isMember)
+          return res.status(403).json({ success: false, message: "Forbidden" });
+      }
 
       const User = require("../models/User");
 
