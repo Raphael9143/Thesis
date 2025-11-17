@@ -9,13 +9,9 @@ const ResearchContribution = require("../models/ResearchContribution");
 const UseModel = require("../models/UseModel");
 
 const ResearchController = {
-  // Get a project by id with owner (requires membership)
+  // Get a project by id (public projects readable by anyone, private require membership)
   getProjectById: async (req, res) => {
     try {
-      if (!req.user || !req.user.userId)
-        return res
-          .status(401)
-          .json({ success: false, message: "Unauthorized" });
       const id = parseInt(req.params.id, 10);
       if (!id)
         return res
@@ -36,6 +32,34 @@ const ResearchController = {
           .status(404)
           .json({ success: false, message: "Project not found" });
 
+      const plain = project.get({ plain: true });
+
+      // If project is PUBLIC, allow unauthenticated access
+      if (plain.visibility === "PUBLIC") {
+        // Normalize output
+        if (
+          Object.prototype.hasOwnProperty.call(plain, "ownerId") &&
+          Object.prototype.hasOwnProperty.call(plain, "owner_id")
+        )
+          delete plain.ownerId;
+        if (
+          Object.prototype.hasOwnProperty.call(plain, "mainUseModelId") &&
+          Object.prototype.hasOwnProperty.call(plain, "main_use_model_id")
+        )
+          delete plain.mainUseModelId;
+        plain.owner = plain.owner
+          ? { id: plain.owner.id, full_name: plain.owner.full_name }
+          : null;
+        plain.my_role = null;
+        return res.json({ success: true, data: plain });
+      }
+
+      // Otherwise require authentication and membership
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+
       const member = await ResearchProjectMember.findOne({
         where: { research_project_id: id, user_id: req.user.userId },
       });
@@ -43,7 +67,6 @@ const ResearchController = {
         return res.status(403).json({ success: false, message: "Forbidden" });
 
       // Normalize: drop camelCase duplicates and add my_role
-      const plain = project.get({ plain: true });
       if (
         Object.prototype.hasOwnProperty.call(plain, "ownerId") &&
         Object.prototype.hasOwnProperty.call(plain, "owner_id")
@@ -144,6 +167,11 @@ const ResearchController = {
           .status(401)
           .json({ success: false, message: "Unauthorized" });
       const { title, description } = req.body;
+      // visibility: optional, must be PUBLIC or PRIVATE; default PRIVATE
+      const visibilityInput = (req.body.visibility || "").toString().toUpperCase();
+      const visibility = ["PUBLIC", "PRIVATE"].includes(visibilityInput)
+        ? visibilityInput
+        : "PRIVATE";
       if (!title)
         return res
           .status(400)
@@ -178,6 +206,7 @@ const ResearchController = {
         description: description || null,
         owner_id: req.user.userId,
         main_use_model_id: emptyModel.id,
+        visibility,
       });
 
       // create owner membership

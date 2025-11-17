@@ -367,7 +367,8 @@ router.post(
  *       500:
  *         description: Internal server error
  */
-router.get("/projects/:id", auth, ResearchController.getProjectById);
+// public access allowed for PUBLIC projects; auth middleware still works for authenticated requests
+router.get("/projects/:id", ResearchController.getProjectById);
 
 // PATCH /api/research/projects/:id/status - update project status
 /**
