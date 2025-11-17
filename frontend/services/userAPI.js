@@ -174,6 +174,8 @@ const userAPI = {
     axiosClient.post(`research/projects/${id}/contribute`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     }),
+  // GET /api/research/projects/{id}/contributions/history
+  getResearchProjectContributions: (id) => axiosClient.get(`research/projects/${id}/contributions/history`),
   // GET /api/use/models/{id} - Get specific model file content
   getUseModelById: (id) => axiosClient.get(`use/models/${id}`),
 };
