@@ -675,32 +675,7 @@ const initDatabase = async () => {
     status: "ACTIVE",
   });
 
-  // Base USE content for main model (Library domain)
-  const baseUse = `model Library
-
-class Book
-attributes
-    title : String
-operations
-end
-
-class Member
-attributes
-    memberId : Integer
-    name : String
-end
-
-association Borrows between
-    Member [1..*] role borrower
-    Book   [0..*] role book
-end
-
-constraints
-context Book inv hasTitle: self.title <> ''
-context Member inv hasName: self.name <> ''
-`;
-
-  // Ensure uploads/research directory exists and write physical .use files
+  // Ensure uploads/research directory exists
   const fs = require("fs");
   const path = require("path");
   // Use process.cwd() for base since __dirname may not be defined in some bundlers
@@ -708,15 +683,16 @@ context Member inv hasName: self.name <> ''
   const researchUploadsDir = path.resolve("uploads", "research");
   if (!fs.existsSync(researchUploadsDir))
     fs.mkdirSync(researchUploadsDir, { recursive: true });
-  fs.writeFileSync(
-    path.join(researchUploadsDir, "library_main.use"),
-    baseUse,
+
+  // Read the library system USE file
+  const baseUse = fs.readFileSync(
+    path.join(researchUploadsDir, "library_system.use"),
     "utf8"
   );
 
   const mainModel = await UseModel.create({
-    name: "Library",
-    file_path: "/uploads/research/library_main.use",
+    name: "Library System",
+    file_path: "/uploads/research/library_system.use",
     raw_text: baseUse,
     owner_id: owner.id,
   });
@@ -865,17 +841,13 @@ context Member inv hasName: self.name <> ''
   });
 
   // PRIVATE research project 1
-  const hospitalUse =
-    "model Hospital\\n\\nclass Patient\\nattributes\\n" +
-    "    patientId : Integer\\n    name : String\\nend\\n";
-  fs.writeFileSync(
-    path.join(researchUploadsDir, "hospital_main.use"),
-    hospitalUse,
+  const hospitalUse = fs.readFileSync(
+    path.join(researchUploadsDir, "hospital_management.use"),
     "utf8"
   );
   const hospitalModel = await UseModel.create({
-    name: "Hospital",
-    file_path: "/uploads/research/hospital_main.use",
+    name: "Hospital Management System",
+    file_path: "/uploads/research/hospital_management.use",
     raw_text: hospitalUse,
     owner_id: teacherUser.id,
   });
@@ -911,17 +883,13 @@ context Member inv hasName: self.name <> ''
   });
 
   // PUBLIC research project 2
-  const ecommerceUse =
-    "model Ecommerce\\n\\nclass Product\\nattributes\\n" +
-    "    productId : Integer\\n    name : String\\n    price : Real\\nend\\n";
-  fs.writeFileSync(
-    path.join(researchUploadsDir, "ecommerce_main.use"),
-    ecommerceUse,
+  const ecommerceUse = fs.readFileSync(
+    path.join(researchUploadsDir, "ecommerce_platform.use"),
     "utf8"
   );
   const ecommerceModel = await UseModel.create({
-    name: "Ecommerce",
-    file_path: "/uploads/research/ecommerce_main.use",
+    name: "E-Commerce Platform",
+    file_path: "/uploads/research/ecommerce_platform.use",
     raw_text: ecommerceUse,
     owner_id: researcherUser.id,
   });
@@ -959,17 +927,13 @@ context Member inv hasName: self.name <> ''
   });
 
   // PRIVATE research project 2
-  const bankingUse =
-    "model Banking\\n\\nclass Account\\nattributes\\n" +
-    "    accountNumber : String\\n    balance : Real\\nend\\n";
-  fs.writeFileSync(
-    path.join(researchUploadsDir, "banking_private.use"),
-    bankingUse,
+  const bankingUse = fs.readFileSync(
+    path.join(researchUploadsDir, "banking_system.use"),
     "utf8"
   );
   const bankingModel = await UseModel.create({
-    name: "Banking",
-    file_path: "/uploads/research/banking_private.use",
+    name: "Banking System",
+    file_path: "/uploads/research/banking_system.use",
     raw_text: bankingUse,
     owner_id: owner.id,
   });
@@ -1005,39 +969,36 @@ context Member inv hasName: self.name <> ''
   });
 
   // PUBLIC research project 3
-  const socialUse =
-    "model SocialNetwork\\n\\nclass User\\nattributes\\n" +
-    "    userId : Integer\\n    username : String\\nend\\n";
-  fs.writeFileSync(
-    path.join(researchUploadsDir, "social_main.use"),
-    socialUse,
+  const universityUse = fs.readFileSync(
+    path.join(researchUploadsDir, "university_system.use"),
     "utf8"
   );
-  const socialModel = await UseModel.create({
-    name: "SocialNetwork",
-    file_path: "/uploads/research/social_main.use",
-    raw_text: socialUse,
+  const universityModel = await UseModel.create({
+    name: "University System",
+    file_path: "/uploads/research/university_system.use",
+    raw_text: universityUse,
     owner_id: contributor.id,
   });
-  await populateModel(socialModel);
+  await populateModel(universityModel);
 
   const project5 = await ResearchProject.create({
-    title: "Social Network Data Model Study",
+    title: "University System Modeling Research",
     description:
-      "Academic research on social network modeling.\\n\\n" +
-      "Research questions:\\n" +
-      "- How to model friend relationships efficiently?\\n" +
-      "- What constraints ensure data consistency?\\n" +
-      "- Privacy modeling with OCL\\n\\n" +
-      "Collaboration welcome!\\n" +
-      "Currently exploring:\\n" +
-      "- Graph traversal constraints\\n" +
-      "- Privacy levels and access control\\n" +
-      "- Content moderation rules",
+      "Comprehensive university system modeling project.\\n\\n" +
+      "Research objectives:\\n" +
+      "- Model complex academic relationships\\n" +
+      "- Student enrollment and course management\\n" +
+      "- Professor-course assignments\\n" +
+      "- GPA calculation constraints\\n\\n" +
+      "Open collaboration project!\\n" +
+      "Areas of focus:\\n" +
+      "- Academic calendar constraints\\n" +
+      "- Prerequisites modeling\\n" +
+      "- Classroom scheduling",
     status: "ACTIVE",
     owner_id: contributor.id,
     visibility: "PUBLIC",
-    main_use_model_id: socialModel.id,
+    main_use_model_id: universityModel.id,
   });
 
   await ResearchProjectMember.create({
@@ -1047,34 +1008,33 @@ context Member inv hasName: self.name <> ''
   });
 
   // PRIVATE research project 3 - Student group project
-  const studentProjectUse = "model StudentProject\\n\\nclass Task\\nend\\n";
-  fs.writeFileSync(
-    path.join(researchUploadsDir, "student_group.use"),
-    studentProjectUse,
+  const airlineUse = fs.readFileSync(
+    path.join(researchUploadsDir, "airline_reservation.use"),
     "utf8"
   );
-  const studentProjectModel = await UseModel.create({
-    name: "StudentProject",
-    file_path: "/uploads/research/student_group.use",
-    raw_text: studentProjectUse,
+  const airlineModel = await UseModel.create({
+    name: "Airline Reservation System",
+    file_path: "/uploads/research/airline_reservation.use",
+    raw_text: airlineUse,
     owner_id: studentUser.id,
   });
-  await populateModel(studentProjectModel);
+  await populateModel(airlineModel);
 
   const project6 = await ResearchProject.create({
-    title: "Group Assignment: Task Management System",
+    title: "Group Assignment: Airline Reservation System",
     description:
-      "PRIVATE group project for OCL course assignment.\\n\\n" +
-      "Team members working on:\\n" +
-      "- Task creation and assignment\\n" +
-      "- Priority and deadline management\\n" +
-      "- Team collaboration features\\n\\n" +
-      "This is a course assignment project.\\n" +
-      "Access limited to group members and instructor.",
+      "PRIVATE group project for Advanced OCL course.\\n\\n" +
+      "Team deliverables:\\n" +
+      "- Complete flight booking system model\\n" +
+      "- Seat allocation constraints\\n" +
+      "- Reservation and cancellation logic\\n" +
+      "- Multi-passenger booking support\\n\\n" +
+      "Final project for Spring 2025 semester.\\n" +
+      "Access restricted to team members and course instructor.",
     status: "ACTIVE",
     owner_id: studentUser.id,
     visibility: "PRIVATE",
-    main_use_model_id: studentProjectModel.id,
+    main_use_model_id: airlineModel.id,
   });
 
   await ResearchProjectMember.create({
