@@ -8,6 +8,7 @@ import '../../../assets/styles/pages/ClassDetail.css';
 import useAttemptMap from '../../../hooks/useAttemptMap';
 import useTitle from '../../../hooks/useTitle';
 import useLatestScoreMap from '../../../hooks/useLatestScoreMap';
+import useDueDateStatus from '../../../hooks/useDueDateStatus';
 
 export default function StudentExamsList() {
   const { id, courseId: routeCourseId } = useParams();
@@ -68,6 +69,41 @@ export default function StudentExamsList() {
 
   useTitle(`Exams - ${classInfo?.name || (routeCourseId ? 'Course' : '')}`);
 
+  const ExamListItem = ({ ex }) => {
+    const idv = ex.id || ex.exam_id;
+    const dueField = ex.end_date || null;
+    const { formatted, daysLeft, className } = useDueDateStatus(dueField);
+    return (
+      <li
+        key={idv}
+        className={`class-detail__list-item`}
+        onClick={() => {
+          navigate(`/education/student/classes/${id}/courses/${courseIdState}/exams/${idv}`);
+        }}
+      >
+        {(typeof attemptsMap[idv] !== 'undefined' || infoMap[idv]) && (
+          <div className="badges">
+            {typeof attemptsMap[idv] !== 'undefined' && (
+              <span className="attempts-badge" title="Attempts left">
+                {attemptsMap[idv]}
+              </span>
+            )}
+            {infoMap[idv]?.hasSubmission && (
+              <span className="score-chip" title="Latest score">
+                {typeof infoMap[idv].score === 'number' ? infoMap[idv].score : 'Not graded yet'}
+              </span>
+            )}
+          </div>
+        )}
+        <div className="class-detail__item-title">{ex.title}</div>
+        <small className={`due-date ${className}`}>
+          {formatted}
+          {daysLeft !== null ? ` (${daysLeft}d)` : ''}
+        </small>
+      </li>
+    );
+  };
+
   return (
     <Section>
       <Card>
@@ -78,34 +114,9 @@ export default function StudentExamsList() {
           {!loading && !error && exams.length === 0 && <div>No exams.</div>}
           {!loading && !error && exams.length > 0 && (
             <ul className="class-detail__list">
-              {exams.map((ex) => {
-                const idv = ex.id || ex.exam_id;
-                return (
-                  <li
-                    key={idv}
-                    className={`class-detail__list-item`}
-                    onClick={() => {
-                      navigate(`/education/student/classes/${id}/courses/${courseIdState}/exams/${idv}`);
-                    }}
-                  >
-                    {(typeof attemptsMap[idv] !== 'undefined' || infoMap[idv]) && (
-                      <div className="badges">
-                        {typeof attemptsMap[idv] !== 'undefined' && (
-                          <span className="attempts-badge" title="Attempts left">
-                            {attemptsMap[idv]}
-                          </span>
-                        )}
-                        {infoMap[idv]?.hasSubmission && (
-                          <span className="score-chip" title="Latest score">
-                            {typeof infoMap[idv].score === 'number' ? infoMap[idv].score : 'Not graded yet'}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    <div className="class-detail__item-title">{ex.title}</div>
-                  </li>
-                );
-              })}
+              {exams.map((ex) => (
+                <ExamListItem key={ex.id || ex.exam_id} ex={ex} />
+              ))}
             </ul>
           )}
         </div>

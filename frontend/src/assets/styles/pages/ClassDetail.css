@@ -191,3 +191,18 @@
   text-align: right;
   margin-bottom: 8px;
 }
+
+/* Due date label styles */
+.due-date {
+  display: inline-block;
+  margin-top: 6px;
+  font-weight: 600;
+  color: #111827; /* default */
+  font-size: 12px;
+}
+.due-date--warning {
+  color: #b45309; /* amber/dark yellow */
+}
+.due-date--urgent {
+  color: #b91c1c; /* red */
+}

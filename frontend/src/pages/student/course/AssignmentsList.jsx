@@ -8,6 +8,7 @@ import '../../../assets/styles/pages/ClassDetail.css';
 import useAttemptMap from '../../../hooks/useAttemptMap';
 import useTitle from '../../../hooks/useTitle';
 import useLatestScoreMap from '../../../hooks/useLatestScoreMap';
+import useDueDateStatus from '../../../hooks/useDueDateStatus';
 
 // Clean implementation without duplication
 export default function StudentAssignmentsList() {
@@ -70,6 +71,40 @@ export default function StudentAssignmentsList() {
   }, [hookAttemptsMap]);
 
   useTitle(`Assignments - ${classInfo?.name || (routeCourseId ? 'Course' : '')}`);
+  const AssignmentListItem = ({ a }) => {
+    const idv = a.assignment_id || a.id;
+    const dueField = a.end_date || null;
+    const { formatted, daysLeft, className } = useDueDateStatus(dueField);
+    return (
+      <li
+        key={idv}
+        className={`class-detail__list-item`}
+        onClick={() => {
+          navigate(`/education/student/classes/${id}/courses/${courseIdState}/assignments/${idv}`);
+        }}
+      >
+        {(typeof attemptsMap[idv] !== 'undefined' || infoMap[idv]) && (
+          <div className="badges">
+            {typeof attemptsMap[idv] !== 'undefined' && (
+              <span className="attempts-badge" title="Attempts left">
+                {attemptsMap[idv]}
+              </span>
+            )}
+            {infoMap[idv]?.hasSubmission && (
+              <span className="score-chip" title="Latest score">
+                {typeof infoMap[idv].score === 'number' ? infoMap[idv].score : 'Not graded yet'}
+              </span>
+            )}
+          </div>
+        )}
+        <div className="class-detail__item-title">{a.title}</div>
+        <small className={`due-date ${className}`}>
+          {formatted}
+          {daysLeft !== null ? ` (${daysLeft}d)` : ''}
+        </small>
+      </li>
+    );
+  };
 
   return (
     <Section>
@@ -81,34 +116,9 @@ export default function StudentAssignmentsList() {
           {!loading && !error && assignments.length === 0 && <div>No assignments.</div>}
           {!loading && !error && assignments.length > 0 && (
             <ul className="class-detail__list">
-              {assignments.map((a) => {
-                const idv = a.assignment_id || a.id;
-                return (
-                  <li
-                    key={idv}
-                    className={`class-detail__list-item`}
-                    onClick={() => {
-                      navigate(`/education/student/classes/${id}/courses/${courseIdState}/assignments/${idv}`);
-                    }}
-                  >
-                    {(typeof attemptsMap[idv] !== 'undefined' || infoMap[idv]) && (
-                      <div className="badges">
-                        {typeof attemptsMap[idv] !== 'undefined' && (
-                          <span className="attempts-badge" title="Attempts left">
-                            {attemptsMap[idv]}
-                          </span>
-                        )}
-                        {infoMap[idv]?.hasSubmission && (
-                          <span className="score-chip" title="Latest score">
-                            {typeof infoMap[idv].score === 'number' ? infoMap[idv].score : 'Not graded yet'}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    <div className="class-detail__item-title">{a.title}</div>
-                  </li>
-                );
-              })}
+              {assignments.map((a) => (
+                <AssignmentListItem key={a.assignment_id || a.id} a={a} />
+              ))}
             </ul>
           )}
         </div>
