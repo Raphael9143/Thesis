@@ -228,7 +228,14 @@ export default function ResearcherProjectDetail() {
 
                   <div className="project-detail-about-section">
                     <div className="project-detail-about-title">About</div>
-                    {project?.description && <p className="project-detail-about-description">{project.description}</p>}
+                    {project?.description && (
+                      <p className="project-detail-about-description" style={{ whiteSpace: 'pre-line' }}>
+                        {(() => {
+                          const replaced = project.description.replace(/\\n/g, '\n');
+                          return replaced.length > 500 ? replaced.slice(0, 500).trimEnd() + '…' : replaced;
+                        })()}
+                      </p>
+                    )}
                     <DashedDivider />
                     <ProjectMembers members={members} />
                   </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 export default function FormField({
   label,
@@ -11,6 +11,7 @@ export default function FormField({
   required = false,
   textarea = false,
   rows = 3,
+  autoResize = false,
   options = [],
   className = '',
   inputRef = undefined,
@@ -31,7 +32,7 @@ export default function FormField({
         </label>
       )}
       {textarea ? (
-        <textarea
+        <Textarea
           id={id}
           name={name}
           rows={rows}
@@ -40,8 +41,9 @@ export default function FormField({
           placeholder={placeholder}
           readOnly={readOnly}
           required={required}
-          ref={inputRef}
-          {...inputProps}
+          inputRef={inputRef}
+          autoResize={autoResize}
+          inputProps={inputProps}
         />
       ) : options && options.length > 0 ? (
         <select
@@ -82,5 +84,46 @@ export default function FormField({
         })()
       )}
     </div>
+  );
+}
+
+function Textarea({
+  id,
+  name,
+  rows,
+  value,
+  onChange,
+  placeholder,
+  readOnly,
+  required,
+  inputRef,
+  autoResize,
+  inputProps,
+}) {
+  const internalRef = useRef(null);
+  const refToUse = inputRef || internalRef;
+
+  useEffect(() => {
+    if (autoResize && refToUse.current) {
+      const el = refToUse.current;
+      el.style.height = 'auto';
+      el.style.height = Math.min(el.scrollHeight, 600) + 'px';
+    }
+  }, [value, autoResize, refToUse]);
+
+  return (
+    <textarea
+      id={id}
+      name={name}
+      rows={rows}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      readOnly={readOnly}
+      required={required}
+      ref={refToUse}
+      {...inputProps}
+      className={`textarea-field ${inputProps?.className || ''}`.trim()}
+    />
   );
 }

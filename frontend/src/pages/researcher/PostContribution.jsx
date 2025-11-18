@@ -131,7 +131,9 @@ export default function PostContribution() {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             textarea
-            placeholder="Describe your contribution..."
+            autoResize
+            rows={4}
+            placeholder={'Describe your contribution...\nYou can write multiple lines.'}
           />
 
           <DashedDivider />

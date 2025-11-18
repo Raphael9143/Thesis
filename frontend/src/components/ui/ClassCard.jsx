@@ -1,7 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import '../../assets/styles/components/ui/ClassCard.css';
 
-export default function ClassCard({ title, subtitle, image, onClick, badge, description, className }) {
+export default function ClassCard({
+  title,
+  subtitle,
+  image,
+  onClick,
+  badge,
+  description,
+  className,
+  maxDescriptionChars = 30,
+}) {
   const handleKeyPress = (e) => {
     if (!onClick) return;
     if (e.key === 'Enter' || e.key === ' ') onClick();
@@ -14,6 +23,12 @@ export default function ClassCard({ title, subtitle, image, onClick, badge, desc
     .map((w) => w[0])
     .join('')
     .toUpperCase();
+
+  const normalizedDesc = useMemo(() => {
+    if (!description) return '';
+    const replaced = description.replace(/\\n/g, '\n');
+    return replaced.length > maxDescriptionChars ? replaced.slice(0, maxDescriptionChars).trimEnd() + '…' : replaced;
+  }, [description, maxDescriptionChars]);
 
   return (
     <div
@@ -32,7 +47,11 @@ export default function ClassCard({ title, subtitle, image, onClick, badge, desc
       <div className="class-card__meta">
         <div className="class-card__title">{title}</div>
         {subtitle && <div className="class-card__subtitle">{subtitle}</div>}
-        {description && <div className="class-card__desc">{description}</div>}
+        {description && (
+          <div className="class-card__desc" title={description}>
+            {normalizedDesc}
+          </div>
+        )}
       </div>
     </div>
   );
