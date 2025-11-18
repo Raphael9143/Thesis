@@ -9,12 +9,6 @@ import useAttemptMap from '../../../hooks/useAttemptMap';
 import useTitle from '../../../hooks/useTitle';
 import useLatestScoreMap from '../../../hooks/useLatestScoreMap';
 
-function isExpired(assignment) {
-  const due = assignment?.end_date;
-  if (!due) return false;
-  return Date.now() > new Date(due).getTime();
-}
-
 // Clean implementation without duplication
 export default function StudentAssignmentsList() {
   const { id, courseId: routeCourseId } = useParams();
@@ -88,14 +82,12 @@ export default function StudentAssignmentsList() {
           {!loading && !error && assignments.length > 0 && (
             <ul className="class-detail__list">
               {assignments.map((a) => {
-                const disabled = isExpired(a);
                 const idv = a.assignment_id || a.id;
                 return (
                   <li
                     key={idv}
-                    className={`class-detail__list-item${disabled ? ' disabled' : ''}`}
+                    className={`class-detail__list-item`}
                     onClick={() => {
-                      if (disabled) return;
                       navigate(`/education/student/classes/${id}/courses/${courseIdState}/assignments/${idv}`);
                     }}
                   >

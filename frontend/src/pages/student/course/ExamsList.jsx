@@ -9,11 +9,6 @@ import useAttemptMap from '../../../hooks/useAttemptMap';
 import useTitle from '../../../hooks/useTitle';
 import useLatestScoreMap from '../../../hooks/useLatestScoreMap';
 
-function isExpired(exam) {
-  if (!exam?.end_date) return false;
-  return Date.now() > new Date(exam.end_date).getTime();
-}
-
 export default function StudentExamsList() {
   const { id, courseId: routeCourseId } = useParams();
   const navigate = useNavigate();
@@ -84,14 +79,12 @@ export default function StudentExamsList() {
           {!loading && !error && exams.length > 0 && (
             <ul className="class-detail__list">
               {exams.map((ex) => {
-                const disabled = isExpired(ex);
                 const idv = ex.id || ex.exam_id;
                 return (
                   <li
                     key={idv}
-                    className={`class-detail__list-item${disabled ? ' disabled' : ''}`}
+                    className={`class-detail__list-item`}
                     onClick={() => {
-                      if (disabled) return;
                       navigate(`/education/student/classes/${id}/courses/${courseIdState}/exams/${idv}`);
                     }}
                   >
