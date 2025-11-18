@@ -84,19 +84,66 @@ const initDatabase = async () => {
     years_of_experience: 8,
   });
 
+  // Create multiple courses
   const course = await Course.create({
     course_name: "OCL Fundamentals",
     course_code: "OCL101",
-    description: "A course about OCL fundamentals",
+    description:
+      "A comprehensive introduction to Object Constraint Language (OCL)." +
+      "\nStudents will learn to write precise constraints for UML models." +
+      "\nTopics include: OCL syntax, context, invariants, pre/post conditions." +
+      "\nPractical exercises with USE tool for model validation.",
     created_by: teacherUser.id,
     semester: "Spring 2025",
     status: "ACTIVE",
   });
 
+  const course2 = await Course.create({
+    course_name: "Advanced UML Modeling",
+    course_code: "UML201",
+    description:
+      "Deep dive into Unified Modeling Language for software design." +
+      "\nCovers class diagrams, sequence diagrams, state machines." +
+      "\nEmphasis on design patterns and architectural modeling." +
+      "\nIncludes hands-on projects using enterprise modeling tools.",
+    created_by: teacherUser.id,
+    semester: "Spring 2025",
+    status: "ACTIVE",
+  });
+
+  const course3 = await Course.create({
+    course_name: "Software Requirements Engineering",
+    course_code: "SRE301",
+    description:
+      "Systematic approach to gathering and documenting software requirements." +
+      "\nTechniques for stakeholder analysis and elicitation." +
+      "\nRequirements modeling using UML use cases and scenarios." +
+      "\nValidation and verification methods for requirement specifications.",
+    created_by: teacherUser.id,
+    semester: "Fall 2025",
+    status: "ACTIVE",
+  });
+
+  const course4 = await Course.create({
+    course_name: "Formal Methods in Software Engineering",
+    course_code: "FMSE401",
+    description:
+      "Mathematical foundations for software specification and verification." +
+      "\nFormal specification languages including Z notation and OCL." +
+      "\nModel checking and theorem proving techniques." +
+      "\nCase studies of safety-critical systems development.",
+    created_by: teacherUser.id,
+    semester: "Fall 2025",
+    status: "ACTIVE",
+  });
+
+  // Create multiple classes
   const class1 = await Class.create({
     name: "OCL Basic",
     code: "OCL2025",
-    description: "OCL Basic class for 1st year students",
+    description:
+      "OCL Basic class for 1st year students." +
+      "\nFocus on fundamental constraint writing and model validation.",
     teacher_id: teacherUser.id,
     year: 2025,
     max_students: 50,
@@ -104,9 +151,82 @@ const initDatabase = async () => {
     status: "active",
   });
 
+  const class2 = await Class.create({
+    name: "UML Advanced Section A",
+    code: "UML2025A",
+    description:
+      "Advanced UML modeling for 2nd year students - Section A." +
+      "\nProject-based learning with real-world modeling scenarios.",
+    teacher_id: teacherUser.id,
+    year: 2025,
+    max_students: 40,
+    current_students: 35,
+    status: "active",
+  });
+
+  const class3 = await Class.create({
+    name: "UML Advanced Section B",
+    code: "UML2025B",
+    description:
+      "Advanced UML modeling for 2nd year students - Section B." +
+      "\nCollaborative projects with industry partners.",
+    teacher_id: teacherUser.id,
+    year: 2025,
+    max_students: 40,
+    current_students: 32,
+    status: "active",
+  });
+
+  const class4 = await Class.create({
+    name: "Requirements Engineering",
+    code: "REQ2025",
+    description:
+      "Requirements engineering class for 3rd year students" +
+      ".\nEmphasis on real-world client interaction and documentation.",
+    teacher_id: teacherUser.id,
+    year: 2025,
+    max_students: 30,
+    current_students: 28,
+    status: "active",
+  });
+
+  const class5 = await Class.create({
+    name: "Formal Methods",
+    code: "FM2025",
+    description:
+      "Graduate-level formal methods class." +
+      "\nRigorous mathematical approach to software development.",
+    teacher_id: teacherUser.id,
+    year: 2025,
+    max_students: 25,
+    current_students: 20,
+    status: "active",
+  });
+
+  // Link courses to classes
   await ClassCourse.create({
     class_id: class1.id,
     course_id: course.course_id,
+  });
+
+  await ClassCourse.create({
+    class_id: class2.id,
+    course_id: course2.course_id,
+  });
+
+  await ClassCourse.create({
+    class_id: class3.id,
+    course_id: course2.course_id,
+  });
+
+  await ClassCourse.create({
+    class_id: class4.id,
+    course_id: course3.course_id,
+  });
+
+  await ClassCourse.create({
+    class_id: class5.id,
+    course_id: course4.course_id,
   });
 
   await ClassStudent.create({
@@ -137,10 +257,21 @@ const initDatabase = async () => {
     });
   }
 
+  // Create assignments for OCL course
   const assignment = await Assignment.create({
     course_id: course.course_id,
-    title: "Exercise 1: Basic OCL",
-    description: "Learn the basics of OCL programming.",
+    title: "Exercise 1: Basic OCL Constraints",
+    description:
+      "Introduction to writing basic OCL constraints.\\n\\n" +
+      "Objectives:\\n" +
+      "- Understand OCL syntax and context declarations\\n" +
+      "- Write simple invariants for class attributes\\n" +
+      "- Test constraints using the USE tool\\n\\n" +
+      "Tasks:\\n" +
+      "1. Model a simple library system with Book and Member classes\\n" +
+      "2. Add invariants to ensure data validity\\n" +
+      "3. Create test cases to verify your constraints\\n\\n" +
+      "Deliverables: Submit a .use file with your model and constraints",
     created_by: teacherUser.id,
     attachment: "/uploads/assignments/sample.use",
     type: "SINGLE",
@@ -174,10 +305,25 @@ const initDatabase = async () => {
     status: "published",
   });
 
+  // Create exams
   const exam1 = await Exam.create({
     course_id: course.course_id,
-    title: "Midterm Exam",
-    description: "Midterm exam for USE fundamentals",
+    title: "Midterm Exam: OCL Fundamentals",
+    description:
+      "Comprehensive midterm covering weeks 1-6.\\n\\n" +
+      "Topics covered:\\n" +
+      "- OCL syntax and semantics\\n" +
+      "- Context declarations\\n" +
+      "- Invariants and constraints\\n" +
+      "- Collection operations\\n" +
+      "- Navigation expressions\\n\\n" +
+      "Exam format:\\n" +
+      "- Part 1: Multiple choice (20 points)\\n" +
+      "- Part 2: Short answer questions (30 points)\\n" +
+      "- Part 3: Practical modeling task (50 points)\\n\\n" +
+      "Duration: 120 minutes\\n" +
+      "Open book: No\\n" +
+      "Tools allowed: USE tool for Part 3",
     start_date: new Date("2025-10-15T09:00:00Z"),
     end_date: new Date("2025-10-15T11:00:00Z"),
     type: "SINGLE",
@@ -188,8 +334,19 @@ const initDatabase = async () => {
   // Additional sample assignments
   const assignment2 = await Assignment.create({
     course_id: course.course_id,
-    title: "Exercise 2: Advanced OCL",
-    description: "Advanced exercises to deepen OCL knowledge.",
+    title: "Exercise 2: Collection Operations in OCL",
+    description:
+      "Master OCL collection operations and navigation.\\n\\n" +
+      "Objectives:\\n" +
+      "- Use collection operations (select, reject, collect, forAll, exists)\\n" +
+      "- Navigate associations in OCL expressions\\n" +
+      "- Write complex invariants involving multiple classes\\n\\n" +
+      "Tasks:\\n" +
+      "1. Extend your library model with associations\\n" +
+      "2. Write constraints using collection operations\\n" +
+      "3. Implement pre/post conditions for operations\\n\\n" +
+      "Bonus: Add derived attributes using OCL\\n" +
+      "Deliverables: Enhanced .use file with advanced constraints",
     created_by: teacherUser.id,
     attachment: "/uploads/exams/banking.use",
     type: "SINGLE",
@@ -207,8 +364,25 @@ const initDatabase = async () => {
 
   const assignment3 = await Assignment.create({
     course_id: course.course_id,
-    title: "Group Project: OCL Use Case",
-    description: "A group assignment to model a real-world use case with OCL.",
+    title: "Group Project: E-Commerce System Modeling",
+    description:
+      "Collaborative project to model a complete e-commerce system.\\n\\n" +
+      "Objectives:\\n" +
+      "- Apply UML class diagrams with OCL constraints\\n" +
+      "- Model real-world business rules\\n" +
+      "- Collaborate using version control\\n" +
+      "- Present and defend your design decisions\\n\\n" +
+      "Requirements:\\n" +
+      "1. Model customers, products, orders, and payments\\n" +
+      "2. Implement at least 15 meaningful OCL constraints\\n" +
+      "3. Include state machines for order processing\\n" +
+      "4. Create comprehensive test scenarios\\n\\n" +
+      "Group size: 3-5 students\\n" +
+      "Deliverables:\\n" +
+      "- Complete .use file with all models and constraints\\n" +
+      "- Design documentation (PDF)\\n" +
+      "- 15-minute presentation\\n" +
+      "- Individual reflection report",
     created_by: teacherUser.id,
     attachment: "/uploads/exams/banking.use",
     type: "GROUP",
@@ -224,15 +398,185 @@ const initDatabase = async () => {
     week: 8,
   });
 
+  // Assignments for UML course
+  const umlAssignment1 = await Assignment.create({
+    course_id: course2.course_id,
+    title: "Class Diagram Design: Banking System",
+    description:
+      "Design a comprehensive class diagram for a banking system.\\n\\n" +
+      "Requirements:\\n" +
+      "- Model accounts, customers, transactions\\n" +
+      "- Include inheritance hierarchy\\n" +
+      "- Show associations with proper multiplicities\\n" +
+      "- Add OCL constraints for business rules\\n\\n" +
+      "Grading criteria:\\n" +
+      "- Completeness of model (40%)\\n" +
+      "- Proper use of UML notation (30%)\\n" +
+      "- OCL constraint quality (20%)\\n" +
+      "- Documentation and clarity (10%)",
+    created_by: teacherUser.id,
+    type: "SINGLE",
+    start_date: new Date("2025-09-15T08:00:00Z"),
+    end_date: new Date("2025-09-30T23:59:00Z"),
+  });
+
+  await AssignmentCourse.create({
+    assignment_id: umlAssignment1.id,
+    course_id: course2.course_id,
+    start_date: new Date("2025-09-15T08:00:00Z"),
+    due_date: new Date("2025-09-30T23:59:00Z"),
+    week: 1,
+  });
+
+  const umlAssignment2 = await Assignment.create({
+    course_id: course2.course_id,
+    title: "Sequence Diagrams: User Authentication Flow",
+    description:
+      "Create sequence diagrams for authentication scenarios.\\n\\n" +
+      "Scenarios to model:\\n" +
+      "1. Successful login\\n" +
+      "2. Failed login attempt\\n" +
+      "3. Password reset flow\\n" +
+      "4. Two-factor authentication\\n\\n" +
+      "Include:\\n" +
+      "- All relevant objects and actors\\n" +
+      "- Proper message ordering\\n" +
+      "- Alternative and exception flows\\n" +
+      "- Timing constraints where applicable",
+    created_by: teacherUser.id,
+    type: "SINGLE",
+    start_date: new Date("2025-10-01T08:00:00Z"),
+    end_date: new Date("2025-10-15T23:59:00Z"),
+  });
+
+  await AssignmentCourse.create({
+    assignment_id: umlAssignment2.id,
+    course_id: course2.course_id,
+    start_date: new Date("2025-10-01T08:00:00Z"),
+    due_date: new Date("2025-10-15T23:59:00Z"),
+    week: 3,
+  });
+
+  // Requirements Engineering assignments
+  const reqAssignment1 = await Assignment.create({
+    course_id: course3.course_id,
+    title: "Requirements Elicitation: Interview Report",
+    description:
+      "Conduct stakeholder interviews and document requirements.\\n\\n" +
+      "Tasks:\\n" +
+      "1. Identify and interview 2-3 stakeholders\\n" +
+      "2. Extract functional and non-functional requirements\\n" +
+      "3. Create use case diagrams\\n" +
+      "4. Write detailed use case specifications\\n\\n" +
+      "Report must include:\\n" +
+      "- Interview transcripts or detailed notes\\n" +
+      "- Requirements analysis\\n" +
+      "- Use case model with descriptions\\n" +
+      "- Prioritization matrix\\n" +
+      "- Validation plan",
+    created_by: teacherUser.id,
+    type: "SINGLE",
+    start_date: new Date("2025-11-01T08:00:00Z"),
+    end_date: new Date("2025-11-20T23:59:00Z"),
+  });
+
+  await AssignmentCourse.create({
+    assignment_id: reqAssignment1.id,
+    course_id: course3.course_id,
+    start_date: new Date("2025-11-01T08:00:00Z"),
+    due_date: new Date("2025-11-20T23:59:00Z"),
+    week: 2,
+  });
+
   // Final exam sample
   const finalExam = await Exam.create({
     course_id: course.course_id,
-    title: "Final Exam",
-    description: "Comprehensive final exam covering the whole course.",
+    title: "Final Exam: Comprehensive OCL Assessment",
+    description:
+      "Cumulative final exam covering entire semester.\\n\\n" +
+      "Comprehensive topics:\\n" +
+      "- All OCL language features\\n" +
+      "- Advanced collection operations\\n" +
+      "- Pre/post conditions\\n" +
+      "- Complex constraint patterns\\n" +
+      "- Integration with UML models\\n\\n" +
+      "Exam structure:\\n" +
+      "- Part 1: Theory and concepts (30 points)\\n" +
+      "- Part 2: Code reading and analysis (30 points)\\n" +
+      "- Part 3: Complete system modeling (40 points)\\n\\n" +
+      "Duration: 180 minutes\\n" +
+      "Worth: 40% of final grade\\n" +
+      "Study materials: All lecture slides and assignments",
     start_date: new Date("2025-12-10T09:00:00Z"),
     end_date: new Date("2025-12-10T12:00:00Z"),
     type: "SINGLE",
     attachment: "/uploads/exams/banking.use",
+    status: "published",
+  });
+
+  // Additional exams for other courses
+  await Exam.create({
+    course_id: course2.course_id,
+    title: "UML Modeling Quiz 1: Class Diagrams",
+    description:
+      "Quick assessment of class diagram understanding.\\n\\n" +
+      "Coverage:\\n" +
+      "- Classes, attributes, operations\\n" +
+      "- Associations and aggregations\\n" +
+      "- Inheritance and interfaces\\n" +
+      "- Multiplicities and constraints\\n\\n" +
+      "Format: 60-minute online quiz\\n" +
+      "Questions: 30 multiple choice\\n" +
+      "Attempt limit: 1",
+    start_date: new Date("2025-10-20T14:00:00Z"),
+    end_date: new Date("2025-10-20T15:00:00Z"),
+    type: "SINGLE",
+    status: "published",
+  });
+
+  await Exam.create({
+    course_id: course2.course_id,
+    title: "Final Project Presentation: GROUP",
+    description:
+      "Group presentation of semester design project.\\n\\n" +
+      "Requirements:\\n" +
+      "- 20-minute presentation per group\\n" +
+      "- Demonstrate complete UML model\\n" +
+      "- Explain design decisions\\n" +
+      "- Answer questions from panel\\n\\n" +
+      "Evaluation criteria:\\n" +
+      "- Design quality (40%)\\n" +
+      "- Presentation clarity (25%)\\n" +
+      "- Technical depth (20%)\\n" +
+      "- Team coordination (15%)\\n\\n" +
+      "Each team member must present\\n" +
+      "Attendance mandatory for all",
+    start_date: new Date("2025-12-05T09:00:00Z"),
+    end_date: new Date("2025-12-05T17:00:00Z"),
+    type: "GROUP",
+    status: "published",
+  });
+
+  await Exam.create({
+    course_id: course3.course_id,
+    title: "Requirements Engineering Case Study Exam",
+    description:
+      "Apply RE techniques to a real-world case study.\\n\\n" +
+      "You will receive:\\n" +
+      "- Business context document\\n" +
+      "- Stakeholder profiles\\n" +
+      "- Initial requirements (incomplete)\\n\\n" +
+      "Tasks:\\n" +
+      "1. Identify missing requirements\\n" +
+      "2. Resolve conflicts and ambiguities\\n" +
+      "3. Create use case model\\n" +
+      "4. Write SRS document excerpt\\n" +
+      "5. Develop validation checklist\\n\\n" +
+      "Duration: 3 hours\\n" +
+      "Open book and notes allowed",
+    start_date: new Date("2025-12-08T09:00:00Z"),
+    end_date: new Date("2025-12-08T12:00:00Z"),
+    type: "SINGLE",
     status: "published",
   });
 
@@ -357,13 +701,18 @@ context Member inv hasName: self.name <> ''
 `;
 
   // Ensure uploads/research directory exists and write physical .use files
-  const fs = require('fs');
-  const path = require('path');
+  const fs = require("fs");
+  const path = require("path");
   // Use process.cwd() for base since __dirname may not be defined in some bundlers
   // resolve uploads directory relative to project root (assuming execution from backend dir)
-  const researchUploadsDir = path.resolve('uploads', 'research');
-  if (!fs.existsSync(researchUploadsDir)) fs.mkdirSync(researchUploadsDir, { recursive: true });
-  fs.writeFileSync(path.join(researchUploadsDir, 'library_main.use'), baseUse, 'utf8');
+  const researchUploadsDir = path.resolve("uploads", "research");
+  if (!fs.existsSync(researchUploadsDir))
+    fs.mkdirSync(researchUploadsDir, { recursive: true });
+  fs.writeFileSync(
+    path.join(researchUploadsDir, "library_main.use"),
+    baseUse,
+    "utf8"
+  );
 
   const mainModel = await UseModel.create({
     name: "Library",
@@ -373,25 +722,31 @@ context Member inv hasName: self.name <> ''
   });
 
   // Helper to parse simple USE content to create child rows
-  const UseClass = require('./models/UseClass');
-  const UseAttribute = require('./models/UseAttribute');
+  const UseClass = require("./models/UseClass");
+  const UseAttribute = require("./models/UseAttribute");
   // const UseOperation = require('./models/UseOperation'); // operations not parsed in sample
-  const UseAssociation = require('./models/UseAssociation');
-  const UseAssociationPart = require('./models/UseAssociationPart');
-  const UseConstraint = require('./models/UseConstraint');
+  const UseAssociation = require("./models/UseAssociation");
+  const UseAssociationPart = require("./models/UseAssociationPart");
+  const UseConstraint = require("./models/UseConstraint");
 
   function parseUse(raw) {
     const result = { classes: [], associations: [], constraints: [] };
     // Classes
-    const classBlockRe = /^class\s+([A-Za-z0-9_]+)[\s\S]*?^end$/gmi;
-    let cb; while ((cb = classBlockRe.exec(raw)) !== null) {
+    const classBlockRe = /^class\s+([A-Za-z0-9_]+)[\s\S]*?^end$/gim;
+    let cb;
+    while ((cb = classBlockRe.exec(raw)) !== null) {
       const block = cb[0];
       const nameMatch = block.match(/^class\s+([A-Za-z0-9_]+)/i);
-      const name = nameMatch ? nameMatch[1] : 'Unknown';
+      const name = nameMatch ? nameMatch[1] : "Unknown";
       const cls = { name, attributes: [], operations: [] };
-      const attrMatch = block.match(/attributes\s*([\s\S]*?)(?:operations|end)/i);
+      const attrMatch = block.match(
+        /attributes\s*([\s\S]*?)(?:operations|end)/i
+      );
       if (attrMatch) {
-        const lines = attrMatch[1].split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        const lines = attrMatch[1]
+          .split(/\r?\n/)
+          .map((l) => l.trim())
+          .filter(Boolean);
         for (const line of lines) {
           const m = line.match(/^([A-Za-z0-9_]+)\s*:\s*([A-Za-z0-9_:<>]+)/);
           if (m) cls.attributes.push({ name: m[1], type: m[2] });
@@ -400,35 +755,59 @@ context Member inv hasName: self.name <> ''
       result.classes.push(cls);
     }
     // Associations
-    const assocRe = /association\s+([A-Za-z0-9_]+)\s+between([\s\S]*?)end/gmi;
-    let am; while ((am = assocRe.exec(raw)) !== null) {
-      const name = am[1]; const body = am[2];
-      const lines = body.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+    const assocRe = /association\s+([A-Za-z0-9_]+)\s+between([\s\S]*?)end/gim;
+    let am;
+    while ((am = assocRe.exec(raw)) !== null) {
+      const name = am[1];
+      const body = am[2];
+      const lines = body
+        .split(/\r?\n/)
+        .map((l) => l.trim())
+        .filter(Boolean);
       const parts = [];
       for (const line of lines) {
-        const pm = line.match(/([A-Za-z0-9_]+)\s*\[([^\]]+)\]\s*role\s*([A-Za-z0-9_]+)/i);
-        if (pm) parts.push({ className: pm[1], multiplicity: pm[2], role: pm[3] });
+        const pm = line.match(
+          /([A-Za-z0-9_]+)\s*\[([^\]]+)\]\s*role\s*([A-Za-z0-9_]+)/i
+        );
+        if (pm)
+          parts.push({ className: pm[1], multiplicity: pm[2], role: pm[3] });
       }
       result.associations.push({ name, parts });
     }
     // Constraints
-    const constraintRe = /^context\s+([A-Za-z0-9_]+)\s+inv\s+([A-Za-z0-9_]+)\s*:(.*)$/gmi;
-    let cm; while ((cm = constraintRe.exec(raw)) !== null) {
-      result.constraints.push({ context: cm[1], name: cm[2], expression: cm[3].trim() });
+    const constraintRe =
+      /^context\s+([A-Za-z0-9_]+)\s+inv\s+([A-Za-z0-9_]+)\s*:(.*)$/gim;
+    let cm;
+    while ((cm = constraintRe.exec(raw)) !== null) {
+      result.constraints.push({
+        context: cm[1],
+        name: cm[2],
+        expression: cm[3].trim(),
+      });
     }
     return result;
   }
 
   async function populateModel(useModelRow) {
-    const parsed = parseUse(useModelRow.raw_text || '');
+    const parsed = parseUse(useModelRow.raw_text || "");
     for (const cls of parsed.classes) {
-      const clsRow = await UseClass.create({ use_model_id: useModelRow.id, name: cls.name });
+      const clsRow = await UseClass.create({
+        use_model_id: useModelRow.id,
+        name: cls.name,
+      });
       for (const attr of cls.attributes) {
-        await UseAttribute.create({ use_class_id: clsRow.id, name: attr.name, type: attr.type });
+        await UseAttribute.create({
+          use_class_id: clsRow.id,
+          name: attr.name,
+          type: attr.type,
+        });
       }
     }
     for (const assoc of parsed.associations) {
-      const aRow = await UseAssociation.create({ use_model_id: useModelRow.id, name: assoc.name });
+      const aRow = await UseAssociation.create({
+        use_model_id: useModelRow.id,
+        name: assoc.name,
+      });
       for (const part of assoc.parts) {
         await UseAssociationPart.create({
           use_association_id: aRow.id,
@@ -442,7 +821,7 @@ context Member inv hasName: self.name <> ''
       await UseConstraint.create({
         use_model_id: useModelRow.id,
         context: cons.context,
-        kind: 'invariant',
+        kind: "invariant",
         name: cons.name,
         expression: cons.expression,
       });
@@ -451,9 +830,18 @@ context Member inv hasName: self.name <> ''
 
   await populateModel(mainModel);
 
+  // Create multiple research projects (PUBLIC and PRIVATE)
   const project = await ResearchProject.create({
-    title: "UML/OCL Library Project",
-    description: "Community project to model a library domain.",
+    title: "UML/OCL Library Management System",
+    description:
+      "Public community project to collaboratively model a\\n" +
+      "comprehensive library management system.\\n\\n" +
+      "Goals:\\n" +
+      "- Create a complete UML model with OCL constraints\\n" +
+      "- Document best practices for library domain modeling\\n" +
+      "- Serve as educational resource for students\\n\\n" +
+      "Current focus: Core entities (Book, Member, Loan)\\n" +
+      "Next phase: Advanced features (Reservations, Fines, Digital Media)",
     status: "ACTIVE",
     owner_id: owner.id,
     visibility: "PUBLIC",
@@ -476,12 +864,235 @@ context Member inv hasName: self.name <> ''
     role: "CONTRIBUTOR",
   });
 
+  // PRIVATE research project 1
+  const hospitalUse =
+    "model Hospital\\n\\nclass Patient\\nattributes\\n" +
+    "    patientId : Integer\\n    name : String\\nend\\n";
+  fs.writeFileSync(
+    path.join(researchUploadsDir, "hospital_main.use"),
+    hospitalUse,
+    "utf8"
+  );
+  const hospitalModel = await UseModel.create({
+    name: "Hospital",
+    file_path: "/uploads/research/hospital_main.use",
+    raw_text: hospitalUse,
+    owner_id: teacherUser.id,
+  });
+  await populateModel(hospitalModel);
+
+  const project2 = await ResearchProject.create({
+    title: "Hospital Management System Design",
+    description:
+      "PRIVATE research project for healthcare system modeling.\\n\\n" +
+      "Confidential project modeling hospital operations.\\n" +
+      "Focus areas:\\n" +
+      "- Patient records and privacy\\n" +
+      "- Medical staff scheduling\\n" +
+      "- Treatment protocols\\n" +
+      "- Medication management\\n\\n" +
+      "Access restricted to project team only.\\n" +
+      "Contains sensitive healthcare business logic.",
+    status: "ACTIVE",
+    owner_id: teacherUser.id,
+    visibility: "PRIVATE",
+    main_use_model_id: hospitalModel.id,
+  });
+
+  await ResearchProjectMember.create({
+    research_project_id: project2.id,
+    user_id: teacherUser.id,
+    role: "OWNER",
+  });
+  await ResearchProjectMember.create({
+    research_project_id: project2.id,
+    user_id: researcherUser.id,
+    role: "CONTRIBUTOR",
+  });
+
+  // PUBLIC research project 2
+  const ecommerceUse =
+    "model Ecommerce\\n\\nclass Product\\nattributes\\n" +
+    "    productId : Integer\\n    name : String\\n    price : Real\\nend\\n";
+  fs.writeFileSync(
+    path.join(researchUploadsDir, "ecommerce_main.use"),
+    ecommerceUse,
+    "utf8"
+  );
+  const ecommerceModel = await UseModel.create({
+    name: "Ecommerce",
+    file_path: "/uploads/research/ecommerce_main.use",
+    raw_text: ecommerceUse,
+    owner_id: researcherUser.id,
+  });
+  await populateModel(ecommerceModel);
+
+  const project3 = await ResearchProject.create({
+    title: "E-Commerce Platform Pattern Library",
+    description:
+      "Open source patterns for e-commerce systems.\\n\\n" +
+      "Objectives:\\n" +
+      "- Catalog common e-commerce design patterns\\n" +
+      "- Provide reusable UML/OCL templates\\n" +
+      "- Document real-world implementations\\n\\n" +
+      "Patterns included:\\n" +
+      "- Shopping cart with inventory checks\\n" +
+      "- Order processing workflow\\n" +
+      "- Payment gateway integration\\n" +
+      "- Product catalog with variants\\n\\n" +
+      "Open for community contributions!",
+    status: "ACTIVE",
+    owner_id: researcherUser.id,
+    visibility: "PUBLIC",
+    main_use_model_id: ecommerceModel.id,
+  });
+
+  await ResearchProjectMember.create({
+    research_project_id: project3.id,
+    user_id: researcherUser.id,
+    role: "OWNER",
+  });
+  await ResearchProjectMember.create({
+    research_project_id: project3.id,
+    user_id: studentUser.id,
+    role: "CONTRIBUTOR",
+  });
+
+  // PRIVATE research project 2
+  const bankingUse =
+    "model Banking\\n\\nclass Account\\nattributes\\n" +
+    "    accountNumber : String\\n    balance : Real\\nend\\n";
+  fs.writeFileSync(
+    path.join(researchUploadsDir, "banking_private.use"),
+    bankingUse,
+    "utf8"
+  );
+  const bankingModel = await UseModel.create({
+    name: "Banking",
+    file_path: "/uploads/research/banking_private.use",
+    raw_text: bankingUse,
+    owner_id: owner.id,
+  });
+  await populateModel(bankingModel);
+
+  const project4 = await ResearchProject.create({
+    title: "Secure Banking System Architecture",
+    description:
+      "CONFIDENTIAL: Advanced banking system design.\\n\\n" +
+      "Proprietary research for financial institutions.\\n" +
+      "Security-focused modeling of:\\n" +
+      "- Multi-factor authentication\\n" +
+      "- Transaction verification protocols\\n" +
+      "- Fraud detection algorithms\\n" +
+      "- Regulatory compliance constraints\\n\\n" +
+      "Access restricted - NDA required.\\n" +
+      "Contains proprietary business logic.",
+    status: "ACTIVE",
+    owner_id: owner.id,
+    visibility: "PRIVATE",
+    main_use_model_id: bankingModel.id,
+  });
+
+  await ResearchProjectMember.create({
+    research_project_id: project4.id,
+    user_id: owner.id,
+    role: "OWNER",
+  });
+  await ResearchProjectMember.create({
+    research_project_id: project4.id,
+    user_id: moderator.id,
+    role: "MODERATOR",
+  });
+
+  // PUBLIC research project 3
+  const socialUse =
+    "model SocialNetwork\\n\\nclass User\\nattributes\\n" +
+    "    userId : Integer\\n    username : String\\nend\\n";
+  fs.writeFileSync(
+    path.join(researchUploadsDir, "social_main.use"),
+    socialUse,
+    "utf8"
+  );
+  const socialModel = await UseModel.create({
+    name: "SocialNetwork",
+    file_path: "/uploads/research/social_main.use",
+    raw_text: socialUse,
+    owner_id: contributor.id,
+  });
+  await populateModel(socialModel);
+
+  const project5 = await ResearchProject.create({
+    title: "Social Network Data Model Study",
+    description:
+      "Academic research on social network modeling.\\n\\n" +
+      "Research questions:\\n" +
+      "- How to model friend relationships efficiently?\\n" +
+      "- What constraints ensure data consistency?\\n" +
+      "- Privacy modeling with OCL\\n\\n" +
+      "Collaboration welcome!\\n" +
+      "Currently exploring:\\n" +
+      "- Graph traversal constraints\\n" +
+      "- Privacy levels and access control\\n" +
+      "- Content moderation rules",
+    status: "ACTIVE",
+    owner_id: contributor.id,
+    visibility: "PUBLIC",
+    main_use_model_id: socialModel.id,
+  });
+
+  await ResearchProjectMember.create({
+    research_project_id: project5.id,
+    user_id: contributor.id,
+    role: "OWNER",
+  });
+
+  // PRIVATE research project 3 - Student group project
+  const studentProjectUse = "model StudentProject\\n\\nclass Task\\nend\\n";
+  fs.writeFileSync(
+    path.join(researchUploadsDir, "student_group.use"),
+    studentProjectUse,
+    "utf8"
+  );
+  const studentProjectModel = await UseModel.create({
+    name: "StudentProject",
+    file_path: "/uploads/research/student_group.use",
+    raw_text: studentProjectUse,
+    owner_id: studentUser.id,
+  });
+  await populateModel(studentProjectModel);
+
+  const project6 = await ResearchProject.create({
+    title: "Group Assignment: Task Management System",
+    description:
+      "PRIVATE group project for OCL course assignment.\\n\\n" +
+      "Team members working on:\\n" +
+      "- Task creation and assignment\\n" +
+      "- Priority and deadline management\\n" +
+      "- Team collaboration features\\n\\n" +
+      "This is a course assignment project.\\n" +
+      "Access limited to group members and instructor.",
+    status: "ACTIVE",
+    owner_id: studentUser.id,
+    visibility: "PRIVATE",
+    main_use_model_id: studentProjectModel.id,
+  });
+
+  await ResearchProjectMember.create({
+    research_project_id: project6.id,
+    user_id: studentUser.id,
+    role: "OWNER",
+  });
+
   // Contribution 1: Add Author class (PENDING)
   const contrib1Text =
     "model Library\n\nclass Book\nattributes\n    title : String\nend\n\n" +
     "class Author\nattributes\n    name : String\nend\n\n" +
     "association Wrote between\n    Author [1..*] role writer\n    Book [1..*] role work\nend\n";
-  fs.writeFileSync(path.join(researchUploadsDir, 'library_add_author.use'), contrib1Text, 'utf8');
+  fs.writeFileSync(
+    path.join(researchUploadsDir, "library_add_author.use"),
+    contrib1Text,
+    "utf8"
+  );
   const contrib1Model = await UseModel.create({
     name: "Library",
     file_path: "/uploads/research/library_add_author.use",
@@ -502,7 +1113,11 @@ context Member inv hasName: self.name <> ''
   const contrib2Text =
     "model Library\n\nclass Book\nattributes\n    title : String\nend\n\n" +
     "constraints\ncontext Book inv titleNotEmpty: self.title.size() > 0\n";
-  fs.writeFileSync(path.join(researchUploadsDir, 'library_invariant.use'), contrib2Text, 'utf8');
+  fs.writeFileSync(
+    path.join(researchUploadsDir, "library_invariant.use"),
+    contrib2Text,
+    "utf8"
+  );
   const contrib2Model = await UseModel.create({
     name: "Library",
     file_path: "/uploads/research/library_invariant.use",
@@ -523,7 +1138,11 @@ context Member inv hasName: self.name <> ''
   const contrib3Text =
     "model Library\n\nclass Book\nattributes\n    title : String\nend\n\n" +
     "-- bad syntax below\ncontext Book inv broken: self.\n";
-  fs.writeFileSync(path.join(researchUploadsDir, 'library_broken.use'), contrib3Text, 'utf8');
+  fs.writeFileSync(
+    path.join(researchUploadsDir, "library_broken.use"),
+    contrib3Text,
+    "utf8"
+  );
   const contrib3Model = await UseModel.create({
     name: "Library",
     file_path: "/uploads/research/library_broken.use",
@@ -544,7 +1163,11 @@ context Member inv hasName: self.name <> ''
   // Contribution 4: From teacher (PENDING)
   const contrib4Text =
     "model Library\n\nclass Book\nattributes\n    title : String\n    isbn : String\nend\n";
-  fs.writeFileSync(path.join(researchUploadsDir, 'library_add_isbn.use'), contrib4Text, 'utf8');
+  fs.writeFileSync(
+    path.join(researchUploadsDir, "library_add_isbn.use"),
+    contrib4Text,
+    "utf8"
+  );
   const contrib4Model = await UseModel.create({
     name: "Library",
     file_path: "/uploads/research/library_add_isbn.use",
@@ -566,7 +1189,11 @@ context Member inv hasName: self.name <> ''
     "model Library\n\n" +
     "class Member\nattributes\n    memberId : Integer\n" +
     "    name : String\n    email : String\nend\n";
-  fs.writeFileSync(path.join(researchUploadsDir, 'library_add_email.use'), contrib5Text, 'utf8');
+  fs.writeFileSync(
+    path.join(researchUploadsDir, "library_add_email.use"),
+    contrib5Text,
+    "utf8"
+  );
   const contrib5Model = await UseModel.create({
     name: "Library",
     file_path: "/uploads/research/library_add_email.use",
@@ -588,9 +1215,9 @@ context Member inv hasName: self.name <> ''
     "model Library\n\nclass Librarian\nattributes\n" +
     "    employeeId : Integer\n    name : String\nend\n";
   fs.writeFileSync(
-    path.join(researchUploadsDir, 'library_add_librarian.use'),
+    path.join(researchUploadsDir, "library_add_librarian.use"),
     contrib6Text,
-    'utf8'
+    "utf8"
   );
   const contrib6Model = await UseModel.create({
     name: "Library",
@@ -611,7 +1238,11 @@ context Member inv hasName: self.name <> ''
   // Contribution 7: From researcher (NEEDS_EDIT)
   const contrib7Text =
     "model Library\n\nclass Book\nattributes\n    title : String\n    publishYear : Integer\nend\n";
-  fs.writeFileSync(path.join(researchUploadsDir, 'library_add_year.use'), contrib7Text, 'utf8');
+  fs.writeFileSync(
+    path.join(researchUploadsDir, "library_add_year.use"),
+    contrib7Text,
+    "utf8"
+  );
   const contrib7Model = await UseModel.create({
     name: "Library",
     file_path: "/uploads/research/library_add_year.use",
@@ -629,11 +1260,17 @@ context Member inv hasName: self.name <> ''
   });
 
   // Contribution 8: From another student (PENDING)
-  const student2 = await User.findOne({ where: { email: 'student2@example.com' } });
+  const student2 = await User.findOne({
+    where: { email: "student2@example.com" },
+  });
   if (student2) {
     const contrib8Text =
       "model Library\n\nclass Book\nattributes\n    title : String\n    genre : String\nend\n";
-    fs.writeFileSync(path.join(researchUploadsDir, 'library_add_genre.use'), contrib8Text, 'utf8');
+    fs.writeFileSync(
+      path.join(researchUploadsDir, "library_add_genre.use"),
+      contrib8Text,
+      "utf8"
+    );
     const contrib8Model = await UseModel.create({
       name: "Library",
       file_path: "/uploads/research/library_add_genre.use",
@@ -652,12 +1289,18 @@ context Member inv hasName: self.name <> ''
   }
 
   // Contribution 9: From another student (ACCEPTED)
-  const student3 = await User.findOne({ where: { email: 'student3@example.com' } });
+  const student3 = await User.findOne({
+    where: { email: "student3@example.com" },
+  });
   if (student3) {
     const contrib9Text =
       "model Library\n\nclass Loan\nattributes\n" +
       "    loanDate : String\n    returnDate : String\nend\n";
-    fs.writeFileSync(path.join(researchUploadsDir, 'library_add_loan.use'), contrib9Text, 'utf8');
+    fs.writeFileSync(
+      path.join(researchUploadsDir, "library_add_loan.use"),
+      contrib9Text,
+      "utf8"
+    );
     const contrib9Model = await UseModel.create({
       name: "Library",
       file_path: "/uploads/research/library_add_loan.use",
@@ -679,9 +1322,9 @@ context Member inv hasName: self.name <> ''
   const contrib10Text =
     "model Library\n\nclass Publisher\nattributes\n    name : String\n    country : String\nend\n";
   fs.writeFileSync(
-    path.join(researchUploadsDir, 'library_add_publisher.use'),
+    path.join(researchUploadsDir, "library_add_publisher.use"),
     contrib10Text,
-    'utf8'
+    "utf8"
   );
   const contrib10Model = await UseModel.create({
     name: "Library",
@@ -700,15 +1343,17 @@ context Member inv hasName: self.name <> ''
   });
 
   // Contribution 11: From student4 (PENDING)
-  const student4 = await User.findOne({ where: { email: 'student4@example.com' } });
+  const student4 = await User.findOne({
+    where: { email: "student4@example.com" },
+  });
   if (student4) {
     const contrib11Text =
       "model Library\n\nclass Book\nattributes\n    title : String\n" +
       "    pageCount : Integer\nend\n";
     fs.writeFileSync(
-      path.join(researchUploadsDir, 'library_add_pagecount.use'),
+      path.join(researchUploadsDir, "library_add_pagecount.use"),
       contrib11Text,
-      'utf8'
+      "utf8"
     );
     const contrib11Model = await UseModel.create({
       name: "Library",
@@ -728,15 +1373,17 @@ context Member inv hasName: self.name <> ''
   }
 
   // Contribution 12: From student5 (REJECTED)
-  const student5 = await User.findOne({ where: { email: 'student5@example.com' } });
+  const student5 = await User.findOne({
+    where: { email: "student5@example.com" },
+  });
   if (student5) {
     const contrib12Text =
       "model Library\n\nclass Member\nattributes\n" +
       "    password : String\nend\n";
     fs.writeFileSync(
-      path.join(researchUploadsDir, 'library_add_password.use'),
+      path.join(researchUploadsDir, "library_add_password.use"),
       contrib12Text,
-      'utf8'
+      "utf8"
     );
     const contrib12Model = await UseModel.create({
       name: "Library",
@@ -760,9 +1407,9 @@ context Member inv hasName: self.name <> ''
     "model Library\n\nclass Category\nattributes\n    name : String\n" +
     "    description : String\nend\n";
   fs.writeFileSync(
-    path.join(researchUploadsDir, 'library_add_category.use'),
+    path.join(researchUploadsDir, "library_add_category.use"),
     contrib13Text,
-    'utf8'
+    "utf8"
   );
   const contrib13Model = await UseModel.create({
     name: "Library",
@@ -785,9 +1432,9 @@ context Member inv hasName: self.name <> ''
     "model Library\n\nclass Book\nattributes\n    title : String\n" +
     "    availability : Boolean\nend\n";
   fs.writeFileSync(
-    path.join(researchUploadsDir, 'library_add_availability.use'),
+    path.join(researchUploadsDir, "library_add_availability.use"),
     contrib14Text,
-    'utf8'
+    "utf8"
   );
   const contrib14Model = await UseModel.create({
     name: "Library",
@@ -810,9 +1457,9 @@ context Member inv hasName: self.name <> ''
     "model Library\n\nclass Review\nattributes\n    rating : Integer\n" +
     "    comment : String\nend\n";
   fs.writeFileSync(
-    path.join(researchUploadsDir, 'library_add_review.use'),
+    path.join(researchUploadsDir, "library_add_review.use"),
     contrib15Text,
-    'utf8'
+    "utf8"
   );
   const contrib15Model = await UseModel.create({
     name: "Library",
@@ -832,24 +1479,25 @@ context Member inv hasName: self.name <> ''
 
   // Seed comments for some contributions
   const ContributionComment = require("./models/ContributionComment");
-  
+
   // Comments for contribution 1 (Add Author entity)
   await ContributionComment.create({
     contribution_id: 1,
     user_id: teacherUser.id,
     comment_text: "Good idea! But should we add nationality for Author?",
   });
-  
+
   await ContributionComment.create({
     contribution_id: 1,
     user_id: studentUser.id,
     comment_text: "I agree with adding nationality field.",
   });
-  
+
   await ContributionComment.create({
     contribution_id: 1,
     user_id: researcherUser.id,
-    comment_text: "We could also add birth_date and death_date for historical authors.",
+    comment_text:
+      "We could also add birth_date and death_date for historical authors.",
   });
 
   // Comments for contribution 5 (Add email to Member)
@@ -858,7 +1506,7 @@ context Member inv hasName: self.name <> ''
     user_id: teacherUser.id,
     comment_text: "Email is essential for notifications. Approved!",
   });
-  
+
   await ContributionComment.create({
     contribution_id: 5,
     user_id: researcherUser.id,
@@ -869,9 +1517,10 @@ context Member inv hasName: self.name <> ''
   await ContributionComment.create({
     contribution_id: 8,
     user_id: moderator.id,
-    comment_text: "We need to track loan duration. Can you add due_date attribute?",
+    comment_text:
+      "We need to track loan duration. Can you add due_date attribute?",
   });
-  
+
   await ContributionComment.create({
     contribution_id: 8,
     user_id: owner.id,
@@ -885,7 +1534,9 @@ context Member inv hasName: self.name <> ''
     comment_text: "This is really useful for checking book availability!",
   });
 
-  console.log("Seeded sample data with 15 contributions and comments for project ID 1!");
+  console.log(
+    "Seeded sample data with 15 contributions and comments for project ID 1!"
+  );
 };
 
 module.exports = initDatabase;
