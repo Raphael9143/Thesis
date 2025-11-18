@@ -20,6 +20,17 @@ const Submission = sequelize.define(
     student_id: {
       type: DataTypes.BIGINT.UNSIGNED,
       allowNull: false,
+      comment: "Student who submitted (even in group work)",
+    },
+    assignment_group_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+      comment: "Reference to assignment group (NULL if individual)",
+    },
+    exam_group_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+      comment: "Reference to exam group (NULL if individual)",
     },
     submission_time: {
       type: DataTypes.DATE,
@@ -71,6 +82,14 @@ Submission.belongsTo(require("./Exam"), {
 Submission.belongsTo(require("./Student"), {
   foreignKey: "student_id",
   as: "student",
+});
+Submission.belongsTo(require("./AssignmentGroup"), {
+  foreignKey: "assignment_group_id",
+  as: "assignmentGroup",
+});
+Submission.belongsTo(require("./ExamGroup"), {
+  foreignKey: "exam_group_id",
+  as: "examGroup",
 });
 
 module.exports = Submission;

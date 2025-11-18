@@ -41,6 +41,8 @@ const SubmissionController = {
       let maxAttempts = 1;
       let targetType = null; // 'assignment' | 'exam'
       let targetId = null;
+      let assignmentGroupId = null;
+      let examGroupId = null;
 
       if (assignment_id) {
         const assignment = await Assignment.findByPk(assignment_id);
@@ -86,6 +88,32 @@ const SubmissionController = {
         maxAttempts = Number(assignment.submission_limit || 1) || 1;
         targetType = "assignment";
         targetId = assignment_id;
+
+        // Check if assignment is GROUP type
+        if (assignment.type === "GROUP") {
+          const GroupMember = require("../models/GroupMember");
+          const groupMember = await GroupMember.findOne({
+            where: {
+              student_id: req.user.userId,
+              assignment_group_id: { [Op.ne]: null },
+            },
+            include: [
+              {
+                model: require("../models/AssignmentGroup"),
+                as: "assignmentGroup",
+                where: { assignment_id: assignment_id },
+                required: true,
+              },
+            ],
+          });
+          if (!groupMember) {
+            return res.status(403).json({
+              success: false,
+              message: "You must be in a group to submit this GROUP assignment.",
+            });
+          }
+          assignmentGroupId = groupMember.assignment_group_id;
+        }
       } else {
         // exam_id path
         const exam = await require("../models/Exam").findByPk(exam_id);
@@ -118,6 +146,32 @@ const SubmissionController = {
         maxAttempts = Number(exam.submission_limit || 1) || 1;
         targetType = "exam";
         targetId = exam_id;
+
+        // Check if exam is GROUP type
+        if (exam.type === "GROUP") {
+          const GroupMember = require("../models/GroupMember");
+          const groupMember = await GroupMember.findOne({
+            where: {
+              student_id: req.user.userId,
+              exam_group_id: { [Op.ne]: null },
+            },
+            include: [
+              {
+                model: require("../models/ExamGroup"),
+                as: "examGroup",
+                where: { exam_id: exam_id },
+                required: true,
+              },
+            ],
+          });
+          if (!groupMember) {
+            return res.status(403).json({
+              success: false,
+              message: "You must be in a group to submit this GROUP exam.",
+            });
+          }
+          examGroupId = groupMember.exam_group_id;
+        }
       }
 
       // Attachment (single file) is required and must be a .use file
@@ -156,6 +210,8 @@ const SubmissionController = {
       const submission = await Submission.create({
         assignment_id: assignment_id || null,
         exam_id: exam_id || null,
+        assignment_group_id: assignmentGroupId,
+        exam_group_id: examGroupId,
         student_id: req.user.userId,
         submission_time: new Date(),
         attempt_number,
