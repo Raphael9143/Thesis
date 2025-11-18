@@ -24,7 +24,7 @@ export default function ContributionChangesTab({
       return <div className="contribution-diff-error">Unable to show changes - missing model data</div>;
     }
 
-    const diffLines = computeDiff(originalModel.raw_text, useModel.raw_text);
+    const diffLines = computeDiff(originalModel.raw_text, useModel.raw_text, { context: 3, collapse: true });
 
     return (
       <div className="contribution-diff-container">
@@ -41,12 +41,28 @@ export default function ContributionChangesTab({
           </div>
         </div>
         <pre className="contribution-diff-content">
-          {diffLines.map((item, idx) => (
-            <div key={idx} className={`contribution-diff-line contribution-diff-line-${item.type}`}>
-              <span className="contribution-diff-line-num">{item.lineNum}</span>
-              <span className="contribution-diff-line-text">{item.line || ' '}</span>
-            </div>
-          ))}
+          {diffLines.map((item, idx) => {
+            if (item.type === 'skip') {
+              return (
+                <div key={idx} className="contribution-diff-line contribution-diff-line-skip">
+                  <span className="contribution-diff-line-num">…</span>
+                  <span className="contribution-diff-line-text">Skipped {item.skipCount} unchanged lines</span>
+                </div>
+              );
+            }
+            const lineNumDisplay = (() => {
+              if (item.type === 'added') return `+${item.modLineNum}`;
+              if (item.type === 'removed') return `-${item.origLineNum}`;
+              if (item.type === 'unchanged') return `${item.origLineNum}`;
+              return '';
+            })();
+            return (
+              <div key={idx} className={`contribution-diff-line contribution-diff-line-${item.type}`}>
+                <span className="contribution-diff-line-num">{lineNumDisplay}</span>
+                <span className="contribution-diff-line-text">{item.line || ' '}</span>
+              </div>
+            );
+          })}
         </pre>
       </div>
     );
