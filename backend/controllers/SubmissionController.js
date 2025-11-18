@@ -586,10 +586,10 @@ const SubmissionController = {
       const { Op } = require("sequelize");
       const ClassCourse = require("../models/ClassCourse");
       const enrolments = await ClassStudent.findAll({
-        where: { studentId: req.user.userId },
-        attributes: ["classId"],
+        where: { student_id: req.user.userId },
+        attributes: ["class_id"],
       });
-      const enrolledClassIds = enrolments.map((e) => e.classId ?? e.class_id);
+      const enrolledClassIds = enrolments.map((e) => e.class_id ?? e.classId);
       if (!enrolledClassIds || enrolledClassIds.length === 0)
         return res.status(403).json({
           success: false,
@@ -674,7 +674,7 @@ const SubmissionController = {
           if (classIds.length === 0)
             return res.json({ success: true, data: [] });
           const teacherClass = await Class.findOne({
-            where: { id: classIds, teacherId: userId },
+            where: { id: classIds, teacher_id: userId },
           });
           if (!teacherClass)
             return res
@@ -743,7 +743,7 @@ const SubmissionController = {
           if (classIds.length === 0)
             return res.json({ success: true, data: [] });
           const teacherClass = await Class.findOne({
-            where: { id: classIds, teacherId: userId },
+            where: { id: classIds, teacher_id: userId },
           });
           if (!teacherClass)
             return res
@@ -811,7 +811,7 @@ const SubmissionController = {
           if (classIds.length === 0)
             return res.json({ success: true, data: null });
           const teacherClass = await Class.findOne({
-            where: { id: classIds, teacherId: userId },
+            where: { id: classIds, teacher_id: userId },
           });
           if (!teacherClass)
             return res
