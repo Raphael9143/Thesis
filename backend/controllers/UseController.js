@@ -137,8 +137,8 @@ function parseUseContent(content) {
         .map((l) => l.trim())
         .filter(Boolean);
       for (const line of lines) {
-        // match 'name : Type' allowing namespace in type
-        const m = line.match(/^([a-zA-Z0-9_]+)\s*:\s*([A-Za-z0-9_:<>]+)\s*$/);
+        // match 'name : Type' (capture the full type portion up to line end)
+        const m = line.match(/^([a-zA-Z0-9_]+)\s*:\s*([^\r\n]+)\s*$/);
         if (m) cls.attributes.push({ name: m[1], type: m[2] });
       }
     }
@@ -172,11 +172,16 @@ function parseUseContent(content) {
       .filter(Boolean);
     const parts = [];
     for (const line of lines) {
-      // e.g. Customer [1] role owner
+      // e.g. Customer [1] role owner OR Customer [1]
       const m = line.match(
-        /([A-Za-z0-9_]+)\s*\[([^\]]+)\]\s*role\s*([A-Za-z0-9_]+)/i
+        /([A-Za-z0-9_]+)\s*\[([^\]]+)\](?:\s+role\s+([A-Za-z0-9_]+))?/i
       );
-      if (m) parts.push({ class: m[1], multiplicity: m[2].trim(), role: m[3] });
+      if (m)
+        parts.push({
+          class: m[1],
+          multiplicity: m[2].trim(),
+          role: m[3] || m[1].toLowerCase(),
+        });
     }
     res.associations.push({ name, parts });
   }
@@ -354,7 +359,7 @@ const UseController = {
           .status(404)
           .json({ success: false, message: "File not found" });
 
-      // Run USE CLI to validate and inspect the model
+      // Run USE CLI to validate and inspect the model (best-effort)
       let cliResult = null;
       try {
         cliResult = await runUseCli(filePath, 8000);
@@ -362,41 +367,42 @@ const UseController = {
         cliResult = { error: err.message };
       }
 
-      // Validation: if USE CLI reports errors or no model can be detected,
-      // return a 400 error indicating invalid .use file
+      const content = fs.readFileSync(filePath, "utf8");
+
+      // Try to parse from CLI output first if available and looks valid
+      let parsed = null;
       const stdoutText = (cliResult && cliResult.stdout) || "";
       const stderrText = (cliResult && cliResult.stderr) || "";
       const errorPattern =
         /error|syntax\s+error|could\s+not\s+open|failed|no viable alternative/i;
       const hasCliError = errorPattern.test(stderrText + "\n" + stdoutText);
       const hasModelLine = /(^|\n)\s*model\s+[A-Za-z0-9_]+/i.test(stdoutText);
-      if (cliResult && (hasCliError || !hasModelLine)) {
-        // Extract error message like "line 9:0 no viable alternative at input 'context'"
+
+      if (!hasCliError && hasModelLine && cliResult && cliResult.stdout) {
+        try {
+          parsed = parseCliOutput(cliResult.stdout);
+        } catch {
+          parsed = null;
+        }
+      }
+
+      // Fallback to parsing raw file content if CLI isn't available or failed
+      if (!parsed || !parsed.model) {
+        parsed = parseUseContent(content);
+      }
+
+      // If still no model parsed, return a helpful error using CLI message if present
+      if (!parsed || !parsed.model) {
         const errorMatch = (stderrText + "\n" + stdoutText).match(
           /line\s+\d+:\d+\s+.+/i
         );
         const errorMessage = errorMatch
           ? errorMatch[0]
+          : cliResult && cliResult.error
+          ? `USE CLI error: ${cliResult.error}`
           : "Invalid .use file. Please fix syntax or model errors.";
 
-        return res.status(400).json({
-          success: false,
-          message: errorMessage,
-        });
-      }
-
-      const content = fs.readFileSync(filePath, "utf8");
-      let parsed = null;
-      if (cliResult && cliResult.stdout) {
-        try {
-          parsed = parseCliOutput(cliResult.stdout);
-        } catch (e) {
-          // fallback to parsing raw file
-          parsed = parseUseContent(content);
-          console.error("Error parsing CLI output, fallback to file parse:", e);
-        }
-      } else {
-        parsed = parseUseContent(content);
+        return res.status(400).json({ success: false, message: errorMessage });
       }
 
       return res.json({ success: true, cli: cliResult, model: parsed });
