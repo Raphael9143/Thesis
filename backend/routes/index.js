@@ -15,6 +15,7 @@ const lectureRoutes = require("./lecture");
 const examRoutes = require("./exam");
 const useRoutes = require("./use");
 const researchRoutes = require("./research");
+const groupRoutes = require("./group");
 
 const { specs, swaggerUi } = require("../config/swagger");
 
@@ -78,6 +79,8 @@ app.use("/api/exams", examRoutes);
 app.use("/api/use", useRoutes);
 // Research Project routes
 app.use("/api/research", researchRoutes);
+// Group routes (for group assignments/exams)
+app.use("/api/groups", groupRoutes);
 
 app.use("/uploads", express.static("uploads"));
 // Multer error handler: give clearer message instead of stacktrace
