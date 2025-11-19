@@ -9,7 +9,7 @@ export default function ClassCard({
   badge,
   description,
   className,
-  maxDescriptionChars = 30,
+  maxDescriptionChars = 26,
 }) {
   const handleKeyPress = (e) => {
     if (!onClick) return;
