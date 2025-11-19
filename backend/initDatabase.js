@@ -261,17 +261,7 @@ const initDatabase = async () => {
   const assignment = await Assignment.create({
     course_id: course.course_id,
     title: "Exercise 1: Basic OCL Constraints",
-    description:
-      "Introduction to writing basic OCL constraints.\\n\\n" +
-      "Objectives:\\n" +
-      "- Understand OCL syntax and context declarations\\n" +
-      "- Write simple invariants for class attributes\\n" +
-      "- Test constraints using the USE tool\\n\\n" +
-      "Tasks:\\n" +
-      "1. Model a simple library system with Book and Member classes\\n" +
-      "2. Add invariants to ensure data validity\\n" +
-      "3. Create test cases to verify your constraints\\n\\n" +
-      "Deliverables: Submit a .use file with your model and constraints",
+    description: "Learn OCL basics and write simple invariants. Submit a .use model file.",
     created_by: teacherUser.id,
     attachment: "/uploads/assignments/sample.use",
     type: "SINGLE",
@@ -310,20 +300,8 @@ const initDatabase = async () => {
     course_id: course.course_id,
     title: "Midterm Exam: OCL Fundamentals",
     description:
-      "Comprehensive midterm covering weeks 1-6.\\n\\n" +
-      "Topics covered:\\n" +
-      "- OCL syntax and semantics\\n" +
-      "- Context declarations\\n" +
-      "- Invariants and constraints\\n" +
-      "- Collection operations\\n" +
-      "- Navigation expressions\\n\\n" +
-      "Exam format:\\n" +
-      "- Part 1: Multiple choice (20 points)\\n" +
-      "- Part 2: Short answer questions (30 points)\\n" +
-      "- Part 3: Practical modeling task (50 points)\\n\\n" +
-      "Duration: 120 minutes\\n" +
-      "Open book: No\\n" +
-      "Tools allowed: USE tool for Part 3",
+      "Midterm covering OCL fundamentals and practical modeling tasks. " +
+      "Closed-book exam lasting 120 minutes.",
     start_date: new Date("2025-10-15T09:00:00Z"),
     end_date: new Date("2025-10-15T11:00:00Z"),
     type: "SINGLE",
@@ -336,17 +314,8 @@ const initDatabase = async () => {
     course_id: course.course_id,
     title: "Exercise 2: Collection Operations in OCL",
     description:
-      "Master OCL collection operations and navigation.\\n\\n" +
-      "Objectives:\\n" +
-      "- Use collection operations (select, reject, collect, forAll, exists)\\n" +
-      "- Navigate associations in OCL expressions\\n" +
-      "- Write complex invariants involving multiple classes\\n\\n" +
-      "Tasks:\\n" +
-      "1. Extend your library model with associations\\n" +
-      "2. Write constraints using collection operations\\n" +
-      "3. Implement pre/post conditions for operations\\n\\n" +
-      "Bonus: Add derived attributes using OCL\\n" +
-      "Deliverables: Enhanced .use file with advanced constraints",
+      "Practice OCL collection operations and navigation. " +
+      "Deliver an enhanced .use file with advanced constraints.",
     created_by: teacherUser.id,
     attachment: "/uploads/exams/banking.use",
     type: "SINGLE",
@@ -810,14 +779,8 @@ const initDatabase = async () => {
   const project = await ResearchProject.create({
     title: "UML/OCL Library Management System",
     description:
-      "Public community project to collaboratively model a\\n" +
-      "comprehensive library management system.\\n\\n" +
-      "Goals:\\n" +
-      "- Create a complete UML model with OCL constraints\\n" +
-      "- Document best practices for library domain modeling\\n" +
-      "- Serve as educational resource for students\\n\\n" +
-      "Current focus: Core entities (Book, Member, Loan)\\n" +
-      "Next phase: Advanced features (Reservations, Fines, Digital Media)",
+      "Community project to build a UML/OCL model for library management. " +
+      "Focus on core entities (Book, Member, Loan) and educational examples.",
     status: "ACTIVE",
     owner_id: owner.id,
     visibility: "PUBLIC",
@@ -856,15 +819,8 @@ const initDatabase = async () => {
   const project2 = await ResearchProject.create({
     title: "Hospital Management System Design",
     description:
-      "PRIVATE research project for healthcare system modeling.\\n\\n" +
-      "Confidential project modeling hospital operations.\\n" +
-      "Focus areas:\\n" +
-      "- Patient records and privacy\\n" +
-      "- Medical staff scheduling\\n" +
-      "- Treatment protocols\\n" +
-      "- Medication management\\n\\n" +
-      "Access restricted to project team only.\\n" +
-      "Contains sensitive healthcare business logic.",
+      "Private healthcare modeling project focusing on hospital operations. " +
+      "Access restricted; concentrates on records, scheduling and medication management.",
     status: "ACTIVE",
     owner_id: teacherUser.id,
     visibility: "PRIVATE",
@@ -898,17 +854,8 @@ const initDatabase = async () => {
   const project3 = await ResearchProject.create({
     title: "E-Commerce Platform Pattern Library",
     description:
-      "Open source patterns for e-commerce systems.\\n\\n" +
-      "Objectives:\\n" +
-      "- Catalog common e-commerce design patterns\\n" +
-      "- Provide reusable UML/OCL templates\\n" +
-      "- Document real-world implementations\\n\\n" +
-      "Patterns included:\\n" +
-      "- Shopping cart with inventory checks\\n" +
-      "- Order processing workflow\\n" +
-      "- Payment gateway integration\\n" +
-      "- Product catalog with variants\\n\\n" +
-      "Open for community contributions!",
+      "Open-source catalog of e-commerce design patterns and UML/OCL templates. " +
+      "Provides reusable examples and welcomes community contributions.",
     status: "ACTIVE",
     owner_id: researcherUser.id,
     visibility: "PUBLIC",
@@ -942,15 +889,8 @@ const initDatabase = async () => {
   const project4 = await ResearchProject.create({
     title: "Secure Banking System Architecture",
     description:
-      "CONFIDENTIAL: Advanced banking system design.\\n\\n" +
-      "Proprietary research for financial institutions.\\n" +
-      "Security-focused modeling of:\\n" +
-      "- Multi-factor authentication\\n" +
-      "- Transaction verification protocols\\n" +
-      "- Fraud detection algorithms\\n" +
-      "- Regulatory compliance constraints\\n\\n" +
-      "Access restricted - NDA required.\\n" +
-      "Contains proprietary business logic.",
+      "Confidential research on secure banking architecture." +
+      " Focuses on authentication and fraud detection. Access restricted under NDA.",
     status: "ACTIVE",
     owner_id: owner.id,
     visibility: "PRIVATE",
@@ -984,17 +924,8 @@ const initDatabase = async () => {
   const project5 = await ResearchProject.create({
     title: "University System Modeling Research",
     description:
-      "Comprehensive university system modeling project.\\n\\n" +
-      "Research objectives:\\n" +
-      "- Model complex academic relationships\\n" +
-      "- Student enrollment and course management\\n" +
-      "- Professor-course assignments\\n" +
-      "- GPA calculation constraints\\n\\n" +
-      "Open collaboration project!\\n" +
-      "Areas of focus:\\n" +
-      "- Academic calendar constraints\\n" +
-      "- Prerequisites modeling\\n" +
-      "- Classroom scheduling",
+      "Project to model university processes such as enrollment, courses and scheduling. " +
+      "Open collaboration for academic constraint modeling.",
     status: "ACTIVE",
     owner_id: contributor.id,
     visibility: "PUBLIC",
@@ -1023,14 +954,8 @@ const initDatabase = async () => {
   const project6 = await ResearchProject.create({
     title: "Group Assignment: Airline Reservation System",
     description:
-      "PRIVATE group project for Advanced OCL course.\\n\\n" +
-      "Team deliverables:\\n" +
-      "- Complete flight booking system model\\n" +
-      "- Seat allocation constraints\\n" +
-      "- Reservation and cancellation logic\\n" +
-      "- Multi-passenger booking support\\n\\n" +
-      "Final project for Spring 2025 semester.\\n" +
-      "Access restricted to team members and course instructor.",
+      "Private group project to model an airline reservation system with booking and seat rules. " +
+      "Access restricted to team members and instructor.",
     status: "ACTIVE",
     owner_id: studentUser.id,
     visibility: "PRIVATE",
@@ -1043,18 +968,30 @@ const initDatabase = async () => {
     role: "OWNER",
   });
 
-  // Contribution 1: Add Author class (PENDING)
+  // Contribution 1: Introduce Author entity & Wrote association (based on new LibrarySystem)
   const contrib1Text =
-    "model Library\n\nclass Book\nattributes\n    title : String\nend\n\n" +
-    "class Author\nattributes\n    name : String\nend\n\n" +
-    "association Wrote between\n    Author [1..*] role writer\n    Book [1..*] role work\nend\n";
+    "model LibrarySystem\n\n" +
+    "class Author\nattributes\n" +
+    "    name : String\n" +
+    "    nationality : String\n" +
+    "end\n\n" +
+    "class Book\nattributes\n" +
+    "    isbn : String\n" +
+    "    title : String\n" +
+    "end\n\n" +
+    "association Wrote between\n" +
+    "    Author [1..*] role writers\n" +
+    "    Book   [1..*] role works\n" +
+    "end\n\n" +
+    "constraints\n" +
+    "context Author inv nameNotEmpty: name.size() > 0\n";
   fs.writeFileSync(
     path.join(researchUploadsDir, "library_add_author.use"),
     contrib1Text,
     "utf8"
   );
   const contrib1Model = await UseModel.create({
-    name: "Library",
+    name: "LibrarySystem",
     file_path: "/uploads/research/library_add_author.use",
     raw_text: contrib1Text,
     owner_id: contributor.id,
@@ -1069,17 +1006,22 @@ const initDatabase = async () => {
     status: "PENDING",
   });
 
-  // Contribution 2: Add invariant (NEEDS_EDIT)
+  // Contribution 2: Add invariant ensuring publicationYear in valid range
   const contrib2Text =
-    "model Library\n\nclass Book\nattributes\n    title : String\nend\n\n" +
-    "constraints\ncontext Book inv titleNotEmpty: self.title.size() > 0\n";
+    "model LibrarySystem\n\n" +
+    "class Book\nattributes\n" +
+    "    publicationYear : Integer\n" +
+    "    title : String\n" +
+    "end\n\n" +
+    "constraints\n" +
+    "context Book inv validPublicationYear: publicationYear >= 1900 and publicationYear <= 2025\n";
   fs.writeFileSync(
     path.join(researchUploadsDir, "library_invariant.use"),
     contrib2Text,
     "utf8"
   );
   const contrib2Model = await UseModel.create({
-    name: "Library",
+    name: "LibrarySystem",
     file_path: "/uploads/research/library_invariant.use",
     raw_text: contrib2Text,
     owner_id: contributor.id,
@@ -1094,17 +1036,20 @@ const initDatabase = async () => {
     status: "PENDING",
   });
 
-  // Contribution 3: Rejected sample
+  // Contribution 3: Rejected sample (kept for testing) – malformed invariant
   const contrib3Text =
-    "model Library\n\nclass Book\nattributes\n    title : String\nend\n\n" +
-    "-- bad syntax below\ncontext Book inv broken: self.\n";
+    "model LibrarySystem\n\n" +
+    "class Book\nattributes\n" +
+    "    title : String\n" +
+    "end\n\n" +
+    "context Book inv broken: self.\n";
   fs.writeFileSync(
     path.join(researchUploadsDir, "library_broken.use"),
     contrib3Text,
     "utf8"
   );
   const contrib3Model = await UseModel.create({
-    name: "Library",
+    name: "LibrarySystem",
     file_path: "/uploads/research/library_broken.use",
     raw_text: contrib3Text,
     owner_id: contributor.id,
@@ -1122,14 +1067,22 @@ const initDatabase = async () => {
   // Additional 7 contributions from various users to test pagination
   // Contribution 4: From teacher (PENDING)
   const contrib4Text =
-    "model Library\n\nclass Book\nattributes\n    title : String\n    isbn : String\nend\n";
+    "model LibrarySystem\n\n" +
+    "class Book\nattributes\n" +
+    "    isbn : String\n" +
+    "    title : String\n" +
+    "    totalCopies : Integer\n" +
+    "    availableCopies : Integer\n" +
+    "end\n\n" +
+    "constraints\n" +
+    "context Book inv copiesInRange: availableCopies >= 0 and availableCopies <= totalCopies\n";
   fs.writeFileSync(
     path.join(researchUploadsDir, "library_add_isbn.use"),
     contrib4Text,
     "utf8"
   );
   const contrib4Model = await UseModel.create({
-    name: "Library",
+    name: "LibrarySystem",
     file_path: "/uploads/research/library_add_isbn.use",
     raw_text: contrib4Text,
     owner_id: teacherUser.id,
@@ -1146,16 +1099,23 @@ const initDatabase = async () => {
 
   // Contribution 5: From student (ACCEPTED)
   const contrib5Text =
-    "model Library\n\n" +
-    "class Member\nattributes\n    memberId : Integer\n" +
-    "    name : String\n    email : String\nend\n";
+    "model LibrarySystem\n\n" +
+    "class Member\nattributes\n" +
+    "    memberId : String\n" +
+    "    name : String\n" +
+    "    email : String\n" +
+    "    membershipType : String\n" +
+    "end\n\n" +
+    "constraints\n" +
+    "context Member inv membershipAllowed: Set{'STANDARD','PREMIUM','STUDENT'}" +
+    "->includes(membershipType)\n";
   fs.writeFileSync(
     path.join(researchUploadsDir, "library_add_email.use"),
     contrib5Text,
     "utf8"
   );
   const contrib5Model = await UseModel.create({
-    name: "Library",
+    name: "LibrarySystem",
     file_path: "/uploads/research/library_add_email.use",
     raw_text: contrib5Text,
     owner_id: studentUser.id,
@@ -1172,15 +1132,21 @@ const initDatabase = async () => {
 
   // Contribution 6: From moderator (PENDING)
   const contrib6Text =
-    "model Library\n\nclass Librarian\nattributes\n" +
-    "    employeeId : Integer\n    name : String\nend\n";
+    "model LibrarySystem\n\n" +
+    "class Librarian\nattributes\n" +
+    "    employeeId : String\n" +
+    "    name : String\n" +
+    "    position : String\n" +
+    "end\n\n" +
+    "constraints\n" +
+    "context Librarian inv positionNotEmpty: position.size() > 0\n";
   fs.writeFileSync(
     path.join(researchUploadsDir, "library_add_librarian.use"),
     contrib6Text,
     "utf8"
   );
   const contrib6Model = await UseModel.create({
-    name: "Library",
+    name: "LibrarySystem",
     file_path: "/uploads/research/library_add_librarian.use",
     raw_text: contrib6Text,
     owner_id: moderator.id,
@@ -1197,14 +1163,20 @@ const initDatabase = async () => {
 
   // Contribution 7: From researcher (NEEDS_EDIT)
   const contrib7Text =
-    "model Library\n\nclass Book\nattributes\n    title : String\n    publishYear : Integer\nend\n";
+    "model LibrarySystem\n\n" +
+    "class Book\nattributes\n" +
+    "    title : String\n" +
+    "    publicationYear : Integer\n" +
+    "end\n\n" +
+    "constraints\n" +
+    "context Book inv publicationYearFuture: publicationYear <= 2030\n";
   fs.writeFileSync(
     path.join(researchUploadsDir, "library_add_year.use"),
     contrib7Text,
     "utf8"
   );
   const contrib7Model = await UseModel.create({
-    name: "Library",
+    name: "LibrarySystem",
     file_path: "/uploads/research/library_add_year.use",
     raw_text: contrib7Text,
     owner_id: researcherUser.id,
@@ -1224,15 +1196,23 @@ const initDatabase = async () => {
     where: { email: "student2@example.com" },
   });
   if (student2) {
-    const contrib8Text =
-      "model Library\n\nclass Book\nattributes\n    title : String\n    genre : String\nend\n";
+      const contrib8Text =
+        "model LibrarySystem\n\n" +
+        "class Book\nattributes\n" +
+        "    title : String\n" +
+        "    genre : String\n" +
+        "    isbn : String\n" +
+        "end\n\n" +
+        "constraints\n" +
+        "context Book inv genreAllowed: Set{'FICTION','NONFICTION','SCIENCE','TECH','OTHER'}" +
+        "->includes(genre)\n";
     fs.writeFileSync(
       path.join(researchUploadsDir, "library_add_genre.use"),
       contrib8Text,
       "utf8"
     );
     const contrib8Model = await UseModel.create({
-      name: "Library",
+      name: "LibrarySystem",
       file_path: "/uploads/research/library_add_genre.use",
       raw_text: contrib8Text,
       owner_id: student2.id,
@@ -1253,16 +1233,24 @@ const initDatabase = async () => {
     where: { email: "student3@example.com" },
   });
   if (student3) {
-    const contrib9Text =
-      "model Library\n\nclass Loan\nattributes\n" +
-      "    loanDate : String\n    returnDate : String\nend\n";
+      const contrib9Text =
+        "model LibrarySystem\n\n" +
+        "class Loan\nattributes\n" +
+        "    loanId : String\n" +
+        "    loanDate : String\n" +
+        "    dueDate : String\n" +
+        "    returnDate : String\n" +
+        "    status : String\n" +
+        "end\n\n" +
+        "constraints\n" +
+        "context Loan inv validStatus: Set{'ACTIVE','RETURNED','OVERDUE'}->includes(status)\n";
     fs.writeFileSync(
       path.join(researchUploadsDir, "library_add_loan.use"),
       contrib9Text,
       "utf8"
     );
     const contrib9Model = await UseModel.create({
-      name: "Library",
+      name: "LibrarySystem",
       file_path: "/uploads/research/library_add_loan.use",
       raw_text: contrib9Text,
       owner_id: student3.id,
@@ -1280,14 +1268,21 @@ const initDatabase = async () => {
 
   // Contribution 10: From owner (ACCEPTED)
   const contrib10Text =
-    "model Library\n\nclass Publisher\nattributes\n    name : String\n    country : String\nend\n";
+    "model LibrarySystem\n\n" +
+    "class Publisher\nattributes\n" +
+    "    name : String\n" +
+    "    country : String\n" +
+    "    foundedYear : Integer\n" +
+    "end\n\n" +
+    "constraints\n" +
+    "context Publisher inv foundedYearRange: foundedYear >= 1800 and foundedYear <= 2025\n";
   fs.writeFileSync(
     path.join(researchUploadsDir, "library_add_publisher.use"),
     contrib10Text,
     "utf8"
   );
   const contrib10Model = await UseModel.create({
-    name: "Library",
+    name: "LibrarySystem",
     file_path: "/uploads/research/library_add_publisher.use",
     raw_text: contrib10Text,
     owner_id: owner.id,
@@ -1307,16 +1302,22 @@ const initDatabase = async () => {
     where: { email: "student4@example.com" },
   });
   if (student4) {
-    const contrib11Text =
-      "model Library\n\nclass Book\nattributes\n    title : String\n" +
-      "    pageCount : Integer\nend\n";
+      const contrib11Text =
+        "model LibrarySystem\n\n" +
+        "class Book\nattributes\n" +
+        "    title : String\n" +
+        "    pageCount : Integer\n" +
+        "    isbn : String\n" +
+        "end\n\n" +
+        "constraints\n" +
+        "context Book inv pageCountPositive: pageCount > 0\n";
     fs.writeFileSync(
       path.join(researchUploadsDir, "library_add_pagecount.use"),
       contrib11Text,
       "utf8"
     );
     const contrib11Model = await UseModel.create({
-      name: "Library",
+      name: "LibrarySystem",
       file_path: "/uploads/research/library_add_pagecount.use",
       raw_text: contrib11Text,
       owner_id: student4.id,
@@ -1337,16 +1338,21 @@ const initDatabase = async () => {
     where: { email: "student5@example.com" },
   });
   if (student5) {
-    const contrib12Text =
-      "model Library\n\nclass Member\nattributes\n" +
-      "    password : String\nend\n";
+      const contrib12Text =
+        "model LibrarySystem\n\n" +
+        "class Member\nattributes\n" +
+        "    password : String\n" +
+        "    name : String\n" +
+        "end\n\n" +
+        "constraints\n" +
+        "context Member inv passwordMinLen: password.size() >= 8\n";
     fs.writeFileSync(
       path.join(researchUploadsDir, "library_add_password.use"),
       contrib12Text,
       "utf8"
     );
     const contrib12Model = await UseModel.create({
-      name: "Library",
+      name: "LibrarySystem",
       file_path: "/uploads/research/library_add_password.use",
       raw_text: contrib12Text,
       owner_id: student5.id,
@@ -1364,15 +1370,20 @@ const initDatabase = async () => {
 
   // Contribution 13: From teacher (ACCEPTED)
   const contrib13Text =
-    "model Library\n\nclass Category\nattributes\n    name : String\n" +
-    "    description : String\nend\n";
+    "model LibrarySystem\n\n" +
+    "class Category\nattributes\n" +
+    "    name : String\n" +
+    "    description : String\n" +
+    "end\n\n" +
+    "constraints\n" +
+    "context Category inv nameUnique: Category.allInstances()->isUnique(name)\n";
   fs.writeFileSync(
     path.join(researchUploadsDir, "library_add_category.use"),
     contrib13Text,
     "utf8"
   );
   const contrib13Model = await UseModel.create({
-    name: "Library",
+    name: "LibrarySystem",
     file_path: "/uploads/research/library_add_category.use",
     raw_text: contrib13Text,
     owner_id: teacherUser.id,
@@ -1389,15 +1400,22 @@ const initDatabase = async () => {
 
   // Contribution 14: From moderator (NEEDS_EDIT)
   const contrib14Text =
-    "model Library\n\nclass Book\nattributes\n    title : String\n" +
-    "    availability : Boolean\nend\n";
+    "model LibrarySystem\n\n" +
+    "class Book\nattributes\n" +
+    "    title : String\n" +
+    "    availableCopies : Integer\n" +
+    "    totalCopies : Integer\n" +
+    "end\n\n" +
+    "constraints\n" +
+    "context Book inv totalPositive: totalCopies > 0\n" +
+    "context Book inv availableWithin: availableCopies >= 0 and availableCopies <= totalCopies\n";
   fs.writeFileSync(
     path.join(researchUploadsDir, "library_add_availability.use"),
     contrib14Text,
     "utf8"
   );
   const contrib14Model = await UseModel.create({
-    name: "Library",
+    name: "LibrarySystem",
     file_path: "/uploads/research/library_add_availability.use",
     raw_text: contrib14Text,
     owner_id: moderator.id,
@@ -1414,15 +1432,21 @@ const initDatabase = async () => {
 
   // Contribution 15: From researcher (PENDING)
   const contrib15Text =
-    "model Library\n\nclass Review\nattributes\n    rating : Integer\n" +
-    "    comment : String\nend\n";
+    "model LibrarySystem\n\n" +
+    "class Review\nattributes\n" +
+    "    rating : Integer\n" +
+    "    comment : String\n" +
+    "    reviewerName : String\n" +
+    "end\n\n" +
+    "constraints\n" +
+    "context Review inv ratingRange: rating >= 1 and rating <= 5\n";
   fs.writeFileSync(
     path.join(researchUploadsDir, "library_add_review.use"),
     contrib15Text,
     "utf8"
   );
   const contrib15Model = await UseModel.create({
-    name: "Library",
+    name: "LibrarySystem",
     file_path: "/uploads/research/library_add_review.use",
     raw_text: contrib15Text,
     owner_id: researcherUser.id,
