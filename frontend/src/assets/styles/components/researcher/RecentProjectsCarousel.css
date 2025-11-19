@@ -69,11 +69,12 @@
 }
 
 .project-card-title {
-	font-size: 24px;
+	font-size: 1rem;
 	font-weight: 600;
 	color: #1f2937;
 	margin: 0;
 	flex: 1;
+  text-align: left;
 }
 
 .project-badge {
@@ -105,10 +106,22 @@
 	font-size: 16px;
 	line-height: 1.6;
 	color: #6b7280;
-	margin: 0 0 24px 0;
 	min-height: 48px;
 }
 
+/* render literal newlines as line breaks */
+.project-card-description {
+  white-space: pre-line;
+}
+
+/* Utility truncate: single-line ellipsis up to ~40 characters */
+.truncate {
+	max-width: 32ch;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: inline-block;
+}
 .project-card-meta {
 	display: flex;
 	gap: 24px;

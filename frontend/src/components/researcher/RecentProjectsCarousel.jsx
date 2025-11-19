@@ -13,6 +13,15 @@ export default function RecentProjectsCarousel({ projects, onJoinClick }) {
   const minCopies = Math.ceil(6 / projects.length); // At least 6 items total
   const extendedProjects = Array(minCopies).fill(projects).flat();
 
+  // Precompute decoded + truncated descriptions to avoid inline functions in JSX
+  const MAX_DESC = 150;
+  const processedProjects = extendedProjects.map((project) => {
+    const raw = project.description || 'No description available.';
+    const decoded = raw.replace(/\\n/g, '\n');
+    const truncated = decoded.length > MAX_DESC ? decoded.slice(0, MAX_DESC).trimEnd() + '…' : decoded;
+    return { ...project, _decoded: decoded, _truncated: truncated, _truncateClass: 'truncate' };
+  });
+
   // Max slides so we always have at least 3 cards visible
   const maxSlideIndex = extendedProjects.length - 3;
 
@@ -45,7 +54,7 @@ export default function RecentProjectsCarousel({ projects, onJoinClick }) {
           </button>
           <div className="carousel-wrapper">
             <div className="carousel-track" style={{ transform: `translateX(-${currentSlide * (100 / 3)}%)` }}>
-              {extendedProjects.map((project, index) => (
+              {processedProjects.map((project, index) => (
                 <div key={`${project.id}-${index}`} className="carousel-slide">
                   <div className="project-card">
                     <div className="project-card-header">
@@ -54,7 +63,9 @@ export default function RecentProjectsCarousel({ projects, onJoinClick }) {
                         {project.status || 'Active'}
                       </span>
                     </div>
-                    <p className="project-card-description">{project.description || 'No description available.'}</p>
+                    <p className={`project-card-description ${project._truncateClass || ''}`} title={project._decoded}>
+                      {project._truncated}
+                    </p>
                     <div className="project-card-meta">
                       <div className="project-meta-item">
                         <i className="fa fa-user"></i>
