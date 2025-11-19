@@ -3,6 +3,7 @@ const multer = require("multer");
 const path = require("path");
 const auth = require("../middlewares/auth");
 const ResearchController = require("../controllers/ResearchController");
+const tryAuth = require("../middlewares/tryAuth");
 
 const router = express.Router();
 
@@ -382,6 +383,7 @@ router.get(
  */
 router.get(
   "/projects/:projectId/contributions/by-status",
+  tryAuth,
   ResearchController.listContributionsByStatus
 );
 
@@ -496,6 +498,7 @@ router.get(
  */
 router.get(
   "/projects/:projectId/members",
+  tryAuth,
   ResearchController.listProjectMembers
 );
 
@@ -627,8 +630,8 @@ router.post(
  *       500:
  *         description: Internal server error
  */
-// public access allowed for PUBLIC projects; auth middleware still works for authenticated requests
-router.get("/projects/:id", ResearchController.getProjectById);
+// public access allowed for PUBLIC projects; tryAuth decodes token if present
+router.get("/projects/:id", tryAuth, ResearchController.getProjectById);
 
 // PATCH /api/research/projects/:id/status - update project status
 /**
