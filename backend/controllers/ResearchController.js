@@ -464,17 +464,19 @@ const ResearchController = {
           .status(404)
           .json({ success: false, message: "Project not found" });
 
-      // require membership (owner/moderator/contributor)
-      const membership = await ResearchProjectMember.findOne({
-        where: { research_project_id: projectId, user_id: req.user.userId },
-      });
-      if (!membership)
-        return res
-          .status(403)
-          .json({
-            success: false,
-            message: "You are not a member of this project",
-          });
+      // If project is PRIVATE, require membership (owner/moderator/contributor)
+      if (project.visibility === "PRIVATE") {
+        const membership = await ResearchProjectMember.findOne({
+          where: { research_project_id: projectId, user_id: req.user.userId },
+        });
+        if (!membership)
+          return res
+            .status(403)
+            .json({
+              success: false,
+              message: "You are not a member of this project",
+            });
+      }
 
       // Accept file upload only (req.file or req.files)
       let filePath = null;
