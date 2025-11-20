@@ -78,7 +78,7 @@ function runUseCli(filePath, timeout = 5000) {
         const lines = finalOut.split(/\r?\n/);
         if (lines.length > 2) {
           lines.splice(-2, 2);
-          finalOut = lines.join('\r\n');
+          finalOut = lines.join("\r\n");
         }
 
         return resolve({ code, stdout: finalOut, stderr: err });
@@ -118,7 +118,8 @@ function parseUseContent(content) {
   }
 
   // Classes (robust, multiline-aware)
-  const classBlockRe = /^\s*(?:abstract\s+)?class\s+[A-Za-z0-9_][\s\S]*?^end\b/gim;
+  const classBlockRe =
+    /^\s*(?:abstract\s+)?class\s+[A-Za-z0-9_][\s\S]*?^end\b/gim;
   let cb;
   while ((cb = classBlockRe.exec(content)) !== null) {
     const block = cb[0];
@@ -145,7 +146,13 @@ function parseUseContent(content) {
       }
     }
 
-    const cls = { name, isAbstract, superclasses, attributes: [], operations: [] };
+    const cls = {
+      name,
+      isAbstract,
+      superclasses,
+      attributes: [],
+      operations: [],
+    };
 
     // attributes block within class
     const attrMatch = block.match(
@@ -223,9 +230,7 @@ const UseController = {
     try {
       const id = parseInt(req.params.id, 10);
       if (!id) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid id" });
+        return res.status(400).json({ success: false, message: "Invalid id" });
       }
 
       // Ensure associations
@@ -394,12 +399,40 @@ const UseController = {
       let parsed = null;
       const stdoutText = (cliResult && cliResult.stdout) || "";
       const stderrText = (cliResult && cliResult.stderr) || "";
-      const errorPattern =
-        /error|syntax\s+error|could\s+not\s+open|failed|no viable alternative/i;
-      const hasCliError = errorPattern.test(stderrText + "\n" + stdoutText);
-      const hasModelLine = /(^|\n)\s*model\s+[A-Za-z0-9_]+/i.test(stdoutText);
 
-      if (!hasCliError && hasModelLine && cliResult && cliResult.stdout) {
+      // If CLI produced any stderr or non-zero exit code, treat as a parse error
+      const cliHasStdErr = stderrText && String(stderrText).trim().length > 0;
+      const cliExitCode =
+        cliResult && typeof cliResult.code === "number" ? cliResult.code : null;
+
+      // Allow explicit fallback (for backward compatibility) via query param or body field
+      const allowFallback =
+        (req.query && String(req.query.fallback).toLowerCase() === "true") ||
+        (req.body && req.body.fallback === true);
+
+      if (
+        cliResult &&
+        (cliHasStdErr || (cliExitCode !== null && cliExitCode !== 0))
+      ) {
+        if (!allowFallback) {
+          // prefer concise CLI error message when available
+          const normalized = String(stderrText || "").replace(/\r/g, "\n");
+          const match =
+            normalized.match(/line\s*\d+:\d+\s+[^\n\r]*/i) ||
+            normalized.match(/no viable alternative[^\n\r]*/i) ||
+            normalized.match(/error[^\n\r]*/i);
+          const message = match
+            ? match[0].trim()
+            : cliResult.error
+              ? `USE CLI error: ${cliResult.error}`
+              : "USE CLI reported an error";
+          return res.status(400).json({ success: false, message });
+        }
+      }
+
+      // If CLI output looks like a valid model, prefer parsing it
+      const hasModelLine = /(^|\n)\s*model\s+[A-Za-z0-9_]+/i.test(stdoutText);
+      if (!cliHasStdErr && hasModelLine && cliResult && cliResult.stdout) {
         try {
           parsed = parseCliOutput(cliResult.stdout);
         } catch {
@@ -407,7 +440,7 @@ const UseController = {
         }
       }
 
-      // Fallback to parsing raw file content if CLI isn't available or failed
+      // Fallback to parsing raw file content if CLI isn't available or didn't produce model
       if (!parsed || !parsed.model) {
         parsed = parseUseContent(content);
       }
@@ -420,8 +453,8 @@ const UseController = {
         const errorMessage = errorMatch
           ? errorMatch[0]
           : cliResult && cliResult.error
-          ? `USE CLI error: ${cliResult.error}`
-          : "Invalid .use file. Please fix syntax or model errors.";
+            ? `USE CLI error: ${cliResult.error}`
+            : "Invalid .use file. Please fix syntax or model errors.";
 
         return res.status(400).json({ success: false, message: errorMessage });
       }
@@ -538,7 +571,8 @@ const UseController = {
             name: parsed.model || null,
             file_path: publicPath,
             owner_id: ownerId,
-            raw_text: cliResult && cliResult.stdout ? cliResult.stdout : content,
+            raw_text:
+              cliResult && cliResult.stdout ? cliResult.stdout : content,
           },
           { transaction: t }
         );
@@ -616,27 +650,27 @@ const UseController = {
               }
             }
 
-              // generalizations (superclasses) - persist as UseGeneralization rows
-              if (parsed.classes && parsed.classes.length) {
-                for (const cls of parsed.classes) {
-                  if (cls.superclasses && cls.superclasses.length) {
-                    const childId = classMap[cls.name] || null;
-                    for (const parentName of cls.superclasses) {
-                      const parentId = classMap[parentName] || null;
-                      await UseGeneralization.create(
-                        {
-                          use_model_id: modelRow.id,
-                          specific_use_class_id: childId,
-                          general_use_class_id: parentId,
-                          specific_name: cls.name,
-                          general_name: parentName,
-                        },
-                        { transaction: t }
-                      );
-                    }
+            // generalizations (superclasses) - persist as UseGeneralization rows
+            if (parsed.classes && parsed.classes.length) {
+              for (const cls of parsed.classes) {
+                if (cls.superclasses && cls.superclasses.length) {
+                  const childId = classMap[cls.name] || null;
+                  for (const parentName of cls.superclasses) {
+                    const parentId = classMap[parentName] || null;
+                    await UseGeneralization.create(
+                      {
+                        use_model_id: modelRow.id,
+                        specific_use_class_id: childId,
+                        general_use_class_id: parentId,
+                        specific_name: cls.name,
+                        general_name: parentName,
+                      },
+                      { transaction: t }
+                    );
                   }
                 }
               }
+            }
           }
         }
 
