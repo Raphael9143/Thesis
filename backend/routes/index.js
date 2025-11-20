@@ -14,6 +14,7 @@ const assignmentRoutes = require("./assignment");
 const lectureRoutes = require("./lecture");
 const examRoutes = require("./exam");
 const useRoutes = require("./use");
+const umlRoutes = require("./uml");
 const researchRoutes = require("./research");
 const groupRoutes = require("./group");
 
@@ -77,6 +78,8 @@ app.use("/api/lectures", lectureRoutes);
 app.use("/api/exams", examRoutes);
 // USE parsing routes
 app.use("/api/use", useRoutes);
+// UML export routes
+app.use("/api/uml", umlRoutes);
 // Research Project routes
 app.use("/api/research", researchRoutes);
 // Group routes (for group assignments/exams)
