@@ -224,6 +224,96 @@ function parseCliOutput(cliOut) {
   return parseUseContent(payload);
 }
 
+/**
+ * Build a .use file text from a JSON model object.
+ * Expected shape: { model, enums, classes, associations, constraints }
+ */
+function buildUseText(modelJson) {
+  if (!modelJson || typeof modelJson !== "object") return "";
+  const lines = [];
+  const modelName = modelJson.model || modelJson.name || "Model1";
+  lines.push(`model ${modelName}`);
+  lines.push("");
+
+  // Enums
+  if (Array.isArray(modelJson.enums)) {
+    for (const en of modelJson.enums) {
+      const name = en.name || "Enum";
+      const vals = Array.isArray(en.values)
+        ? en.values
+        : String(en.values || "")
+            .split(/,/)
+            .map((s) => s.trim())
+            .filter(Boolean);
+      lines.push(`enum ${name} { ${vals.join(", ")} }`);
+      lines.push("");
+    }
+  }
+
+  // Classes
+  if (Array.isArray(modelJson.classes)) {
+    for (const cls of modelJson.classes) {
+      const parts = [];
+      if (cls.isAbstract) parts.push("abstract");
+      let header = `class ${cls.name || "Unnamed"}`;
+      if (Array.isArray(cls.superclasses) && cls.superclasses.length) {
+        header += ` < ${cls.superclasses.join(", ")}`;
+      }
+      if (parts.length) header = parts.join(" ") + " " + header;
+      lines.push(header);
+
+      if (Array.isArray(cls.attributes) && cls.attributes.length) {
+        lines.push("  attributes");
+        for (const a of cls.attributes) {
+          const t = a.type ? ` : ${a.type}` : "";
+          lines.push(`    ${a.name || "unnamed"}${t}`);
+        }
+      }
+
+      if (Array.isArray(cls.operations) && cls.operations.length) {
+        lines.push("  operations");
+        for (const op of cls.operations) {
+          const sig = op.signature !== undefined ? `(${op.signature})` : "()";
+          lines.push(`    ${op.name || "op"}${sig}`);
+        }
+      }
+
+      lines.push("end");
+      lines.push("");
+    }
+  }
+
+  // Associations
+  if (Array.isArray(modelJson.associations)) {
+    for (const assoc of modelJson.associations) {
+      lines.push(`association ${assoc.name || "Assoc"} between`);
+      if (Array.isArray(assoc.parts)) {
+        for (const p of assoc.parts) {
+          const mult = p.multiplicity ? `[${p.multiplicity}]` : "";
+          const role = p.role ? ` role ${p.role}` : "";
+          lines.push(`  ${p.class || "Unnamed"} ${mult}${role}`);
+        }
+      }
+      lines.push("end");
+      lines.push("");
+    }
+  }
+
+  // Constraints (simple pass-through if provided as array of strings)
+  if (Array.isArray(modelJson.constraints) && modelJson.constraints.length) {
+    lines.push("constraints");
+    for (const c of modelJson.constraints) {
+      if (typeof c === "string") lines.push(c);
+      else if (c && c.raw) lines.push(c.raw);
+      else if (c && c.expression) lines.push(c.expression);
+    }
+    lines.push("");
+  }
+
+  lines.push("end");
+  return lines.join("\n");
+}
+
 const UseController = {
   // Get a stored USE model by id with related entities
   getById: async (req, res) => {
@@ -462,6 +552,34 @@ const UseController = {
       return res.json({ success: true, cli: cliResult, model: parsed });
     } catch (error) {
       console.error("Parse .use error:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+  exportUml: async (req, res) => {
+    try {
+      const json = req.body;
+      if (!json || typeof json !== "object")
+        return res
+          .status(400)
+          .json({ success: false, message: "JSON UML body required" });
+
+      const useText = buildUseText(json);
+      const modelName = (json.model || json.name || "model").replace(
+        /[^A-Za-z0-9_\-]/g,
+        "_"
+      );
+      const filename = `${modelName}.use`;
+
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${filename}"`
+      );
+      return res.send(useText);
+    } catch (error) {
+      console.error("Export UML error:", error);
       return res
         .status(500)
         .json({ success: false, message: "Internal Server Error" });
