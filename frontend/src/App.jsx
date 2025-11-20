@@ -37,6 +37,8 @@ import ClassCoursesStudentPage from './pages/student/ClassCourses';
 import LecturePreview from './pages/preview/LecturePreview';
 import AssignmentPreview from './pages/preview/AssignmentPreview';
 import ExamPreview from './pages/preview/ExamPreview';
+import UMLPage from './pages/preview/UMLPage';
+import FilePreviewPage from './pages/preview/FilePreviewPage';
 import SubmitWork from './pages/student/SubmitWork';
 import RequireAuth from './components/routing/RequireAuth';
 import RequireRole from './components/routing/RequireRole';
@@ -87,6 +89,8 @@ const router = createBrowserRouter(
             </RequireAuth>
           }
         />
+        <Route path="/uml/preview" element={<UMLPage />} />
+        <Route path="/file/preview" element={<FilePreviewPage />} />
         <Route
           path="/education/teacher/classes"
           element={
