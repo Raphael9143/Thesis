@@ -677,13 +677,30 @@ const initDatabase = async () => {
   function parseUse(raw) {
     const result = { classes: [], associations: [], constraints: [] };
     // Classes
-    const classBlockRe = /^class\s+([A-Za-z0-9_]+)[\s\S]*?^end$/gim;
+    const classBlockRe = /^\s*(?:abstract\s+)?class\s+[A-Za-z0-9_][\s\S]*?^end$/gim;
     let cb;
     while ((cb = classBlockRe.exec(raw)) !== null) {
       const block = cb[0];
-      const nameMatch = block.match(/^class\s+([A-Za-z0-9_]+)/i);
-      const name = nameMatch ? nameMatch[1] : "Unknown";
-      const cls = { name, attributes: [], operations: [] };
+
+      // header may be: 'class Name', 'abstract class Name', 'class Name < Super1, Super2'
+      const headerMatch = block.match(/^\s*(abstract\s+)?class\s+([^\r\n]+)/i);
+      let name = "Unknown";
+      let isAbstract = false;
+      let superclasses = [];
+      if (headerMatch) {
+        isAbstract = Boolean(headerMatch[1]);
+        const after = headerMatch[2].trim();
+        const nameOnly = after.match(/^([A-Za-z0-9_]+)/);
+        if (nameOnly) name = nameOnly[1];
+        const gen = after.match(/<\s*([^\n]+)/);
+        if (gen) {
+          superclasses = gen[1]
+            .split(/,/) // support multiple inheritance
+            .map((s) => s.trim())
+            .filter(Boolean);
+        }
+      }
+      const cls = { name, isAbstract, superclasses, attributes: [], operations: [] };
       const attrMatch = block.match(
         /attributes\s*([\s\S]*?)(?:operations|end)/i
       );
