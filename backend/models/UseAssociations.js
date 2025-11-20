@@ -7,6 +7,7 @@ const UseOperation = require("./UseOperation");
 const UseAssociation = require("./UseAssociation");
 const UseAssociationPart = require("./UseAssociationPart");
 const UseConstraint = require("./UseConstraint");
+const UseGeneralization = require("./UseGeneralization");
 const User = require("./User");
 const ResearchProject = require("./ResearchProject");
 const ResearchProjectMember = require("./ResearchProjectMember");
@@ -81,6 +82,37 @@ UseModel.hasMany(UseConstraint, {
 UseConstraint.belongsTo(UseModel, {
   foreignKey: "use_model_id",
   as: "model",
+});
+
+// Generalizations
+UseModel.hasMany(UseGeneralization, {
+  foreignKey: "use_model_id",
+  as: "generalizations",
+  onDelete: "CASCADE",
+});
+UseGeneralization.belongsTo(UseModel, {
+  foreignKey: "use_model_id",
+  as: "model",
+});
+
+UseClass.hasMany(UseGeneralization, {
+  foreignKey: "specific_use_class_id",
+  as: "generalizationsAsSpecific",
+  onDelete: "CASCADE",
+});
+UseGeneralization.belongsTo(UseClass, {
+  foreignKey: "specific_use_class_id",
+  as: "specificClass",
+});
+
+UseClass.hasMany(UseGeneralization, {
+  foreignKey: "general_use_class_id",
+  as: "generalizationsAsGeneral",
+  onDelete: "CASCADE",
+});
+UseGeneralization.belongsTo(UseClass, {
+  foreignKey: "general_use_class_id",
+  as: "generalClass",
 });
 
 // Ownership: a UseModel optionally belongs to a User (owner)
