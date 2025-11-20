@@ -118,13 +118,34 @@ function parseUseContent(content) {
   }
 
   // Classes (robust, multiline-aware)
-  const classBlockRe = /^class\s+([A-Za-z0-9_]+)[\s\S]*?^end\b/gim;
+  const classBlockRe = /^\s*(?:abstract\s+)?class\s+[A-Za-z0-9_][\s\S]*?^end\b/gim;
   let cb;
   while ((cb = classBlockRe.exec(content)) !== null) {
     const block = cb[0];
-    const nameMatch = block.match(/^class\s+([A-Za-z0-9_]+)/im);
-    const name = nameMatch ? nameMatch[1] : "Unknown";
-    const cls = { name, attributes: [], operations: [] };
+
+    // extract the header line (first line that contains 'class')
+    const headerMatch = block.match(/^\s*(abstract\s+)?class\s+([^\r\n]+)/im);
+    let name = "Unknown";
+    let isAbstract = false;
+    let superclasses = [];
+    if (headerMatch) {
+      isAbstract = Boolean(headerMatch[1]);
+      const afterClass = headerMatch[2].trim();
+      // afterClass may contain: "Name < Super1, Super2" or "Name"
+      const nameOnlyMatch = afterClass.match(/^([A-Za-z0-9_]+)/);
+      if (nameOnlyMatch) name = nameOnlyMatch[1];
+
+      const genMatch = afterClass.match(/<\s*([^\n]+)/);
+      if (genMatch) {
+        const list = genMatch[1]
+          .split(/,/) // multiple inheritance separated by commas
+          .map((s) => s.trim())
+          .filter(Boolean);
+        superclasses = list;
+      }
+    }
+
+    const cls = { name, isAbstract, superclasses, attributes: [], operations: [] };
 
     // attributes block within class
     const attrMatch = block.match(
@@ -658,3 +679,5 @@ const UseController = {
 };
 
 module.exports = UseController;
+// Export helpful parser utility for tests and tooling
+module.exports.parseUseContent = parseUseContent;
