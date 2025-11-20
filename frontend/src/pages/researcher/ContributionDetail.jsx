@@ -26,7 +26,6 @@ export default function ContributionDetail() {
   const [reviewNotes, setReviewNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
-  
 
   const currentUserId = Number(sessionStorage.getItem('userId'));
 

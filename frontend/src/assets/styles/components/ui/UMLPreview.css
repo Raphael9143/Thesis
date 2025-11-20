@@ -58,6 +58,20 @@
   padding-bottom: 6px;
   user-select: none;
 }
+
+/* Allow long class names to wrap and fit inside boxes */
+.uml-box {
+  box-sizing: border-box;
+  overflow: visible;
+}
+.uml-box-title {
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  display: block;
+  text-align: center;
+  padding: 6px 8px;
+}
 .uml-box-body {
   font-size: 13px;
   margin-top: 6px;
@@ -131,4 +145,19 @@ details summary a {
 
 details summary a:hover {
   color: var(--brand);
+}
+
+/* Full-page UML preview layout */
+.uml-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 24px);
+}
+.uml-page-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0; /* allow children to flex/scroll correctly */
+  overflow: auto;
+  padding: 12px;
+  background: var(--bg-gradient);;
 }

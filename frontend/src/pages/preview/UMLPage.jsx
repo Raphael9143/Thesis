@@ -162,15 +162,11 @@ export default function UMLPage() {
   }
 
   return (
-    <div style={{ padding: 12 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="uml-page">
+      <div style={{ padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>UML Preview - {model.model || 'Model'}</h2>
       </div>
-      <div
-        className="uml-page-body"
-        ref={containerRef}
-        style={{ position: 'relative', height: '80vh', border: '1px solid #eee' }}
-      >
+      <div className="uml-page-body" ref={containerRef} style={{ border: '1px solid #eee' }}>
         <UMLCanvas
           associations={associations}
           classes={classes}

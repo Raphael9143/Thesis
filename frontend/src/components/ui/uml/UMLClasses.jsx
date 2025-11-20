@@ -1,7 +1,7 @@
 import React from 'react';
 
 const UMLClasses = ({ classes, enums, positions, boxRefs, startDrag, BOX_W, BOX_MIN_H }) => (
-  <div style={{ position: 'relative', minHeight: 400 }}>
+  <div style={{ position: 'relative', minHeight: 400, height: '100%' }}>
     {classes.map((c) => {
       const pos = positions[c.name] || { x: 0, y: 0 };
       return (
@@ -9,7 +9,7 @@ const UMLClasses = ({ classes, enums, positions, boxRefs, startDrag, BOX_W, BOX_
           key={c.name}
           ref={(el) => (boxRefs.current[c.name] = el)}
           className="uml-box"
-          style={{ left: pos.x, top: pos.y, width: BOX_W, minHeight: BOX_MIN_H }}
+          style={{ left: pos.x, top: pos.y, minWidth: BOX_W, width: 'auto', minHeight: BOX_MIN_H }}
           onMouseDown={(e) => startDrag(c.name, e)}
         >
           <div className="uml-box-title">{c.name}</div>
