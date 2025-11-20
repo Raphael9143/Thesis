@@ -14,7 +14,6 @@ import FilePreview from '../../../components/ui/FilePreview';
 
 export default function SubmissionsView() {
   const params = useParams();
-  // route params are available via `params` when needed
   const assignmentId = params.assignmentId;
   const examId = params.examId;
   const kind = assignmentId ? 'assignment' : examId ? 'exam' : null;
@@ -25,8 +24,6 @@ export default function SubmissionsView() {
   const [submissions, setSubmissions] = useState([]);
   const [gradeModalOpen, setGradeModalOpen] = useState(false);
   const [selectedForGrade, setSelectedForGrade] = useState(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewAttachment, setPreviewAttachment] = useState('');
 
   const { push } = useNotifications();
 
@@ -123,8 +120,9 @@ export default function SubmissionsView() {
                           <a
                             className="score-btn"
                             onClick={() => {
-                              setPreviewAttachment(String(s.attachment || ''));
-                              setPreviewOpen(true);
+                              // open preview in a new browser tab
+                              const fp = encodeURIComponent(s.attachment);
+                              window.open(`/file/preview?file=${fp}`, '_blank');
                             }}
                           >
                             Preview
@@ -157,17 +155,7 @@ export default function SubmissionsView() {
                 setSubmissions((prev) => prev.map((p) => (p.id === (updated.id || p.id) ? { ...p, ...updated } : p)));
               }}
             />
-            <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="Submission Preview">
-              {previewAttachment ? (
-                <FilePreview
-                  url={toFullUrl(previewAttachment)}
-                  filename={previewAttachment}
-                  filePath={previewAttachment}
-                />
-              ) : (
-                <div>No file</div>
-              )}
-            </Modal>
+            {/* Preview now opens on a dedicated page via /file/preview */}
           </div>
         )}
       </Card>

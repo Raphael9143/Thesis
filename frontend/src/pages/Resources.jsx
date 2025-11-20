@@ -4,7 +4,6 @@ import Card from '../components/ui/Card';
 import '../assets/styles/ui.css';
 import userAPI from '../../services/userAPI';
 import toFullUrl from '../utils/FullURLFile';
-import Modal from '../components/ui/Modal';
 import FilePreview from '../components/ui/FilePreview';
 import { useNotifications } from '../contexts/NotificationContext';
 
@@ -12,8 +11,6 @@ export default function ResourcesPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewPath, setPreviewPath] = useState('');
   const { push } = useNotifications();
 
   useEffect(() => {
@@ -72,9 +69,10 @@ export default function ResourcesPage() {
                     {m.file_path ? (
                       <a
                         onClick={() => {
-                          setPreviewPath(String(m.file_path));
-                          setPreviewOpen(true);
+                          const fp = encodeURIComponent(m.file_path);
+                          window.open(`/file/preview?file=${fp}`, '_blank');
                         }}
+                        style={{ cursor: 'pointer' }}
                       >
                         Preview
                       </a>
@@ -96,13 +94,7 @@ export default function ResourcesPage() {
             </tbody>
           </table>
         )}
-        <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="Model Preview">
-          {previewPath ? (
-            <FilePreview url={toFullUrl(previewPath)} filename={previewPath} filePath={previewPath} />
-          ) : (
-            <div>No file</div>
-          )}
-        </Modal>
+        {/* Preview now opens in dedicated page /file/preview */}
       </Card>
     </Section>
   );

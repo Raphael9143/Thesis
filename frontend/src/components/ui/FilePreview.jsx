@@ -3,14 +3,14 @@ import mammoth from 'mammoth';
 import '../../assets/styles/ui.css';
 import { useNotifications } from '../../contexts/NotificationContext';
 import userAPI from '../../../services/userAPI';
-import UMLPreview from './UMLPreview';
+// using window.open for opening preview in new tab
 import '../../assets/styles/components/ui/FilePreview.css';
 
 // url: absolute URL to the file
 // filename: optional filename to derive extension when mimetype is missing
 // filePath: optional backend-relative path used by the parse API (e.g. 'uploads/...')
 // onValidationError: callback to pass validation error message up to parent
-export default function FilePreview({ url, filename, mimetype, filePath, onValidationError }) {
+export default function FilePreview({ url, filename, mimetype, filePath }) {
   const { push } = useNotifications();
 
   const [loading, setLoading] = useState(false);
@@ -72,11 +72,10 @@ export default function FilePreview({ url, filename, mimetype, filePath, onValid
   }, [url, filename, mimetype, filePath]);
 
   // UML preview state
-  const [showUml, setShowUml] = useState(false);
-  const [umlModel, setUmlModel] = useState(null);
-  const [umlCli, setUmlCli] = useState(null);
-  const [umlLoading, setUmlLoading] = useState(false);
+  const [umlLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+
+  // no client-side validation callback; validation reports come from server
 
   if (!url) return <div>No file URL</div>;
   const ext = extFromName(filename || url);
@@ -86,54 +85,9 @@ export default function FilePreview({ url, filename, mimetype, filePath, onValid
 
   const handlePreview = async () => {
     if (!showPreviewButton) return;
-    try {
-      setUmlLoading(true);
-      const res = await userAPI.parseUseModel(filePath || filename || url);
-      if (!res || res.success === false) {
-        const msg =
-          res?.message ||
-          (Array.isArray(res?.details) && res.details.join('\n')) ||
-          res?.cli?.stdout ||
-          'Invalid .use file. Please fix syntax or model errors.';
-        push({ title: 'USE parse', body: msg });
-        // Pass validation error to parent
-        if (onValidationError) {
-          onValidationError(msg);
-        }
-        setUmlLoading(false);
-        return;
-      }
-      if (!res.model) {
-        const msg =
-          res?.message ||
-          (Array.isArray(res?.details) && res.details.join('\n')) ||
-          'Parse succeeded but no model returned.';
-        push({ title: 'USE parse', body: msg });
-        // Pass validation error to parent
-        if (onValidationError) {
-          onValidationError(msg);
-        }
-        setUmlLoading(false);
-        return;
-      }
-      // Clear validation error on success
-      if (onValidationError) {
-        onValidationError(null);
-      }
-      setUmlModel(res.model);
-      setUmlCli(res.cli?.stdout || res.cli?.stderr || null);
-      setShowUml(true);
-    } catch (err) {
-      console.log(err);
-      const errorMsg = err?.response?.data?.message || String(err);
-      push({ title: 'Error', body: `Failed to parse model: ${errorMsg}` });
-      // Pass validation error to parent
-      if (onValidationError) {
-        onValidationError(errorMsg);
-      }
-    } finally {
-      setUmlLoading(false);
-    }
+    // Open UML preview in a new tab and let that page handle parsing.
+    const encoded = encodeURIComponent(filePath || filename || url || '');
+    window.open(`/uml/preview?file=${encoded}`, '_blank');
   };
 
   const handleSave = async () => {
@@ -249,7 +203,7 @@ export default function FilePreview({ url, filename, mimetype, filePath, onValid
         )}
       </div>
       {previewContent}
-      {showUml && umlModel && <UMLPreview model={umlModel} cli={umlCli} onClose={() => setShowUml(false)} />}
+      {/* Full-page UML preview will be shown on dedicated route. */}
     </div>
   );
 }

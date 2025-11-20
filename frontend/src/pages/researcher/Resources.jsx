@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
+// open preview in new tab; no navigate needed
 import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
-import Modal from '../../components/ui/Modal';
 import FilePreview from '../../components/ui/FilePreview';
 import userAPI from '../../../services/userAPI';
 import toFullUrl from '../../utils/FullURLFile';
@@ -13,8 +13,7 @@ export default function ResearcherResources() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewPath, setPreviewPath] = useState('');
+  // open preview in new tab, no need for navigate
   const { push } = useNotifications();
 
   useTitle('Resources');
@@ -74,8 +73,8 @@ export default function ResearcherResources() {
                     {m.file_path ? (
                       <a
                         onClick={() => {
-                          setPreviewPath(String(m.file_path));
-                          setPreviewOpen(true);
+                          const fp = encodeURIComponent(m.file_path);
+                          window.open(`/file/preview?file=${fp}`, '_blank');
                         }}
                         style={{ cursor: 'pointer' }}
                       >
@@ -99,13 +98,7 @@ export default function ResearcherResources() {
             </tbody>
           </table>
         )}
-        <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="Model Preview">
-          {previewPath ? (
-            <FilePreview url={toFullUrl(previewPath)} filename={previewPath} filePath={previewPath} />
-          ) : (
-            <div>No file</div>
-          )}
-        </Modal>
+        {/* Preview now opens in a dedicated page /file/preview */}
       </Card>
     </Section>
   );

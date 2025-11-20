@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Section from '../../../components/ui/Section';
 import Card from '../../../components/ui/Card';
 import userAPI from '../../../../services/userAPI';
@@ -19,8 +19,7 @@ export default function StudentSubmissions() {
   const [exams, setExams] = useState([]);
   const [gradeModalOpen, setGradeModalOpen] = useState(false);
   const [selectedForGrade, setSelectedForGrade] = useState(null);
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewAttachment, setPreviewAttachment] = useState('');
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { push } = useNotifications();
@@ -193,8 +192,13 @@ export default function StudentSubmissions() {
                       <a
                         className="score-btn"
                         onClick={() => {
-                          setPreviewAttachment(String(it.attachment || ''));
-                          setPreviewOpen(true);
+                          navigate('/file/preview', {
+                            state: {
+                              url: toFullUrl(it.attachment),
+                              filename: it.attachment,
+                              filePath: it.attachment,
+                            },
+                          });
                         }}
                       >
                         Preview
@@ -223,13 +227,7 @@ export default function StudentSubmissions() {
           submission={selectedForGrade}
           onGraded={onGraded}
         />
-        <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="Submission Preview">
-          {previewAttachment ? (
-            <FilePreview url={toFullUrl(previewAttachment)} filename={previewAttachment} filePath={previewAttachment} />
-          ) : (
-            <div>No file</div>
-          )}
-        </Modal>
+        {/* Model/file preview moved to dedicated page /file/preview */}
       </Card>
     </Section>
   );

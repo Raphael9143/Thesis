@@ -1,8 +1,54 @@
 import React from 'react';
 import { intersectBorder } from '../../../utils/umlUtils';
 
-const UMLCanvas = ({ associations, centerOf, getRect, roleActiveKey, rolePositions, rolePreviewTarget }) => (
+const UMLCanvas = ({
+  associations,
+  classes = [],
+  centerOf,
+  getRect,
+  roleActiveKey,
+  rolePositions,
+  rolePreviewTarget,
+}) => (
   <svg className="uml-canvas-svg" style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' }}>
+    {/* Draw generalizations (inheritance) first */}
+    {Array.isArray(classes) &&
+      classes.map((c, idx) => {
+        const subsName = c.name;
+        const subsRect = getRect(subsName);
+        const subsCenter = centerOf(subsName);
+        if (!c.superclasses || !Array.isArray(c.superclasses)) return null;
+        return c.superclasses.map((supName, sidx) => {
+          const supRect = getRect(supName);
+          const supCenter = centerOf(supName);
+          if (!subsCenter || !supCenter) return null;
+          const pFrom = subsRect ? intersectBorder(subsRect, subsCenter, supCenter) : subsCenter;
+          const pTo = supRect ? intersectBorder(supRect, supCenter, subsCenter) : supCenter;
+          // base point for triangle a little before tip
+          const dirX = pTo.x - pFrom.x;
+          const dirY = pTo.y - pFrom.y;
+          const len = Math.sqrt(dirX * dirX + dirY * dirY) || 1;
+          const base = { x: pTo.x - (dirX / len) * 14, y: pTo.y - (dirY / len) * 14 };
+          const nx = (-dirY / len) * 8;
+          const ny = (dirX / len) * 8;
+          const pLeft = { x: base.x + nx, y: base.y + ny };
+          const pRight = { x: base.x - nx, y: base.y - ny };
+
+          return (
+            <g key={`gen-${idx}-${sidx}`}>
+              <line x1={pFrom.x} y1={pFrom.y} x2={base.x} y2={base.y} stroke="#333" strokeWidth={2} />
+              <polygon
+                points={`${pTo.x},${pTo.y} ${pLeft.x},${pLeft.y} ${pRight.x},${pRight.y}`}
+                fill="#fff"
+                stroke="#333"
+                strokeWidth={2}
+              />
+            </g>
+          );
+        });
+      })}
+
+    {/* Draw associations (simple lines) */}
     {associations.map((a, idx) => {
       const left = a.parts?.[0];
       const right = a.parts?.[1];

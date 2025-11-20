@@ -37,8 +37,6 @@ export default function SubmissionHistory({ type, id }) {
 function HistoryTable({ history }) {
   const [feedbackOpen, setFeedbackOpen] = React.useState(false);
   const [feedbackText, setFeedbackText] = React.useState('');
-  const [previewOpen, setPreviewOpen] = React.useState(false);
-  const [previewAttachment, setPreviewAttachment] = React.useState('');
 
   return (
     <div className="submission-history">
@@ -65,8 +63,8 @@ function HistoryTable({ history }) {
                   {s.attachment ? (
                     <a
                       onClick={() => {
-                        setPreviewAttachment(String(s.attachment || ''));
-                        setPreviewOpen(true);
+                        const fp = encodeURIComponent(s.attachment);
+                        window.open(`/file/preview?file=${fp}`, '_blank');
                       }}
                     >
                       Preview
@@ -106,13 +104,7 @@ function HistoryTable({ history }) {
       <Modal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} title="Feedback">
         <pre className="submission-history-feedback">{feedbackText}</pre>
       </Modal>
-      <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="Submission Preview">
-        {previewAttachment ? (
-          <FilePreview url={toFullUrl(previewAttachment)} filename={previewAttachment} filePath={previewAttachment} />
-        ) : (
-          <div>No file</div>
-        )}
-      </Modal>
+      {/* File preview now opens on /file/preview */}
     </div>
   );
 }

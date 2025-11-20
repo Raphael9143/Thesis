@@ -26,7 +26,7 @@ export default function ContributionDetail() {
   const [reviewNotes, setReviewNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
-  const [validationError, setValidationError] = useState(null);
+  
 
   const currentUserId = Number(sessionStorage.getItem('userId'));
 
@@ -105,7 +105,6 @@ export default function ContributionDetail() {
       const reviewData = {
         action,
         notes: reviewNotes.trim() || null,
-        validation_report: validationError || null,
       };
 
       const res = await userAPI.reviewContribution(contributionId, reviewData);
@@ -236,13 +235,7 @@ export default function ContributionDetail() {
             onChange={setActiveTab}
           />
 
-          {activeTab === 'details' && (
-            <ContributionDetailsTab
-              contribution={contribution}
-              useModel={useModel}
-              onValidationError={setValidationError}
-            />
-          )}
+          {activeTab === 'details' && <ContributionDetailsTab contribution={contribution} useModel={useModel} />}
 
           {activeTab === 'changes' && (
             <ContributionChangesTab
@@ -254,7 +247,6 @@ export default function ContributionDetail() {
               setReviewNotes={setReviewNotes}
               submitting={submitting}
               handleReview={handleReview}
-              validationError={validationError}
               currentUserId={currentUserId}
             />
           )}
