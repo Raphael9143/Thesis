@@ -529,6 +529,7 @@ const UseController = {
       const UseAssociation = require("../models/UseAssociation");
       const UseAssociationPart = require("../models/UseAssociationPart");
       const UseConstraint = require("../models/UseConstraint");
+      const UseGeneralization = require("../models/UseGeneralization");
 
       const result = await sequelize.transaction(async (t) => {
         const ownerId = req.user && req.user.userId ? req.user.userId : null;
@@ -614,6 +615,28 @@ const UseController = {
                 );
               }
             }
+
+              // generalizations (superclasses) - persist as UseGeneralization rows
+              if (parsed.classes && parsed.classes.length) {
+                for (const cls of parsed.classes) {
+                  if (cls.superclasses && cls.superclasses.length) {
+                    const childId = classMap[cls.name] || null;
+                    for (const parentName of cls.superclasses) {
+                      const parentId = classMap[parentName] || null;
+                      await UseGeneralization.create(
+                        {
+                          use_model_id: modelRow.id,
+                          specific_use_class_id: childId,
+                          general_use_class_id: parentId,
+                          specific_name: cls.name,
+                          general_name: parentName,
+                        },
+                        { transaction: t }
+                      );
+                    }
+                  }
+                }
+              }
           }
         }
 
