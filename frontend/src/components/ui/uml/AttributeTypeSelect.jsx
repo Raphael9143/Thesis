@@ -1,10 +1,21 @@
 import React from 'react';
 
-export default function AttributeTypeSelect({ value, onChange, classes = [], enums = [], className = 'uml-attr-type' }) {
+export default function AttributeTypeSelect({
+  value,
+  onChange,
+  classes = [],
+  enums = [],
+  className = 'uml-attr-type',
+}) {
   const primitiveTypes = ['String', 'Integer', 'Real', 'Boolean'];
 
   return (
-    <select className={className} value={value || 'String'} onChange={(e) => onChange(e.target.value)} style={{ maxWidth: '100%' }}>
+    <select
+      className={className}
+      value={value || 'String'}
+      onChange={(e) => onChange(e.target.value)}
+      style={{ maxWidth: '100%' }}
+    >
       {primitiveTypes.map((t) => (
         <option key={t} value={t}>
           {t}

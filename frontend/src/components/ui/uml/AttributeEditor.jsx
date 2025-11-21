@@ -18,23 +18,15 @@ export default function AttributeEditor({
     let text = '';
     if (attr == null) text = '';
     else if (typeof attr === 'string') text = attr;
-    else if (typeof attr === 'object') text = attr.name ? `${attr.name}${attr.type ? `: ${attr.type}` : ''}` : JSON.stringify(attr);
+    else if (typeof attr === 'object')
+      text = attr.name ? `${attr.name}${attr.type ? `: ${attr.type}` : ''}` : JSON.stringify(attr);
     return <div className="uml-attr">{text}</div>;
   }
 
   return (
     <div className="uml-attr editing">
-      <input
-        className="uml-attr-name"
-        value={aname}
-        onChange={(e) => onUpdate(idx, e.target.value, atype)}
-      />
-      <AttributeTypeSelect
-        value={atype}
-        onChange={(v) => onUpdate(idx, aname, v)}
-        classes={classes}
-        enums={enums}
-      />
+      <input className="uml-attr-name" value={aname} onChange={(e) => onUpdate(idx, e.target.value, atype)} />
+      <AttributeTypeSelect value={atype} onChange={(v) => onUpdate(idx, aname, v)} classes={classes} enums={enums} />
       <i
         className="fa fa-trash uml-icon-btn"
         title="Delete attribute"
