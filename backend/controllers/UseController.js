@@ -188,40 +188,129 @@ function parseUseContent(content) {
     res.classes.push(cls);
   }
 
-  // Associations
-  const assocRe = /association\s+(\w+)\s+between([\s\S]*?)end/gi;
+  // Associations (supports 'association', 'aggregation', 'composition', 'associationclass')
+  const assocRe =
+    /(?:association|aggregation|composition|associationclass)\s+(\w+)\s+between([\s\S]*?)end/gi;
   let am;
   while ((am = assocRe.exec(content)) !== null) {
+    // Determine the keyword (type) by inspecting the matched substring
+    const fullMatch = am[0];
+    let type = "association";
+    const typeMatch = fullMatch.match(
+      /^(association|aggregation|composition)\s+/i
+    );
+    if (typeMatch) type = typeMatch[1].toLowerCase();
+    else {
+      const acMatch = fullMatch.match(/^associationclass\s+/i);
+      if (acMatch) type = "associationclass";
+    }
     const name = am[1];
     const body = am[2];
-    const lines = body
-      .split(/\r?\n/)
-      .map((l) => l.trim())
-      .filter(Boolean);
+    // split body into raw lines but keep order
+    const rawLines = body.split(/\r?\n/);
+    const lines = rawLines.map((l) => l.trim());
     const parts = [];
+    const assocAttributes = [];
+    const assocOperations = [];
+    let mode = "parts"; // switch to 'attributes' or 'operations' when encountered
     for (const line of lines) {
-      // e.g. Customer [1] role owner OR Customer [1]
-      const m = line.match(
-        /([A-Za-z0-9_]+)\s*\[([^\]]+)\](?:\s+role\s+([A-Za-z0-9_]+))?/i
-      );
-      if (m)
-        parts.push({
-          class: m[1],
-          multiplicity: m[2].trim(),
-          role: m[3] || m[1].toLowerCase(),
-        });
+      if (!line) continue;
+      const l = line.trim();
+      const lower = l.toLowerCase();
+      if (lower === "attributes") {
+        mode = "attributes";
+        continue;
+      }
+      if (lower === "operations") {
+        mode = "operations";
+        continue;
+      }
+
+      if (mode === "parts") {
+        const m = l.match(
+          /([A-Za-z0-9_]+)\s*\[([^\]]+)\](?:\s+role\s+([A-Za-z0-9_]+))?/i
+        );
+        if (m) {
+          const part = {
+            class: m[1],
+            multiplicity: m[2].trim(),
+            role: m[3] || m[1].toLowerCase(),
+          };
+          if (/\b(composition|composite)\b/i.test(l)) part.kind = "composition";
+          else if (/\b(aggregation)\b/i.test(l)) part.kind = "aggregation";
+          parts.push(part);
+        } else {
+          // allow parts without explicit multiplicity (e.g. 'Customer' or 'Customer role x')
+          const m2 = l.match(/([A-Za-z0-9_]+)(?:\s+role\s+([A-Za-z0-9_]+))?/i);
+          if (m2) {
+            parts.push({
+              class: m2[1],
+              multiplicity: null,
+              role: m2[2] || m2[1].toLowerCase(),
+            });
+          }
+        }
+      } else if (mode === "attributes") {
+        // simple attribute line 'name : Type'
+        const amatch = l.match(/^([a-zA-Z0-9_]+)\s*:\s*(.+)$/);
+        if (amatch)
+          assocAttributes.push({ name: amatch[1], type: amatch[2].trim() });
+      } else if (mode === "operations") {
+        // operation line like 'opName(params) : Type' or with body lines — keep signature
+        const om = l.match(/^([a-zA-Z0-9_]+)\s*\(([^)]*)\)\s*(?::\s*(.+))?$/);
+        if (om)
+          assocOperations.push({
+            name: om[1],
+            signature: om[2].trim(),
+            returnType: om[3] ? om[3].trim() : null,
+          });
+        else assocOperations.push({ raw: l });
+      }
     }
-    res.associations.push({ name, parts });
+
+    const assocObj = { name, parts, type };
+    if (type === "associationclass") {
+      if (assocAttributes.length) assocObj.attributes = assocAttributes;
+      if (assocOperations.length) assocObj.operations = assocOperations;
+    }
+    res.associations.push(assocObj);
   }
 
   return res;
+}
+
+// Attach extracted conditionals to parsed output
+// so the helper `extractConditionals` is actually used.
+function parseUseContentWithConditionals(content) {
+  const parsed = parseUseContent(content);
+  parsed.conditionals = extractConditionals(content);
+  return parsed;
+}
+
+// Extract simple if-then-else blocks from raw content
+// (returns array of {condition, then, else, raw})
+function extractConditionals(content) {
+  const found = [];
+  if (!content || typeof content !== "string") return found;
+  const ifRe =
+    /if\s*\(([^)]+)\)\s*then\s*([\s\S]*?)(?:\s*else\s*([\s\S]*?))?(?=\n\s*\n|\nend\b|$)/gim;
+  let im;
+  while ((im = ifRe.exec(content)) !== null) {
+    found.push({
+      condition: im[1].trim(),
+      then: im[2].trim(),
+      else: im[3] ? im[3].trim() : null,
+      raw: im[0].trim(),
+    });
+  }
+  return found;
 }
 
 function parseCliOutput(cliOut) {
   const idx = cliOut.search(/\n?model\s+/i);
   const payload = idx >= 0 ? cliOut.slice(idx) : cliOut;
   // Reuse parseUseContent on the cleaned payload
-  return parseUseContent(payload);
+  return parseUseContentWithConditionals(payload);
 }
 
 /**
@@ -530,7 +619,16 @@ const UseController = {
 
       // Fallback to parsing raw file content if CLI isn't available or didn't produce model
       if (!parsed || !parsed.model) {
-        parsed = parseUseContent(content);
+        parsed = parseUseContentWithConditionals(content);
+      }
+
+      // Ensure we always attach conditionals extracted from the raw content
+      try {
+        if (!parsed.conditionals || !parsed.conditionals.length) {
+          parsed.conditionals = extractConditionals(content);
+        }
+      } catch (e) {
+        console.error("Error extracting conditionals:", e);
       }
 
       // If still no model parsed, return a helpful error using CLI message if present
@@ -605,14 +703,12 @@ const UseController = {
         const exitCode =
           cliRes && typeof cliRes.code === "number" ? cliRes.code : null;
         if (stderrText && String(stderrText).trim().length > 0) {
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "USE CLI reported errors",
-              cli: { stdout: stdoutText, stderr: stderrText, code: exitCode },
-              text: useText,
-            });
+          return res.status(400).json({
+            success: false,
+            message: "USE CLI reported errors",
+            cli: { stdout: stdoutText, stderr: stderrText, code: exitCode },
+            text: useText,
+          });
         }
       }
 
@@ -707,10 +803,13 @@ const UseController = {
         try {
           parsed = parseCliOutput(cliResult.stdout);
         } catch (e) {
-          parsed = parseUseContent(content);
+          parsed = parseUseContentWithConditionals(content);
           console.error("Error parsing CLI output, fallback to file parse:", e);
         }
       } else parsed = parseUseContent(content);
+      // ensure fallback case uses wrapper too
+      if (!parsed || !parsed.model)
+        parsed = parseUseContentWithConditionals(content);
 
       // Persist into DB
       const { sequelize } = require("../config/database");
@@ -898,5 +997,5 @@ const UseController = {
 };
 
 module.exports = UseController;
-// Export helpful parser utility for tests and tooling
-module.exports.parseUseContent = parseUseContent;
+// Export helpful parser utility for tests and tooling (includes conditionals)
+module.exports.parseUseContent = parseUseContentWithConditionals;
