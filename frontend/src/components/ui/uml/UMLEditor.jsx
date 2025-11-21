@@ -4,16 +4,20 @@ import '../../../assets/styles/components/ui/UMLPreview.css';
 import '../../../assets/styles/components/ui/UMLEditor.css';
 import useBoxMeasurements from '../../../hooks/useBoxMeasurements';
 import useBoxDrag from '../../../hooks/useBoxDrag';
+import useConstraints from '../../../hooks/useConstraints';
+import useLinkDrag from '../../../hooks/useLinkDrag';
 import UMLCanvas from './UMLCanvas';
 import userAPI from '../../../../services/userAPI';
-import AttributeEditor from './AttributeEditor';
-import EnumEditor from './EnumEditor';
-import UmlToolbox from './UmlToolbox';
-import AttributeTypeSelect from './AttributeTypeSelect';
-
-function uid(prefix = 'id') {
-  return `${prefix}_${Math.random().toString(36).slice(2, 9)}`;
-}
+import ClassBox from './editor/ClassBox';
+import EnumBox from './editor/EnumBox';
+import UmlToolbox from './editor/UmlToolbox';
+import AttributeTypeSelect from './editor/AttributeTypeSelect';
+import ConstraintModal from './editor/ConstraintModal';
+import ChoicePopup from './editor/ChoicePopup';
+import AssociationModal from './editor/AssociationModal';
+import ConstraintList from './editor/ConstraintList';
+import ConstraintBox from './editor/ConstraintBox';
+import UmlEditorContext from '../../../contexts/UmlEditorContext';
 
 export default function UMLEditor({ initialModel = null, onResult }) {
   const containerRef = useRef(null);
@@ -28,8 +32,8 @@ export default function UMLEditor({ initialModel = null, onResult }) {
   const [enums, setEnums] = useState(starter.enums || []);
   const [associations, setAssociations] = useState(starter.associations || []);
   const [positions, setPositions] = useState({});
-  const [constraints, setConstraints] = useState(starter.constraints || []);
-  const [constraintDraft, setConstraintDraft] = useState(null); // { id, type, name, expression, ownerClass }
+  const { constraints, constraintDraft, openConstraintModal, setConstraintDraft, createConstraint, deleteConstraint } =
+    useConstraints(starter.constraints || []);
   const [nextIndex, setNextIndex] = useState((starter.classes?.length || 0) + 1);
 
   const BOX_W = 220;
@@ -102,19 +106,14 @@ export default function UMLEditor({ initialModel = null, onResult }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.search]);
 
-  // link dragging state (temporary line and hover)
-  const [linkDrag, setLinkDrag] = useState(null);
-  // hovered target (not currently used visually)
-  const [choice, setChoice] = useState(null);
+  // link dragging moved into hook
 
   useEffect(() => {
     positionsRef.current = positions;
   }, [positions]);
 
   const onToolDragStart = (ev, type) => ev.dataTransfer.setData('application/uml', type);
-  const openConstraintModal = () => {
-    setConstraintDraft({ id: uid('con'), type: 'inv', name: '', expression: '', ownerClass: null });
-  };
+  // constraints handled by useConstraints hook (openConstraintModal, createConstraint, deleteConstraint)
   const onCanvasDragOver = (e) => e.preventDefault();
   const onCanvasDrop = (e) => {
     e.preventDefault();
@@ -155,72 +154,36 @@ export default function UMLEditor({ initialModel = null, onResult }) {
       setNewAttrInputs((n) => ({ ...n, [name]: { name: '', type: '', adding: false } }));
     }
     setEditingName(null);
-    setEditingType('class');
     setEditValue('');
   };
 
-  const startLinkDrag = (ev, fromName) => {
-    ev.stopPropagation();
-    const rect = containerRef.current?.getBoundingClientRect();
-    setLinkDrag({ from: fromName, x: (ev.clientX || 0) - (rect?.left || 0), y: (ev.clientY || 0) - (rect?.top || 0) });
-  };
+  // useLinkDrag hook handles temporary link line, pointer listeners and choice
+  const { linkDrag, startLinkDrag, choice, setChoice, assocModal, setAssocModal, addAssociation, addGeneralization } =
+    useLinkDrag({
+      positionsRef,
+      containerRef,
+      BOX_W,
+      BOX_MIN_H,
+      onAddAssociation: (assoc) => setAssociations((s) => [...s, assoc]),
+      onAddGeneralization: (sub, sup) =>
+        setClasses((s) =>
+          s.map((c) => {
+            if (c.name === sub) {
+              return { ...c, superclasses: Array.from(new Set([...(c.superclasses || []), sup])) };
+            }
+            return c;
+          })
+        ),
+    });
 
-  useEffect(() => {
-    if (!linkDrag) return undefined;
-    const onMove = (e) => {
-      const rect = containerRef.current?.getBoundingClientRect();
-      const x = (e.clientX || 0) - (rect?.left || 0);
-      const y = (e.clientY || 0) - (rect?.top || 0);
-      setLinkDrag((l) => ({ ...l, x, y }));
-    };
-    const onUp = (e) => {
-      const rect = containerRef.current?.getBoundingClientRect();
-      const x = (e.clientX || 0) - (rect?.left || 0);
-      const y = (e.clientY || 0) - (rect?.top || 0);
-      let target = null;
-      Object.keys(positions).forEach((name) => {
-        const left = positions[name].x;
-        const top = positions[name].y;
-        const right = left + BOX_W;
-        const bottom = top + BOX_MIN_H;
-        if (x >= left && x <= right && y >= top && y <= bottom) target = name;
-      });
-      if (target && target !== linkDrag.from) setChoice({ from: linkDrag.from, to: target, x, y });
-      setLinkDrag(null);
-      // clear hover (not used)
-    };
-    window.addEventListener('pointermove', onMove);
-    window.addEventListener('pointerup', onUp);
-    return () => {
-      window.removeEventListener('pointermove', onMove);
-      window.removeEventListener('pointerup', onUp);
-    };
-  }, [linkDrag, positions]);
-
-  const addAssociation = (from, to, left = '1', right = '*', name = '') => {
-    const assoc = {
-      id: uid('a'),
-      name,
-      parts: [
-        { class: from, multiplicity: left, role: from },
-        { class: to, multiplicity: right, role: to },
-      ],
-    };
-    setAssociations((s) => [...s, assoc]);
-  };
-
-  const addGeneralization = (sub, sup) =>
-    setClasses((s) =>
-      s.map((c) => (c.name === sub ? { ...c, superclasses: Array.from(new Set([...(c.superclasses || []), sup])) } : c))
-    );
+  // addAssociation and addGeneralization provided by hook and routed above
 
   const [editingName, setEditingName] = useState(null);
-  const [editingType, setEditingType] = useState('class'); // 'class' or 'enum'
   const [editValue, setEditValue] = useState('');
   const [attrEditBuffers, setAttrEditBuffers] = useState({}); // staged attribute edits per class
   const [enumEditBuffers, setEnumEditBuffers] = useState({}); // staged enum value edits per enum
   const [newAttrInputs, setNewAttrInputs] = useState({}); // { [className]: { name:'', type:'', adding: bool } }
-  const [assocModal, setAssocModal] = useState(null); // { from, to, left, right, name }
+  // assocModal handled by hook
   const [newEnumInputs, setNewEnumInputs] = useState({}); // { [enumName]: { value:'', adding: bool } }
 
   // (modal actions inline in modal below)
@@ -299,7 +262,6 @@ export default function UMLEditor({ initialModel = null, onResult }) {
     }
 
     setEditingName(null);
-    setEditingType('class');
     setEditValue('');
   };
 
@@ -307,7 +269,6 @@ export default function UMLEditor({ initialModel = null, onResult }) {
   const startAddingAttr = (clsName) => {
     setNewAttrInputs((n) => ({ ...n, [clsName]: { name: '', type: '', adding: true } }));
     setEditingName(clsName);
-    setEditingType('class');
     ensureAttrBuffer(clsName);
   };
 
@@ -394,11 +355,6 @@ export default function UMLEditor({ initialModel = null, onResult }) {
   };
 
   // Enum value editing helpers
-  const startAddingEnumValue = (enumName) => {
-    setNewEnumInputs((n) => ({ ...n, [enumName]: { value: '', adding: true } }));
-    setEditingName(enumName);
-    setEditingType('enum');
-  };
 
   // ensure a staged buffer exists for editing an enum's values
   const ensureEnumBuffer = (enumName) => {
@@ -516,336 +472,170 @@ export default function UMLEditor({ initialModel = null, onResult }) {
 
   // No manual path import allowed — preview provides parsed model via router state
 
+  const contextValue = {
+    positionsRef,
+    positions,
+    setPositions,
+    boxRefs,
+    startDrag,
+    startLinkDrag,
+    ensureAttrBuffer,
+    ensureEnumBuffer,
+    updateAttribute,
+    deleteAttribute,
+    startAddingAttr,
+    updateNewAttrInput,
+    commitAddingAttr,
+    cancelAddingAttr,
+    updateEnumValue,
+    deleteEnumValue,
+    commitAddingEnumValue,
+    classes,
+    enums,
+    editingName,
+    editValue,
+    setEditValue,
+  };
+
   return (
-    <div className="uml-editor">
-      <UmlToolbox
-        onToolDragStart={onToolDragStart}
-        onExport={exportModel}
-        onOpenConstraintModal={openConstraintModal}
-      />
+    <UmlEditorContext.Provider value={contextValue}>
+      <div className="uml-editor">
+        <UmlToolbox
+          onToolDragStart={onToolDragStart}
+          onExport={exportModel}
+          onOpenConstraintModal={openConstraintModal}
+        />
 
-      <div className="uml-canvas-area">
-        <div ref={containerRef} onDragOver={onCanvasDragOver} onDrop={onCanvasDrop} className="uml-canvas">
-          {/* svg layer */}
-          <UMLCanvas associations={associations} classes={classes} centerOf={centerOf} getRect={getRect} />
+        <div className="uml-canvas-area">
+          <div ref={containerRef} onDragOver={onCanvasDragOver} onDrop={onCanvasDrop} className="uml-canvas">
+            {/* svg layer */}
+            <UMLCanvas associations={associations} classes={classes} centerOf={centerOf} getRect={getRect} />
 
-          {/* render boxes with existing UML CSS classes */}
-          {[...classes].map((c) => {
-            const pos = positions[c.name] || { x: 40, y: 40 };
-            const newAttr = newAttrInputs[c.name] || { name: '', type: '', adding: false };
-            const attrs = editingName === c.name ? (attrEditBuffers[c.name] ?? c.attributes) : c.attributes;
-            return (
-              <div
-                key={c.name}
-                ref={(el) => (boxRefs.current[c.name] = el)}
-                className="uml-box"
-                style={{ left: pos.x, top: pos.y }}
-                onMouseDown={(e) => startDrag(c.name, e)}
-              >
-                <div className="uml-box-title">
-                  {editingName === c.name ? (
-                    <div className="uml-title-edit-controls">
-                      <input
-                        className="uml-title-input"
-                        autoFocus
-                        value={editValue}
-                        onChange={(e) => setEditValue(e.target.value)}
-                        onKeyDown={(e) => e.key === 'Enter' && commitEdit(c.name)}
-                      />
-                      <i
-                        className="fa fa-plus uml-icon-btn"
-                        title="Add attribute"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          startAddingAttr(c.name);
-                        }}
-                      />
-                      <i
-                        className="fa fa-save uml-icon-btn"
-                        title="Save"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          commitEdit(c.name);
-                        }}
-                      />
-                      <i
-                        className="fa fa-times uml-icon-btn"
-                        title="Cancel"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          cancelEdit(c.name, 'class');
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <>
-                      <div>{c.name}</div>
-                      <i
-                        className="fa fa-edit uml-edit-btn"
-                        title="Edit"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          ensureAttrBuffer(c.name);
-                          setEditingName(c.name);
-                          setEditingType('class');
-                          setEditValue(c.name);
-                        }}
-                      />
-                    </>
-                  )}
-                </div>
-                <div className="uml-box-body">
-                  <div className="uml-attributes">
-                    {Array.isArray(attrs) &&
-                      attrs.map((a, idx) => (
-                        <AttributeEditor
-                          key={idx}
-                          clsName={c.name}
-                          attr={a}
-                          idx={idx}
-                          editing={editingName === c.name}
-                          onUpdate={(i, n, t) => updateAttribute(c.name, i, n, t)}
-                          onDelete={(i) => deleteAttribute(c.name, i)}
-                          classes={classes}
-                          enums={enums}
-                        />
-                      ))}
-                    {/* new attr inline editor when adding */}
-                    {editingName === c.name && newAttr.adding && (
-                      <div className="uml-attr editing">
-                        <input
-                          placeholder="name"
-                          value={newAttr.name}
-                          onChange={(e) => updateNewAttrInput(c.name, 'name', e.target.value)}
-                          className="uml-attr-name"
-                        />
-                        <AttributeTypeSelect
-                          value={newAttr.type}
-                          onChange={(v) => updateNewAttrInput(c.name, 'type', v)}
-                          classes={classes}
-                          enums={enums}
-                        />
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            commitAddingAttr(c.name);
-                          }}
-                        >
-                          Add
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            cancelAddingAttr(c.name);
-                          }}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <div className="uml-box-actions">
-                    <div
-                      className="uml-connector"
-                      title="Drag to link"
-                      onPointerDown={(e) => startLinkDrag(e, c.name)}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-
-          {[...enums].map((en) => {
-            const key = `enum:${en.name}`;
-            const pos = positions[key] || { x: 40, y: 40 };
-            const newEnum = newEnumInputs[en.name] || { value: '', adding: false };
-            return (
-              <div
-                key={en.name}
-                ref={(el) => (boxRefs.current[key] = el)}
-                className="uml-box uml-enum"
-                style={{ left: pos.x, top: pos.y, width: BOX_W / 1.2 }}
-                onMouseDown={(e) => startDrag(key, e)}
-              >
-                <EnumEditor
-                  en={en}
+            {/* render boxes with existing UML CSS classes */}
+            {[...classes].map((c) => {
+              const pos = positions[c.name] || { x: 40, y: 40 };
+              const newAttr = newAttrInputs[c.name] || { name: '', type: '', adding: false };
+              const attrs = editingName === c.name ? (attrEditBuffers[c.name] ?? c.attributes) : c.attributes;
+              return (
+                <ClassBox
+                  key={c.name}
+                  c={c}
+                  pos={pos}
+                  boxRefs={boxRefs}
+                  startDrag={startDrag}
                   editingName={editingName}
-                  editingType={editingType}
                   editValue={editValue}
-                  onEditChange={(v) => setEditValue(v)}
+                  setEditValue={setEditValue}
+                  onStartEdit={() => {
+                    ensureAttrBuffer(c.name);
+                    setEditingName(c.name);
+                    setEditValue(c.name);
+                  }}
+                  onCommitEdit={() => commitEdit(c.name)}
+                  onCancelEdit={() => cancelEdit(c.name, 'class')}
+                  startAddingAttr={startAddingAttr}
+                  newAttr={newAttr}
+                  attrs={attrs}
+                  onUpdateAttribute={updateAttribute}
+                  onDeleteAttribute={deleteAttribute}
+                  updateNewAttrInput={updateNewAttrInput}
+                  commitAddingAttr={commitAddingAttr}
+                  cancelAddingAttr={cancelAddingAttr}
+                  startLinkDrag={startLinkDrag}
+                  classes={classes}
+                  enums={enums}
+                />
+              );
+            })}
+
+            {[...enums].map((en) => {
+              const key = `enum:${en.name}`;
+              const pos = positions[key] || { x: 40, y: 40 };
+              const newEnum = newEnumInputs[en.name] || { value: '', adding: false };
+              return (
+                <EnumBox
+                  key={en.name}
+                  en={en}
+                  pos={pos}
+                  boxRefs={boxRefs}
+                  startDrag={startDrag}
+                  editingName={editingName}
+                  editValue={editValue}
                   onStartEdit={() => {
                     ensureEnumBuffer(en.name);
                     setEditingName(en.name);
-                    setEditingType('enum');
                     setEditValue(en.name);
                   }}
                   onCommitEdit={() => commitEdit(en.name, 'enum')}
-                  onCancelEdit={() => {
-                    cancelEdit(en.name, 'enum');
-                  }}
+                  onCancelEdit={() => cancelEdit(en.name, 'enum')}
                   newEnum={newEnum}
                   onUpdateValue={(idx, val) => {
                     if (idx === 'new') updateNewEnumInput(en.name, val);
                     else updateEnumValue(en.name, idx, val);
                   }}
                   onDeleteValue={(idx) => deleteEnumValue(en.name, idx)}
-                  onStartAddValue={() => startAddingEnumValue(en.name)}
                   onCommitAddValue={() => commitAddingEnumValue(en.name)}
                   onCancelAddValue={() => cancelAddingEnumValue(en.name)}
                   classes={classes}
                 />
-              </div>
-            );
-          })}
+              );
+            })}
 
-          {/* temporary link line */}
-          {linkDrag && (
-            <svg className="uml-temp-svg">
-              {centerOf(linkDrag.from) && (
-                <line
-                  x1={centerOf(linkDrag.from).x}
-                  y1={centerOf(linkDrag.from).y}
-                  x2={linkDrag.x}
-                  y2={linkDrag.y}
-                  stroke="#333"
-                  strokeWidth={2}
-                />
-              )}
-            </svg>
-          )}
-
-          {choice && (
-            <div className="uml-choice-popup" style={{ left: choice.x + 8, top: choice.y + 8 }}>
-              <div className="uml-choice-title">Create relationship</div>
-              <div className="uml-choice-actions">
-                <button
-                  onClick={() => {
-                    setAssocModal({ from: choice.from, to: choice.to, left: '1', right: '*', name: '' });
-                    setChoice(null);
-                  }}
-                >
-                  Association
-                </button>
-                <button
-                  onClick={() => {
-                    addGeneralization(choice.from, choice.to);
-                    setChoice(null);
-                  }}
-                >
-                  Generalization
-                </button>
-                <button onClick={() => setChoice(null)}>Cancel</button>
-              </div>
-            </div>
-          )}
-
-          {/* Association modal */}
-          {assocModal && (
-            <div className="uml-modal-overlay" onClick={() => setAssocModal(null)}>
-              <div className="uml-modal" onClick={(e) => e.stopPropagation()}>
-                <div className="uml-modal-title">Association details</div>
-                <div className="uml-modal-row">
-                  <div>
-                    <label className="uml-modal-label">Left multiplicity</label>
-                    <input
-                      className="uml-modal-input"
-                      value={assocModal.left}
-                      onChange={(e) => setAssocModal((m) => ({ ...m, left: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <label className="uml-modal-label">Right multiplicity</label>
-                    <input
-                      className="uml-modal-input"
-                      value={assocModal.right}
-                      onChange={(e) => setAssocModal((m) => ({ ...m, right: e.target.value }))}
-                    />
-                  </div>
-                </div>
-                <div className="uml-modal-section">
-                  <label className="uml-modal-label">Name (optional)</label>
-                  <input
-                    className="uml-modal-input"
-                    value={assocModal.name}
-                    onChange={(e) => setAssocModal((m) => ({ ...m, name: e.target.value }))}
+            {/* temporary link line */}
+            {linkDrag && (
+              <svg className="uml-temp-svg">
+                {centerOf(linkDrag.from) && (
+                  <line
+                    x1={centerOf(linkDrag.from).x}
+                    y1={centerOf(linkDrag.from).y}
+                    x2={linkDrag.x}
+                    y2={linkDrag.y}
+                    stroke="#333"
+                    strokeWidth={2}
                   />
-                </div>
-                <div className="uml-modal-actions">
-                  <button onClick={() => setAssocModal(null)} title="Cancel">
-                    <i className="fa fa-times" /> Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      addAssociation(
-                        assocModal.from,
-                        assocModal.to,
-                        assocModal.left || '1',
-                        assocModal.right || '*',
-                        assocModal.name || ''
-                      );
-                      setAssocModal(null);
-                    }}
-                    title="Create association"
-                  >
-                    <i className="fa fa-save" /> Save
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-          {/* Constraint modal (single textarea) */}
-          {constraintDraft && (
-            <div className="uml-modal-overlay" onClick={() => setConstraintDraft(null)}>
-              <div className="uml-modal uml-modal-small" onClick={(e) => e.stopPropagation()}>
-                <div className="uml-modal-title">New Constraint</div>
-                <div className="uml-modal-section">
-                  <label className="uml-modal-label">Constraint (single-line header optional)</label>
-                  <textarea
-                    rows={4}
-                    className="uml-modal-input"
-                    placeholder="Optional: prefix with `inv: ClassName: ` or `pre: ClassName: `, then the expression"
-                    value={constraintDraft.expression || ''}
-                    onChange={(e) => setConstraintDraft((d) => ({ ...d, expression: e.target.value }))}
-                  />
-                </div>
-                <div className="uml-modal-actions">
-                  <button onClick={() => setConstraintDraft(null)} title="Cancel">
-                    <i className="fa fa-times" /> Cancel
-                  </button>
-                  <button
-                    onClick={() => {
-                      // parse optional type and owner from the start of the text
-                      const raw = (constraintDraft.expression || '').trim();
-                      const m = raw.match(/^(?:(inv|pre|post)\s*[:\-\s]+)?(?:(\w+)\s*[:\-\s]+)?([\s\S]+)$/i);
-                      let type = 'inv';
-                      let owner = null;
-                      let expr = raw;
-                      if (m) {
-                        if (m[1]) type = m[1].toLowerCase();
-                        if (m[2]) owner = m[2];
-                        expr = (m[3] || '').trim();
-                      }
-                      const con = {
-                        id: constraintDraft.id || uid('con'),
-                        type,
-                        name: '',
-                        expression: expr,
-                        ownerClass: owner,
-                      };
-                      setConstraints((s) => [...s, con]);
-                      setConstraintDraft(null);
-                    }}
-                    title="Create constraint"
-                  >
-                    <i className="fa fa-save" /> Create
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+                )}
+              </svg>
+            )}
+
+            <ChoicePopup
+              choice={choice}
+              onAssociation={() => {
+                setAssocModal({ from: choice.from, to: choice.to, left: '1', right: '*', name: '' });
+                setChoice(null);
+              }}
+              onGeneralization={() => {
+                addGeneralization(choice.from, choice.to);
+                setChoice(null);
+              }}
+              onCancel={() => setChoice(null)}
+            />
+
+            {/* Association modal */}
+            <AssociationModal
+              assoc={assocModal}
+              onChange={(next) => setAssocModal(next)}
+              onClose={() => setAssocModal(null)}
+              onSave={(a) => {
+                addAssociation(a.from, a.to, a.left || '1', a.right || '*', a.name || '');
+                setAssocModal(null);
+              }}
+            />
+            {/* Constraint modal (single textarea) */}
+            {constraintDraft && (
+              <ConstraintModal
+                draft={constraintDraft}
+                onChange={(v) => setConstraintDraft((d) => ({ ...(d || {}), expression: v }))}
+                onCancel={() => setConstraintDraft(null)}
+                onCreate={createConstraint}
+              />
+            )}
+
+            {/* Constraint list (side panel) */}
+            <ConstraintList constraints={constraints} onDelete={deleteConstraint} />
+            <ConstraintBox constraints={constraints} positions={positionsRef.current || {}} />
+          </div>
         </div>
       </div>
-    </div>
+    </UmlEditorContext.Provider>
   );
 }
