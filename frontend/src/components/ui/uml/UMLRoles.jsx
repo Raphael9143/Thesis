@@ -10,10 +10,11 @@ const UMLRoles = ({
 }) => (
   <>
     {Object.entries(rolePositions).map(([key, pos]) => {
-      const [idxStr, side] = key.split(':');
+      const [idxStr, partIdxStr] = key.split(':');
       const assoc = associations[Number(idxStr)];
       if (!assoc) return null;
-      const part = side === 'left' ? assoc.parts?.[0] : assoc.parts?.[1];
+      const partIdx = Number(partIdxStr);
+      const part = assoc.parts?.[partIdx];
       if (!part) return null;
       const role = part.role || part.name || '';
       const ownerName = part.class;
@@ -32,10 +33,11 @@ const UMLRoles = ({
     })}
 
     {Object.entries(multiplicityPositions).map(([key, pos]) => {
-      const [idxStr, side] = key.split(':');
+      const [idxStr, partIdxStr] = key.split(':');
       const assoc = associations[Number(idxStr)];
       if (!assoc) return null;
-      const part = side === 'left' ? assoc.parts?.[0] : assoc.parts?.[1];
+      const partIdx = Number(partIdxStr);
+      const part = assoc.parts?.[partIdx];
       if (!part) return null;
       const mult = fmtMultiplicity(part);
       if (!mult) return null;

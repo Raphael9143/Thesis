@@ -1,6 +1,19 @@
 import React from 'react';
 import { intersectBorder } from '../../../utils/umlUtils';
 
+function drawDiamondPoints(tip, other, size = 14) {
+  const dirX = other.x - tip.x;
+  const dirY = other.y - tip.y;
+  const len = Math.sqrt(dirX * dirX + dirY * dirY) || 1;
+  const along = { x: tip.x + (dirX / len) * size, y: tip.y + (dirY / len) * size };
+  const nx = (-dirY / len) * (size * 0.6);
+  const ny = (dirX / len) * (size * 0.6);
+  const left = { x: along.x + nx, y: along.y + ny };
+  const right = { x: along.x - nx, y: along.y - ny };
+  const back = { x: tip.x + (dirX / len) * (size * 2), y: tip.y + (dirY / len) * (size * 2) };
+  return [tip, left, back, right];
+}
+
 const UMLCanvas = ({
   associations,
   classes = [],
@@ -48,22 +61,130 @@ const UMLCanvas = ({
         });
       })}
 
-    {/* Draw associations (simple lines) */}
+    {/* Draw associations: support binary, n-ary, aggregation/composition, associationclass */}
     {associations.map((a, idx) => {
-      const left = a.parts?.[0];
-      const right = a.parts?.[1];
-      if (!left || !right) return null;
-      const leftName = left.class;
-      const rightName = right.class;
-      const c1 = centerOf(leftName);
-      const c2 = centerOf(rightName);
-      const rect1 = getRect(leftName);
-      const rect2 = getRect(rightName);
-      const p1 = rect1 ? intersectBorder(rect1, c1, c2) : c1;
-      const p2 = rect2 ? intersectBorder(rect2, c2, c1) : c2;
+      const parts = Array.isArray(a.parts) ? a.parts : [];
+      const type = a.type || 'association';
+      // gather centers and rects
+      const centers = parts.map((p) => ({ name: p.class, center: centerOf(p.class), rect: getRect(p.class), raw: p }));
+      // skip if no parts
+      if (centers.length === 0) return null;
+
+      // Binary association (two ends)
+      if (centers.length === 2) {
+        const left = centers[0];
+        const right = centers[1];
+        if (!left.center || !right.center) return null;
+        const p1 = left.rect ? intersectBorder(left.rect, left.center, right.center) : left.center;
+        const p2 = right.rect ? intersectBorder(right.rect, right.center, left.center) : right.center;
+        return (
+          <g key={`assoc-${idx}`}>
+            <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="#333" strokeWidth={2} />
+            {/* aggregation / composition markers on the first part */}
+            {type === 'composition' && (
+              <polygon
+                points={drawDiamondPoints(p1, p2)
+                  .map((pt) => `${pt.x},${pt.y}`)
+                  .join(' ')}
+                fill="#333"
+                stroke="#333"
+                strokeWidth={1}
+              />
+            )}
+            {type === 'aggregation' && (
+              <polygon
+                points={drawDiamondPoints(p1, p2)
+                  .map((pt) => `${pt.x},${pt.y}`)
+                  .join(' ')}
+                fill="#fff"
+                stroke="#333"
+                strokeWidth={1.5}
+              />
+            )}
+            {/* associationclass: render a small class box near middle and connect with dashed line */}
+            {type === 'associationclass' &&
+              a.attributes &&
+              (() => {
+                const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+                const boxW = 140;
+                const boxH = Math.max(30, 18 + (a.attributes.length || 0) * 16);
+                const bx = mid.x + 24;
+                const by = mid.y - boxH / 2;
+                return (
+                  <g key={`assocclass-${idx}`}>
+                    <rect x={bx} y={by} width={boxW} height={boxH} fill="#fff" stroke="#333" />
+                    <text x={bx + 8} y={by + 16} fontSize={12} fontWeight="bold">
+                      {a.name || 'AssocClass'}
+                    </text>
+                    {a.attributes.map((att, i) => (
+                      <text key={i} x={bx + 8} y={by + 34 + i * 14} fontSize={12}>
+                        {att.name + (att.type ? ` : ${att.type}` : '')}
+                      </text>
+                    ))}
+                    <line x1={mid.x} y1={mid.y} x2={bx} y2={by + boxH / 2} stroke="#333" strokeDasharray="6 4" />
+                  </g>
+                );
+              })()}
+          </g>
+        );
+      }
+
+      // N-ary association: compute centroid and connect to each participant
+      const valid = centers.filter((c) => c.center);
+      if (valid.length < 2) return null;
+      const centroid = valid.reduce((acc, c) => ({ x: acc.x + c.center.x, y: acc.y + c.center.y }), { x: 0, y: 0 });
+      centroid.x /= valid.length;
+      centroid.y /= valid.length;
+      // draw connector lines from centroid to each part
+      const lines = valid.map((c, i) => {
+        const pt = c.rect ? intersectBorder(c.rect, c.center, centroid) : c.center;
+        return (
+          <line
+            key={`n-${idx}-${i}`}
+            x1={centroid.x}
+            y1={centroid.y}
+            x2={pt.x}
+            y2={pt.y}
+            stroke="#333"
+            strokeWidth={2}
+          />
+        );
+      });
       return (
-        <g key={idx}>
-          <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke="#333" strokeWidth={2} />
+        <g key={`nary-${idx}`}>
+          {lines}
+          {/* central marker */}
+          <circle cx={centroid.x} cy={centroid.y} r={6} fill="#fff" stroke="#333" strokeWidth={2} />
+          {/* associationclass for n-ary */}
+          {type === 'associationclass' &&
+            a.attributes &&
+            (() => {
+              const bx = centroid.x + 28;
+              const boxW = 140;
+              const boxH = Math.max(30, 18 + (a.attributes.length || 0) * 16);
+              const by = centroid.y - boxH / 2;
+              return (
+                <g key={`assocclass-n-${idx}`}>
+                  <rect x={bx} y={by} width={boxW} height={boxH} fill="#fff" stroke="#333" />
+                  <text x={bx + 8} y={by + 16} fontSize={12} fontWeight="bold">
+                    {a.name || 'AssocClass'}
+                  </text>
+                  {a.attributes.map((att, i) => (
+                    <text key={i} x={bx + 8} y={by + 34 + i * 14} fontSize={12}>
+                      {att.name + (att.type ? ` : ${att.type}` : '')}
+                    </text>
+                  ))}
+                  <line
+                    x1={centroid.x}
+                    y1={centroid.y}
+                    x2={bx}
+                    y2={by + boxH / 2}
+                    stroke="#333"
+                    strokeDasharray="6 4"
+                  />
+                </g>
+              );
+            })()}
         </g>
       );
     })}

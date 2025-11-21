@@ -11,19 +11,22 @@ const useMultiplicityPositions = (associations, centerOf, getRect, { perpOffset,
   useMemo(() => {
     const mp = {};
     associations.forEach((a, i) => {
-      const left = a.parts?.[0];
-      const right = a.parts?.[1];
-      if (!left || !right) return;
-      const leftName = left.class;
-      const rightName = right.class;
-      const c1 = centerOf(leftName);
-      const c2 = centerOf(rightName);
-      const rect1 = getRect(leftName);
-      const rect2 = getRect(rightName);
-      const p1 = rect1 ? intersectBorder(rect1, c1, c2) : offsetAlong(c1, c2, 14);
-      const p2 = rect2 ? intersectBorder(rect2, c2, c1) : offsetAlong(c2, c1, 14);
-      mp[`${i}:left`] = perpOffset(p1, c1, c2, 14, 6);
-      mp[`${i}:right`] = perpOffset(p2, c2, c1, 14, 6);
+      const parts = Array.isArray(a.parts) ? a.parts : [];
+      const centers = parts.map((p) => ({ name: p.class, center: centerOf(p.class), rect: getRect(p.class), raw: p }));
+      // for each part compute multiplicity position
+      centers.forEach((c, idx) => {
+        if (!c.center) return;
+        const otherCenters = centers.filter((x) => x !== c && x.center).map((x) => x.center);
+        let anchorTarget = null;
+        if (otherCenters.length > 0) {
+          // choose the first other center as a target for direction
+          anchorTarget = otherCenters[0];
+        } else {
+          anchorTarget = { x: c.center.x + 20, y: c.center.y };
+        }
+        const p = c.rect ? intersectBorder(c.rect, c.center, anchorTarget) : offsetAlong(c.center, anchorTarget, 14);
+        mp[`${i}:${idx}`] = perpOffset(p, c.center, anchorTarget, 14, 6);
+      });
     });
     return mp;
   }, [associations, centerOf, getRect, perpOffset, offsetAlong, intersectBorder]);

@@ -82,19 +82,14 @@ export default function UMLPage() {
   useEffect(() => {
     const rp = {};
     associations.forEach((a, i) => {
-      const left = a.parts?.[0];
-      const right = a.parts?.[1];
-      if (!left || !right) return;
-      const leftName = left.class;
-      const rightName = right.class;
-      const c1 = centerOf(leftName);
-      const c2 = centerOf(rightName);
-      const rect1 = getRect(leftName);
-      const rect2 = getRect(rightName);
-      const p1 = rect1 ? intersectBorder(rect1, c1, c2) : offsetAlong(c1, c2, 14);
-      const p2 = rect2 ? intersectBorder(rect2, c2, c1) : offsetAlong(c2, c1, 14);
-      rp[`${i}:left`] = pushOutward(p1, c1, 18);
-      rp[`${i}:right`] = pushOutward(p2, c2, 18);
+      const parts = Array.isArray(a.parts) ? a.parts : [];
+      const centers = parts.map((p) => ({ name: p.class, center: centerOf(p.class), rect: getRect(p.class), raw: p }));
+      centers.forEach((c, idx) => {
+        if (!c.center) return;
+        const other = centers.find((x) => x !== c && x.center) || { center: { x: c.center.x + 20, y: c.center.y } };
+        const p = c.rect ? intersectBorder(c.rect, c.center, other.center) : offsetAlong(c.center, other.center, 14);
+        rp[`${i}:${idx}`] = pushOutward(p, c.center, 18);
+      });
     });
     setRolePositions(rp);
   }, [positions, associations, centerOf, getRect, setRolePositions]);
