@@ -48,4 +48,29 @@ const UseController = require("../controllers/UseController");
  */
 router.post("/export", UseController.exportUml);
 
+// Serialize single class JSON to a .use class block
+/**
+ * @swagger
+ * /api/uml/serialize/class:
+ *   post:
+ *     summary: Serialize a single class JSON into a .use class block
+ *     tags:
+ *       - UML
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: class
+ *         description: JSON object describing a class
+ *         required: true
+ *         schema:
+ *           type: object
+ *     responses:
+ *       200:
+ *         description: Plain text of the class block
+ *       400:
+ *         description: Invalid request body
+ */
+router.post("/serialize/class", UseController.serializeClass);
+
 module.exports = router;

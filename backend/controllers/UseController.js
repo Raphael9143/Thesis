@@ -438,6 +438,51 @@ function buildUseText(modelJson) {
   return lines.join("\n");
 }
 
+/**
+ * Build a single class `.use` text from a class JSON object.
+ * Expected shape: { name, isAbstract, superclasses, attributes, operations }
+ */
+function buildClassText(cls) {
+  if (!cls || typeof cls !== "object") return "";
+  const lines = [];
+  const parts = [];
+  if (cls.isAbstract) parts.push("abstract");
+  let header = `class ${cls.name || "Unnamed"}`;
+  if (Array.isArray(cls.superclasses) && cls.superclasses.length) {
+    header += ` < ${cls.superclasses.join(", ")}`;
+  }
+  if (parts.length) header = parts.join(" ") + " " + header;
+  lines.push(header);
+
+  if (Array.isArray(cls.attributes) && cls.attributes.length) {
+    lines.push("  attributes");
+    for (const a of cls.attributes) {
+      // accept {name,type} or string like 'x : Type'
+      if (typeof a === "string") {
+        lines.push("    " + a);
+      } else if (a && typeof a === "object") {
+        const t = a.type ? ` : ${a.type}` : "";
+        lines.push(`    ${a.name || "unnamed"}${t}`);
+      }
+    }
+  }
+
+  if (Array.isArray(cls.operations) && cls.operations.length) {
+    lines.push("  operations");
+    for (const op of cls.operations) {
+      if (typeof op === "string") {
+        lines.push("    " + op);
+      } else if (op && typeof op === "object") {
+        const sig = op.signature !== undefined ? `(${op.signature})` : "()";
+        lines.push(`    ${op.name || "op"}${sig}`);
+      }
+    }
+  }
+
+  lines.push("end");
+  return lines.join("\n");
+}
+
 const UseController = {
   // Get a stored USE model by id with related entities
   getById: async (req, res) => {
@@ -760,6 +805,23 @@ const UseController = {
       return res
         .status(500)
         .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+  // Serialize a single class JSON into .use class text
+  serializeClass: async (req, res) => {
+    try {
+      const cls = req.body;
+      if (!cls || typeof cls !== "object")
+        return res
+          .status(400)
+          .json({ success: false, message: "Class JSON body required" });
+
+      const text = buildClassText(cls);
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      return res.send(text);
+    } catch (err) {
+      console.error("serializeClass error:", err);
+      return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
   },
   save: async (req, res) => {
