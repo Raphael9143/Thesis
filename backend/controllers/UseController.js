@@ -373,9 +373,21 @@ function buildUseText(modelJson) {
   }
 
   // Associations
+  // Associations
   if (Array.isArray(modelJson.associations)) {
     for (const assoc of modelJson.associations) {
-      lines.push(`association ${assoc.name || "Assoc"} between`);
+      const type = assoc.type || "association";
+      const keyword =
+        type === "aggregation"
+          ? "aggregation"
+          : type === "composition"
+          ? "composition"
+          : type === "associationclass"
+          ? "associationclass"
+          : "association";
+
+      lines.push(`${keyword} ${assoc.name || "Assoc"} between`);
+
       if (Array.isArray(assoc.parts)) {
         for (const p of assoc.parts) {
           const mult = p.multiplicity ? `[${p.multiplicity}]` : "";
@@ -383,6 +395,31 @@ function buildUseText(modelJson) {
           lines.push(`  ${p.class || "Unnamed"} ${mult}${role}`);
         }
       }
+
+      // associationclass can have attributes and operations inside
+      if (type === "associationclass") {
+        if (Array.isArray(assoc.attributes) && assoc.attributes.length) {
+          lines.push("  attributes");
+          for (const a of assoc.attributes) {
+            const t = a.type ? ` : ${a.type}` : "";
+            lines.push(`    ${a.name || "unnamed"}${t}`);
+          }
+        }
+
+        if (Array.isArray(assoc.operations) && assoc.operations.length) {
+          lines.push("  operations");
+          for (const op of assoc.operations) {
+            if (op.signature !== undefined) {
+              const sig = `(${op.signature})`;
+              const ret = op.returnType ? ` : ${op.returnType}` : "";
+              lines.push(`    ${op.name || "op"}${sig}${ret}`);
+            } else if (op.raw) {
+              lines.push(`    ${op.raw}`);
+            }
+          }
+        }
+      }
+
       lines.push("end");
       lines.push("");
     }
