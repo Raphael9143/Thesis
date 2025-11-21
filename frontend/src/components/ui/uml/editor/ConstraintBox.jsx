@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function ConstraintBox({ constraints = [], positions = {}, BOX_W = 220, BOX_MIN_H = 60 }) {
+export default function ConstraintBox({ constraints = [], positions = {}, BOX_W = 220 }) {
   if (!Array.isArray(constraints) || constraints.length === 0) return null;
   return (
     <div className="uml-constraints-layer">

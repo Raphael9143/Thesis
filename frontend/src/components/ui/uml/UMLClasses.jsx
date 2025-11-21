@@ -22,14 +22,7 @@ const UMLClasses = ({ classes, enums, positions, boxRefs, startDrag, BOX_W, BOX_
                   </div>
                 ))}
             </div>
-            <div className="uml-ops">
-              {Array.isArray(c.operations) &&
-                c.operations.map((op) => (
-                  <div key={op.name} className="uml-op">
-                    {op.name}({op.signature || ''})
-                  </div>
-                ))}
-            </div>
+            {/* operations intentionally omitted in preview */}
           </div>
         </div>
       );
