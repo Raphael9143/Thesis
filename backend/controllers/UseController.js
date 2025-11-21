@@ -309,8 +309,6 @@ function buildUseText(modelJson) {
     }
     lines.push("");
   }
-
-  lines.push("end");
   return lines.join("\n");
 }
 
@@ -567,10 +565,56 @@ const UseController = {
 
       const useText = buildUseText(json);
       const modelName = (json.model || json.name || "model").replace(
-        /[^A-Za-z0-9_\-]/g,
+        /[^A-Za-z0-9_-]/g,
         "_"
       );
       const filename = `${modelName}.use`;
+
+      // Validate with USE CLI if requested with ?validate=true
+      const wantValidate =
+        (req.query && String(req.query.validate).toLowerCase() === "true") ||
+        false;
+      if (wantValidate) {
+        const uploadsDir = path.resolve(__dirname, "..", "uploads");
+        if (!fs.existsSync(uploadsDir))
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        const tmpName = `uml_export_${Date.now()}.use`;
+        const tmpPath = path.join(uploadsDir, tmpName);
+        fs.writeFileSync(tmpPath, useText, "utf8");
+        let cliRes = null;
+        try {
+          cliRes = await runUseCli(tmpPath, 8000);
+        } catch (e) {
+          try {
+            fs.unlinkSync(tmpPath);
+          } catch (err) {
+            console.error("Error deleting temp USE file:", err);
+          }
+          return res
+            .status(500)
+            .json({ success: false, message: `USE CLI error: ${e.message}` });
+        }
+        try {
+          fs.unlinkSync(tmpPath);
+        } catch (err) {
+          console.error("Error deleting temp USE file:", err);
+        }
+
+        const stderrText = (cliRes && cliRes.stderr) || "";
+        const stdoutText = (cliRes && cliRes.stdout) || "";
+        const exitCode =
+          cliRes && typeof cliRes.code === "number" ? cliRes.code : null;
+        if (stderrText && String(stderrText).trim().length > 0) {
+          return res
+            .status(400)
+            .json({
+              success: false,
+              message: "USE CLI reported errors",
+              cli: { stdout: stdoutText, stderr: stderrText, code: exitCode },
+              text: useText,
+            });
+        }
+      }
 
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       res.setHeader(
