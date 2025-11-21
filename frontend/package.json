@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "axios": "^1.11.0",
+    "jointjs": "^3.7.7",
     "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",
     "mammoth": "^1.4.18",
