@@ -70,7 +70,8 @@
 .uml-box-body {
   padding: 6px 8px;
 }
-.uml-attributes {}
+.uml-attributes {
+}
 .uml-attr {
   padding: 2px 0;
 }
@@ -120,11 +121,19 @@
   border-radius: 6px;
   z-index: 50;
 }
-.uml-choice-actions { display: flex; gap: 8px; }
+.uml-choice-actions {
+  display: flex;
+  gap: 8px;
+}
 
-.uml-choice-title { margin-bottom: 8px; font-weight: 700; }
+.uml-choice-title {
+  margin-bottom: 8px;
+  font-weight: 700;
+}
 
-.uml-modal-section { margin-bottom: 12px; }
+.uml-modal-section {
+  margin-bottom: 12px;
+}
 
 .uml-modal-overlay {
   position: fixed;
@@ -132,7 +141,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -144,9 +153,35 @@
   border-radius: 8px;
   min-width: 320px;
 }
-.uml-modal h3, .uml-modal .uml-modal-title { font-weight: 700; margin-bottom: 8px; }
-.uml-modal-row { display: flex; gap: 8px; margin-bottom: 8px; }
-.uml-modal-row > div { flex: 1; }
-.uml-modal-label { display: block; font-size: 12px; }
-.uml-modal-input { width: 100%; }
-.uml-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.uml-modal-small {
+  width: 460px;
+  max-width: 92vw;
+  padding: 12px;
+  max-height: 24vh;
+  overflow: auto;
+}
+.uml-modal h3,
+.uml-modal .uml-modal-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.uml-modal-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.uml-modal-row > div {
+  flex: 1;
+}
+.uml-modal-label {
+  display: block;
+  font-size: 12px;
+}
+.uml-modal-input {
+  width: 100%;
+}
+.uml-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

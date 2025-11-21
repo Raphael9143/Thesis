@@ -2,7 +2,6 @@ import React from 'react';
 import AttributeTypeSelect from './AttributeTypeSelect';
 
 export default function AttributeEditor({
-  clsName,
   attr,
   idx,
   editing,

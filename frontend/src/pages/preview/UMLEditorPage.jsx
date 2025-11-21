@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation } from 'react-router-dom';
 import UMLEditor from '../../components/ui/uml/UMLEditor';
 
 export default function UMLEditorPage() {
-  const [result, setResult] = useState(null);
   const { state } = useLocation();
   const initialModel = state?.model || null;
 
@@ -14,7 +13,7 @@ export default function UMLEditorPage() {
       </header>
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <div style={{ flex: 1, minHeight: 0 }}>
-          <UMLEditor initialModel={initialModel} onResult={(r) => setResult(r?.data || r)} />
+          <UMLEditor initialModel={initialModel} onResult={() => {}} />
         </div>
       </div>
     </div>

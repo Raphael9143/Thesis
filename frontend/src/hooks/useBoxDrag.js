@@ -53,7 +53,7 @@ const useBoxDrag = ({ setPositions, containerRef, positionsRef }) => {
       const tgt = e.target;
       if (tgt && tgt.closest && tgt.closest('.uml-connector')) return;
       if (tgt && tgt.closest && tgt.closest('.uml-edit-btn')) return;
-    } catch (err) {
+    } catch {
       // ignore
     }
     const clientX = (e.touches && e.touches[0] && e.touches[0].clientX) || e.clientX;

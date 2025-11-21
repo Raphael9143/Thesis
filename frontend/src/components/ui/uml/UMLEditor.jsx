@@ -28,6 +28,8 @@ export default function UMLEditor({ initialModel = null, onResult }) {
   const [enums, setEnums] = useState(starter.enums || []);
   const [associations, setAssociations] = useState(starter.associations || []);
   const [positions, setPositions] = useState({});
+  const [constraints, setConstraints] = useState(starter.constraints || []);
+  const [constraintDraft, setConstraintDraft] = useState(null); // { id, type, name, expression, ownerClass }
   const [nextIndex, setNextIndex] = useState((starter.classes?.length || 0) + 1);
 
   const BOX_W = 220;
@@ -110,6 +112,9 @@ export default function UMLEditor({ initialModel = null, onResult }) {
   }, [positions]);
 
   const onToolDragStart = (ev, type) => ev.dataTransfer.setData('application/uml', type);
+  const openConstraintModal = () => {
+    setConstraintDraft({ id: uid('con'), type: 'inv', name: '', expression: '', ownerClass: null });
+  };
   const onCanvasDragOver = (e) => e.preventDefault();
   const onCanvasDrop = (e) => {
     e.preventDefault();
@@ -129,6 +134,7 @@ export default function UMLEditor({ initialModel = null, onResult }) {
       setPositions((p) => ({ ...p, [`enum:${name}`]: { x: Math.max(12, x - BOX_W / 2), y: Math.max(12, y - 28) } }));
       setNextIndex((n) => n + 1);
     }
+    // no drag-to-add for constraints; use modal
   };
 
   const cancelEdit = (name, type = 'class') => {
@@ -216,6 +222,8 @@ export default function UMLEditor({ initialModel = null, onResult }) {
   const [newAttrInputs, setNewAttrInputs] = useState({}); // { [className]: { name:'', type:'', adding: bool } }
   const [assocModal, setAssocModal] = useState(null); // { from, to, left, right, name }
   const [newEnumInputs, setNewEnumInputs] = useState({}); // { [enumName]: { value:'', adding: bool } }
+
+  // (modal actions inline in modal below)
 
   const commitEdit = (oldName, type = 'class') => {
     const val = (editValue || '').trim();
@@ -481,7 +489,13 @@ export default function UMLEditor({ initialModel = null, onResult }) {
         isAbstract: !!c.isAbstract,
       })),
       associations: associations.map((a) => ({ name: a.name || '', parts: a.parts })),
-      constraints: [],
+      constraints: (constraints || []).map((c) => ({
+        id: c.id,
+        type: c.type,
+        name: c.name || '',
+        expression: c.expression || '',
+        ownerClass: c.ownerClass || null,
+      })),
     };
 
     // call backend converter and forward response
@@ -504,7 +518,11 @@ export default function UMLEditor({ initialModel = null, onResult }) {
 
   return (
     <div className="uml-editor">
-      <UmlToolbox onToolDragStart={onToolDragStart} onExport={exportModel} />
+      <UmlToolbox
+        onToolDragStart={onToolDragStart}
+        onExport={exportModel}
+        onOpenConstraintModal={openConstraintModal}
+      />
 
       <div className="uml-canvas-area">
         <div ref={containerRef} onDragOver={onCanvasDragOver} onDrop={onCanvasDrop} className="uml-canvas">
@@ -771,6 +789,56 @@ export default function UMLEditor({ initialModel = null, onResult }) {
                     title="Create association"
                   >
                     <i className="fa fa-save" /> Save
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {/* Constraint modal (single textarea) */}
+          {constraintDraft && (
+            <div className="uml-modal-overlay" onClick={() => setConstraintDraft(null)}>
+              <div className="uml-modal uml-modal-small" onClick={(e) => e.stopPropagation()}>
+                <div className="uml-modal-title">New Constraint</div>
+                <div className="uml-modal-section">
+                  <label className="uml-modal-label">Constraint (single-line header optional)</label>
+                  <textarea
+                    rows={4}
+                    className="uml-modal-input"
+                    placeholder="Optional: prefix with `inv: ClassName: ` or `pre: ClassName: `, then the expression"
+                    value={constraintDraft.expression || ''}
+                    onChange={(e) => setConstraintDraft((d) => ({ ...d, expression: e.target.value }))}
+                  />
+                </div>
+                <div className="uml-modal-actions">
+                  <button onClick={() => setConstraintDraft(null)} title="Cancel">
+                    <i className="fa fa-times" /> Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      // parse optional type and owner from the start of the text
+                      const raw = (constraintDraft.expression || '').trim();
+                      const m = raw.match(/^(?:(inv|pre|post)\s*[:\-\s]+)?(?:(\w+)\s*[:\-\s]+)?([\s\S]+)$/i);
+                      let type = 'inv';
+                      let owner = null;
+                      let expr = raw;
+                      if (m) {
+                        if (m[1]) type = m[1].toLowerCase();
+                        if (m[2]) owner = m[2];
+                        expr = (m[3] || '').trim();
+                      }
+                      const con = {
+                        id: constraintDraft.id || uid('con'),
+                        type,
+                        name: '',
+                        expression: expr,
+                        ownerClass: owner,
+                      };
+                      setConstraints((s) => [...s, con]);
+                      setConstraintDraft(null);
+                    }}
+                    title="Create constraint"
+                  >
+                    <i className="fa fa-save" /> Create
                   </button>
                 </div>
               </div>
