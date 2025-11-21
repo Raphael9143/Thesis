@@ -148,6 +148,10 @@ const userAPI = {
   parseUseModel: (path) => axiosClient.post('use/parse', { path }),
   // POST /api/use/save { path }
   saveUseModel: (path) => axiosClient.post('use/save', { path }),
+  // Convert UML JSON (from designer) to .use and validate/parse on server
+  // Expects payload { graphJson: { ... } }
+  // Returns { success, useText, model, cli, validation_report }
+  convertUmlJson: (data) => axiosClient.post('uml/export', data),
   // GET /api/use/models
   getUseModels: () => axiosClient.get('use/models'),
   // Researcher projects

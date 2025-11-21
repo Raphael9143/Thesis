@@ -39,6 +39,7 @@ import AssignmentPreview from './pages/preview/AssignmentPreview';
 import ExamPreview from './pages/preview/ExamPreview';
 import UMLPage from './pages/preview/UMLPage';
 import FilePreviewPage from './pages/preview/FilePreviewPage';
+import UMLEditorPage from './pages/preview/UMLEditorPage';
 import SubmitWork from './pages/student/SubmitWork';
 import RequireAuth from './components/routing/RequireAuth';
 import RequireRole from './components/routing/RequireRole';
@@ -90,6 +91,7 @@ const router = createBrowserRouter(
           }
         />
         <Route path="/uml/preview" element={<UMLPage />} />
+        <Route path="/uml/editor" element={<UMLEditorPage />} />
         <Route path="/file/preview" element={<FilePreviewPage />} />
         <Route
           path="/education/teacher/classes"

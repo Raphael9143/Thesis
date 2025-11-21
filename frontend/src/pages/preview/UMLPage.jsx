@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
 import { useNotifications } from '../../contexts/NotificationContext';
 import '../../assets/styles/components/ui/UMLPreview.css';
@@ -14,8 +14,9 @@ import UMLRoles from '../../components/ui/uml/UMLRoles';
 import UMLClasses from '../../components/ui/uml/UMLClasses';
 
 export default function UMLPage() {
-  const { state } = useLocation();
-  const { search } = useLocation();
+  const location = useLocation();
+  const { state } = location;
+  const { search } = location;
   const params = new URLSearchParams(search);
   const qfile = params.get('file');
 
@@ -26,6 +27,9 @@ export default function UMLPage() {
   const { push } = useNotifications();
   const [loadingModel, setLoadingModel] = useState(false);
   const [modelError, setModelError] = useState(null);
+  const loadingFilesRef = useRef({});
+
+  const navigate = useNavigate();
 
   const containerRef = useRef(null);
   const [positions, setPositions] = useState({});
@@ -104,6 +108,11 @@ export default function UMLPage() {
         setModelError('No file specified to parse for UML.');
         return;
       }
+
+      // Prevent duplicate loads for the same file (covers React Strict Mode double mount)
+      if (loadingFilesRef.current[fileKey]) return;
+      loadingFilesRef.current[fileKey] = true;
+
       const decoded = decodeURIComponent(fileKey);
       try {
         // try sessionStorage first
@@ -146,6 +155,7 @@ export default function UMLPage() {
         }
       } finally {
         setLoadingModel(false);
+        loadingFilesRef.current[fileKey] = false;
       }
     };
     load();
@@ -165,6 +175,17 @@ export default function UMLPage() {
     <div className="uml-page">
       <div style={{ padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>UML Preview - {model.model || 'Model'}</h2>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            className="btn btn-signin btn-sm"
+            onClick={() => {
+              // navigate to editor, pass current parsed model in router state
+              navigate('/uml/editor', { state: { model } });
+            }}
+          >
+            Edit
+          </button>
+        </div>
       </div>
       <div className="uml-page-body" ref={containerRef} style={{ border: '1px solid #eee' }}>
         <UMLCanvas

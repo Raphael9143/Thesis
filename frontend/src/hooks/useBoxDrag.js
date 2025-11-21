@@ -48,7 +48,14 @@ const useBoxDrag = ({ setPositions, containerRef, positionsRef }) => {
   }, [setPositions, containerRef]);
 
   const startDrag = (name, e) => {
-    e.stopPropagation();
+    // If the drag originated from a connector handle or edit control, don't start box drag
+    try {
+      const tgt = e.target;
+      if (tgt && tgt.closest && tgt.closest('.uml-connector')) return;
+      if (tgt && tgt.closest && tgt.closest('.uml-edit-btn')) return;
+    } catch (err) {
+      // ignore
+    }
     const clientX = (e.touches && e.touches[0] && e.touches[0].clientX) || e.clientX;
     const clientY = (e.touches && e.touches[0] && e.touches[0].clientY) || e.clientY;
     draggingRef.current = {

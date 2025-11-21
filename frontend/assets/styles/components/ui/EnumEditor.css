@@ -1,0 +1,40 @@
+/* Styles for EnumEditor component */
+.uml-enum-var {
+  padding: 4px 6px;
+}
+
+.uml-enum-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.uml-enum-input {
+  flex: 1 1 auto;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.uml-enum-delete {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #c0392b;
+  padding: 4px;
+}
+
+.uml-enum-delete .fa {
+  pointer-events: none;
+}
+
+.uml-enum-var.editing {
+  background: #fafafa;
+}
+
+.uml-add-value {
+  margin-top: 6px;
+  color: #2c3e50;
+  cursor: pointer;
+}

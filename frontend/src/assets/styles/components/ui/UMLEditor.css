@@ -1,0 +1,152 @@
+/* Styles for the UML editor - moved from inline styles */
+.uml-editor {
+  display: flex;
+  height: 100%;
+}
+
+.uml-toolbox {
+  width: 180px;
+  border-right: 1px solid #eee;
+  padding: 12px;
+  box-sizing: border-box;
+}
+.uml-toolbox-title {
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+.uml-tool-item {
+  padding: 8px;
+  border: 1px dashed #ccc;
+  border-radius: 6px;
+  cursor: grab;
+  margin-bottom: 8px;
+}
+.uml-toolbox-actions {
+  margin-top: 12px;
+}
+
+.uml-canvas-area {
+  flex: 1;
+  position: relative;
+}
+.uml-canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.uml-box {
+  position: absolute;
+  min-width: 220px;
+}
+.uml-enum {
+  width: 184px;
+}
+.uml-box-title {
+  position: relative;
+  padding: 6px 8px;
+  font-weight: 600;
+}
+.uml-title-edit-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.uml-title-input {
+  width: 60%;
+}
+.uml-edit-btn {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  cursor: pointer;
+}
+.uml-icon-btn {
+  cursor: pointer;
+}
+
+.uml-box-body {
+  padding: 6px 8px;
+}
+.uml-attributes {}
+.uml-attr {
+  padding: 2px 0;
+}
+.uml-attr.editing {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.uml-attr-name {
+  flex: 1;
+}
+.uml-attr-type {
+  width: 80px;
+}
+.uml-add-attr {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.uml-connector {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-left: 8px;
+  border-radius: 7px;
+  background: #444;
+  cursor: crosshair;
+}
+
+.uml-temp-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.uml-choice-popup {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 6px;
+  z-index: 50;
+}
+.uml-choice-actions { display: flex; gap: 8px; }
+
+.uml-choice-title { margin-bottom: 8px; font-weight: 700; }
+
+.uml-modal-section { margin-bottom: 12px; }
+
+.uml-modal-overlay {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.uml-modal {
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  min-width: 320px;
+}
+.uml-modal h3, .uml-modal .uml-modal-title { font-weight: 700; margin-bottom: 8px; }
+.uml-modal-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.uml-modal-row > div { flex: 1; }
+.uml-modal-label { display: block; font-size: 12px; }
+.uml-modal-input { width: 100%; }
+.uml-modal-actions { display: flex; justify-content: flex-end; gap: 8px; }
