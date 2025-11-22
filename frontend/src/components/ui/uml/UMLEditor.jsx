@@ -470,9 +470,7 @@ export default function UMLEditor({ initialModel = null }) {
         name: a.name || '',
         parts: a.parts || [],
         type: a.type || 'association',
-        attributes: Array.isArray(a.attributes)
-          ? a.attributes.map(normalizeAttr).filter(Boolean)
-          : [],
+        attributes: Array.isArray(a.attributes) ? a.attributes.map(normalizeAttr).filter(Boolean) : [],
       })),
       constraints: (constraints || []).map((c) => ({
         id: c.id,
@@ -704,7 +702,10 @@ export default function UMLEditor({ initialModel = null }) {
                 if (type === 'association' || type === 'aggregation' || type === 'composition') {
                   setAssocModal({ type, parts: baseParts, name: '' });
                 } else if (type === 'n-ary' || type === 'associationclass') {
-                  setAssocModal({ type, parts: baseParts, name: '', attributes: [] });
+                  // For n-ary, prefill an extra empty participant so the user can add the third
+                  // role more easily. AssociationClass shares similar UI (attributes).
+                  const extra = { class: '', multiplicity: '', role: '' };
+                  setAssocModal({ type, parts: [...baseParts, extra], name: '', attributes: [] });
                 }
                 setChoice(null);
               }}
