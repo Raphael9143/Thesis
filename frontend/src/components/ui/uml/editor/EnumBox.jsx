@@ -52,7 +52,9 @@ export default function EnumBox({
           </div>
         ) : (
           <>
-            <div>{en.name}</div>
+            <div>
+              {'<<enumeration>>'} {en.name}
+            </div>
             <i
               className="fa fa-edit uml-edit-btn"
               title="Edit"
@@ -64,7 +66,7 @@ export default function EnumBox({
           </>
         )}
       </div>
-
+      <hr className="uml-seperate" />
       <div className="uml-box-body">
         <div className="uml-attributes">
           {(Array.isArray(en.values) ? en.values : []).map((v, idx) => (

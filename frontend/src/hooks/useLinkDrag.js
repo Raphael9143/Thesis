@@ -62,19 +62,19 @@ export default function useLinkDrag({
   }, [linkDrag, containerRef, positionsRef, BOX_W, BOX_MIN_H]);
 
   const addAssociation = useCallback(
-    (from, to, left = '1', right = '*', name = '') => {
-      const assoc = {
-        id: uid('a'),
-        name,
-        parts: [
-          { class: from, multiplicity: left, role: from },
-          { class: to, multiplicity: right, role: to },
-        ],
-      };
-      if (typeof onAddAssociation === 'function') onAddAssociation(assoc);
-      else {
-        // fallback: nothing
-      }
+    (assoc) => {
+      if (!assoc) return;
+      const a = typeof assoc === 'object' ? { ...assoc } : assoc;
+      if (!a.id) a.id = uid('a');
+      // normalize parts: ensure parts array exists and each part has class/multiplicity/role
+      a.parts = Array.isArray(a.parts)
+        ? a.parts.map((p, i) => ({
+            class: p.class || p.name || '',
+            multiplicity: p.multiplicity || p.mult || p.mult || '',
+            role: p.role || p.name || `p${i}`,
+          }))
+        : [];
+      if (typeof onAddAssociation === 'function') onAddAssociation(a);
     },
     [onAddAssociation]
   );

@@ -41,12 +41,10 @@
 }
 .uml-box {
   position: absolute;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  background-color: var(--uml-box-background);
+  border: 2px solid var(--uml-box-border);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
   cursor: grab;
-  padding: 6px;
   box-sizing: border-box;
 }
 .uml-enum {
@@ -54,7 +52,6 @@
 }
 .uml-box-title {
   font-weight: 700;
-  border-bottom: 1px dashed #eee;
   padding-bottom: 6px;
   user-select: none;
 }
@@ -63,6 +60,14 @@
 .uml-box {
   box-sizing: border-box;
   overflow: visible;
+}
+.uml-seperate {
+  border: none;
+  border-top: 2px solid var(--uml-box-border);
+  margin: 0;
+  padding: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 .uml-box-title {
   white-space: normal;
@@ -159,5 +164,4 @@ details summary a:hover {
   min-height: 0; /* allow children to flex/scroll correctly */
   overflow: auto;
   padding: 12px;
-  background: var(--bg-gradient);;
 }

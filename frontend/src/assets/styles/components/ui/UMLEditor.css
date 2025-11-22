@@ -5,10 +5,128 @@
 }
 
 .uml-toolbox {
-  width: 180px;
   border-right: 1px solid #eee;
   padding: 12px;
   box-sizing: border-box;
+}
+.uml-tree-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  text-align: left;
+}
+.uml-tree-children {
+  margin-left: 1rem;
+}
+.uml-tree-text {
+  text-align: left;
+}
+.uml-tree-toggle {
+  width: 14px;
+  text-align: center;
+}
+.uml-tree-toggle-empty {
+  width: 14px;
+  display: inline-block;
+}
+.uml-tree-subchildren {
+  overflow: hidden;
+  transition: all 220ms ease;
+}
+.uml-tree-subchildren.collapsed {
+  max-height: 0;
+  opacity: 0;
+  padding-left: 0;
+  margin-left: 0;
+}
+.uml-tree-subchildren.open {
+  max-height: 800px;
+  opacity: 1;
+}
+.uml-left-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 280px; /* left column width */
+  min-width: 220px;
+  box-sizing: border-box;
+  padding: 8px;
+  background-color: #fff;
+}
+.uml-divider {
+  height: 1px;
+  width: 100%;
+  background: repeating-linear-gradient(90deg, #ddd 0 6px, transparent 6px 12px);
+  margin: 8px 0;
+}
+.uml-model-tree {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+.uml-left-top {
+  flex: 0 0 auto;
+}
+.uml-left-bottom {
+  flex: 1 1 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.uml-model-tree {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+}
+.uml-model-tree-root {
+  flex: 1 1 50%;
+  overflow: auto;
+  margin-left: 1rem;
+}
+.uml-model-tree-detail {
+  flex: 1 1 50%;
+  overflow: auto;
+}
+.uml-tree-children.collapsed {
+  max-height: 0;
+  overflow: hidden;
+}
+.uml-tree-children.open {
+  max-height: 1200px;
+}
+.uml-tree-item {
+  padding: 2px 0;
+}
+.uml-tree-subchildren {
+  padding-left: 12px;
+  border-left: 1px solid rgba(0, 0, 0, 0.06);
+  margin-left: 6px;
+}
+.uml-tree-item.leaf {
+  padding-left: 6px;
+  text-align: left;
+}
+.uml-tree-item .uml-tree-label:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+.uml-tree-item .leaf-label {
+  display: block;
+}
+.uml-model-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.uml-model-tree-detail-text {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: monospace;
 }
 .uml-toolbox-title {
   margin-bottom: 12px;
@@ -20,6 +138,8 @@
   border-radius: 6px;
   cursor: grab;
   margin-bottom: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 .uml-toolbox-actions {
   margin-top: 12px;
@@ -40,12 +160,20 @@
 .uml-box {
   position: absolute;
   min-width: 220px;
+  background-color: var(--uml-box-background);
 }
 .uml-enum {
   width: 184px;
 }
+.uml-seperate {
+  border: none;
+  border-top: 2px solid var(--uml-box-border);
+  margin: 0;
+  padding: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
+}
 .uml-box-title {
-  position: relative;
   padding: 6px 8px;
   font-weight: 600;
 }
@@ -59,8 +187,14 @@
 }
 .uml-edit-btn {
   position: absolute;
-  right: 6px;
-  top: 6px;
+  right: 8px;
+  top: 12px;
+  cursor: pointer;
+}
+.uml-box-actions {
+  position: absolute;
+  left: 8px;
+  top: 8px;
   cursor: pointer;
 }
 .uml-icon-btn {
@@ -71,6 +205,7 @@
   padding: 6px 8px;
 }
 .uml-attributes {
+  display: block;
 }
 .uml-attr {
   padding: 2px 0;

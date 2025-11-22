@@ -31,7 +31,7 @@ export default function MainLayout() {
           </>
         ) : (
           <>
-            <div className="app-container pt-16">
+            <div className="app-container">
               <Outlet />
             </div>
           </>

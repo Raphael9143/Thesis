@@ -70,6 +70,9 @@ export default function ClassBox({
           </div>
         ) : (
           <>
+            <div className="uml-box-actions">
+              <div className="uml-connector" title="Drag to link" onPointerDown={(e) => startLinkDrag(e, c.name)} />
+            </div>
             <div>{c.name}</div>
             <i
               className="fa fa-edit uml-edit-btn"
@@ -82,6 +85,7 @@ export default function ClassBox({
           </>
         )}
       </div>
+      <hr className="uml-seperate" />
       <div className="uml-box-body">
         <div className="uml-attributes">
           {Array.isArray(attrs) &&
@@ -131,25 +135,6 @@ export default function ClassBox({
               </button>
             </div>
           )}
-
-          {/* operations list */}
-          {Array.isArray(c.operations) && c.operations.length > 0 && (
-            <div className="uml-operations">
-              {c.operations.map((op, i) => {
-                const opname = typeof op === 'string' ? op : op.name || '';
-                const sig = typeof op === 'object' && op.signature ? op.signature : '';
-                return (
-                  <div key={i} className="uml-op">
-                    {opname}
-                    {sig ? <span className="uml-op-sig">({sig})</span> : null}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-        <div className="uml-box-actions">
-          <div className="uml-connector" title="Drag to link" onPointerDown={(e) => startLinkDrag(e, c.name)} />
         </div>
       </div>
     </div>

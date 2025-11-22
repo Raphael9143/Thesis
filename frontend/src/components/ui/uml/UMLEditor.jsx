@@ -18,6 +18,7 @@ import AssociationModal from './editor/AssociationModal';
 import ConstraintList from './editor/ConstraintList';
 import ConstraintBox from './editor/ConstraintBox';
 import UmlEditorContext from '../../../contexts/UmlEditorContext';
+import ModelTreePane from './editor/ModelTreePane';
 
 export default function UMLEditor({ initialModel = null, onResult }) {
   const containerRef = useRef(null);
@@ -32,8 +33,9 @@ export default function UMLEditor({ initialModel = null, onResult }) {
   const [enums, setEnums] = useState(starter.enums || []);
   const [associations, setAssociations] = useState(starter.associations || []);
   const [positions, setPositions] = useState({});
-  const { constraints, constraintDraft, openConstraintModal, setConstraintDraft, createConstraint, deleteConstraint } =
-    useConstraints(starter.constraints || []);
+  const { constraints, constraintDraft, setConstraintDraft, createConstraint, deleteConstraint } = useConstraints(
+    starter.constraints || []
+  );
   const [nextIndex, setNextIndex] = useState((starter.classes?.length || 0) + 1);
 
   const BOX_W = 220;
@@ -185,6 +187,7 @@ export default function UMLEditor({ initialModel = null, onResult }) {
   const [newAttrInputs, setNewAttrInputs] = useState({}); // { [className]: { name:'', type:'', adding: bool } }
   // assocModal handled by hook
   const [newEnumInputs, setNewEnumInputs] = useState({}); // { [enumName]: { value:'', adding: bool } }
+  // operations will be exposed/editable from the ModelTree pane below the canvas
 
   // (modal actions inline in modal below)
 
@@ -497,14 +500,61 @@ export default function UMLEditor({ initialModel = null, onResult }) {
     setEditValue,
   };
 
+  const handleUpdateNode = (key, text) => {
+    if (!key) return;
+    // class:name -> store as _notes on the class
+    if (key.startsWith('class:')) {
+      const name = key.split(':')[1];
+      setClasses((s) => s.map((c) => (c.name === name ? { ...c, _notes: text } : c)));
+      return;
+    }
+    // assoc:index
+    if (key.startsWith('assoc:')) {
+      const idx = parseInt(key.split(':')[1], 10);
+      if (Number.isFinite(idx)) {
+        setAssociations((s) => s.map((a, i) => (i === idx ? { ...a, _notes: text } : a)));
+      }
+      return;
+    }
+    // inv:id (not directly mutable here - constraints are managed by useConstraints hook)
+    if (key.startsWith('inv:')) {
+      return;
+    }
+    if (key.startsWith('op:')) {
+      const parts = key.split(':');
+      const className = parts[1];
+      const idx = parseInt(parts[2], 10);
+      setClasses((s) =>
+        s.map((c) => {
+          if (c.name !== className) return c;
+          const ops = Array.isArray(c.operations) ? [...c.operations] : [];
+          if (ops[idx]) {
+            const op = ops[idx];
+            const newOp = typeof op === 'string' ? { name: op, _notes: text } : { ...op, _notes: text };
+            ops[idx] = newOp;
+            return { ...c, operations: ops };
+          }
+          return c;
+        })
+      );
+      return;
+    }
+  };
+
   return (
     <UmlEditorContext.Provider value={contextValue}>
       <div className="uml-editor">
-        <UmlToolbox
-          onToolDragStart={onToolDragStart}
-          onExport={exportModel}
-          onOpenConstraintModal={openConstraintModal}
-        />
+        <div className="uml-left-panel">
+          <UmlToolbox onToolDragStart={onToolDragStart} onExport={exportModel} />
+          <div className="uml-divider" />
+          <ModelTreePane
+            modelName={starter.model || 'Model'}
+            classes={classes}
+            associations={associations}
+            constraints={constraints}
+            onUpdateNode={handleUpdateNode}
+          />
+        </div>
 
         <div className="uml-canvas-area">
           <div ref={containerRef} onDragOver={onCanvasDragOver} onDrop={onCanvasDrop} className="uml-canvas">
@@ -599,11 +649,21 @@ export default function UMLEditor({ initialModel = null, onResult }) {
 
             <ChoicePopup
               choice={choice}
-              onAssociation={() => {
-                setAssocModal({ from: choice.from, to: choice.to, left: '1', right: '*', name: '' });
+              onPickType={(type) => {
+                if (!choice) return;
+                const baseParts = [
+                  { class: choice.from, multiplicity: '1', role: choice.from },
+                  { class: choice.to, multiplicity: '*', role: choice.to },
+                ];
+                if (type === 'association' || type === 'aggregation' || type === 'composition') {
+                  setAssocModal({ type, parts: baseParts, name: '' });
+                } else if (type === 'n-ary' || type === 'associationclass') {
+                  setAssocModal({ type, parts: baseParts, name: '', attributes: [] });
+                }
                 setChoice(null);
               }}
               onGeneralization={() => {
+                if (!choice) return;
                 addGeneralization(choice.from, choice.to);
                 setChoice(null);
               }}
@@ -613,10 +673,12 @@ export default function UMLEditor({ initialModel = null, onResult }) {
             {/* Association modal */}
             <AssociationModal
               assoc={assocModal}
+              classes={classes}
               onChange={(next) => setAssocModal(next)}
               onClose={() => setAssocModal(null)}
               onSave={(a) => {
-                addAssociation(a.from, a.to, a.left || '1', a.right || '*', a.name || '');
+                // normalize and pass full assoc object to hook
+                addAssociation(a);
                 setAssocModal(null);
               }}
             />
@@ -630,9 +692,12 @@ export default function UMLEditor({ initialModel = null, onResult }) {
               />
             )}
 
+            {/* Operation modal removed; operations managed in ModelTree pane */}
+
             {/* Constraint list (side panel) */}
             <ConstraintList constraints={constraints} onDelete={deleteConstraint} />
             <ConstraintBox constraints={constraints} positions={positionsRef.current || {}} />
+            {/* model tree moved to left panel */}
           </div>
         </div>
       </div>

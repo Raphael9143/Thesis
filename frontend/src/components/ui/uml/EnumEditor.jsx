@@ -70,6 +70,7 @@ export default function EnumEditor({
           </>
         )}
       </div>
+      <hr className="uml-seperate" />
       <div className="uml-box-body">
         {Array.isArray(en.values) &&
           en.values.map((v, idx) => {

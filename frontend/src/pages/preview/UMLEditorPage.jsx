@@ -8,9 +8,6 @@ export default function UMLEditorPage() {
 
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <header style={{ padding: 12, borderBottom: '1px solid #eee' }}>
-        <h2>UML Editor</h2>
-      </header>
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <div style={{ flex: 1, minHeight: 0 }}>
           <UMLEditor initialModel={initialModel} onResult={() => {}} />

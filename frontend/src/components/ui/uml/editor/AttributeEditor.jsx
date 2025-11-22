@@ -3,10 +3,14 @@ import AttributeTypeSelect from './AttributeTypeSelect';
 
 export default function AttributeEditor({ attr, idx, editing, onUpdate, onDelete, classes = [], enums = [] }) {
   if (!editing) {
-    return <div className="uml-attr">{typeof attr === 'string' ? attr : attr.name}</div>;
+    return (
+      <div className="uml-attr">
+        {attr.name} : {attr.type}{' '}
+      </div>
+    );
   }
   const name = typeof attr === 'string' ? attr : attr.name;
-  const type = typeof attr === 'string' ? '' : attr.type || '';
+  const type = attr.type;
   return (
     <div className="uml-attr">
       <input value={name} onChange={(e) => onUpdate(idx, e.target.value, type)} />

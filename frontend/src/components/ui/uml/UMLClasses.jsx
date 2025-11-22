@@ -13,6 +13,7 @@ const UMLClasses = ({ classes, enums, positions, boxRefs, startDrag, BOX_W, BOX_
           onMouseDown={(e) => startDrag(c.name, e)}
         >
           <div className="uml-box-title">{c.name}</div>
+          <hr className="uml-seperate" />
           <div className="uml-box-body">
             <div className="uml-attributes">
               {Array.isArray(c.attributes) &&
@@ -22,7 +23,6 @@ const UMLClasses = ({ classes, enums, positions, boxRefs, startDrag, BOX_W, BOX_
                   </div>
                 ))}
             </div>
-            {/* operations intentionally omitted in preview */}
           </div>
         </div>
       );
@@ -42,6 +42,7 @@ const UMLClasses = ({ classes, enums, positions, boxRefs, startDrag, BOX_W, BOX_
           <div className="uml-box-title">
             {'<<enumeration>>'} {e.name}
           </div>
+          <hr className="uml-seperate" />
           <div className="uml-box-body">
             {Array.isArray(e.values) &&
               e.values.map((v) => (

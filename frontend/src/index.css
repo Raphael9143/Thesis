@@ -27,6 +27,9 @@
 	--white: #fff;
 	--red: #ef4444;
 
+  --uml-box-background: #fff8b4;
+  --uml-box-border: #0000ff;
+
   color-scheme: light dark;
   color: var(--color-text);
   background-color: var(--color-bg);
