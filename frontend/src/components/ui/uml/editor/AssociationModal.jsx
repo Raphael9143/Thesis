@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import NotificationPopup from '../../NotificationPopup';
 
 export default function AssociationModal({ assoc, classes = [], onChange, onClose, onSave, onDelete }) {
-  // local validation errors
   const [errors, setErrors] = useState([]);
+  const [showNotification, setShowNotification] = useState(false);
 
   // Ensure sensible defaults when modal opens: default class selection and attribute types
   useEffect(() => {
@@ -92,6 +93,17 @@ export default function AssociationModal({ assoc, classes = [], onChange, onClos
       });
     }
     return errs;
+  };
+
+  const handleSave = () => {
+    const errs = validate();
+    if (errs.length) {
+      setErrors(errs);
+      setShowNotification(true);
+      return;
+    }
+    setErrors([]);
+    onSave && onSave(assoc);
   };
 
   return (
@@ -224,29 +236,18 @@ export default function AssociationModal({ assoc, classes = [], onChange, onClos
               <i className="fa fa-trash" />
             </button>
           )}
-          <button
-            type="button"
-            className="icon-btn"
-            title="Save"
-            onClick={() => {
-              const errs = validate();
-              if (errs.length) {
-                setErrors(errs);
-                return;
-              }
-              setErrors([]);
-              onSave && onSave(assoc);
-            }}
-          >
+          <button type="button" className="icon-btn" title="Save" onClick={handleSave}>
             <i className="fa fa-save" />
           </button>
         </div>
-        {errors.length > 0 && (
-          <div style={{ color: 'crimson', marginTop: 8 }}>
-            {errors.map((e, i) => (
-              <div key={i}>{e}</div>
-            ))}
-          </div>
+
+        {showNotification && (
+          <NotificationPopup
+            message={errors.join('\n')}
+            open={showNotification}
+            type="error"
+            onClose={() => setShowNotification(false)}
+          />
         )}
       </div>
     </div>
