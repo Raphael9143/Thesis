@@ -33,5 +33,19 @@ export default function useDeserialize() {
     }
   };
 
-  return { deserializeClass, deserializeAssociation, loading, error };
+  const deserializeOperation = async (data) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await userAPI.deserializeOperation(data);
+      return res;
+    } catch (e) {
+      setError(e);
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { deserializeClass, deserializeAssociation, deserializeOperation, loading, error };
 }

@@ -33,5 +33,19 @@ export default function useSerialize() {
     }
   };
 
-  return { serializeClass, serializeAssociation, loading, error };
+  const serializeOperation = async (data) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await userAPI.serializeOperation(data);
+      return res;
+    } catch (e) {
+      setError(e);
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { serializeClass, serializeAssociation, serializeOperation, loading, error };
 }
