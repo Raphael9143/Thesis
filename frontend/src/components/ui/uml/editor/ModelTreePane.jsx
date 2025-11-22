@@ -8,6 +8,7 @@ export default function ModelTreePane({
   classes = [],
   associations = [],
   constraints = [],
+  enumerations = [],
   onSelect,
   onUpdateNode,
 }) {
@@ -113,6 +114,17 @@ export default function ModelTreePane({
                   indent={12}
                 />
               ))}
+          </TreeSection>
+
+          <TreeSection
+            title="Enumerations"
+            isOpen={!!openKeys['enums']}
+            onToggle={() => toggleOpen('enums')}
+            count={enumerations.length}
+          >
+            {enumerations.map((e) => (
+              <TreeLeaf key={e.name} label={e.name} onClick={() => handleSelect(`enum:${e.name}`, e)} indent={12} />
+            ))}
           </TreeSection>
         </div>
       </div>

@@ -552,6 +552,7 @@ export default function UMLEditor({ initialModel = null, onResult }) {
             classes={classes}
             associations={associations}
             constraints={constraints}
+            enumerations={enums} // Pass enumerations to the tree
             onUpdateNode={handleUpdateNode}
           />
         </div>
