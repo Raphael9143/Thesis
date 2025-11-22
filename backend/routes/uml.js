@@ -98,4 +98,59 @@ router.post("/serialize/class", UseController.serializeClass);
  */
 router.post("/serialize/association", UseController.serializeAssociation);
 
+/**
+ * @swagger
+ * /api/uml/deserialize/class:
+ *   post:
+ *     summary: Deserialize a .use class block into JSON
+ *     tags:
+ *       - UML
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: class
+ *         description: .use class block text
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             text:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: JSON representation of the class
+ *       400:
+ *         description: Invalid request body
+ */
+router.post("/deserialize/class", UseController.deserializeClass);
+
+// Deserialize a .use association block into JSON
+/**
+ * @swagger
+ * /api/uml/deserialize/association:
+ *   post:
+ *     summary: Deserialize a .use association block into JSON
+ *     tags:
+ *       - UML
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: association
+ *         description: .use association block text
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             text:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: JSON representation of the association
+ *       400:
+ *         description: Invalid request body
+ */
+router.post("/deserialize/association", UseController.deserializeAssociation);
+
 module.exports = router;

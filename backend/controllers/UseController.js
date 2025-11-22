@@ -2,6 +2,10 @@ const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
 
+// Import the parseAssociationText and parseClassText utility functions
+const parseAssociationText = require("../utils/parseAssociationText");
+const parseClassText = require("../utils/parseClassText");
+
 // Path to the bundled USE CLI batch
 const USE_BIN = path.resolve(__dirname, "..", "use-7.5.0", "bin");
 const USE_BATCH = path.join(USE_BIN, "use.bat");
@@ -381,10 +385,10 @@ function buildUseText(modelJson) {
         type === "aggregation"
           ? "aggregation"
           : type === "composition"
-          ? "composition"
-          : type === "associationclass"
-          ? "associationclass"
-          : "association";
+            ? "composition"
+            : type === "associationclass"
+              ? "associationclass"
+              : "association";
 
       lines.push(`${keyword} ${assoc.name || "Assoc"} between`);
 
@@ -495,10 +499,10 @@ function buildAssociationText(assoc) {
     type === "aggregation"
       ? "aggregation"
       : type === "composition"
-      ? "composition"
-      : type === "associationclass"
-      ? "associationclass"
-      : "association";
+        ? "composition"
+        : type === "associationclass"
+          ? "associationclass"
+          : "association";
 
   const lines = [`${keyword} ${assoc.name || "Unnamed"} between`];
 
@@ -852,7 +856,9 @@ const UseController = {
       return res.send(text);
     } catch (err) {
       console.error("serializeClass error:", err);
-      return res.status(500).json({ success: false, message: "Internal Server Error" });
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
     }
   },
   // Serialize a single association JSON into .use association text
@@ -870,7 +876,9 @@ const UseController = {
       return res.send(text);
     } catch (err) {
       console.error("serializeAssociation error:", err);
-      return res.status(500).json({ success: false, message: "Internal Server Error" });
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
     }
   },
   save: async (req, res) => {
@@ -1142,8 +1150,177 @@ const UseController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+  /**
+   * Parse a `.use` class block into JSON.
+   * Expected format:
+   * class ClassName [< Superclass1, Superclass2]
+   *   attributes
+   *     attrName : Type
+   *   operations
+   *     opName(params) : ReturnType
+   * end
+   */
+  parseClassText(useText) {
+    if (!useText || typeof useText !== "string") return null;
+
+    const classRe =
+      /^\s*(abstract\s+)?class\s+([A-Za-z0-9_]+)(?:\s+<\s+([^{\n]+))?/i;
+    const attrRe = /^\s*([A-Za-z0-9_]+)\s*:\s*([A-Za-z0-9_<>]+)\s*$/;
+    const opRe =
+      /^\s*([A-Za-z0-9_]+)\s*\(([^)]*)\)\s*(?::\s*([A-Za-z0-9_<>]+))?/;
+
+    const lines = useText.split(/\r?\n/).map((l) => l.trim());
+    const cls = {
+      name: "",
+      isAbstract: false,
+      superclasses: [],
+      attributes: [],
+      operations: [],
+    };
+
+    let mode = "header";
+    for (const line of lines) {
+      if (!line) continue;
+
+      if (mode === "header") {
+        const match = line.match(classRe);
+        if (match) {
+          cls.isAbstract = Boolean(match[1]);
+          cls.name = match[2];
+          if (match[3]) {
+            cls.superclasses = match[3].split(/,\s*/).filter(Boolean);
+          }
+          mode = "body";
+        }
+      } else if (mode === "body") {
+        if (/^attributes$/i.test(line)) {
+          mode = "attributes";
+        } else if (/^operations$/i.test(line)) {
+          mode = "operations";
+        }
+      } else if (mode === "attributes") {
+        const match = line.match(attrRe);
+        if (match) {
+          cls.attributes.push({ name: match[1], type: match[2] });
+        } else if (/^operations$/i.test(line)) {
+          mode = "operations";
+        }
+      } else if (mode === "operations") {
+        const match = line.match(opRe);
+        if (match) {
+          cls.operations.push({
+            name: match[1],
+            signature: match[2],
+            returnType: match[3] || null,
+          });
+        }
+      }
+    }
+
+    return cls;
+  },
+
+  /**
+   * Parse a `.use` association block into JSON.
+   * Expected format:
+   * association AssocName between
+   *   Class1 [Multiplicity] role Role1
+   *   Class2 [Multiplicity] role Role2
+   * end
+   */
+  parseAssociationText(useText) {
+    if (!useText || typeof useText !== "string") return null;
+
+    const assocRe =
+      /^(association|aggregation|composition|associationclass)\s+([A-Za-z0-9_]+)\s+between/i;
+    const partRe =
+      /^\s*([A-Za-z0-9_]+)\s*(?:\[([^\]]+)\])?(?:\s+role\s+([A-Za-z0-9_]+))?/i;
+
+    const lines = useText.split(/\r?\n/).map((l) => l.trim());
+    const assoc = { name: "", type: "association", parts: [] };
+
+    let mode = "header";
+    for (const line of lines) {
+      if (!line) continue;
+
+      if (mode === "header") {
+        const match = line.match(assocRe);
+        if (match) {
+          assoc.type = match[1].toLowerCase();
+          assoc.name = match[2];
+          mode = "parts";
+        }
+      } else if (mode === "parts") {
+        const match = line.match(partRe);
+        if (match) {
+          assoc.parts.push({
+            class: match[1],
+            multiplicity: match[2] || null,
+            role: match[3] || null,
+          });
+        }
+      }
+    }
+
+    return assoc;
+  },
+
+  // Deserialize a `.use` class block into JSON
+  deserializeClass: async (req, res) => {
+    try {
+      const useText = req.body && req.body.text;
+      if (!useText || typeof useText !== "string") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Class .use text required" });
+      }
+
+      const json = parseClassText(useText);
+      if (!json) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid .use class text" });
+      }
+
+      return res.json({ success: true, data: json });
+    } catch (err) {
+      console.error("deserializeClass error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
+  // Deserialize a `.use` association block into JSON
+  deserializeAssociation: async (req, res) => {
+    try {
+      const useText = req.body && req.body.text;
+      if (!useText || typeof useText !== "string") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Association .use text required" });
+      }
+
+      const json = parseAssociationText(useText);
+      if (!json) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid .use association text" });
+      }
+
+      return res.json({ success: true, data: json });
+    } catch (err) {
+      console.error("deserializeAssociation error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
 };
 
 module.exports = UseController;
 // Export helpful parser utility for tests and tooling (includes conditionals)
 module.exports.parseUseContent = parseUseContentWithConditionals;
+// Ensure `parseAssociationText` and `parseClassText` are properly defined and exported
+module.exports.parseAssociationText = parseAssociationText;
+module.exports.parseClassText = parseClassText;
