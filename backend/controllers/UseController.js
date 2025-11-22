@@ -340,6 +340,16 @@ function parseCliOutput(cliOut) {
   return parseUseContentWithConditionals(payload);
 }
 
+// Parse a single operation line like `deposit(amount : Real) : Void`
+function parseOperationLine(line) {
+  if (!line || typeof line !== "string") return null;
+  const l = line.trim();
+  // match name(params) : ReturnType  (returnType optional)
+  const m = l.match(/^([A-Za-z0-9_]+)\s*\(([^)]*)\)\s*(?::\s*(.+))?$/);
+  if (!m) return null;
+  return { name: m[1], signature: (m[2] || "").trim(), returnType: m[3] ? m[3].trim() : null };
+}
+
 /**
  * Build a .use file text from a JSON model object.
  * Expected shape: { model, enums, classes, associations, constraints }
@@ -887,6 +897,84 @@ const UseController = {
       return res.send(text);
     } catch (err) {
       console.error("serializeAssociation error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+  // Serialize a single operation (optionally tied to a class) into .use text
+  serializeOperation: async (req, res) => {
+    try {
+      const body = req.body || {};
+      const className = body.class || null;
+      const op = body.op;
+      if (!op || typeof op !== "object") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Operation JSON required" });
+      }
+
+      // If a class name is provided, build a class block with only this operation
+      if (className) {
+        const cls = { name: className, operations: [op] };
+        const text = buildClassText(cls);
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        return res.send(text);
+      }
+
+      // Otherwise, serialize only the operation line
+      const sig = op.signature !== undefined ? `(${op.signature})` : "()";
+      const line = `${op.name || "op"}${sig}${op.returnType ? ` : ${op.returnType}` : ""}`;
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      return res.send(line);
+    } catch (err) {
+      console.error("serializeOperation error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
+  // Deserialize an operation: accept either a class block or a single operation line
+  deserializeOperation: async (req, res) => {
+    try {
+      const text = (req.body && req.body.text) || "";
+      const providedClass = (req.body && req.body.class) || null;
+      if (!text || typeof text !== "string") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Operation .use text required" });
+      }
+
+      // If the text contains a 'class' keyword, parse as class and extract operations
+      if (/^\s*class\b/i.test(text) || /\bend\b/i.test(text)) {
+        // Try to extract class block using existing parseClassText helper
+        const parsedClass = parseClassText(text);
+        if (!parsedClass)
+          return res
+            .status(400)
+            .json({ success: false, message: "Invalid .use class text" });
+
+        // return first operation if present, else empty
+        const ops = Array.isArray(parsedClass.operations)
+          ? parsedClass.operations
+          : [];
+        return res.json({ success: true, class: parsedClass.name || null, ops });
+      }
+
+      // Otherwise treat as a single operation line
+      const op = parseOperationLine(text);
+      if (!op)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid operation text" });
+
+      // attach provided class if present
+      const result = { op };
+      if (providedClass) result.class = providedClass;
+      return res.json({ success: true, data: result });
+    } catch (err) {
+      console.error("deserializeOperation error:", err);
       return res
         .status(500)
         .json({ success: false, message: "Internal Server Error" });

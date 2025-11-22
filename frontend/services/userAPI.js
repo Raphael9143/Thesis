@@ -152,6 +152,13 @@ const userAPI = {
   // Expects payload { graphJson: { ... } }
   // Returns { success, useText, model, cli, validation_report }
   convertUmlJson: (data) => axiosClient.post('uml/export', data),
+  // Serialize/deserialize single elements between JSON and USE text
+  // JSON -> USE (serialize)
+  serializeClass: (data) => axiosClient.post('uml/serialize/class', data),
+  serializeAssociation: (data) => axiosClient.post('uml/serialize/association', data),
+  // USE -> JSON (deserialize)
+  deserializeClass: (data) => axiosClient.post('uml/deserialize/class', data),
+  deserializeAssociation: (data) => axiosClient.post('uml/deserialize/association', data),
   // GET /api/use/models
   getUseModels: () => axiosClient.get('use/models'),
   // Researcher projects
