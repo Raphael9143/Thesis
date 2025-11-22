@@ -501,7 +501,7 @@ export default function UMLEditor({ initialModel = null }) {
       setExportModalVisible(true);
     } catch (e) {
       console.error('Export failed:', e);
-      setExportError(e?.response?.data?.message || e.message || 'Export failed');
+      setExportError(e?.response?.data?.message || 'Export failed');
     } finally {
       setExporting(false);
     }

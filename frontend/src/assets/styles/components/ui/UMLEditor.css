@@ -323,9 +323,64 @@
 }
 .uml-modal-input {
   width: 100%;
+  background: #fff;
+  color: #000;
+  border: 1px solid #d0d0d0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  box-sizing: border-box;
 }
 .uml-modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+/* Icon button used in modals and compact controls */
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #666;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  background: transparent;
+  border: none;
+}
+.icon-btn:hover {
+  color: var(--black);
+  transform: translateY(-2px);
+}
+
+/* Additional input styles for modal/class editing */
+.uml-title-input {
+  background: #fff;
+  color: #000;
+  border: 1px solid #d0d0d0;
+  padding: 6px 8px;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.uml-attr-name {
+  background: #fff;
+  color: #000;
+  border: 1px solid #d0d0d0;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+.uml-attr-type {
+  background: #fff;
+  color: #000;
+  border: 1px solid #d0d0d0;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.required {
+  color: crimson;
+  margin-left: 6px;
 }
