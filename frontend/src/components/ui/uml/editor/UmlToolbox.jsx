@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function UmlToolbox({ onToolDragStart, onExport }) {
+export default function UmlToolbox({ onToolDragStart }) {
   return (
     <div className="uml-toolbox">
       <div className="uml-toolbox-title">Toolbox</div>
@@ -10,7 +10,6 @@ export default function UmlToolbox({ onToolDragStart, onExport }) {
       <div className="uml-tool-item" draggable onDragStart={(e) => onToolDragStart(e, 'enum')}>
         Enum
       </div>
-      <span onClick={onExport}>Export</span>
     </div>
   );
 }
