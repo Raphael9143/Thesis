@@ -260,6 +260,15 @@
   display: flex;
   gap: 8px;
 }
+.uml-choice-cancel {
+  float: right;
+  cursor: pointer;
+  color: #888;
+}
+
+.uml-choice-cancel:hover {
+  color: var(--brand);
+}
 
 .uml-choice-title {
   margin-bottom: 8px;
