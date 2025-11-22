@@ -175,17 +175,79 @@ function parseUseContent(content) {
       }
     }
 
-    // operations block within class
+    // operations block within class -- capture multi-line bodies and query-style '=' bodies
     const opMatch = block.match(/operations\s*([\s\S]*?)(?=\n\s*end\b)/im);
     if (opMatch) {
       const opBody = opMatch[1];
-      const opLines = opBody
-        .split(/\r?\n/)
-        .map((l) => l.trim())
-        .filter(Boolean);
-      for (const line of opLines) {
-        const m = line.match(/^([a-zA-Z0-9_]+)\s*\(([^)]*)\)/);
-        if (m) cls.operations.push({ name: m[1], signature: m[2].trim() });
+      const rawLines = opBody.split(/\r?\n/);
+
+      // Identify indices that start a new operation (lines that look like a signature)
+      const sr = /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
+      const opStartIdx = [];
+      for (let i = 0; i < rawLines.length; i++) {
+        const t = rawLines[i].trim();
+        if (!t) continue;
+        if (sr.test(t)) opStartIdx.push(i);
+      }
+
+      // If none matched, try to treat every non-empty line as an operation line
+      if (!opStartIdx.length) {
+        for (let i = 0; i < rawLines.length; i++) {
+          if (rawLines[i].trim()) opStartIdx.push(i);
+        }
+      }
+
+      // Group lines into operation chunks
+      for (let k = 0; k < opStartIdx.length; k++) {
+        const start = opStartIdx[k];
+        const end =
+          k + 1 < opStartIdx.length ? opStartIdx[k + 1] : rawLines.length;
+        const chunkLines = rawLines.slice(start, end);
+        const header = (chunkLines[0] || "").trim();
+        const rest = chunkLines.slice(1).join("\n").trim();
+
+        const m = header.match(sr);
+        if (!m) {
+          // fallback: push raw line
+          cls.operations.push({ raw: chunkLines.join("\n").trim() });
+          continue;
+        }
+
+        // name may include Class::op, so split
+        let fullName = m[1] || "";
+        let classQualifier = null;
+        let opName = fullName;
+        if (fullName.includes("::")) {
+          const parts = fullName.split("::");
+          classQualifier = parts[0];
+          opName = parts.slice(1).join("::");
+        }
+
+        const signature = (m[2] || "").trim();
+        const returnType = m[3] ? m[3].trim() : null;
+        const inlineBody = m[4] !== undefined ? String(m[4]).trim() : null;
+
+        let body = null;
+        if (inlineBody && inlineBody.length) {
+          // entire body provided inline after '=' on same header line
+          body = inlineBody + (rest ? "\n" + rest : "");
+        } else if (rest) {
+          // If rest begins with 'begin', keep everything including begin/end
+          body = rest;
+        } else {
+          // no body
+          body = null;
+        }
+
+        const opObj = {
+          name: opName,
+          fullName: fullName,
+          class: classQualifier,
+          signature,
+          returnType,
+        };
+        if (body) opObj.body = body;
+        cls.operations.push(opObj);
       }
     }
 
@@ -210,14 +272,16 @@ function parseUseContent(content) {
     }
     const name = am[1];
     const body = am[2];
-    // split body into raw lines but keep order
+    // split body into raw lines and walk by index to support multi-line operation bodies
     const rawLines = body.split(/\r?\n/);
     const lines = rawLines.map((l) => l.trim());
     const parts = [];
     const assocAttributes = [];
     const assocOperations = [];
     let mode = "parts"; // switch to 'attributes' or 'operations' when encountered
-    for (const line of lines) {
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
       if (!line) continue;
       const l = line.trim();
       const lower = l.toLowerCase();
@@ -227,7 +291,60 @@ function parseUseContent(content) {
       }
       if (lower === "operations") {
         mode = "operations";
-        continue;
+        // gather rest of lines as the operations block
+        const opsLines = lines.slice(i + 1);
+        // group into operation chunks similar to class parsing
+        const sigRe =
+          /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
+        const opStartIdx = [];
+        for (let j = 0; j < opsLines.length; j++) {
+          if (!opsLines[j] || !opsLines[j].trim()) continue;
+          if (sigRe.test(opsLines[j].trim())) opStartIdx.push(j);
+        }
+        if (!opStartIdx.length) {
+          for (let j = 0; j < opsLines.length; j++) {
+            if (opsLines[j] && opsLines[j].trim()) opStartIdx.push(j);
+          }
+        }
+        for (let k = 0; k < opStartIdx.length; k++) {
+          const start = opStartIdx[k];
+          const end =
+            k + 1 < opStartIdx.length ? opStartIdx[k + 1] : opsLines.length;
+          const chunk = opsLines.slice(start, end);
+          const header = (chunk[0] || "").trim();
+          const rest = chunk.slice(1).join("\n").trim();
+          const m = header.match(sigRe);
+          if (!m) {
+            assocOperations.push({ raw: chunk.join("\n").trim() });
+            continue;
+          }
+          let fullName = m[1] || "";
+          let classQualifier = null;
+          let opName = fullName;
+          if (fullName.includes("::")) {
+            const partsQ = fullName.split("::");
+            classQualifier = partsQ[0];
+            opName = partsQ.slice(1).join("::");
+          }
+          const signature = (m[2] || "").trim();
+          const returnType = m[3] ? m[3].trim() : null;
+          const inlineBody = m[4] !== undefined ? String(m[4]).trim() : null;
+          let bodyText = null;
+          if (inlineBody && inlineBody.length)
+            bodyText = inlineBody + (rest ? "\n" + rest : "");
+          else if (rest) bodyText = rest;
+          const opObj = {
+            name: opName,
+            fullName,
+            class: classQualifier,
+            signature,
+            returnType,
+          };
+          if (bodyText) opObj.body = bodyText;
+          assocOperations.push(opObj);
+        }
+        // we've consumed the rest of the operations block; break out of the loop
+        break;
       }
 
       if (mode === "parts") {
@@ -244,31 +361,20 @@ function parseUseContent(content) {
           else if (/\b(aggregation)\b/i.test(l)) part.kind = "aggregation";
           parts.push(part);
         } else {
-          // allow parts without explicit multiplicity (e.g. 'Customer' or 'Customer role x')
           const m2 = l.match(/([A-Za-z0-9_]+)(?:\s+role\s+([A-Za-z0-9_]+))?/i);
           if (m2) {
-            parts.push({
+            const pObj = {
               class: m2[1],
               multiplicity: null,
               role: m2[2] || m2[1].toLowerCase(),
-            });
+            };
+            parts.push(pObj);
           }
         }
       } else if (mode === "attributes") {
-        // simple attribute line 'name : Type'
         const amatch = l.match(/^([a-zA-Z0-9_]+)\s*:\s*(.+)$/);
         if (amatch)
           assocAttributes.push({ name: amatch[1], type: amatch[2].trim() });
-      } else if (mode === "operations") {
-        // operation line like 'opName(params) : Type' or with body lines — keep signature
-        const om = l.match(/^([a-zA-Z0-9_]+)\s*\(([^)]*)\)\s*(?::\s*(.+))?$/);
-        if (om)
-          assocOperations.push({
-            name: om[1],
-            signature: om[2].trim(),
-            returnType: om[3] ? om[3].trim() : null,
-          });
-        else assocOperations.push({ raw: l });
       }
     }
 
@@ -299,7 +405,9 @@ function extractFirstCliError(stderrText, stdoutText) {
   const combined = (stderrPart + "\n" + stdoutPart).replace(/\r/g, "\n");
 
   // Prefer explicit column-style messages like `49:17: ...` or `line 49:17: ...`
-  let m = combined.match(/(?:line\s*)?\s*(\d+)\s*[:.,]\s*(\d+)\s*[:\s-]([^\n\r]*)/i);
+  let m = combined.match(
+    /(?:line\s*)?\s*(\d+)\s*[:.,]\s*(\d+)\s*[:\s-]([^\n\r]*)/i
+  );
   if (m) return `${m[1]}:${m[2]}: ${m[3].trim()}`;
 
   m = combined.match(/(?:line\s*)?(\d+):(\d+)[:\s]([^\n\r]*)/i);
@@ -347,7 +455,11 @@ function parseOperationLine(line) {
   // match name(params) : ReturnType  (returnType optional)
   const m = l.match(/^([A-Za-z0-9_]+)\s*\(([^)]*)\)\s*(?::\s*(.+))?$/);
   if (!m) return null;
-  return { name: m[1], signature: (m[2] || "").trim(), returnType: m[3] ? m[3].trim() : null };
+  return {
+    name: m[1],
+    signature: (m[2] || "").trim(),
+    returnType: m[3] ? m[3].trim() : null,
+  };
 }
 
 /**
@@ -746,8 +858,8 @@ const UseController = {
           const message = firstErr
             ? firstErr
             : cliResult.error
-            ? `USE CLI error: ${cliResult.error}`
-            : "USE CLI reported an error";
+              ? `USE CLI error: ${cliResult.error}`
+              : "USE CLI reported an error";
           return res.status(400).json({ success: false, message });
         }
       }
@@ -782,8 +894,8 @@ const UseController = {
         const errorMessage = firstErr
           ? firstErr
           : cliResult && cliResult.error
-          ? `USE CLI error: ${cliResult.error}`
-          : "Invalid .use file. Please fix syntax or model errors.";
+            ? `USE CLI error: ${cliResult.error}`
+            : "Invalid .use file. Please fix syntax or model errors.";
 
         return res.status(400).json({ success: false, message: errorMessage });
       }
@@ -959,7 +1071,11 @@ const UseController = {
         const ops = Array.isArray(parsedClass.operations)
           ? parsedClass.operations
           : [];
-        return res.json({ success: true, class: parsedClass.name || null, ops });
+        return res.json({
+          success: true,
+          class: parsedClass.name || null,
+          ops,
+        });
       }
 
       // Otherwise treat as a single operation line
@@ -1265,8 +1381,6 @@ const UseController = {
     const classRe =
       /^\s*(abstract\s+)?class\s+([A-Za-z0-9_]+)(?:\s+<\s+([^{\n]+))?/i;
     const attrRe = /^\s*([A-Za-z0-9_]+)\s*:\s*([A-Za-z0-9_<>]+)\s*$/;
-    const opRe =
-      /^\s*([A-Za-z0-9_]+)\s*\(([^)]*)\)\s*(?::\s*([A-Za-z0-9_<>]+))?/;
 
     const lines = useText.split(/\r?\n/).map((l) => l.trim());
     const cls = {
@@ -1302,16 +1416,63 @@ const UseController = {
         if (match) {
           cls.attributes.push({ name: match[1], type: match[2] });
         } else if (/^operations$/i.test(line)) {
+          // switch to operations and consume the remaining operation lines
           mode = "operations";
-        }
-      } else if (mode === "operations") {
-        const match = line.match(opRe);
-        if (match) {
-          cls.operations.push({
-            name: match[1],
-            signature: match[2],
-            returnType: match[3] || null,
-          });
+          // gather rest of the lines starting at next index
+          // find current index in lines array (we're in a for..of, so rebuild index)
+          const startIdx = lines.indexOf(line);
+          const opsLines = lines.slice(startIdx + 1);
+          const sigRe =
+            /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
+          const opStartIdx = [];
+          for (let j = 0; j < opsLines.length; j++) {
+            if (!opsLines[j] || !opsLines[j].trim()) continue;
+            if (sigRe.test(opsLines[j].trim())) opStartIdx.push(j);
+          }
+          if (!opStartIdx.length) {
+            for (let j = 0; j < opsLines.length; j++) {
+              if (opsLines[j] && opsLines[j].trim()) opStartIdx.push(j);
+            }
+          }
+          for (let k = 0; k < opStartIdx.length; k++) {
+            const s = opStartIdx[k];
+            const e =
+              k + 1 < opStartIdx.length ? opStartIdx[k + 1] : opsLines.length;
+            const chunk = opsLines.slice(s, e);
+            const header = (chunk[0] || "").trim();
+            const rest = chunk.slice(1).join("\n").trim();
+            const m = header.match(sigRe);
+            if (!m) {
+              cls.operations.push({ raw: chunk.join("\n").trim() });
+              continue;
+            }
+            let fullName = m[1] || "";
+            let classQualifier = null;
+            let opName = fullName;
+            if (fullName.includes("::")) {
+              const partsQ = fullName.split("::");
+              classQualifier = partsQ[0];
+              opName = partsQ.slice(1).join("::");
+            }
+            const signature = (m[2] || "").trim();
+            const returnType = m[3] ? m[3].trim() : null;
+            const inlineBody = m[4] !== undefined ? String(m[4]).trim() : null;
+            let bodyText = null;
+            if (inlineBody && inlineBody.length)
+              bodyText = inlineBody + (rest ? "\n" + rest : "");
+            else if (rest) bodyText = rest;
+            const opObj = {
+              name: opName,
+              fullName,
+              class: classQualifier,
+              signature,
+              returnType,
+            };
+            if (bodyText) opObj.body = bodyText;
+            cls.operations.push(opObj);
+          }
+          // we've consumed operations, break out of loop
+          break;
         }
       }
     }

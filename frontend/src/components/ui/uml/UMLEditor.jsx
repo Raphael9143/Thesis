@@ -535,13 +535,60 @@ export default function UMLEditor({ initialModel = null }) {
 
   const handleUpdateNode = (key, text) => {
     if (!key) return;
+    // If `text` is an object, apply it as JSON model update.
+    if (typeof text === 'object' && text !== null) {
+      if (key.startsWith('class:')) {
+        const name = key.split(':')[1];
+        // replace or rename class
+        setClasses((s) =>
+          s.map((c) => {
+            if (c.name !== name) return c;
+            // incoming payload may include a new name
+            const newName = text.name || name;
+            return { ...c, ...text, name: newName };
+          })
+        );
+        // update associations referencing the class name
+        if (text.name && text.name !== key.split(':')[1]) {
+          const oldName = key.split(':')[1];
+          const newName = text.name;
+          setAssociations((as) =>
+            as.map((a) => ({
+              ...a,
+              parts:
+                a.parts?.map((p) => ({
+                  ...p,
+                  class: p.class === oldName ? newName : p.class,
+                })) || [],
+            }))
+          );
+          setPositions((p) => {
+            const np = { ...p };
+            if (np[oldName]) {
+              np[newName] = np[oldName];
+              delete np[oldName];
+            }
+            return np;
+          });
+        }
+        return;
+      }
+      if (key.startsWith('assoc:')) {
+        const idx = parseInt(key.split(':')[1], 10);
+        if (Number.isFinite(idx)) {
+          setAssociations((s) => s.map((a, i) => (i === idx ? { ...(text || {}), name: text.name || a.name } : a)));
+        }
+        return;
+      }
+    }
+
     // class:name -> store as _notes on the class
     if (key.startsWith('class:')) {
       const name = key.split(':')[1];
       setClasses((s) => s.map((c) => (c.name === name ? { ...c, _notes: text } : c)));
       return;
     }
-    // assoc:index
+    // assoc:index -> store notes on assoc
     if (key.startsWith('assoc:')) {
       const idx = parseInt(key.split(':')[1], 10);
       if (Number.isFinite(idx)) {

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import '../../../../assets/styles/components/ui/UMLEditor.css';
 import TreeSection from './TreeSection';
 import TreeLeaf from './TreeLeaf';
+import useSerialize from '../../../../hooks/useSerialize';
+import useDeserialize from '../../../../hooks/useDeserialize';
 
 export default function ModelTreePane({
   modelName = 'Model',
@@ -15,25 +17,77 @@ export default function ModelTreePane({
   const [openKeys, setOpenKeys] = useState({});
   const [selected, setSelected] = useState(null);
   const [detailText, setDetailText] = useState('');
+  const [readOnlyText, setReadOnlyText] = useState('');
+  const [editing, setEditing] = useState(false);
+  const { serializeClass, serializeAssociation, loading: serializing } = useSerialize();
+  const { deserializeClass, deserializeAssociation, loading: deserializing } = useDeserialize();
 
   const toggleOpen = (key) => setOpenKeys((o) => ({ ...o, [key]: !o[key] }));
 
   const handleSelect = (key, payload) => {
     setSelected({ key, payload });
-    setDetailText(payload && payload._notes ? payload._notes : JSON.stringify(payload, null, 2));
+    setEditing(false);
+    setDetailText('');
+    setReadOnlyText('');
+    // Show human-friendly USE text when possible (serialize JSON -> USE)
+    const trySerialize = async () => {
+      if (!payload) return;
+      try {
+        if (key.startsWith('class:')) {
+          const res = await serializeClass(payload);
+          const text = res?.data?.data || res?.data || res;
+          setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
+        } else if (key.startsWith('assoc:')) {
+          const res = await serializeAssociation(payload);
+          const text = res?.data?.data || res?.data || res;
+          setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
+        } else {
+          // default to showing notes or JSON
+          setReadOnlyText(payload && payload._notes ? payload._notes : JSON.stringify(payload, null, 2));
+        }
+      } catch {
+        setReadOnlyText(payload && payload._notes ? payload._notes : JSON.stringify(payload, null, 2));
+      }
+    };
+    trySerialize();
     onSelect && onSelect({ key, payload });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selected) return;
-    onUpdateNode && onUpdateNode(selected.key, detailText);
+    // if editing USE text, deserialize back to JSON and pass object to onUpdateNode
+    try {
+      if (selected.key.startsWith('class:')) {
+        const res = await deserializeClass({ text: detailText });
+        const payload = res?.data?.data || res?.data || res;
+        if (payload) {
+          onUpdateNode && onUpdateNode(selected.key, payload);
+        }
+      } else if (selected.key.startsWith('assoc:')) {
+        const res = await deserializeAssociation({ text: detailText });
+        const payload = res?.data?.data || res?.data || res;
+        if (payload) {
+          onUpdateNode && onUpdateNode(selected.key, payload);
+        }
+      } else {
+        // fallback: save text as notes
+        onUpdateNode && onUpdateNode(selected.key, detailText);
+      }
+      setEditing(false);
+    } catch (e) {
+      // show raw text in detailText if deserialize failed
+      console.error('Deserialize failed', e);
+      // still call onUpdateNode with raw text to preserve behavior
+      onUpdateNode && onUpdateNode(selected.key, detailText);
+      setEditing(false);
+    }
   };
 
   const handleCancel = () => {
     if (!selected) return;
-    setDetailText(
-      selected.payload && selected.payload._notes ? selected.payload._notes : JSON.stringify(selected.payload, null, 2)
-    );
+    // exit edit mode and restore read-only text
+    setEditing(false);
+    setDetailText('');
   };
 
   return (
@@ -133,16 +187,29 @@ export default function ModelTreePane({
         {selected ? (
           <div>
             <div className="uml-model-tree-detail-header">{selected.key}</div>
-            <textarea
-              className="uml-model-tree-detail-text"
-              rows={10}
-              value={detailText}
-              onChange={(e) => setDetailText(e.target.value)}
-            />
-            <div className="uml-model-tree-detail-actions">
-              <button onClick={handleCancel}>Cancel</button>
-              <button onClick={handleSave}>Save</button>
-            </div>
+            {!editing ? (
+              <div>
+                <pre className="uml-model-tree-detail-text" style={{ whiteSpace: 'pre-wrap' }}>
+                  {serializing || deserializing ? 'Loading...' : readOnlyText}
+                </pre>
+                <div style={{ marginTop: 8 }}>
+                  <button onClick={() => setEditing(true)}>Edit</button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <textarea
+                  className="uml-model-tree-detail-text"
+                  rows={10}
+                  value={detailText || readOnlyText}
+                  onChange={(e) => setDetailText(e.target.value)}
+                />
+                <div className="uml-model-tree-detail-actions">
+                  <button onClick={handleCancel}>Cancel</button>
+                  <button onClick={handleSave}>Save</button>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="uml-model-tree-empty">Select a node to view/edit details</div>
