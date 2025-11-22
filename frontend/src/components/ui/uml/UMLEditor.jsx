@@ -268,6 +268,23 @@ export default function UMLEditor({ initialModel = null, onResult }) {
     setEditValue('');
   };
 
+  const deleteClass = (className) => {
+    // Remove the class
+    setClasses((prevClasses) => prevClasses.filter((c) => c.name !== className));
+
+    // Remove associations related to the class
+    setAssociations((prevAssociations) =>
+      prevAssociations.filter((assoc) => !assoc.parts.some((part) => part.class === className))
+    );
+
+    // Remove positions related to the class
+    setPositions((prevPositions) => {
+      const updatedPositions = { ...prevPositions };
+      delete updatedPositions[className];
+      return updatedPositions;
+    });
+  };
+
   // start adding attribute inline for a class
   const startAddingAttr = (clsName) => {
     setNewAttrInputs((n) => ({ ...n, [clsName]: { name: '', type: '', adding: true } }));
@@ -498,6 +515,7 @@ export default function UMLEditor({ initialModel = null, onResult }) {
     editingName,
     editValue,
     setEditValue,
+    deleteClass, // Pass deleteClass to context
   };
 
   const handleUpdateNode = (key, text) => {
@@ -595,6 +613,7 @@ export default function UMLEditor({ initialModel = null, onResult }) {
                   startLinkDrag={startLinkDrag}
                   classes={classes}
                   enums={enums}
+                  onDeleteClass={deleteClass} // Pass deleteClass to ClassBox
                 />
               );
             })}

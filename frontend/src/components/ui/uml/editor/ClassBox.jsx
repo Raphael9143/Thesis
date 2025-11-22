@@ -24,6 +24,7 @@ export default function ClassBox({
   startLinkDrag,
   classes,
   enums,
+  onDeleteClass, // Add a new prop for deleting the class
 }) {
   return (
     <div
@@ -65,6 +66,14 @@ export default function ClassBox({
               onClick={(e) => {
                 e.stopPropagation();
                 onCancelEdit(c.name, 'class');
+              }}
+            />
+            <i
+              className="fa fa-trash uml-icon-btn"
+              title="Delete class"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteClass(c.name); // Call the delete class function
               }}
             />
           </div>
