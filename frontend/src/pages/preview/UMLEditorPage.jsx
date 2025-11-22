@@ -10,7 +10,7 @@ export default function UMLEditorPage() {
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
         <div style={{ flex: 1, minHeight: 0 }}>
-          <UMLEditor initialModel={initialModel} onResult={() => {}} />
+          <UMLEditor initialModel={initialModel} />
         </div>
       </div>
     </div>

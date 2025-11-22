@@ -66,6 +66,8 @@ export default function useLinkDrag({
       if (!assoc) return;
       const a = typeof assoc === 'object' ? { ...assoc } : assoc;
       if (!a.id) a.id = uid('a');
+      // ensure type is present (default to plain association)
+      a.type = a.type || 'association';
       // normalize parts: ensure parts array exists and each part has class/multiplicity/role
       a.parts = Array.isArray(a.parts)
         ? a.parts.map((p, i) => ({

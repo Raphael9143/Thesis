@@ -1,0 +1,89 @@
+/* New minimalist USE export modal styling */
+.use-export-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1200;
+}
+
+.use-export-container {
+  position: relative;
+  width: clamp(360px, 60vw, 960px);
+  max-height: 60vh;
+  background: rgb(247, 247, 247);
+  border-radius: 8px;
+  padding: 52px 20px 20px; /* top space for floating buttons */
+  overflow: hidden;
+  box-shadow: 0 8px 28px -6px rgba(0, 0, 0, 0.55);
+  transition:
+    filter 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* Blur entire content when not hovered */
+.use-export-container:not(:hover) .use-export-content {
+  filter: blur(2px) brightness(0.85);
+}
+
+.use-export-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+  z-index: 2;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: #bbb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    transform 0.15s;
+}
+.icon-btn:hover {
+  color: var(--black);
+  transform: translateY(-2px);
+}
+
+.use-export-content {
+  margin: 0;
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: pre;
+  padding: 6px 4px 12px 4px;
+  color: var(--black);
+  overflow: auto;
+  max-height: calc(60vh - 96px);
+  -webkit-overflow-scrolling: touch;
+  touch-action: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 760px) {
+  .use-export-container {
+    width: calc(100vw - 32px);
+    padding: 52px 16px 16px;
+  }
+  .use-export-content {
+    font-size: 12px;
+  }
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+}

@@ -19,8 +19,9 @@ import ConstraintList from './editor/ConstraintList';
 import ConstraintBox from './editor/ConstraintBox';
 import UmlEditorContext from '../../../contexts/UmlEditorContext';
 import ModelTreePane from './editor/ModelTreePane';
+import ExportModal from './ExportModal'; // Export modal component
 
-export default function UMLEditor({ initialModel = null, onResult }) {
+export default function UMLEditor({ initialModel = null }) {
   const containerRef = useRef(null);
   const boxRefs = useRef({});
   const positionsRef = useRef({});
@@ -439,7 +440,8 @@ export default function UMLEditor({ initialModel = null, onResult }) {
 
   // attribute editing helpers remain in this file; types/options are provided to components
 
-  const exportModel = () => {
+  // Build the JSON payload sent to export endpoint
+  const buildModelJson = () => {
     const normalizeAttr = (a) => {
       if (a == null) return null;
       if (typeof a === 'string') {
@@ -449,7 +451,7 @@ export default function UMLEditor({ initialModel = null, onResult }) {
       if (typeof a === 'object') return { name: a.name || '', type: a.type || '' };
       return { name: String(a) };
     };
-    const modelJson = {
+    return {
       model: starter.model || 'Model',
       enums: enums.map((e) => ({
         name: e.name,
@@ -464,7 +466,14 @@ export default function UMLEditor({ initialModel = null, onResult }) {
         superclasses: c.superclasses || [],
         isAbstract: !!c.isAbstract,
       })),
-      associations: associations.map((a) => ({ name: a.name || '', parts: a.parts })),
+      associations: associations.map((a) => ({
+        name: a.name || '',
+        parts: a.parts || [],
+        type: a.type || 'association',
+        attributes: Array.isArray(a.attributes)
+          ? a.attributes.map(normalizeAttr).filter(Boolean)
+          : [],
+      })),
       constraints: (constraints || []).map((c) => ({
         id: c.id,
         type: c.type,
@@ -473,24 +482,32 @@ export default function UMLEditor({ initialModel = null, onResult }) {
         ownerClass: c.ownerClass || null,
       })),
     };
-
-    // call backend converter and forward response
-    console.log(JSON.stringify(modelJson, null, 2));
-    userAPI
-      .convertUmlJson({ graphJson: modelJson })
-      .then((res) => {
-        const data = res?.data ?? res;
-        console.log('Server convert result:', data);
-        if (onResult) onResult(data);
-      })
-      .catch((err) => {
-        console.error('convertUmlJson failed', err);
-        // still call onResult with raw model if provided
-        if (onResult) onResult({ success: false, error: err?.message || String(err), graphJson: modelJson });
-      });
   };
 
-  // No manual path import allowed — preview provides parsed model via router state
+  const [exportModalVisible, setExportModalVisible] = useState(false);
+  const [exportedText, setExportedText] = useState('');
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState(null);
+
+  const handleExport = async () => {
+    setExportError(null);
+    setExporting(true);
+    try {
+      const modelJson = buildModelJson();
+      const res = await userAPI.convertUmlJson(modelJson); // backend expects raw model JSON body
+      const data = res?.data ?? res;
+      // Accept either plain string or structured object
+      const useText =
+        typeof data === 'string' ? data : data.useText || data.fileContent || JSON.stringify(data, null, 2);
+      setExportedText(useText);
+      setExportModalVisible(true);
+    } catch (e) {
+      console.error('Export failed:', e);
+      setExportError(e?.response?.data?.message || e.message || 'Export failed');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const contextValue = {
     positionsRef,
@@ -563,16 +580,25 @@ export default function UMLEditor({ initialModel = null, onResult }) {
     <UmlEditorContext.Provider value={contextValue}>
       <div className="uml-editor">
         <div className="uml-left-panel">
-          <UmlToolbox onToolDragStart={onToolDragStart} onExport={exportModel} />
+          <UmlToolbox onToolDragStart={onToolDragStart} />
           <div className="uml-divider" />
           <ModelTreePane
             modelName={starter.model || 'Model'}
             classes={classes}
             associations={associations}
             constraints={constraints}
-            enumerations={enums} // Pass enumerations to the tree
+            enumerations={enums}
             onUpdateNode={handleUpdateNode}
           />
+          <button
+            className="export-button"
+            onClick={handleExport}
+            disabled={exporting}
+            title={exportError || 'Export USE model'}
+          >
+            {exporting ? 'Exporting…' : 'Export'}
+          </button>
+          {exportError && <div className="export-error">{exportError}</div>}
         </div>
 
         <div className="uml-canvas-area">
@@ -720,6 +746,8 @@ export default function UMLEditor({ initialModel = null, onResult }) {
             {/* model tree moved to left panel */}
           </div>
         </div>
+
+        {exportModalVisible && <ExportModal fileContent={exportedText} onClose={() => setExportModalVisible(false)} />}
       </div>
     </UmlEditorContext.Provider>
   );
