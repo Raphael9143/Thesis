@@ -7,6 +7,7 @@ export default function EnumBox({
   startDrag,
   editingName,
   editValue,
+  setEditValue,
   onStartEdit,
   onCommitEdit,
   onCancelEdit,
@@ -31,7 +32,9 @@ export default function EnumBox({
               className="uml-title-input"
               autoFocus
               value={editValue}
-              onChange={(e) => onStartEdit && onStartEdit(e.target.value)}
+              onChange={(e) => {
+                if (typeof setEditValue === 'function') setEditValue(e.target.value);
+              }}
             />
             <i
               className="fa fa-save uml-icon-btn"
@@ -72,7 +75,7 @@ export default function EnumBox({
           {(Array.isArray(en.values) ? en.values : []).map((v, idx) => (
             <div className="uml-attr" key={idx}>
               {editingName === en.name ? (
-                <input value={v} onChange={(e) => onUpdateValue(idx, e.target.value)} />
+                <input className="uml-attr-name" value={v} onChange={(e) => onUpdateValue(idx, e.target.value)} />
               ) : (
                 <div>{v}</div>
               )}
@@ -92,7 +95,12 @@ export default function EnumBox({
 
           {editingName === en.name && newEnum?.adding && (
             <div className="uml-attr editing">
-              <input placeholder="value" value={newEnum.value} onChange={(e) => onUpdateValue('new', e.target.value)} />
+              <input
+                className="uml-attr-name"
+                placeholder="value"
+                value={newEnum.value}
+                onChange={(e) => onUpdateValue('new', e.target.value)}
+              />
               <button
                 onClick={(e) => {
                   e.stopPropagation();

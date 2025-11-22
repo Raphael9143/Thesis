@@ -655,6 +655,7 @@ export default function UMLEditor({ initialModel = null }) {
                   startDrag={startDrag}
                   editingName={editingName}
                   editValue={editValue}
+                  setEditValue={setEditValue}
                   onStartEdit={() => {
                     ensureEnumBuffer(en.name);
                     setEditingName(en.name);
