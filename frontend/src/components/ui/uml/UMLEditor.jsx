@@ -580,6 +580,25 @@ export default function UMLEditor({ initialModel = null }) {
         }
         return;
       }
+      if (key.startsWith('op:')) {
+        const parts = key.split(':');
+        const className = parts[1];
+        const idx = parseInt(parts[2], 10);
+        if (!className) return;
+        setClasses((s) =>
+          s.map((c) => {
+            if (c.name !== className) return c;
+            const ops = Array.isArray(c.operations) ? [...c.operations] : [];
+            if (Number.isFinite(idx)) {
+              const existing = ops[idx] || {};
+              ops[idx] = { ...existing, ...(text || {}) };
+              return { ...c, operations: ops };
+            }
+            return c;
+          })
+        );
+        return;
+      }
     }
 
     // class:name -> store as _notes on the class

@@ -19,8 +19,8 @@ export default function ModelTreePane({
   const [detailText, setDetailText] = useState('');
   const [readOnlyText, setReadOnlyText] = useState('');
   const [editing, setEditing] = useState(false);
-  const { serializeClass, serializeAssociation, loading: serializing } = useSerialize();
-  const { deserializeClass, deserializeAssociation, loading: deserializing } = useDeserialize();
+  const { serializeClass, serializeAssociation, serializeOperation, loading: serializing } = useSerialize();
+  const { deserializeClass, deserializeAssociation, deserializeOperation, loading: deserializing } = useDeserialize();
 
   const toggleOpen = (key) => setOpenKeys((o) => ({ ...o, [key]: !o[key] }));
 
@@ -39,6 +39,10 @@ export default function ModelTreePane({
           setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
         } else if (key.startsWith('assoc:')) {
           const res = await serializeAssociation(payload);
+          const text = res?.data?.data || res?.data || res;
+          setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
+        } else if (key.startsWith('op:')) {
+          const res = await serializeOperation(payload);
           const text = res?.data?.data || res?.data || res;
           setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
         } else {
@@ -60,15 +64,18 @@ export default function ModelTreePane({
       if (selected.key.startsWith('class:')) {
         const res = await deserializeClass({ text: detailText });
         const payload = res?.data?.data || res?.data || res;
-        if (payload) {
-          onUpdateNode && onUpdateNode(selected.key, payload);
-        }
+        if (payload) onUpdateNode && onUpdateNode(selected.key, payload);
       } else if (selected.key.startsWith('assoc:')) {
         const res = await deserializeAssociation({ text: detailText });
         const payload = res?.data?.data || res?.data || res;
-        if (payload) {
-          onUpdateNode && onUpdateNode(selected.key, payload);
-        }
+        if (payload) onUpdateNode && onUpdateNode(selected.key, payload);
+      } else if (selected.key.startsWith('op:')) {
+        // pass class context as available in payload when deserializing operation
+        const cls = selected.payload && selected.payload.class;
+        const body = { text: detailText, class: cls };
+        const res = await deserializeOperation(body);
+        const payload = res?.data?.data || res?.data || res;
+        if (payload) onUpdateNode && onUpdateNode(selected.key, payload);
       } else {
         // fallback: save text as notes
         onUpdateNode && onUpdateNode(selected.key, detailText);
