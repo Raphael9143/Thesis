@@ -13,7 +13,7 @@ export default function AttributeEditor({ attr, idx, editing, onUpdate, onDelete
   const type = attr.type;
   return (
     <div className="uml-attr">
-      <input value={name} onChange={(e) => onUpdate(idx, e.target.value, type)} />
+      <input className="uml-attr-name" value={name} onChange={(e) => onUpdate(idx, e.target.value, type)} />
       <AttributeTypeSelect value={type} onChange={(v) => onUpdate(idx, name, v)} classes={classes} enums={enums} />
       <i className="fa fa-trash uml-icon-btn" onClick={() => onDelete(idx)} />
     </div>

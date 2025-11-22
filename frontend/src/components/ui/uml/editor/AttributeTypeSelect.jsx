@@ -1,12 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 export default function AttributeTypeSelect({ value = '', onChange, classes = [], enums = [] }) {
+  useEffect(() => {
+    if ((value === '' || value == null) && typeof onChange === 'function') {
+      onChange('String');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleChange = (e) => onChange && onChange(e.target.value);
 
   return (
-    <select className="uml-type-select" value={value} onChange={handleChange}>
+    <select className="uml-type-select" value={value || 'String'} onChange={handleChange}>
       <optgroup label="Primitives">
-        <option value="">String</option>
+        <option value="String">String</option>
         <option value="Integer">Integer</option>
         <option value="Real">Real</option>
         <option value="Boolean">Boolean</option>

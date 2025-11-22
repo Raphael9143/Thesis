@@ -126,22 +126,22 @@ export default function ClassBox({
                 classes={classes}
                 enums={enums}
               />
-              <button
+              <i
+                className="fa fa-plus uml-icon-btn"
+                title="Add attribute"
                 onClick={(e) => {
                   e.stopPropagation();
                   commitAddingAttr(c.name);
                 }}
-              >
-                Add
-              </button>
-              <button
+              />
+              <i
+                className="fa fa-times uml-icon-btn"
+                title="Cancel"
                 onClick={(e) => {
                   e.stopPropagation();
                   cancelAddingAttr(c.name);
                 }}
-              >
-                Cancel
-              </button>
+              />
             </div>
           )}
         </div>
