@@ -98,6 +98,44 @@ router.post("/serialize/class", UseController.serializeClass);
  */
 router.post("/serialize/association", UseController.serializeAssociation);
 
+// Serialize single operation JSON to an operation line or class block
+/**
+ * @swagger
+ * /api/uml/serialize/operation:
+ *   post:
+ *     summary: Serialize a single operation JSON into a .use operation line or class block
+ *     tags:
+ *       - UML
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: operation
+ *         description: JSON object describing an operation.
+ *           Optionally include `class` to wrap into a class block.
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             class:
+ *               type: string
+ *             op:
+ *               type: object
+ *               properties:
+ *                 name:
+ *                   type: string
+ *                 signature:
+ *                   type: string
+ *                 returnType:
+ *                   type: string
+ *     responses:
+ *       200:
+ *         description: Plain text of operation line or class block
+ *       400:
+ *         description: Invalid request body
+ */
+router.post("/serialize/operation", UseController.serializeOperation);
+
 /**
  * @swagger
  * /api/uml/deserialize/class:
@@ -152,5 +190,35 @@ router.post("/deserialize/class", UseController.deserializeClass);
  *         description: Invalid request body
  */
 router.post("/deserialize/association", UseController.deserializeAssociation);
+
+/**
+ * @swagger
+ * /api/uml/deserialize/operation:
+ *   post:
+ *     summary: Deserialize a .use operation line or class block into JSON
+ *     tags:
+ *       - UML
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: operation
+ *         description: .use operation text or class block.
+ *           Optionally include `class` to attach a class name for single-line operations.
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             text:
+ *               type: string
+ *             class:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: JSON representation of the operation
+ *       400:
+ *         description: Invalid request body
+ */
+router.post("/deserialize/operation", UseController.deserializeOperation);
 
 module.exports = router;
