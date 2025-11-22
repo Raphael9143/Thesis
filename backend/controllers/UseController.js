@@ -291,6 +291,29 @@ function parseUseContentWithConditionals(content) {
   return parsed;
 }
 
+// Extract the first concise CLI error message from stderr/stdout and
+// normalize it to the form 'line:col: Message'. Returns null when none.
+function extractFirstCliError(stderrText, stdoutText) {
+  const stderrPart = String(stderrText || "");
+  const stdoutPart = String(stdoutText || "");
+  const combined = (stderrPart + "\n" + stdoutPart).replace(/\r/g, "\n");
+
+  // Prefer explicit column-style messages like `49:17: ...` or `line 49:17: ...`
+  let m = combined.match(/(?:line\s*)?\s*(\d+)\s*[:.,]\s*(\d+)\s*[:\s-]([^\n\r]*)/i);
+  if (m) return `${m[1]}:${m[2]}: ${m[3].trim()}`;
+
+  m = combined.match(/(?:line\s*)?(\d+):(\d+)[:\s]([^\n\r]*)/i);
+  if (m) return `${m[1]}:${m[2]}: ${m[3].trim()}`;
+
+  // fallback to other known messages
+  m = combined.match(/(no viable alternative[^\n\r]*)/i);
+  if (m) return m[1].trim();
+  m = combined.match(/(error[^\n\r]*)/i);
+  if (m) return m[1].trim();
+
+  return null;
+}
+
 // Extract simple if-then-else blocks from raw content
 // (returns array of {condition, then, else, raw})
 function extractConditionals(content) {
@@ -709,17 +732,12 @@ const UseController = {
         (cliHasStdErr || (cliExitCode !== null && cliExitCode !== 0))
       ) {
         if (!allowFallback) {
-          // prefer concise CLI error message when available
-          const normalized = String(stderrText || "").replace(/\r/g, "\n");
-          const match =
-            normalized.match(/line\s*\d+:\d+\s+[^\n\r]*/i) ||
-            normalized.match(/no viable alternative[^\n\r]*/i) ||
-            normalized.match(/error[^\n\r]*/i);
-          const message = match
-            ? match[0].trim()
+          const firstErr = extractFirstCliError(stderrText, stdoutText);
+          const message = firstErr
+            ? firstErr
             : cliResult.error
-              ? `USE CLI error: ${cliResult.error}`
-              : "USE CLI reported an error";
+            ? `USE CLI error: ${cliResult.error}`
+            : "USE CLI reported an error";
           return res.status(400).json({ success: false, message });
         }
       }
@@ -750,14 +768,12 @@ const UseController = {
 
       // If still no model parsed, return a helpful error using CLI message if present
       if (!parsed || !parsed.model) {
-        const errorMatch = (stderrText + "\n" + stdoutText).match(
-          /line\s+\d+:\d+\s+.+/i
-        );
-        const errorMessage = errorMatch
-          ? errorMatch[0]
+        const firstErr = extractFirstCliError(stderrText, stdoutText);
+        const errorMessage = firstErr
+          ? firstErr
           : cliResult && cliResult.error
-            ? `USE CLI error: ${cliResult.error}`
-            : "Invalid .use file. Please fix syntax or model errors.";
+          ? `USE CLI error: ${cliResult.error}`
+          : "Invalid .use file. Please fix syntax or model errors.";
 
         return res.status(400).json({ success: false, message: errorMessage });
       }
@@ -817,15 +833,10 @@ const UseController = {
 
         const stderrText = (cliRes && cliRes.stderr) || "";
         const stdoutText = (cliRes && cliRes.stdout) || "";
-        const exitCode =
-          cliRes && typeof cliRes.code === "number" ? cliRes.code : null;
         if (stderrText && String(stderrText).trim().length > 0) {
-          return res.status(400).json({
-            success: false,
-            message: "USE CLI reported errors",
-            cli: { stdout: stdoutText, stderr: stderrText, code: exitCode },
-            text: useText,
-          });
+          const firstErr = extractFirstCliError(stderrText, stdoutText);
+          const message = firstErr || "USE CLI reported errors";
+          return res.status(400).json({ success: false, message });
         }
       }
 
