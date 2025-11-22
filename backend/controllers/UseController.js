@@ -483,6 +483,37 @@ function buildClassText(cls) {
   return lines.join("\n");
 }
 
+/**
+ * Build a single association `.use` text from an association JSON object.
+ * Expected shape: { name, parts, type }
+ */
+function buildAssociationText(assoc) {
+  if (!assoc || typeof assoc !== "object") return "";
+
+  const type = assoc.type || "association";
+  const keyword =
+    type === "aggregation"
+      ? "aggregation"
+      : type === "composition"
+      ? "composition"
+      : type === "associationclass"
+      ? "associationclass"
+      : "association";
+
+  const lines = [`${keyword} ${assoc.name || "Unnamed"} between`];
+
+  if (Array.isArray(assoc.parts)) {
+    for (const part of assoc.parts) {
+      const mult = part.multiplicity ? `[${part.multiplicity}]` : "";
+      const role = part.role ? ` role ${part.role}` : "";
+      lines.push(`  ${part.class || "Unnamed"} ${mult}${role}`);
+    }
+  }
+
+  lines.push("end");
+  return lines.join("\n");
+}
+
 const UseController = {
   // Get a stored USE model by id with related entities
   getById: async (req, res) => {
@@ -821,6 +852,24 @@ const UseController = {
       return res.send(text);
     } catch (err) {
       console.error("serializeClass error:", err);
+      return res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+  },
+  // Serialize a single association JSON into .use association text
+  serializeAssociation: async (req, res) => {
+    try {
+      const assoc = req.body;
+      if (!assoc || typeof assoc !== "object") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Association JSON body required" });
+      }
+
+      const text = buildAssociationText(assoc);
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      return res.send(text);
+    } catch (err) {
+      console.error("serializeAssociation error:", err);
       return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
   },

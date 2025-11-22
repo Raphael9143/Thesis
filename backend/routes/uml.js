@@ -73,4 +73,29 @@ router.post("/export", UseController.exportUml);
  */
 router.post("/serialize/class", UseController.serializeClass);
 
+// Serialize single association JSON to a .use association block
+/**
+ * @swagger
+ * /api/uml/serialize/association:
+ *   post:
+ *     summary: Serialize a single association JSON into a .use association block
+ *     tags:
+ *       - UML
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: association
+ *         description: JSON object describing an association (name, parts, type)
+ *         required: true
+ *         schema:
+ *           type: object
+ *     responses:
+ *       200:
+ *         description: Plain text of the association block
+ *       400:
+ *         description: Invalid request body
+ */
+router.post("/serialize/association", UseController.serializeAssociation);
+
 module.exports = router;
