@@ -55,7 +55,7 @@ export default function ResearcherProjects() {
     <Section>
       <Card>
         <div className="create-button-section">
-          <button className="btn btn-primary" onClick={() => setCreateModalOpen(true)}>
+          <button className="btn btn-primary btn-sm" onClick={() => setCreateModalOpen(true)}>
             Create Project
           </button>
         </div>

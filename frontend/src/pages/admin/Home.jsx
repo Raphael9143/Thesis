@@ -18,7 +18,7 @@ export default function AdminHome() {
       </Card>
       <Card title="Quick actions">
         <div className="display-flex gap-8 flex-wrap">
-          <button className="btn btn-primary">Invite user</button>
+          <button className="btn btn-primary btn-sm">Invite user</button>
           <button className="btn">Review reports</button>
           <button className="btn">Settings</button>
         </div>

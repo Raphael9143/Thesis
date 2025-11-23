@@ -150,7 +150,7 @@ export default function PostContribution() {
           </div>
 
           <div className="post-contribution-actions">
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
+            <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
               {submitting ? 'Submitting...' : 'Submit'}
             </button>
             <button type="button" className="btn btn-signin" onClick={handleCancel} disabled={submitting}>

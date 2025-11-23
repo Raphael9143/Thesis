@@ -172,7 +172,7 @@ export default function ExamPreview() {
               <div className="mt-8">
                 <Link
                   to={`/education/student/classes/${classId}/courses/${courseId}/exams/${resourceId}/submit`}
-                  className={`btn btn-primary ${isExpired ? 'disabled' : ''}`}
+                  className={`btn btn-primary btn-sm ${isExpired ? 'disabled' : ''}`}
                   aria-disabled={isExpired}
                   onClick={(e) => {
                     if (isExpired) {

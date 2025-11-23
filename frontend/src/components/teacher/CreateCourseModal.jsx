@@ -98,7 +98,7 @@ export default function CreateCourseModal({ open, onClose, defaultClassId = null
         </div>
 
         <div className="create-class-actions">
-          <button type="submit" className="btn btn-primary" disabled={submitting}>
+          <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
             {submitting ? 'Publishing...' : 'Publish'}
           </button>
           <button

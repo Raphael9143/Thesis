@@ -79,7 +79,7 @@ export default function AddModeratorModal({ open, onClose, onAdded, projectId })
           <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
             Cancel
           </button>
-          <button type="submit" className="btn btn-primary" disabled={submitting}>
+          <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
             {submitting ? 'Adding...' : 'Add Moderator'}
           </button>
         </div>

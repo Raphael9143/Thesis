@@ -129,7 +129,7 @@ export default function CreateLectureForm({
               <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
                 Cancel
               </button>
-              <button type="button" className="btn btn-primary" onClick={() => doSubmit()} disabled={submitting}>
+              <button type="button" className="btn btn-primary btn-sm" onClick={() => doSubmit()} disabled={submitting}>
                 {submitting ? 'Applying…' : 'Apply'}
               </button>
             </>
@@ -143,7 +143,7 @@ export default function CreateLectureForm({
               </button>
               <button
                 type="button"
-                className="btn btn-primary"
+                className="btn btn-primary btn-sm"
                 onClick={() => doSubmit('published')}
                 disabled={submitting}
               >

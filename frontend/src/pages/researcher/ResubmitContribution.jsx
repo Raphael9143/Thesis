@@ -137,7 +137,7 @@ export default function ResubmitContribution() {
           </div>
 
           <div className="post-contribution-actions">
-            <button type="submit" className="btn btn-primary" disabled={submitting}>
+            <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
               {submitting ? 'Resubmitting...' : 'Resubmit'}
             </button>
             <button type="button" className="btn btn-signin" onClick={handleCancel} disabled={submitting}>

@@ -311,7 +311,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
               <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
                 Cancel
               </button>
-              <button type="button" className="btn btn-primary" onClick={() => doSubmit()} disabled={submitting}>
+              <button type="button" className="btn btn-primary btn-sm" onClick={() => doSubmit()} disabled={submitting}>
                 {submitting ? 'Applying…' : 'Apply'}
               </button>
             </>
@@ -325,7 +325,7 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
               </button>
               <button
                 type="button"
-                className="btn btn-primary"
+                className="btn btn-primary btn-sm"
                 onClick={() => doSubmit('published')}
                 disabled={submitting}
               >

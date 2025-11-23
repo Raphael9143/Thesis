@@ -139,7 +139,7 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
     } catch (err) {
       console.warn('Failed to create Google Docs viewer URL', err);
       previewContent = (
-        <a href={url} target="_blank" rel="noreferrer" className="btn btn-primary">
+        <a href={url} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm">
           Open file
         </a>
       );

@@ -6,6 +6,8 @@ export default function useSerialize() {
   const [error, setError] = useState(null);
 
   const serializeClass = async (data) => {
+    console.log(JSON.stringify(data));
+
     setLoading(true);
     setError(null);
     try {

@@ -72,7 +72,7 @@ export default function GradeSubmissionModal({ open, onClose, submission, onGrad
           <button className="btn btn-signin" type="button" onClick={onClose} disabled={submitting}>
             Cancel
           </button>
-          <button className="btn btn-primary" type="button" onClick={handleSubmit} disabled={submitting}>
+          <button className="btn btn-primary btn-sm" type="button" onClick={handleSubmit} disabled={submitting}>
             {submitting ? 'Saving…' : 'Save'}
           </button>
         </div>

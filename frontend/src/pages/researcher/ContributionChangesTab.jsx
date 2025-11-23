@@ -101,7 +101,7 @@ export default function ContributionChangesTab({
             You can edit and resubmit this contribution to address feedback or fix validation errors.
           </p>
           <button
-            className="btn btn-primary"
+            className="btn btn-primary btn-sm"
             onClick={() =>
               navigate(
                 `/researcher/projects/${contribution.research_project_id}/contributions/${contribution.id}/resubmit`

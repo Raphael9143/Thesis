@@ -120,7 +120,7 @@ export default function StudentsList() {
     <Section>
       <Card>
         <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          <button className="btn btn-primary" onClick={() => setAddModalOpen(true)}>
+          <button className="btn btn-primary btn-sm" onClick={() => setAddModalOpen(true)}>
             Add student
           </button>
         </div>

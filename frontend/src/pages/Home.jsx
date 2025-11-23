@@ -49,7 +49,7 @@ export default function Home() {
       return (
         <Card title="Role not set" subtitle="Access your personalized dashboard by logging in.">
           <div className="display-flex gap-12">
-            <button className="btn btn-primary" onClick={goToEducation}>
+            <button className="btn btn-primary btn-sm" onClick={goToEducation}>
               Go to Education Login
             </button>
             <button className="btn" onClick={() => navigate('/')}>

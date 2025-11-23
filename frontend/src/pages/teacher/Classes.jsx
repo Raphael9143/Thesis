@@ -54,7 +54,7 @@ export default function ClassesPage() {
     <Section>
       <Card>
         <div className="create-class-header">
-          <button type="button" className="btn btn-primary" onClick={() => setModalOpen(true)}>
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => setModalOpen(true)}>
             Create class
           </button>
         </div>

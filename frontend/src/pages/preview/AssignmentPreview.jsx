@@ -180,7 +180,7 @@ export default function AssignmentPreview() {
               <div className="mt-8">
                 <Link
                   to={`/education/student/classes/${classId}/courses/${courseId}/assignments/${resourceId}/submit`}
-                  className={`btn btn-primary ${isExpired ? 'disabled' : ''}`}
+                  className={`btn btn-primary btn-sm ${isExpired ? 'disabled' : ''}`}
                   aria-disabled={isExpired}
                   onClick={(e) => {
                     if (isExpired) {

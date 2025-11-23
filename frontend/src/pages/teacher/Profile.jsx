@@ -162,7 +162,7 @@ export default function TeacherProfile() {
                 </div>
                 {!editing ? (
                   <div className="edit-actions-btns">
-                    <button className="btn btn-primary edit-btn" onClick={() => setEditing(true)}>
+                    <button className="btn btn-primary btn-sm edit-btn" onClick={() => setEditing(true)}>
                       Edit
                     </button>
                   </div>
@@ -184,7 +184,7 @@ export default function TeacherProfile() {
                     >
                       Cancel
                     </button>
-                    <button className="btn btn-primary save-btn" onClick={onSave}>
+                    <button className="btn btn-primary btn-sm save-btn" onClick={onSave}>
                       Save
                     </button>
                   </div>

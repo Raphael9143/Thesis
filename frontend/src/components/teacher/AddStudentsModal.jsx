@@ -125,7 +125,7 @@ const AddStudentsModal = ({ open, onClose, classId, onAdded }) => {
           </div>
         )}
         <div className="modal-footer" style={{ marginTop: 12, justifyContent: 'center' }}>
-          <button className="btn btn-primary" onClick={submit} disabled={loading}>
+          <button className="btn btn-primary btn-sm" onClick={submit} disabled={loading}>
             {loading ? 'Adding...' : 'Add students'}
           </button>
           <button className="btn btn-signin" onClick={onClose} disabled={loading}>

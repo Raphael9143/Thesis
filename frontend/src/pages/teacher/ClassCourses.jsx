@@ -63,7 +63,7 @@ export default function ClassCoursesPage() {
     <Section>
       <Card>
         <div className="create-course-header">
-          <button className="btn btn-primary" onClick={() => setCreateCourseOpen(true)}>
+          <button className="btn btn-primary btn-sm" onClick={() => setCreateCourseOpen(true)}>
             New Course
           </button>
         </div>

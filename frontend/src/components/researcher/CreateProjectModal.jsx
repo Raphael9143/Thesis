@@ -93,7 +93,7 @@ export default function CreateProjectModal({ open, onClose, onCreated }) {
           <button type="submit" className="btn btn-signin" disabled={submitting}>
             {submitting ? 'Saving...' : 'Save as Draft'}
           </button>
-          <button type="button" className="btn btn-primary" onClick={(e) => onSubmit(e, true)} disabled={submitting}>
+          <button type="button" className="btn btn-primary btn-sm" onClick={(e) => onSubmit(e, true)} disabled={submitting}>
             {submitting ? 'Publishing...' : 'Publish'}
           </button>
         </div>

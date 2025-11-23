@@ -224,7 +224,7 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
         </div>
 
         <div className="create-class-actions">
-          <button type="submit" className="btn btn-primary">
+          <button type="submit" className="btn btn-primary btn-sm">
             Publish
           </button>
           <button type="button" className="btn btn-signin" onClick={(e) => onSubmit(e, 'draft')}>
