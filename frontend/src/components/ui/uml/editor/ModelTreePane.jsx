@@ -223,7 +223,6 @@ export default function ModelTreePane({
       <div className="uml-model-tree-detail">
         {selected ? (
           <div>
-            <div className="uml-model-tree-detail-header">{selected.key}</div>
             {!editing ? (
               <div>
                 <pre className="uml-model-tree-detail-text" style={{ whiteSpace: 'pre-wrap' }}>
