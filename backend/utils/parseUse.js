@@ -1,10 +1,16 @@
 // parseUse.js - helpers to parse .use content and extract CLI-style errors
 
 function parseUseContent(content) {
-  const res = { model: null, enums: [], classes: [], associations: [] };
-
+  const res = {
+    model: null,
+    enums: [],
+    classes: [],
+    associations: [],
+    constraints: [],
+  };
   if (!content || typeof content !== "string") return res;
 
+  // Model name
   const modelMatch = content.match(/model\s+(\w+)/i);
   if (modelMatch) res.model = modelMatch[1];
 
@@ -21,30 +27,28 @@ function parseUseContent(content) {
     res.enums.push({ name, values });
   }
 
-  // Classes (robust, multiline-aware)
+  // Classes
   const classBlockRe =
     /^\s*(?:abstract\s+)?class\s+[A-Za-z0-9_][\s\S]*?^end\b/gim;
   let cb;
   while ((cb = classBlockRe.exec(content)) !== null) {
     const block = cb[0];
 
-    // header
     const headerMatch = block.match(/^\s*(abstract\s+)?class\s+([^\r\n]+)/im);
     let name = "Unknown";
     let isAbstract = false;
     let superclasses = [];
     if (headerMatch) {
       isAbstract = Boolean(headerMatch[1]);
-      const afterClass = headerMatch[2].trim();
-      const nameOnlyMatch = afterClass.match(/^([A-Za-z0-9_]+)/);
-      if (nameOnlyMatch) name = nameOnlyMatch[1];
-      const genMatch = afterClass.match(/<\s*([^\n]+)/);
-      if (genMatch) {
-        superclasses = genMatch[1]
-          .split(/,/) // multiple inheritance separated by commas
+      const after = headerMatch[2].trim();
+      const nm = after.match(/^([A-Za-z0-9_]+)/);
+      if (nm) name = nm[1];
+      const gen = after.match(/<\s*([^\n]+)/);
+      if (gen)
+        superclasses = gen[1]
+          .split(",")
           .map((s) => s.trim())
           .filter(Boolean);
-      }
     }
 
     const cls = {
@@ -53,7 +57,6 @@ function parseUseContent(content) {
       superclasses,
       attributes: [],
       operations: [],
-      // query-style operations (have bodies or '=' inline bodies)
       query_operations: [],
     };
 
@@ -62,88 +65,72 @@ function parseUseContent(content) {
       /attributes\s*([\s\S]*?)(?:operations\b|\n\s*end\b)/im
     );
     if (attrMatch) {
-      const attrBody = attrMatch[1] || "";
-      const lines = attrBody
+      const lines = (attrMatch[1] || "")
         .split(/\r?\n/)
         .map((l) => l.trim())
         .filter(Boolean);
       for (const line of lines) {
-        const m = line.match(/^([a-zA-Z0-9_]+)\s*:\s*([^\r\n]+)\s*$/);
-        if (m) cls.attributes.push({ name: m[1], type: m[2] });
+        const m = line.match(/^([A-Za-z0-9_]+)\s*:\s*(.+)$/);
+        if (m) cls.attributes.push({ name: m[1], type: m[2].trim() });
       }
     }
 
-    // operations: allow multi-line bodies; avoid treating OCL keywords
+    // operations
     const opMatch = block.match(/operations\s*([\s\S]*?)(?=\n\s*end\b)/im);
     if (opMatch) {
-      const opBody = opMatch[1] || "";
-      const rawLines = opBody.split(/\r?\n/);
-
-      const sr =
+      const rawLines = (opMatch[1] || "").split(/\r?\n/);
+      const sigRe =
         /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
-      const headerReserved =
-        /^(?:if|then|else|endif|let|in|collect|select|reject|forAll|exists|closure)\b/i;
-
-      const opStartIdx = [];
+      const reserved =
+        /^(?:if|let|collect|select|reject|forAll|exists|closure|then|else|endif)\b/i;
+      const starts = [];
       for (let i = 0; i < rawLines.length; i++) {
         const t = rawLines[i].trim();
         if (!t) continue;
-        if (sr.test(t) && !headerReserved.test(t)) opStartIdx.push(i);
+        if (sigRe.test(t) && !reserved.test(t)) starts.push(i);
       }
-      if (!opStartIdx.length) {
-        for (let i = 0; i < rawLines.length; i++) {
-          if (rawLines[i].trim()) opStartIdx.push(i);
-        }
+      if (!starts.length) {
+        for (let i = 0; i < rawLines.length; i++)
+          if (rawLines[i].trim()) starts.push(i);
       }
-
-      for (let k = 0; k < opStartIdx.length; k++) {
-        const start = opStartIdx[k];
-        const end =
-          k + 1 < opStartIdx.length ? opStartIdx[k + 1] : rawLines.length;
-        const chunkLines = rawLines.slice(start, end);
-        const header = (chunkLines[0] || "").trim();
-        const rest = chunkLines.slice(1).join("\n").trim();
-
-        const m = header.match(sr);
+      for (let k = 0; k < starts.length; k++) {
+        const s = starts[k];
+        const e = k + 1 < starts.length ? starts[k + 1] : rawLines.length;
+        const chunk = rawLines.slice(s, e);
+        const header = (chunk[0] || "").trim();
+        const rest = chunk.slice(1).join("\n").trim();
+        const m = header.match(sigRe);
         if (!m) {
-          cls.operations.push({ raw: chunkLines.join("\n").trim() });
+          cls.operations.push({ raw: chunk.join("\n").trim() });
           continue;
         }
-
-        let fullName = m[1] || "";
-        let classQualifier = null;
-        let opName = fullName;
-        if (fullName.includes("::")) {
-          const parts = fullName.split("::");
-          classQualifier = parts[0];
+        let full = m[1] || "";
+        let classQ = null;
+        let opName = full;
+        if (full.includes("::")) {
+          const parts = full.split("::");
+          classQ = parts[0];
           opName = parts.slice(1).join("::");
         }
-
         const signature = (m[2] || "").trim();
         const returnType = m[3] ? m[3].trim() : null;
-        const inlineBody = m[4] !== undefined ? String(m[4]).trim() : null;
-
+        const inline = m[4] !== undefined ? String(m[4]).trim() : null;
         let body = null;
-        if (inlineBody && inlineBody.length) {
-          body = inlineBody;
+        if (inline && inline.length) {
+          body = inline;
           if (rest) body += "\n" + rest;
-        } else if (rest) {
-          body = rest;
-        }
-
+        } else if (rest) body = rest;
         const opObj = {
           name: opName,
-          fullName,
-          class: classQualifier,
+          fullName: full,
+          class: classQ,
           signature,
           returnType,
         };
         if (body) opObj.body = body;
-
-        const isQueryOp =
-          (!!inlineBody && inlineBody.length) ||
-          (body && /^\s*if\b/i.test(body));
-        if (isQueryOp) cls.query_operations.push(opObj);
+        const isQuery =
+          (!!inline && inline.length) || (body && /^\s*if\b/i.test(body));
+        if (isQuery) cls.query_operations.push(opObj);
         else cls.operations.push(opObj);
       }
     }
@@ -156,28 +143,21 @@ function parseUseContent(content) {
     /(?:association|aggregation|composition|associationclass)\s+(\w+)\s+between([\s\S]*?)end/gi;
   let am;
   while ((am = assocRe.exec(content)) !== null) {
-    const fullMatch = am[0];
+    const full = am[0];
     let type = "association";
-    const typeMatch = fullMatch.match(
-      /^(association|aggregation|composition)\s+/i
-    );
-    if (typeMatch) type = typeMatch[1].toLowerCase();
-    else if (fullMatch.match(/^associationclass\s+/i))
-      type = "associationclass";
+    const tm = full.match(/^(association|aggregation|composition)\s+/i);
+    if (tm) type = tm[1].toLowerCase();
+    else if (/^associationclass\s+/i.test(full)) type = "associationclass";
     const name = am[1];
     const body = am[2] || "";
-
-    const rawLines = body.split(/\r?\n/);
-    const lines = rawLines.map((l) => l.trim());
+    const lines = body.split(/\r?\n/).map((l) => l.trim());
     const parts = [];
-    const assocAttributes = [];
-    const assocOperations = [];
-    const assocQueryOperations = [];
+    const attributes = [];
+    const operations = [];
+    const query_operations = [];
     let mode = "parts";
-
-    for (const line of lines) {
-      if (!line) continue;
-      const l = line.trim();
+    for (const l of lines) {
+      if (!l) continue;
       const lower = l.toLowerCase();
       if (lower === "attributes") {
         mode = "attributes";
@@ -187,20 +167,19 @@ function parseUseContent(content) {
         mode = "operations";
         continue;
       }
-
       if (mode === "parts") {
         const m = l.match(
           /([A-Za-z0-9_]+)\s*\[([^\]]+)\](?:\s+role\s+([A-Za-z0-9_]+))?/i
         );
         if (m) {
-          const part = {
+          const p = {
             class: m[1],
             multiplicity: m[2].trim(),
             role: m[3] || m[1].toLowerCase(),
           };
-          if (/\b(composition|composite)\b/i.test(l)) part.kind = "composition";
-          else if (/\b(aggregation)\b/i.test(l)) part.kind = "aggregation";
-          parts.push(part);
+          if (/\b(composition|composite)\b/i.test(l)) p.kind = "composition";
+          else if (/\b(aggregation)\b/i.test(l)) p.kind = "aggregation";
+          parts.push(p);
         } else {
           const m2 = l.match(/([A-Za-z0-9_]+)(?:\s+role\s+([A-Za-z0-9_]+))?/i);
           if (m2)
@@ -211,46 +190,151 @@ function parseUseContent(content) {
             });
         }
       } else if (mode === "attributes") {
-        const amatch = l.match(/^([a-zA-Z0-9_]+)\s*:\s*(.+)$/);
-        if (amatch)
-          assocAttributes.push({ name: amatch[1], type: amatch[2].trim() });
+        const amch = l.match(/^([A-Za-z0-9_]+)\s*:\s*(.+)$/);
+        if (amch) attributes.push({ name: amch[1], type: amch[2].trim() });
       } else if (mode === "operations") {
-        // allow inline '=' bodies in association operations too
         const om = l.match(
-          /^([a-zA-Z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/
+          /^([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/
         );
         if (om) {
-          const fullName = om[1];
+          const fulln = om[1];
           const sig = (om[2] || "").trim();
           const ret = om[3] ? om[3].trim() : null;
           const inline = om[4] !== undefined ? String(om[4]).trim() : null;
-          const opObj = { name: fullName, signature: sig, returnType: ret };
-          if (inline) opObj.body = inline;
-          const isQueryOp =
+          const op = { name: fulln, signature: sig, returnType: ret };
+          if (inline) op.body = inline;
+          const isQ =
             (!!inline && inline.length) ||
-            (opObj.body && /^\s*if\b/i.test(opObj.body));
-          if (isQueryOp) assocQueryOperations.push(opObj);
-          else assocOperations.push(opObj);
-        } else {
-          assocOperations.push({ raw: l });
-        }
+            (op.body && /^\s*if\b/i.test(op.body));
+          if (isQ) query_operations.push(op);
+          else operations.push(op);
+        } else operations.push({ raw: l });
+      }
+    }
+    const obj = { name, parts, type };
+    if (type === "associationclass") {
+      if (attributes.length) obj.attributes = attributes;
+      if (operations.length) obj.operations = operations;
+      if (query_operations.length) obj.query_operations = query_operations;
+    }
+    res.associations.push(obj);
+  }
+
+  // Constraints: find context blocks and standalone op specs with pre/post
+  try {
+    // find 'context' headers
+    const ctxHdrRe = /context\s+([^\r\n]+)/gim;
+    let mHdr;
+    while ((mHdr = ctxHdrRe.exec(content)) !== null) {
+      const header = mHdr[1].trim();
+      // determine the following block (lines until blank line or next context)
+      const lineEnd = content.indexOf("\n", mHdr.index);
+      const blockStart =
+        lineEnd >= 0 ? lineEnd + 1 : mHdr.index + mHdr[0].length;
+      // find next double newline or next 'context' occurrence
+      const nextBlank = content.indexOf("\n\n", blockStart);
+      const nextCtxRel = content.slice(blockStart).search(/\n\s*context\b/i);
+      let blockEnd = content.length;
+      if (nextBlank >= 0 && nextCtxRel >= 0)
+        blockEnd =
+          blockStart + Math.min(nextBlank - blockStart + 2, nextCtxRel);
+      else if (nextBlank >= 0) blockEnd = nextBlank + 2;
+      else if (nextCtxRel >= 0) blockEnd = blockStart + nextCtxRel;
+      const block = content.slice(blockStart, blockEnd).trim();
+
+      // header might include 'inv name:' (e.g. "BuyTicket inv name:")
+      const hdrInv = header.match(
+        /^(.*?)\s+inv\s+([A-Za-z0-9_]+)\s*:\s*(.*)$/i
+      );
+      if (hdrInv) {
+        const ctxName = hdrInv[1].trim();
+        const invName = hdrInv[2];
+        const invExpr = (hdrInv[3] || "").trim();
+        if (invExpr)
+          res.constraints.push({
+            context: ctxName,
+            type: "invariant",
+            name: invName,
+            expression: invExpr,
+            raw: `inv ${invName}: ${invExpr}`,
+          });
+        else if (block)
+          res.constraints.push({
+            context: ctxName,
+            type: "invariant",
+            name: invName,
+            expression: block,
+            raw: block,
+          });
+      }
+
+      // find inv lines in block
+      const invRe =
+        /inv\s+([A-Za-z0-9_]+)\s*:\s*([\s\S]*?)(?=(?:\r?\n)\s*inv\b|$)/gim;
+      let im2;
+      while ((im2 = invRe.exec(block)) !== null) {
+        const name = im2[1];
+        const expr = (im2[2] || "").trim();
+        res.constraints.push({
+          context: header.replace(/\s+inv\b[\s\S]*/i, "").trim(),
+          type: "invariant",
+          name,
+          expression: expr,
+          raw: im2[0].trim(),
+        });
+      }
+
+      // pre/post in block
+      const ppRe =
+        /(^|\n)\s*(pre|post)\s+([A-Za-z0-9_]+)\s*:\s*([\s\S]*?)(?=(?:\r?\n)\s*(pre|post)\b|$)/gim;
+      let ppm;
+      while ((ppm = ppRe.exec(block)) !== null) {
+        res.constraints.push({
+          context: header.replace(/\s+inv\b[\s\S]*/i, "").trim(),
+          type:
+            ppm[2].toLowerCase() === "pre" ? "precondition" : "postcondition",
+          name: ppm[3],
+          expression: (ppm[4] || "").trim(),
+          raw: ppm[0].trim(),
+        });
       }
     }
 
-    const assocObj = { name, parts, type };
-    if (type === "associationclass") {
-      if (assocAttributes.length) assocObj.attributes = assocAttributes;
-      if (assocOperations.length) assocObj.operations = assocOperations;
-      if (assocQueryOperations.length)
-        assocObj.query_operations = assocQueryOperations;
+    // standalone op signatures (without leading 'context') followed by indented pre/post
+    const opSigRe =
+      // eslint-disable-next-line no-useless-escape
+      /^([A-Za-z0-9_:\.]+::[A-Za-z0-9_]+\s*\([^\)]*\)\s*:\s*[A-Za-z0-9_]+)\s*$/gim;
+    let sgm;
+    while ((sgm = opSigRe.exec(content)) !== null) {
+      const sig = sgm[1].trim();
+      const start = sgm.index + sgm[0].length;
+      const rest = content.slice(start);
+      const fm = /^([ \t]+[^\r\n]+(?:\r?\n|$))+/m.exec(rest);
+      if (!fm) continue;
+      const block = fm[0];
+      const pp =
+        // eslint-disable-next-line max-len
+        /(?:^|\n)\s*(pre|post)\s+([A-Za-z0-9_]+)\s*:\s*([\s\S]*?)(?=(?:\r?\n)\s*(pre|post)\b|\r?\n\s*\r?\n|$)/gim;
+      let p2;
+      while ((p2 = pp.exec(block)) !== null) {
+        res.constraints.push({
+          context: sig,
+          type:
+            p2[1].toLowerCase() === "pre" ? "precondition" : "postcondition",
+          name: p2[2],
+          expression: (p2[3] || "").trim(),
+          raw: p2[0].trim(),
+        });
+      }
     }
-    res.associations.push(assocObj);
+  } catch (e) {
+    console.error("Error parsing constraints:", e);
   }
 
   return res;
 }
 
-// Attach extracted conditionals to parsed output
+// conditionals extraction
 function extractConditionals(content) {
   const found = [];
   if (!content || typeof content !== "string") return found;
@@ -280,25 +364,20 @@ function parseCliOutput(cliOut) {
   return parseUseContentWithConditionals(payload);
 }
 
-// Extract the first concise CLI error message from stderr/stdout
 function extractFirstCliError(stderrText, stdoutText) {
   const stderrPart = String(stderrText || "");
   const stdoutPart = String(stdoutText || "");
   const combined = (stderrPart + "\n" + stdoutPart).replace(/\r/g, "\n");
-
   let m = combined.match(
     /(?:line\s*)?\s*(\d+)\s*[:.,]\s*(\d+)\s*[:\s-]([^\n\r]*)/i
   );
   if (m) return `${m[1]}:${m[2]}: ${m[3].trim()}`;
-
   m = combined.match(/(?:line\s*)?(\d+):(\d+)[:\s]([^\n\r]*)/i);
   if (m) return `${m[1]}:${m[2]}: ${m[3].trim()}`;
-
   m = combined.match(/(no viable alternative[^\n\r]*)/i);
   if (m) return m[1].trim();
   m = combined.match(/(error[^\n\r]*)/i);
   if (m) return m[1].trim();
-
   return null;
 }
 
