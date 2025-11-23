@@ -15,8 +15,6 @@ import AttributeTypeSelect from './editor/AttributeTypeSelect';
 import ConstraintModal from './editor/ConstraintModal';
 import ChoicePopup from './editor/ChoicePopup';
 import AssociationModal from './editor/AssociationModal';
-import ConstraintList from './editor/ConstraintList';
-import ConstraintBox from './editor/ConstraintBox';
 import UmlEditorContext from '../../../contexts/UmlEditorContext';
 import ModelTreePane from './editor/ModelTreePane';
 import ExportModal from './ExportModal'; // Export modal component
@@ -34,7 +32,7 @@ export default function UMLEditor({ initialModel = null }) {
   const [enums, setEnums] = useState(starter.enums || []);
   const [associations, setAssociations] = useState(starter.associations || []);
   const [positions, setPositions] = useState({});
-  const { constraints, constraintDraft, setConstraintDraft, createConstraint, deleteConstraint } = useConstraints(
+  const { constraints, constraintDraft, setConstraintDraft, createConstraint } = useConstraints(
     starter.constraints || []
   );
   const [nextIndex, setNextIndex] = useState((starter.classes?.length || 0) + 1);
@@ -486,6 +484,11 @@ export default function UMLEditor({ initialModel = null }) {
   const [exportedText, setExportedText] = useState('');
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState(null);
+  const [selectedNode, setSelectedNode] = useState(null);
+
+  const handleTreeSelect = ({ key, payload } = {}) => {
+    setSelectedNode({ key, payload });
+  };
 
   const handleExport = async () => {
     setExportError(null);
@@ -531,6 +534,7 @@ export default function UMLEditor({ initialModel = null }) {
     editValue,
     setEditValue,
     deleteClass, // Pass deleteClass to context
+    selectedNode,
   };
 
   const handleUpdateNode = (key, text) => {
@@ -599,6 +603,25 @@ export default function UMLEditor({ initialModel = null }) {
         );
         return;
       }
+      if (key.startsWith('qop:')) {
+        const parts = key.split(':');
+        const className = parts[1];
+        const idx = parseInt(parts[2], 10);
+        if (!className) return;
+        setClasses((s) =>
+          s.map((c) => {
+            if (c.name !== className) return c;
+            const ops = Array.isArray(c.query_operations) ? [...c.query_operations] : [];
+            if (Number.isFinite(idx)) {
+              const existing = ops[idx] || {};
+              ops[idx] = { ...existing, ...(text || {}) };
+              return { ...c, query_operations: ops };
+            }
+            return c;
+          })
+        );
+        return;
+      }
     }
 
     // class:name -> store as _notes on the class
@@ -653,6 +676,7 @@ export default function UMLEditor({ initialModel = null }) {
             constraints={constraints}
             enumerations={enums}
             onUpdateNode={handleUpdateNode}
+            onSelect={handleTreeSelect}
           />
           <button
             className="export-button"
@@ -805,13 +829,6 @@ export default function UMLEditor({ initialModel = null }) {
                 onCreate={createConstraint}
               />
             )}
-
-            {/* Operation modal removed; operations managed in ModelTree pane */}
-
-            {/* Constraint list (side panel) */}
-            <ConstraintList constraints={constraints} onDelete={deleteConstraint} />
-            <ConstraintBox constraints={constraints} positions={positionsRef.current || {}} />
-            {/* model tree moved to left panel */}
           </div>
         </div>
 

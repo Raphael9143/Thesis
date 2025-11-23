@@ -24,6 +24,8 @@ export default function ModelTreePane({
 
   const toggleOpen = (key) => setOpenKeys((o) => ({ ...o, [key]: !o[key] }));
 
+  const prepostList = constraints.filter((c) => c.type === 'precondition' || c.type === 'postcondition');
+
   const handleSelect = (key, payload) => {
     setSelected({ key, payload });
     setEditing(false);
@@ -41,7 +43,7 @@ export default function ModelTreePane({
           const res = await serializeAssociation(payload);
           const text = res?.data?.data || res?.data || res;
           setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
-        } else if (key.startsWith('op:')) {
+        } else if (key.startsWith('op:') || key.startsWith('qop:')) {
           const res = await serializeOperation(payload);
           const text = res?.data?.data || res?.data || res;
           setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
@@ -69,7 +71,7 @@ export default function ModelTreePane({
         const res = await deserializeAssociation({ text: detailText });
         const payload = res?.data?.data || res?.data || res;
         if (payload) onUpdateNode && onUpdateNode(selected.key, payload);
-      } else if (selected.key.startsWith('op:')) {
+      } else if (selected.key.startsWith('op:') || selected.key.startsWith('qop:')) {
         // pass class context as available in payload when deserializing operation
         const cls = selected.payload && selected.payload.class;
         const body = { text: detailText, class: cls };
@@ -139,24 +141,34 @@ export default function ModelTreePane({
             title="Invariants"
             isOpen={!!openKeys['invariants']}
             onToggle={() => toggleOpen('invariants')}
-            count={constraints.length}
+            count={constraints.filter((c) => c.type === 'invariant').length}
           >
-            {constraints.map((c) => (
-              <TreeLeaf
-                key={c.id}
-                label={c.name || c.type || c.id}
-                onClick={() => handleSelect(`inv:${c.id}`, c)}
-                indent={12}
-              />
-            ))}
+            {constraints
+              .filter((c) => c.type === 'invariant')
+              .map((c) => (
+                <TreeLeaf
+                  key={c.id}
+                  label={c.name || c.type || c.id}
+                  onClick={() => handleSelect(`inv:${c.id}`, c)}
+                  indent={12}
+                />
+              ))}
           </TreeSection>
 
           <TreeSection
             title="Pre/Post Conditions"
             isOpen={!!openKeys['prepost']}
             onToggle={() => toggleOpen('prepost')}
+            count={prepostList.length}
           >
-            <div className="uml-tree-item leaf">(addable)</div>
+            {prepostList.map((c, i) => (
+              <TreeLeaf
+                key={`cond:${i}`}
+                label={c.name || c.id || 'condition'}
+                onClick={() => handleSelect(`cond:${i}`, c)}
+                indent={12}
+              />
+            ))}
           </TreeSection>
 
           <TreeSection
@@ -172,6 +184,24 @@ export default function ModelTreePane({
                   key={`${entry.c}:${idx}`}
                   label={`${entry.c}.${typeof entry.op === 'string' ? entry.op : entry.op.name || 'op'}`}
                   onClick={() => handleSelect(`op:${entry.c}:${idx}`, { class: entry.c, op: entry.op })}
+                  indent={12}
+                />
+              ))}
+          </TreeSection>
+
+          <TreeSection
+            title="Query Operations"
+            isOpen={!!openKeys['qops']}
+            onToggle={() => toggleOpen('qops')}
+            count={classes.flatMap((c) => c.query_operations || []).length}
+          >
+            {classes
+              .flatMap((c) => (c.query_operations || []).map((op, i) => ({ c: c.name, op, i })))
+              .map((entry, idx) => (
+                <TreeLeaf
+                  key={`qop:${entry.c}:${idx}`}
+                  label={`${entry.c}.${entry.op?.name || entry.op || 'qop'}`}
+                  onClick={() => handleSelect(`qop:${entry.c}:${idx}`, { class: entry.c, op: entry.op })}
                   indent={12}
                 />
               ))}
