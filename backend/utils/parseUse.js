@@ -75,14 +75,13 @@ function parseUseContent(content) {
       }
     }
 
-    // operations
-    const opMatch = block.match(/operations\s*([\s\S]*?)(?=\n\s*end\b)/im);
+    // operations - capture until a class-level 'end' at the start of a line
+    const opMatch = block.match(/operations\s*([\s\S]*?)(?=\n^end\b)/im);
     if (opMatch) {
       const rawLines = (opMatch[1] || "").split(/\r?\n/);
       const sigRe =
         /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
-      const reserved =
-        /^(?:if|let|collect|select|reject|forAll|exists|closure|then|else|endif)\b/i;
+      const reserved = /^(?:if|let|collect|select|reject|forAll|exists|closure|then|else|endif)\b/i;
       const starts = [];
       for (let i = 0; i < rawLines.length; i++) {
         const t = rawLines[i].trim();
@@ -115,6 +114,7 @@ function parseUseContent(content) {
         const signature = (m[2] || "").trim();
         const returnType = m[3] ? m[3].trim() : null;
         const inline = m[4] !== undefined ? String(m[4]).trim() : null;
+        const headerHasEq = /=/.test(header);
         let body = null;
         if (inline && inline.length) {
           body = inline;
@@ -128,8 +128,27 @@ function parseUseContent(content) {
           returnType,
         };
         if (body) opObj.body = body;
-        const isQuery =
-          (!!inline && inline.length) || (body && /^\s*if\b/i.test(body));
+        // Heuristic: treat as query if inline body present OR body looks like an
+        // expression (starts with '(' or 'if', contains OCL navigation '->', or
+        // is a short single-line expression). Avoid treating imperative blocks
+        // (begin/declare/insert/for/result assignments) as queries.
+        const looksLikeQuery = (b, inl) => {
+          if (inl) return true;
+          if (!b || !String(b).trim()) return false;
+          const s = String(b).trim();
+          // avoid imperative/multi-line bodies first
+          if (/^\s*begin\b/i.test(s)) return false;
+          if (/\bdeclare\b|\binsert\b|\bfor\b|:=|\bresult\b/i.test(s))
+            return false;
+          // now check for expression-like bodies
+          if (/^\s*if\b/i.test(s)) return true;
+          if (/^\s*\(/.test(s)) return true;
+          if (/->/.test(s)) return true;
+          // single-line (no newline) expressions are likely queries
+          if (!/\r?\n/.test(s)) return true;
+          return false;
+        };
+        const isQuery = looksLikeQuery(body, inline || headerHasEq);
         if (isQuery) cls.query_operations.push(opObj);
         else cls.operations.push(opObj);
       }
@@ -183,15 +202,9 @@ function parseUseContent(content) {
         } else {
           const m2 = l.match(/([A-Za-z0-9_]+)(?:\s+role\s+([A-Za-z0-9_]+))?/i);
           if (m2)
-            parts.push({
-              class: m2[1],
-              multiplicity: null,
-              role: m2[2] || m2[1].toLowerCase(),
-            });
+            parts.push({ class: m2[1], multiplicity: null, role: m2[2] || m2[1].toLowerCase() });
         }
-      } else if (mode === "attributes") {
-        const amch = l.match(/^([A-Za-z0-9_]+)\s*:\s*(.+)$/);
-        if (amch) attributes.push({ name: amch[1], type: amch[2].trim() });
+        // attributes handled in 'attributes' mode above
       } else if (mode === "operations") {
         const om = l.match(
           /^([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/
@@ -201,11 +214,26 @@ function parseUseContent(content) {
           const sig = (om[2] || "").trim();
           const ret = om[3] ? om[3].trim() : null;
           const inline = om[4] !== undefined ? String(om[4]).trim() : null;
+          const headerHasEq = /=/.test(l);
           const op = { name: fulln, signature: sig, returnType: ret };
           if (inline) op.body = inline;
-          const isQ =
-            (!!inline && inline.length) ||
-            (op.body && /^\s*if\b/i.test(op.body));
+          // Heuristic similar to class-level operations
+          const looksLikeQuery = (b, inl) => {
+            if (inl) return true;
+            if (!b || !String(b).trim()) return false;
+            const s = String(b).trim();
+            // avoid imperative/multi-line bodies first
+            if (/^\s*begin\b/i.test(s)) return false;
+            if (/\bdeclare\b|\binsert\b|\bfor\b|:=|\bresult\b/i.test(s))
+              return false;
+            // expression-like checks
+            if (/^\s*if\b/i.test(s)) return true;
+            if (/^\s*\(/.test(s)) return true;
+            if (/->/.test(s)) return true;
+            if (!/\r?\n/.test(s)) return true;
+            return false;
+          };
+          const isQ = looksLikeQuery(op.body, inline || headerHasEq);
           if (isQ) query_operations.push(op);
           else operations.push(op);
         } else operations.push({ raw: l });
