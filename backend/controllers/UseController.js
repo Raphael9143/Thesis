@@ -433,14 +433,60 @@ function buildClassText(cls) {
     }
   }
 
-  if (Array.isArray(cls.operations) && cls.operations.length) {
+  // Render imperative operations first (operations[]), then query operations
+  const hasOps = (Array.isArray(cls.operations) && cls.operations.length) ||
+    (Array.isArray(cls.query_operations) && cls.query_operations.length);
+  if (hasOps) {
     lines.push("  operations");
-    for (const op of cls.operations) {
-      if (typeof op === "string") {
-        lines.push("    " + op);
-      } else if (op && typeof op === "object") {
+
+    // plain operations: render bodies inline/block as appropriate
+    if (Array.isArray(cls.operations)) {
+      for (const op of cls.operations) {
+        if (typeof op === "string") {
+          lines.push("    " + op);
+          continue;
+        }
+        if (!op || typeof op !== "object") continue;
         const sig = op.signature !== undefined ? `(${op.signature})` : "()";
-        lines.push(`    ${op.name || "op"}${sig}`);
+        const ret = op.returnType ? ` : ${op.returnType}` : "";
+        const name = op.name || op.fullName || "op";
+        if (op.body && String(op.body).trim()) {
+          const b = String(op.body);
+          const trimmed = b.trim();
+          const isBlock = /\n/.test(b) || /^begin\b/i.test(trimmed);
+          if (isBlock) {
+            lines.push(`    ${name}${sig}${ret}`);
+            const bodyLines = b.split(/\r?\n/);
+            for (const l of bodyLines) lines.push("      " + l);
+          } else {
+            lines.push(`    ${name}${sig}${ret} = ${trimmed}`);
+          }
+        } else {
+          lines.push(`    ${name}${sig}${ret}`);
+        }
+      }
+    }
+
+    // query operations: render signature then '=' on same line and body indented on following lines
+    if (Array.isArray(cls.query_operations)) {
+      for (const op of cls.query_operations) {
+        if (typeof op === "string") {
+          lines.push("    " + op);
+          continue;
+        }
+        if (!op || typeof op !== "object") continue;
+        const sig = op.signature !== undefined ? `(${op.signature})` : "()";
+        const ret = op.returnType ? ` : ${op.returnType}` : "";
+        const name = op.name || op.fullName || "op";
+        if (op.body && String(op.body).trim()) {
+          const b = String(op.body);
+          const bodyLines = b.split(/\r?\n/);
+          // write signature with '=' then newline and indented body
+          lines.push(`    ${name}${sig}${ret} = `);
+          for (const l of bodyLines) lines.push("      " + l);
+        } else {
+          lines.push(`    ${name}${sig}${ret}`);
+        }
       }
     }
   }
@@ -1522,3 +1568,4 @@ module.exports.parseUseContent = parseUseContentWithConditionals;
 module.exports.parseAssociationText = parseAssociationText;
 module.exports.parseClassText = parseClassText;
 module.exports.buildUseText = buildUseText;
+module.exports.buildClassText = buildClassText;
