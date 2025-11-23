@@ -257,6 +257,20 @@ function buildUseText(modelJson) {
     typeof modelJson.raw_text === "string") {
     try {
       const raw = String(modelJson.raw_text || "");
+      // If the raw text contains a 'constraints' section, capture each top-level
+      // constraint (separated by blank lines) and preserve them as raw strings
+      // so the exporter can re-emit them verbatim.
+      const consMatch = raw.match(/(?:\r?\n|^)\s*constraints\s*([\s\S]*?)$/i);
+      if (consMatch && consMatch[1]) {
+        const block = String(consMatch[1] || "").trim();
+        const parts = block
+          .split(/\r?\n\s*\r?\n/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+        for (const p of parts) constraints.push(p);
+      }
+
+      // Also attempt to extract 'context' blocks (for structured invariants)
       const ctxRe = /context\s+([^\r\n]+)([\s\S]*?)(?=(?:\r?\n)\s*context\b|\r?\n\s*\r?\n|$)/gim;
       let m;
       while ((m = ctxRe.exec(raw)) !== null) {
@@ -649,6 +663,12 @@ const UseController = {
       // Fallback to parsing raw file content if CLI isn't available or didn't produce model
       if (!parsed || !parsed.model) {
         parsed = parseUseContentWithConditionals(content);
+        // keep original file text so downstream exporters can extract constraints
+        try {
+          parsed.raw_text = content;
+        } catch {
+          /* ignore */
+        }
       }
 
       // Ensure we always attach conditionals extracted from the raw content
@@ -730,6 +750,8 @@ const UseController = {
             try {
               parsed = parseUseContentWithConditionals(useText);
               parsed._parseSource = "text";
+              // attach the generated USE text so buildUseText can extract constraints
+              parsed.raw_text = useText;
             } catch (e) {
               parsed = { error: String(e && e.message ? e.message : e) };
             }
