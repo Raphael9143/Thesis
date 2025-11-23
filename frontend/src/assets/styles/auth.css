@@ -46,7 +46,7 @@
 }
 
 .auth-2col-left {
-  background-color: #028f76;
+  background-color: var(--btn-color);
   color: white;
   flex: 1;
   padding: 60px 40px;
@@ -77,7 +77,7 @@
 
 .logo-circle {
   background-color: white;
-  color: #028f76;
+  color: var(--btn-color);
   font-size: 48px;
   font-weight: 700;
   width: 90px;
@@ -131,13 +131,13 @@
 }
 
 .auth-line-input:focus {
-  border-color: #028f76;
+  border-color: var(--btn-color);
 }
 
 .auth-line-btn {
   width: 100%;
   margin-top: 16px;
-  background-color: #028f76;
+  background-color: var(--btn-color);
   color: white;
   border: none;
   padding: 12px;
@@ -159,7 +159,7 @@
 }
 
 .switch a {
-  color: #028f76;
+  color: var(--btn-color);
   text-decoration: none;
   font-weight: 600;
 }

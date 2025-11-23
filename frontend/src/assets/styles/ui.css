@@ -88,22 +88,22 @@
 
 /* Marketing-style buttons */
 .btn-primary {
-	background: #028f76;
+	background: var(--btn-color);
 	color: #fff;
 }
 
 .btn-primary:hover {
-	background: #027864;
+	background: var(--btn-hover);
 }
 
 .btn-signin {
 	background: transparent;
-	border: 1px solid #028f76;
-	color: #028f76;
+	border: 1px solid var(--btn-color);
+	color: var(--btn-color);
 }
 
 .btn-signin:hover {
-	background: #027864;
+	background: var(--btn-hover);
 	color: #fff;
 }
 
@@ -217,7 +217,7 @@
 
 .stat-box h3 {
 	font-size: 22px;
-	color: #028f76;
+	color: var(--btn-color);
 	margin-bottom: 5px
 }
 
