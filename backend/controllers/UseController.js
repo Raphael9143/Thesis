@@ -5,448 +5,122 @@ const { spawn } = require("child_process");
 // Import the parseAssociationText and parseClassText utility functions
 const parseAssociationText = require("../utils/parseAssociationText");
 const parseClassText = require("../utils/parseClassText");
+// central parse helpers
+const {
+  parseUseContent,
+  parseUseContentWithConditionals,
+  extractConditionals,
+  parseCliOutput,
+  extractFirstCliError,
+} = require("../utils/parseUse");
 
 // Path to the bundled USE CLI batch
 const USE_BIN = path.resolve(__dirname, "..", "use-7.5.0", "bin");
 const USE_BATCH = path.join(USE_BIN, "use.bat");
 
-function runUseCli(filePath, timeout = 5000) {
+function runUseCli(filePath, timeout = 20000) {
+  // Attempt to run the USE CLI and request 'info model' for the loaded file.
+  // Returns a promise resolving to { stdout, stderr, code } or rejects on fatal error.
   return new Promise((resolve, reject) => {
-    let proc = null;
-    const spawnUse = () => {
+    if (!filePath || typeof filePath !== "string")
+      return reject(new Error("filePath required"));
+
+    const trySpawn = (cmdStr, opts) => {
       try {
-        // Use shell to allow PATH lookup for `use` command
-        return spawn("use", [], { shell: true });
-      } catch (e) {
-        console.error("Error spawning USE CLI:", e);
-        return null;
-      }
-    };
-    const spawnBatch = () => {
-      if (!fs.existsSync(USE_BATCH)) return null;
-      try {
-        return spawn(USE_BATCH, [], { cwd: USE_BIN, shell: true });
-      } catch (e) {
-        console.error("Error spawning USE CLI batch:", e);
+        return spawn(cmdStr, { shell: true, ...opts });
+      } catch {
         return null;
       }
     };
 
-    proc = spawnUse() || spawnBatch();
+    // Build candidate commands. Prefer bundled batch if present (may accept file arg),
+    // otherwise spawn 'use' and pipe commands to its stdin.
+    const candidates = [];
+    if (fs.existsSync(USE_BATCH)) {
+      // call batch with the file as argument; some USE wrappers accept filename
+      candidates.push(`"${USE_BATCH}" "${filePath}"`);
+    }
+    // generic 'use' invocation (we will write commands to stdin)
+    candidates.push("use");
+
+    let proc = null;
+    for (const c of candidates) {
+      proc = trySpawn(c, { cwd: USE_BIN });
+      if (proc) break;
+    }
+
     if (!proc) return reject(new Error("USE CLI not found"));
 
     let out = "";
     let err = "";
+    let resolved = false;
+
     const timer = setTimeout(() => {
       try {
-        proc.kill();
+        if (proc && proc.kill) proc.kill();
       } catch (e) {
         console.error("Error killing USE CLI process:", e);
       }
-      reject(new Error("USE CLI timed out"));
+      if (!resolved) {
+        resolved = true;
+        reject(new Error("USE CLI timed out"));
+      }
     }, timeout);
 
     proc.stdout.on("data", (d) => {
-      out += d.toString();
+      try {
+        out += String(d || "");
+        // If we detect the model header in output, resolve early with collected output
+        if (!resolved && /(^|\n)\s*model\s+[A-Za-z0-9_]+/i.test(out)) {
+          resolved = true;
+          clearTimeout(timer);
+          // attempt to close process gracefully
+          try {
+            if (proc.stdin && !proc.stdin.destroyed) proc.stdin.end();
+          } catch (e) {
+            console.error("Error ending USE CLI stdin:", e);
+          }
+          resolve({ stdout: out, stderr: err, code: 0 });
+        }
+      } catch (e) {
+        console.error("Error processing USE CLI stdout:", e);
+      }
     });
     proc.stderr.on("data", (d) => {
-      err += d.toString();
+      err += String(d || "");
     });
 
     proc.on("close", (code) => {
+      if (resolved) return;
+      resolved = true;
       clearTimeout(timer);
-      try {
-        let finalOut = out;
-
-        // Prefer the segment that starts at a 'use>' prompt immediately
-        // followed by the model output (e.g. "use> model ..."). This
-        // looks for patterns like: "use> info model" or "use> model".
-        const useModelRe = /use>\s*(?:info\s+model\s*)?model\s+/i;
-        const m = finalOut.match(useModelRe);
-        if (m && m.index != null) {
-          // compute index of the 'model' keyword inside the match
-          const inner = m[0].match(/model\s+/i);
-          const modelOffsetInMatch = inner ? m[0].indexOf(inner[0]) : 0;
-          const modelIdx = m.index + modelOffsetInMatch;
-          finalOut = finalOut.slice(modelIdx);
-        } else {
-          // fallback: start at the first 'model' occurrence
-          const idx = finalOut.search(/\n?model\s+/i);
-          if (idx >= 0) finalOut = finalOut.slice(idx);
-        }
-
-        // Remove trailing 'use>' prompt if present at the end
-        finalOut = finalOut.replace(/\s*use>\s*$/i, "");
-
-        // Drop the last two lines of the returned log as requested
-        const lines = finalOut.split(/\r?\n/);
-        if (lines.length > 2) {
-          lines.splice(-2, 2);
-          finalOut = lines.join("\r\n");
-        }
-
-        return resolve({ code, stdout: finalOut, stderr: err });
-      } catch {
-        // on any error, return the raw output as a safe fallback
-        return resolve({ code, stdout: out, stderr: err });
-      }
+      resolve({ stdout: out, stderr: err, code });
+    });
+    proc.on("error", (e) => {
+      if (resolved) return;
+      resolved = true;
+      clearTimeout(timer);
+      reject(e);
     });
 
-    // Send commands to the USE process: open <file>, then info model, then quit
-    // Ensure file path quoting works across shells
-    const openCmd = `open "${filePath.replace(/"/g, '\\"')}"\n`;
-    proc.stdin.write(openCmd);
-    proc.stdin.write("info model\n");
-    proc.stdin.write("quit\n");
-    proc.stdin.end();
+    // Provide commands via stdin when possible to instruct USE to load the file and print info
+    try {
+      if (proc.stdin && !proc.stdin.destroyed) {
+        // send info model and quit; some USE builds accept the filename as arg and will print model
+        const cmds = [];
+        cmds.push("info model\n");
+        cmds.push("quit\n");
+        proc.stdin.write(cmds.join(""));
+        proc.stdin.end();
+      }
+    } catch (e) {
+      console.error("Error writing to USE CLI stdin:", e);
+    }
   });
 }
 
-function parseUseContent(content) {
-  const res = { model: null, enums: [], classes: [], associations: [] };
-
-  const modelMatch = content.match(/model\s+(\w+)/i);
-  if (modelMatch) res.model = modelMatch[1];
-
-  // Enums
-  const enumRe = /enum\s+(\w+)\s*\{([\s\S]*?)\}/gi;
-  let em;
-  while ((em = enumRe.exec(content)) !== null) {
-    const name = em[1];
-    const body = em[2];
-    const values = body
-      .split(",")
-      .map((v) => v.trim())
-      .filter(Boolean);
-    res.enums.push({ name, values });
-  }
-
-  // Classes (robust, multiline-aware)
-  const classBlockRe =
-    /^\s*(?:abstract\s+)?class\s+[A-Za-z0-9_][\s\S]*?^end\b/gim;
-  let cb;
-  while ((cb = classBlockRe.exec(content)) !== null) {
-    const block = cb[0];
-
-    // extract the header line (first line that contains 'class')
-    const headerMatch = block.match(/^\s*(abstract\s+)?class\s+([^\r\n]+)/im);
-    let name = "Unknown";
-    let isAbstract = false;
-    let superclasses = [];
-    if (headerMatch) {
-      isAbstract = Boolean(headerMatch[1]);
-      const afterClass = headerMatch[2].trim();
-      // afterClass may contain: "Name < Super1, Super2" or "Name"
-      const nameOnlyMatch = afterClass.match(/^([A-Za-z0-9_]+)/);
-      if (nameOnlyMatch) name = nameOnlyMatch[1];
-
-      const genMatch = afterClass.match(/<\s*([^\n]+)/);
-      if (genMatch) {
-        const list = genMatch[1]
-          .split(/,/) // multiple inheritance separated by commas
-          .map((s) => s.trim())
-          .filter(Boolean);
-        superclasses = list;
-      }
-    }
-
-    const cls = {
-      name,
-      isAbstract,
-      superclasses,
-      attributes: [],
-      operations: [],
-    };
-
-    // attributes block within class
-    const attrMatch = block.match(
-      /attributes\s*([\s\S]*?)(?:operations\b|\n\s*end\b)/im
-    );
-    if (attrMatch) {
-      const attrBody = attrMatch[1];
-      const lines = attrBody
-        .split(/\r?\n/)
-        .map((l) => l.trim())
-        .filter(Boolean);
-      for (const line of lines) {
-        // match 'name : Type' (capture the full type portion up to line end)
-        const m = line.match(/^([a-zA-Z0-9_]+)\s*:\s*([^\r\n]+)\s*$/);
-        if (m) cls.attributes.push({ name: m[1], type: m[2] });
-      }
-    }
-
-    // operations block within class -- capture multi-line bodies and query-style '=' bodies
-    const opMatch = block.match(/operations\s*([\s\S]*?)(?=\n\s*end\b)/im);
-    if (opMatch) {
-      const opBody = opMatch[1];
-      const rawLines = opBody.split(/\r?\n/);
-
-      // Identify indices that start a new operation (lines that look like a signature)
-      const sr = /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
-      const opStartIdx = [];
-      for (let i = 0; i < rawLines.length; i++) {
-        const t = rawLines[i].trim();
-        if (!t) continue;
-        if (sr.test(t)) opStartIdx.push(i);
-      }
-
-      // If none matched, try to treat every non-empty line as an operation line
-      if (!opStartIdx.length) {
-        for (let i = 0; i < rawLines.length; i++) {
-          if (rawLines[i].trim()) opStartIdx.push(i);
-        }
-      }
-
-      // Group lines into operation chunks
-      for (let k = 0; k < opStartIdx.length; k++) {
-        const start = opStartIdx[k];
-        const end =
-          k + 1 < opStartIdx.length ? opStartIdx[k + 1] : rawLines.length;
-        const chunkLines = rawLines.slice(start, end);
-        const header = (chunkLines[0] || "").trim();
-        const rest = chunkLines.slice(1).join("\n").trim();
-
-        const m = header.match(sr);
-        if (!m) {
-          // fallback: push raw line
-          cls.operations.push({ raw: chunkLines.join("\n").trim() });
-          continue;
-        }
-
-        // name may include Class::op, so split
-        let fullName = m[1] || "";
-        let classQualifier = null;
-        let opName = fullName;
-        if (fullName.includes("::")) {
-          const parts = fullName.split("::");
-          classQualifier = parts[0];
-          opName = parts.slice(1).join("::");
-        }
-
-        const signature = (m[2] || "").trim();
-        const returnType = m[3] ? m[3].trim() : null;
-        const inlineBody = m[4] !== undefined ? String(m[4]).trim() : null;
-
-        let body = null;
-        if (inlineBody && inlineBody.length) {
-          // entire body provided inline after '=' on same header line
-          body = inlineBody + (rest ? "\n" + rest : "");
-        } else if (rest) {
-          // If rest begins with 'begin', keep everything including begin/end
-          body = rest;
-        } else {
-          // no body
-          body = null;
-        }
-
-        const opObj = {
-          name: opName,
-          fullName: fullName,
-          class: classQualifier,
-          signature,
-          returnType,
-        };
-        if (body) opObj.body = body;
-        cls.operations.push(opObj);
-      }
-    }
-
-    res.classes.push(cls);
-  }
-
-  // Associations (supports 'association', 'aggregation', 'composition', 'associationclass')
-  const assocRe =
-    /(?:association|aggregation|composition|associationclass)\s+(\w+)\s+between([\s\S]*?)end/gi;
-  let am;
-  while ((am = assocRe.exec(content)) !== null) {
-    // Determine the keyword (type) by inspecting the matched substring
-    const fullMatch = am[0];
-    let type = "association";
-    const typeMatch = fullMatch.match(
-      /^(association|aggregation|composition)\s+/i
-    );
-    if (typeMatch) type = typeMatch[1].toLowerCase();
-    else {
-      const acMatch = fullMatch.match(/^associationclass\s+/i);
-      if (acMatch) type = "associationclass";
-    }
-    const name = am[1];
-    const body = am[2];
-    // split body into raw lines and walk by index to support multi-line operation bodies
-    const rawLines = body.split(/\r?\n/);
-    const lines = rawLines.map((l) => l.trim());
-    const parts = [];
-    const assocAttributes = [];
-    const assocOperations = [];
-    let mode = "parts"; // switch to 'attributes' or 'operations' when encountered
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      if (!line) continue;
-      const l = line.trim();
-      const lower = l.toLowerCase();
-      if (lower === "attributes") {
-        mode = "attributes";
-        continue;
-      }
-      if (lower === "operations") {
-        mode = "operations";
-        // gather rest of lines as the operations block
-        const opsLines = lines.slice(i + 1);
-        // group into operation chunks similar to class parsing
-        const sigRe =
-          /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
-        const opStartIdx = [];
-        for (let j = 0; j < opsLines.length; j++) {
-          if (!opsLines[j] || !opsLines[j].trim()) continue;
-          if (sigRe.test(opsLines[j].trim())) opStartIdx.push(j);
-        }
-        if (!opStartIdx.length) {
-          for (let j = 0; j < opsLines.length; j++) {
-            if (opsLines[j] && opsLines[j].trim()) opStartIdx.push(j);
-          }
-        }
-        for (let k = 0; k < opStartIdx.length; k++) {
-          const start = opStartIdx[k];
-          const end =
-            k + 1 < opStartIdx.length ? opStartIdx[k + 1] : opsLines.length;
-          const chunk = opsLines.slice(start, end);
-          const header = (chunk[0] || "").trim();
-          const rest = chunk.slice(1).join("\n").trim();
-          const m = header.match(sigRe);
-          if (!m) {
-            assocOperations.push({ raw: chunk.join("\n").trim() });
-            continue;
-          }
-          let fullName = m[1] || "";
-          let classQualifier = null;
-          let opName = fullName;
-          if (fullName.includes("::")) {
-            const partsQ = fullName.split("::");
-            classQualifier = partsQ[0];
-            opName = partsQ.slice(1).join("::");
-          }
-          const signature = (m[2] || "").trim();
-          const returnType = m[3] ? m[3].trim() : null;
-          const inlineBody = m[4] !== undefined ? String(m[4]).trim() : null;
-          let bodyText = null;
-          if (inlineBody && inlineBody.length)
-            bodyText = inlineBody + (rest ? "\n" + rest : "");
-          else if (rest) bodyText = rest;
-          const opObj = {
-            name: opName,
-            fullName,
-            class: classQualifier,
-            signature,
-            returnType,
-          };
-          if (bodyText) opObj.body = bodyText;
-          assocOperations.push(opObj);
-        }
-        // we've consumed the rest of the operations block; break out of the loop
-        break;
-      }
-
-      if (mode === "parts") {
-        const m = l.match(
-          /([A-Za-z0-9_]+)\s*\[([^\]]+)\](?:\s+role\s+([A-Za-z0-9_]+))?/i
-        );
-        if (m) {
-          const part = {
-            class: m[1],
-            multiplicity: m[2].trim(),
-            role: m[3] || m[1].toLowerCase(),
-          };
-          if (/\b(composition|composite)\b/i.test(l)) part.kind = "composition";
-          else if (/\b(aggregation)\b/i.test(l)) part.kind = "aggregation";
-          parts.push(part);
-        } else {
-          const m2 = l.match(/([A-Za-z0-9_]+)(?:\s+role\s+([A-Za-z0-9_]+))?/i);
-          if (m2) {
-            const pObj = {
-              class: m2[1],
-              multiplicity: null,
-              role: m2[2] || m2[1].toLowerCase(),
-            };
-            parts.push(pObj);
-          }
-        }
-      } else if (mode === "attributes") {
-        const amatch = l.match(/^([a-zA-Z0-9_]+)\s*:\s*(.+)$/);
-        if (amatch)
-          assocAttributes.push({ name: amatch[1], type: amatch[2].trim() });
-      }
-    }
-
-    const assocObj = { name, parts, type };
-    if (type === "associationclass") {
-      if (assocAttributes.length) assocObj.attributes = assocAttributes;
-      if (assocOperations.length) assocObj.operations = assocOperations;
-    }
-    res.associations.push(assocObj);
-  }
-
-  return res;
-}
-
-// Attach extracted conditionals to parsed output
-// so the helper `extractConditionals` is actually used.
-function parseUseContentWithConditionals(content) {
-  const parsed = parseUseContent(content);
-  parsed.conditionals = extractConditionals(content);
-  return parsed;
-}
-
-// Extract the first concise CLI error message from stderr/stdout and
-// normalize it to the form 'line:col: Message'. Returns null when none.
-function extractFirstCliError(stderrText, stdoutText) {
-  const stderrPart = String(stderrText || "");
-  const stdoutPart = String(stdoutText || "");
-  const combined = (stderrPart + "\n" + stdoutPart).replace(/\r/g, "\n");
-
-  // Prefer explicit column-style messages like `49:17: ...` or `line 49:17: ...`
-  let m = combined.match(
-    /(?:line\s*)?\s*(\d+)\s*[:.,]\s*(\d+)\s*[:\s-]([^\n\r]*)/i
-  );
-  if (m) return `${m[1]}:${m[2]}: ${m[3].trim()}`;
-
-  m = combined.match(/(?:line\s*)?(\d+):(\d+)[:\s]([^\n\r]*)/i);
-  if (m) return `${m[1]}:${m[2]}: ${m[3].trim()}`;
-
-  // fallback to other known messages
-  m = combined.match(/(no viable alternative[^\n\r]*)/i);
-  if (m) return m[1].trim();
-  m = combined.match(/(error[^\n\r]*)/i);
-  if (m) return m[1].trim();
-
-  return null;
-}
-
-// Extract simple if-then-else blocks from raw content
-// (returns array of {condition, then, else, raw})
-function extractConditionals(content) {
-  const found = [];
-  if (!content || typeof content !== "string") return found;
-  const ifRe =
-    /if\s*\(([^)]+)\)\s*then\s*([\s\S]*?)(?:\s*else\s*([\s\S]*?))?(?=\n\s*\n|\nend\b|$)/gim;
-  let im;
-  while ((im = ifRe.exec(content)) !== null) {
-    found.push({
-      condition: im[1].trim(),
-      then: im[2].trim(),
-      else: im[3] ? im[3].trim() : null,
-      raw: im[0].trim(),
-    });
-  }
-  return found;
-}
-
-function parseCliOutput(cliOut) {
-  const idx = cliOut.search(/\n?model\s+/i);
-  const payload = idx >= 0 ? cliOut.slice(idx) : cliOut;
-  // Reuse parseUseContent on the cleaned payload
-  return parseUseContentWithConditionals(payload);
-}
+// parseUseContentWithConditionals, extractFirstCliError, extractConditionals,
+// and parseCliOutput are provided by ../utils/parseUse.js and are imported above.
 
 // Parse a single operation line like `deposit(amount : Real) : Void`
 function parseOperationLine(line) {
@@ -503,68 +177,23 @@ function buildUseText(modelJson) {
       if (Array.isArray(cls.attributes) && cls.attributes.length) {
         lines.push("  attributes");
         for (const a of cls.attributes) {
-          const t = a.type ? ` : ${a.type}` : "";
-          lines.push(`    ${a.name || "unnamed"}${t}`);
+          if (typeof a === "string") {
+            lines.push("    " + a);
+          } else if (a && typeof a === "object") {
+            const t = a.type ? ` : ${a.type}` : "";
+            lines.push(`    ${a.name || "unnamed"}${t}`);
+          }
         }
       }
 
       if (Array.isArray(cls.operations) && cls.operations.length) {
         lines.push("  operations");
         for (const op of cls.operations) {
-          const sig = op.signature !== undefined ? `(${op.signature})` : "()";
-          lines.push(`    ${op.name || "op"}${sig}`);
-        }
-      }
-
-      lines.push("end");
-      lines.push("");
-    }
-  }
-
-  // Associations
-  // Associations
-  if (Array.isArray(modelJson.associations)) {
-    for (const assoc of modelJson.associations) {
-      const type = assoc.type || "association";
-      const keyword =
-        type === "aggregation"
-          ? "aggregation"
-          : type === "composition"
-            ? "composition"
-            : type === "associationclass"
-              ? "associationclass"
-              : "association";
-
-      lines.push(`${keyword} ${assoc.name || "Assoc"} between`);
-
-      if (Array.isArray(assoc.parts)) {
-        for (const p of assoc.parts) {
-          const mult = p.multiplicity ? `[${p.multiplicity}]` : "";
-          const role = p.role ? ` role ${p.role}` : "";
-          lines.push(`  ${p.class || "Unnamed"} ${mult}${role}`);
-        }
-      }
-
-      // associationclass can have attributes and operations inside
-      if (type === "associationclass") {
-        if (Array.isArray(assoc.attributes) && assoc.attributes.length) {
-          lines.push("  attributes");
-          for (const a of assoc.attributes) {
-            const t = a.type ? ` : ${a.type}` : "";
-            lines.push(`    ${a.name || "unnamed"}${t}`);
-          }
-        }
-
-        if (Array.isArray(assoc.operations) && assoc.operations.length) {
-          lines.push("  operations");
-          for (const op of assoc.operations) {
-            if (op.signature !== undefined) {
-              const sig = `(${op.signature})`;
-              const ret = op.returnType ? ` : ${op.returnType}` : "";
-              lines.push(`    ${op.name || "op"}${sig}${ret}`);
-            } else if (op.raw) {
-              lines.push(`    ${op.raw}`);
-            }
+          if (typeof op === "string") {
+            lines.push("    " + op);
+          } else if (op && typeof op === "object") {
+            const sig = op.signature !== undefined ? `(${op.signature})` : "()";
+            lines.push(`    ${op.name || "op"}${sig}`);
           }
         }
       }
@@ -574,61 +203,6 @@ function buildUseText(modelJson) {
     }
   }
 
-  // Constraints (simple pass-through if provided as array of strings)
-  if (Array.isArray(modelJson.constraints) && modelJson.constraints.length) {
-    lines.push("constraints");
-    for (const c of modelJson.constraints) {
-      if (typeof c === "string") lines.push(c);
-      else if (c && c.raw) lines.push(c.raw);
-      else if (c && c.expression) lines.push(c.expression);
-    }
-    lines.push("");
-  }
-  return lines.join("\n");
-}
-
-/**
- * Build a single class `.use` text from a class JSON object.
- * Expected shape: { name, isAbstract, superclasses, attributes, operations }
- */
-function buildClassText(cls) {
-  if (!cls || typeof cls !== "object") return "";
-  const lines = [];
-  const parts = [];
-  if (cls.isAbstract) parts.push("abstract");
-  let header = `class ${cls.name || "Unnamed"}`;
-  if (Array.isArray(cls.superclasses) && cls.superclasses.length) {
-    header += ` < ${cls.superclasses.join(", ")}`;
-  }
-  if (parts.length) header = parts.join(" ") + " " + header;
-  lines.push(header);
-
-  if (Array.isArray(cls.attributes) && cls.attributes.length) {
-    lines.push("  attributes");
-    for (const a of cls.attributes) {
-      // accept {name,type} or string like 'x : Type'
-      if (typeof a === "string") {
-        lines.push("    " + a);
-      } else if (a && typeof a === "object") {
-        const t = a.type ? ` : ${a.type}` : "";
-        lines.push(`    ${a.name || "unnamed"}${t}`);
-      }
-    }
-  }
-
-  if (Array.isArray(cls.operations) && cls.operations.length) {
-    lines.push("  operations");
-    for (const op of cls.operations) {
-      if (typeof op === "string") {
-        lines.push("    " + op);
-      } else if (op && typeof op === "object") {
-        const sig = op.signature !== undefined ? `(${op.signature})` : "()";
-        lines.push(`    ${op.name || "op"}${sig}`);
-      }
-    }
-  }
-
-  lines.push("end");
   return lines.join("\n");
 }
 
@@ -656,6 +230,46 @@ function buildAssociationText(assoc) {
       const mult = part.multiplicity ? `[${part.multiplicity}]` : "";
       const role = part.role ? ` role ${part.role}` : "";
       lines.push(`  ${part.class || "Unnamed"} ${mult}${role}`);
+    }
+  }
+
+  lines.push("end");
+  return lines.join("\n");
+}
+
+function buildClassText(cls) {
+  if (!cls || typeof cls !== "object") return "";
+  const lines = [];
+  const parts = [];
+  if (cls.isAbstract) parts.push("abstract");
+  let header = `class ${cls.name || "Unnamed"}`;
+  if (Array.isArray(cls.superclasses) && cls.superclasses.length) {
+    header += ` < ${cls.superclasses.join(", ")}`;
+  }
+  if (parts.length) header = parts.join(" ") + " " + header;
+  lines.push(header);
+
+  if (Array.isArray(cls.attributes) && cls.attributes.length) {
+    lines.push("  attributes");
+    for (const a of cls.attributes) {
+      if (typeof a === "string") {
+        lines.push("    " + a);
+      } else if (a && typeof a === "object") {
+        const t = a.type ? ` : ${a.type}` : "";
+        lines.push(`    ${a.name || "unnamed"}${t}`);
+      }
+    }
+  }
+
+  if (Array.isArray(cls.operations) && cls.operations.length) {
+    lines.push("  operations");
+    for (const op of cls.operations) {
+      if (typeof op === "string") {
+        lines.push("    " + op);
+      } else if (op && typeof op === "object") {
+        const sig = op.signature !== undefined ? `(${op.signature})` : "()";
+        lines.push(`    ${op.name || "op"}${sig}`);
+      }
     }
   }
 
@@ -827,7 +441,7 @@ const UseController = {
       // Run USE CLI to validate and inspect the model (best-effort)
       let cliResult = null;
       try {
-        cliResult = await runUseCli(filePath, 8000);
+        cliResult = await runUseCli(filePath, 20000);
       } catch (err) {
         cliResult = { error: err.message };
       }
@@ -915,8 +529,20 @@ const UseController = {
         return res
           .status(400)
           .json({ success: false, message: "JSON UML body required" });
-
       const useText = buildUseText(json);
+      const embedParse =
+        (req.query && String(req.query.embedParse).toLowerCase() === "true") ||
+        (req.body && req.body.embedParse === true);
+
+      if (embedParse) {
+        let parsed = null;
+        try {
+          parsed = parseUseContentWithConditionals(useText);
+        } catch (e) {
+          parsed = { error: String(e && e.message ? e.message : e) };
+        }
+        return res.json({ success: true, useText, parsed });
+      }
       const modelName = (json.model || json.name || "model").replace(
         /[^A-Za-z0-9_-]/g,
         "_"
@@ -936,7 +562,7 @@ const UseController = {
         fs.writeFileSync(tmpPath, useText, "utf8");
         let cliRes = null;
         try {
-          cliRes = await runUseCli(tmpPath, 8000);
+          cliRes = await runUseCli(tmpPath, 20000);
         } catch (e) {
           try {
             fs.unlinkSync(tmpPath);
@@ -1163,7 +789,7 @@ const UseController = {
       // run CLI
       let cliResult = null;
       try {
-        cliResult = await runUseCli(filePath, 8000);
+        cliResult = await runUseCli(filePath, 20000);
       } catch (e) {
         cliResult = { error: e.message };
       }
@@ -1422,12 +1048,11 @@ const UseController = {
           // find current index in lines array (we're in a for..of, so rebuild index)
           const startIdx = lines.indexOf(line);
           const opsLines = lines.slice(startIdx + 1);
-          const sigRe =
-            /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
+          const sr = /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
           const opStartIdx = [];
           for (let j = 0; j < opsLines.length; j++) {
             if (!opsLines[j] || !opsLines[j].trim()) continue;
-            if (sigRe.test(opsLines[j].trim())) opStartIdx.push(j);
+            if (sr.test(opsLines[j].trim())) opStartIdx.push(j);
           }
           if (!opStartIdx.length) {
             for (let j = 0; j < opsLines.length; j++) {
@@ -1441,7 +1066,7 @@ const UseController = {
             const chunk = opsLines.slice(s, e);
             const header = (chunk[0] || "").trim();
             const rest = chunk.slice(1).join("\n").trim();
-            const m = header.match(sigRe);
+            const m = header.match(sr);
             if (!m) {
               cls.operations.push({ raw: chunk.join("\n").trim() });
               continue;
@@ -1458,9 +1083,12 @@ const UseController = {
             const returnType = m[3] ? m[3].trim() : null;
             const inlineBody = m[4] !== undefined ? String(m[4]).trim() : null;
             let bodyText = null;
-            if (inlineBody && inlineBody.length)
-              bodyText = inlineBody + (rest ? "\n" + rest : "");
-            else if (rest) bodyText = rest;
+            if (inlineBody && inlineBody.length) {
+              bodyText = inlineBody;
+              if (rest) bodyText += "\n" + rest;
+            } else if (rest) {
+              bodyText = rest;
+            }
             const opObj = {
               name: opName,
               fullName,
@@ -1500,7 +1128,8 @@ const UseController = {
     const assoc = { name: "", type: "association", parts: [] };
 
     let mode = "header";
-    for (const line of lines) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
       if (!line) continue;
 
       if (mode === "header") {
@@ -1518,6 +1147,71 @@ const UseController = {
             multiplicity: match[2] || null,
             role: match[3] || null,
           });
+        } else if (/^attributes$/i.test(line)) {
+          mode = "attributes";
+        } else if (/^operations$/i.test(line)) {
+          mode = "operations";
+          // gather operations block from remaining lines
+          const opsLines = lines.slice(i + 1);
+          const sr = /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
+          const opStartIdx = [];
+          for (let j = 0; j < opsLines.length; j++) {
+            if (!opsLines[j] || !opsLines[j].trim()) continue;
+            if (sr.test(opsLines[j].trim())) opStartIdx.push(j);
+          }
+          if (!opStartIdx.length) {
+            for (let j = 0; j < opsLines.length; j++) {
+              if (opsLines[j] && opsLines[j].trim()) opStartIdx.push(j);
+            }
+          }
+          for (let k = 0; k < opStartIdx.length; k++) {
+            const s = opStartIdx[k];
+            const e = k + 1 < opStartIdx.length ? opStartIdx[k + 1] : opsLines.length;
+            const chunk = opsLines.slice(s, e);
+            const header = (chunk[0] || "").trim();
+            const rest = chunk.slice(1).join("\n").trim();
+            const m = header.match(sr);
+            if (!m) {
+              assoc.operations = assoc.operations || [];
+              assoc.operations.push({ raw: chunk.join("\n").trim() });
+              continue;
+            }
+            let fullName = m[1] || "";
+            let classQualifier = null;
+            let opName = fullName;
+            if (fullName.includes("::")) {
+              const partsQ = fullName.split("::");
+              classQualifier = partsQ[0];
+              opName = partsQ.slice(1).join("::");
+            }
+            const signature = (m[2] || "").trim();
+            const returnType = m[3] ? m[3].trim() : null;
+            const inlineBody = m[4] !== undefined ? String(m[4]).trim() : null;
+            let bodyText = null;
+            if (inlineBody && inlineBody.length) {
+              bodyText = inlineBody;
+              if (rest) bodyText += "\n" + rest;
+            } else if (rest) {
+              bodyText = rest;
+            }
+            assoc.operations = assoc.operations || [];
+            const opObj = {
+              name: opName,
+              fullName,
+              class: classQualifier,
+              signature,
+              returnType,
+            };
+            if (bodyText) opObj.body = bodyText;
+            assoc.operations.push(opObj);
+          }
+          break;
+        }
+      } else if (mode === "attributes") {
+        const amatch = line.match(/^([a-zA-Z0-9_]+)\s*:\s*(.+)$/);
+        if (amatch) {
+          assoc.attributes = assoc.attributes || [];
+          assoc.attributes.push({ name: amatch[1], type: amatch[2].trim() });
         }
       }
     }
