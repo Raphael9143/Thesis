@@ -3,6 +3,8 @@
 function parseUseContent(content) {
   const res = { model: null, enums: [], classes: [], associations: [] };
 
+  if (!content || typeof content !== "string") return res;
+
   const modelMatch = content.match(/model\s+(\w+)/i);
   if (modelMatch) res.model = modelMatch[1];
 
@@ -11,7 +13,7 @@ function parseUseContent(content) {
   let em;
   while ((em = enumRe.exec(content)) !== null) {
     const name = em[1];
-    const body = em[2];
+    const body = em[2] || "";
     const values = body
       .split(",")
       .map((v) => v.trim())
@@ -26,7 +28,7 @@ function parseUseContent(content) {
   while ((cb = classBlockRe.exec(content)) !== null) {
     const block = cb[0];
 
-    // extract the header line (first line that contains 'class')
+    // header
     const headerMatch = block.match(/^\s*(abstract\s+)?class\s+([^\r\n]+)/im);
     let name = "Unknown";
     let isAbstract = false;
@@ -36,14 +38,12 @@ function parseUseContent(content) {
       const afterClass = headerMatch[2].trim();
       const nameOnlyMatch = afterClass.match(/^([A-Za-z0-9_]+)/);
       if (nameOnlyMatch) name = nameOnlyMatch[1];
-
       const genMatch = afterClass.match(/<\s*([^\n]+)/);
       if (genMatch) {
-        const list = genMatch[1]
+        superclasses = genMatch[1]
           .split(/,/) // multiple inheritance separated by commas
           .map((s) => s.trim())
           .filter(Boolean);
-        superclasses = list;
       }
     }
 
@@ -53,14 +53,16 @@ function parseUseContent(content) {
       superclasses,
       attributes: [],
       operations: [],
+      // query-style operations (have bodies or '=' inline bodies)
+      query_operations: [],
     };
 
-    // attributes block within class
+    // attributes
     const attrMatch = block.match(
       /attributes\s*([\s\S]*?)(?:operations\b|\n\s*end\b)/im
     );
     if (attrMatch) {
-      const attrBody = attrMatch[1];
+      const attrBody = attrMatch[1] || "";
       const lines = attrBody
         .split(/\r?\n/)
         .map((l) => l.trim())
@@ -71,30 +73,29 @@ function parseUseContent(content) {
       }
     }
 
-    // operations block within class -- capture multi-line bodies and query-style '=' bodies
+    // operations: allow multi-line bodies; avoid treating OCL keywords
     const opMatch = block.match(/operations\s*([\s\S]*?)(?=\n\s*end\b)/im);
     if (opMatch) {
-      const opBody = opMatch[1];
+      const opBody = opMatch[1] || "";
       const rawLines = opBody.split(/\r?\n/);
 
-      // Identify indices that start a new operation (lines that look like a signature)
       const sr =
         /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
+      const headerReserved =
+        /^(?:if|then|else|endif|let|in|collect|select|reject|forAll|exists|closure)\b/i;
+
       const opStartIdx = [];
       for (let i = 0; i < rawLines.length; i++) {
         const t = rawLines[i].trim();
         if (!t) continue;
-        if (sr.test(t)) opStartIdx.push(i);
+        if (sr.test(t) && !headerReserved.test(t)) opStartIdx.push(i);
       }
-
-      // If none matched, try to treat every non-empty line as an operation line
       if (!opStartIdx.length) {
         for (let i = 0; i < rawLines.length; i++) {
           if (rawLines[i].trim()) opStartIdx.push(i);
         }
       }
 
-      // Group lines into operation chunks
       for (let k = 0; k < opStartIdx.length; k++) {
         const start = opStartIdx[k];
         const end =
@@ -105,12 +106,10 @@ function parseUseContent(content) {
 
         const m = header.match(sr);
         if (!m) {
-          // fallback: push raw line
           cls.operations.push({ raw: chunkLines.join("\n").trim() });
           continue;
         }
 
-        // name may include Class::op, so split
         let fullName = m[1] || "";
         let classQualifier = null;
         let opName = fullName;
@@ -130,26 +129,29 @@ function parseUseContent(content) {
           if (rest) body += "\n" + rest;
         } else if (rest) {
           body = rest;
-        } else {
-          body = null;
         }
 
         const opObj = {
           name: opName,
-          fullName: fullName,
+          fullName,
           class: classQualifier,
           signature,
           returnType,
         };
         if (body) opObj.body = body;
-        cls.operations.push(opObj);
+
+        const isQueryOp =
+          (!!inlineBody && inlineBody.length) ||
+          (body && /^\s*if\b/i.test(body));
+        if (isQueryOp) cls.query_operations.push(opObj);
+        else cls.operations.push(opObj);
       }
     }
 
     res.classes.push(cls);
   }
 
-  // Associations (supports 'association', 'aggregation', 'composition', 'associationclass')
+  // Associations
   const assocRe =
     /(?:association|aggregation|composition|associationclass)\s+(\w+)\s+between([\s\S]*?)end/gi;
   let am;
@@ -160,20 +162,19 @@ function parseUseContent(content) {
       /^(association|aggregation|composition)\s+/i
     );
     if (typeMatch) type = typeMatch[1].toLowerCase();
-    else {
-      const acMatch = fullMatch.match(/^associationclass\s+/i);
-      if (acMatch) type = "associationclass";
-    }
+    else if (fullMatch.match(/^associationclass\s+/i))
+      type = "associationclass";
     const name = am[1];
-    const body = am[2];
+    const body = am[2] || "";
 
-    // split body into raw lines but keep order
     const rawLines = body.split(/\r?\n/);
     const lines = rawLines.map((l) => l.trim());
     const parts = [];
     const assocAttributes = [];
     const assocOperations = [];
-    let mode = "parts"; // switch to 'attributes' or 'operations' when encountered
+    const assocQueryOperations = [];
+    let mode = "parts";
+
     for (const line of lines) {
       if (!line) continue;
       const l = line.trim();
@@ -202,27 +203,37 @@ function parseUseContent(content) {
           parts.push(part);
         } else {
           const m2 = l.match(/([A-Za-z0-9_]+)(?:\s+role\s+([A-Za-z0-9_]+))?/i);
-          if (m2) {
+          if (m2)
             parts.push({
               class: m2[1],
               multiplicity: null,
               role: m2[2] || m2[1].toLowerCase(),
             });
-          }
         }
       } else if (mode === "attributes") {
         const amatch = l.match(/^([a-zA-Z0-9_]+)\s*:\s*(.+)$/);
         if (amatch)
           assocAttributes.push({ name: amatch[1], type: amatch[2].trim() });
       } else if (mode === "operations") {
-        const om = l.match(/^([a-zA-Z0-9_]+)\s*\(([^)]*)\)\s*(?::\s*(.+))?$/);
-        if (om)
-          assocOperations.push({
-            name: om[1],
-            signature: om[2].trim(),
-            returnType: om[3] ? om[3].trim() : null,
-          });
-        else assocOperations.push({ raw: l });
+        // allow inline '=' bodies in association operations too
+        const om = l.match(
+          /^([a-zA-Z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/
+        );
+        if (om) {
+          const fullName = om[1];
+          const sig = (om[2] || "").trim();
+          const ret = om[3] ? om[3].trim() : null;
+          const inline = om[4] !== undefined ? String(om[4]).trim() : null;
+          const opObj = { name: fullName, signature: sig, returnType: ret };
+          if (inline) opObj.body = inline;
+          const isQueryOp =
+            (!!inline && inline.length) ||
+            (opObj.body && /^\s*if\b/i.test(opObj.body));
+          if (isQueryOp) assocQueryOperations.push(opObj);
+          else assocOperations.push(opObj);
+        } else {
+          assocOperations.push({ raw: l });
+        }
       }
     }
 
@@ -230,6 +241,8 @@ function parseUseContent(content) {
     if (type === "associationclass") {
       if (assocAttributes.length) assocObj.attributes = assocAttributes;
       if (assocOperations.length) assocObj.operations = assocOperations;
+      if (assocQueryOperations.length)
+        assocObj.query_operations = assocQueryOperations;
     }
     res.associations.push(assocObj);
   }
