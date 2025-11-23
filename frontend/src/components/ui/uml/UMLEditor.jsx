@@ -31,6 +31,7 @@ export default function UMLEditor({ initialModel = null }) {
   const [classes, setClasses] = useState(starter.classes || []);
   const [enums, setEnums] = useState(starter.enums || []);
   const [associations, setAssociations] = useState(starter.associations || []);
+  const [conditionals, setConditionals] = useState(starter.conditionals || []);
   const [positions, setPositions] = useState({});
   const { constraints, constraintDraft, setConstraintDraft, createConstraint } = useConstraints(
     starter.constraints || []
@@ -73,6 +74,7 @@ export default function UMLEditor({ initialModel = null }) {
     setClasses(modelToUse.classes || []);
     setEnums(modelToUse.enums || []);
     setAssociations(modelToUse.associations || []);
+    setConditionals(modelToUse.conditionals || []);
   }, [initialModel, location?.state?.model]);
 
   // If we don't have a model but a ?file= param exists, parse it directly
@@ -449,6 +451,43 @@ export default function UMLEditor({ initialModel = null }) {
       if (typeof a === 'object') return { name: a.name || '', type: a.type || '' };
       return { name: String(a) };
     };
+
+    const parseConditionalRaw = (raw) => {
+      if (!raw || typeof raw !== 'string') return null;
+      // try to extract if (cond) then <then> else <else> endif
+      const m = raw.match(/^\s*if\s*\(([\s\S]*?)\)\s*then\s*([\s\S]*?)\s*else\s*([\s\S]*?)\s*endif\s*$/i);
+      if (m) {
+        return { condition: m[1].trim(), then: m[2].trim(), else: m[3].trim(), raw: raw.trim() };
+      }
+      return { condition: '', then: '', else: '', raw: raw.trim() };
+    };
+
+    const normalizeConditional = (c) => {
+      if (!c) return null;
+      if (typeof c === 'string') return parseConditionalRaw(c);
+      // already shaped object
+      if (c.condition && (c.then !== undefined || c['then'])) {
+        return { condition: c.condition, then: c.then || '', else: c.else || '', raw: c.raw || '' };
+      }
+      if (c.raw) return parseConditionalRaw(c.raw);
+      // fallback - try to stringify
+      return { condition: c.condition || '', then: c.then || '', else: c.else || '', raw: JSON.stringify(c) };
+    };
+
+    const normalizeConstraint = (c) => {
+      if (!c) return null;
+      // preserve original API shape: prefer `context` and `raw` when available
+      const context = c.context ?? c.ownerClass ?? c.contextName ?? null;
+      const raw = c.raw ?? c.expression ?? '';
+      return {
+        context,
+        type: c.type || c.kind || '',
+        name: c.name || '',
+        expression: c.expression || raw || '',
+        raw,
+      };
+    };
+
     return {
       model: starter.model || 'Model',
       enums: enums.map((e) => ({
@@ -461,6 +500,7 @@ export default function UMLEditor({ initialModel = null }) {
         name: c.name,
         attributes: Array.isArray(c.attributes) ? c.attributes.map(normalizeAttr).filter(Boolean) : [],
         operations: c.operations || [],
+        query_operations: c.query_operations || [],
         superclasses: c.superclasses || [],
         isAbstract: !!c.isAbstract,
       })),
@@ -470,13 +510,8 @@ export default function UMLEditor({ initialModel = null }) {
         type: a.type || 'association',
         attributes: Array.isArray(a.attributes) ? a.attributes.map(normalizeAttr).filter(Boolean) : [],
       })),
-      constraints: (constraints || []).map((c) => ({
-        id: c.id,
-        type: c.type,
-        name: c.name || '',
-        expression: c.expression || '',
-        ownerClass: c.ownerClass || null,
-      })),
+      constraints: (constraints || []).map(normalizeConstraint).filter(Boolean),
+      conditionals: Array.isArray(conditionals) ? conditionals.map(normalizeConditional).filter(Boolean) : [],
     };
   };
 
@@ -495,6 +530,7 @@ export default function UMLEditor({ initialModel = null }) {
     setExporting(true);
     try {
       const modelJson = buildModelJson();
+      console.log(JSON.stringify(modelJson));
       const res = await userAPI.convertUmlJson(modelJson); // backend expects raw model JSON body
       const data = res?.data ?? res;
       // Accept either plain string or structured object
