@@ -162,6 +162,9 @@ function buildUseText(modelJson) {
     }
   }
 
+  // Associations
+  // NOTE: associations will be appended after classes to keep classes grouped first
+
   // Classes
   if (Array.isArray(modelJson.classes)) {
     for (const cls of modelJson.classes) {
@@ -186,20 +189,175 @@ function buildUseText(modelJson) {
         }
       }
 
-      if (Array.isArray(cls.operations) && cls.operations.length) {
+      // combine plain operations and query_operations, but preserve body information
+      const allOps = [];
+      if (Array.isArray(cls.operations)) allOps.push(...cls.operations);
+      if (Array.isArray(cls.query_operations)) allOps.push(...cls.query_operations);
+      if (allOps.length) {
         lines.push("  operations");
-        for (const op of cls.operations) {
+        for (const op of allOps) {
           if (typeof op === "string") {
             lines.push("    " + op);
-          } else if (op && typeof op === "object") {
-            const sig = op.signature !== undefined ? `(${op.signature})` : "()";
-            lines.push(`    ${op.name || "op"}${sig}`);
+            continue;
+          }
+          if (!op || typeof op !== "object") continue;
+
+          const sig = op.signature !== undefined ? `(${op.signature})` : "()";
+          const ret = op.returnType ? ` : ${op.returnType}` : "";
+          const name = op.name || op.fullName || "op";
+
+          if (op.body && String(op.body).trim()) {
+            const b = String(op.body);
+            const trimmed = b.trim();
+            const isBlock = /\n/.test(b) || /^begin\b/i.test(trimmed);
+            if (isBlock) {
+              // multi-line block: write signature line then indent body lines
+              lines.push(`    ${name}${sig}${ret}`);
+              const bodyLines = b.split(/\r?\n/);
+              for (const l of bodyLines) {
+                lines.push("      " + l);
+              }
+            } else {
+              // single-line expression: use inline '='
+              lines.push(`    ${name}${sig}${ret} = ${trimmed}`);
+            }
+          } else {
+            // no body
+            lines.push(`    ${name}${sig}${ret}`);
           }
         }
       }
 
       lines.push("end");
       lines.push("");
+    }
+  }
+
+  // Associations: append after classes to keep class blocks grouped together
+  if (Array.isArray(modelJson.associations)) {
+    for (const assoc of modelJson.associations) {
+      try {
+        const txt = buildAssociationText(assoc);
+        if (txt && txt.length) {
+          lines.push(txt);
+          lines.push("");
+        }
+      } catch {
+        // skip bad associations
+      }
+    }
+  }
+
+  // Constraints: render as a top-level 'constraints' block with indented bodies
+  // If no structured constraints are provided, try to extract 'context' blocks from raw_text
+  let constraints = Array.isArray(modelJson.constraints)
+    ? modelJson.constraints.slice()
+    : [];
+  if ((!constraints || !constraints.length) && modelJson.raw_text &&
+    typeof modelJson.raw_text === "string") {
+    try {
+      const raw = String(modelJson.raw_text || "");
+      const ctxRe = /context\s+([^\r\n]+)([\s\S]*?)(?=(?:\r?\n)\s*context\b|\r?\n\s*\r?\n|$)/gim;
+      let m;
+      while ((m = ctxRe.exec(raw)) !== null) {
+        const header = (m[1] || "").trim();
+        const body = (m[2] || "").trim();
+        // header may be 'Class inv name' or an operation signature
+        const invMatch = header.match(/^([A-Za-z0-9_:<>]+)\s+inv\s+([A-Za-z0-9_]+)$/i);
+        if (invMatch) {
+          constraints.push({
+            context: invMatch[1],
+            kind: "invariant",
+            name: invMatch[2],
+            expression: body,
+          });
+        } else {
+          // fallback: store header and body
+          constraints.push({ context: header, kind: "constraint", expression: body });
+        }
+      }
+    } catch {
+      // ignore extraction errors
+    }
+  }
+
+  if (Array.isArray(constraints) && constraints.length) {
+    lines.push("constraints");
+    lines.push("");
+    for (const c of constraints) {
+      try {
+        if (!c) continue;
+        if (typeof c === "string") {
+          // raw constraint text (assume already formatted)
+          lines.push(c.trim());
+          lines.push("");
+          continue;
+        }
+
+        const ctx = c.context || c.contextName || c.context_name || c.header || "";
+        const kind = (c.kind || "").toLowerCase();
+        const name = c.name || c.label || "";
+        const expr = (c.expression || c.expr || c.body || c.raw || "").toString().trim();
+
+        // If ctx is an operation signature (contains '::'), render header and pre/post
+        if (ctx && /::/.test(ctx)) {
+          lines.push(`context ${ctx}`);
+          if ((kind === "pre" || kind === "post") && expr) {
+            if (name) lines.push(`  ${kind} ${name}: ${expr}`);
+            else lines.push(`  ${kind}: ${expr}`);
+          } else if ((kind === "invariant" || kind === "inv") && expr) {
+            // operation-level invariant: print as inv name then body
+            const nm = name ? ` ${name}` : "";
+            lines.push(`  inv${nm}: ${expr}`);
+          } else if (expr) {
+            lines.push(`  ${expr}`);
+          }
+          lines.push("");
+          continue;
+        }
+
+        // Class-level constraints: usually invariants named via 'inv'
+        if (ctx && (kind === "invariant" || kind === "inv")) {
+          const nm = name ? ` ${name}` : "";
+          lines.push(`context ${ctx} inv${nm}:`);
+          if (expr) {
+            const bodyLines = expr.split(/\r?\n/);
+            for (const bl of bodyLines) lines.push(`  ${bl}`);
+          }
+          lines.push("");
+          continue;
+        }
+
+        // pre/post attached to a named context (non-operation)
+        if (ctx && (kind === "pre" || kind === "post")) {
+          const nm = name ? ` ${name}` : "";
+          lines.push(`context ${ctx} ${kind}${nm}:`);
+          if (expr) {
+            const bodyLines = expr.split(/\r?\n/);
+            for (const bl of bodyLines) lines.push(`  ${bl}`);
+          }
+          lines.push("");
+          continue;
+        }
+
+        // Generic fallback: print header if we have context, else dump expression
+        if (ctx) {
+          lines.push(`context ${ctx}`);
+          if (expr) {
+            const bodyLines = expr.split(/\r?\n/);
+            for (const bl of bodyLines) lines.push(`  ${bl}`);
+          }
+          lines.push("");
+          continue;
+        }
+
+        if (expr) {
+          lines.push(expr);
+          lines.push("");
+        }
+      } catch {
+        // ignore formatting errors for individual constraints
+      }
     }
   }
 
@@ -535,13 +693,76 @@ const UseController = {
         (req.body && req.body.embedParse === true);
 
       if (embedParse) {
+        // Attempt to validate/parse the exported text using the USE CLI first,
+        // falling back to the local JS parser in utils/parseUse.js.
+        const uploadsDir = path.resolve(__dirname, "..", "uploads");
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+        const tmpName = `uml_export_parse_${Date.now()}.use`;
+        const tmpPath = path.join(uploadsDir, tmpName);
+        fs.writeFileSync(tmpPath, useText, "utf8");
+
         let parsed = null;
+        let cliRes = null;
         try {
-          parsed = parseUseContentWithConditionals(useText);
-        } catch (e) {
-          parsed = { error: String(e && e.message ? e.message : e) };
+          try {
+            cliRes = await runUseCli(tmpPath, 20000);
+          } catch (e) {
+            cliRes = { error: e.message };
+          }
+
+          const stderrText = (cliRes && cliRes.stderr) || "";
+          const stdoutText = (cliRes && cliRes.stdout) || "";
+          const cliHasStdErr = stderrText && String(stderrText).trim().length > 0;
+
+          // If CLI produced a valid model line and no stderr, prefer parsing CLI output
+          const hasModelLine = /(^|\n)\s*model\s+[A-Za-z0-9_]+/i.test(stdoutText);
+          if (!cliHasStdErr && hasModelLine && cliRes && cliRes.stdout) {
+            try {
+              parsed = parseCliOutput(cliRes.stdout);
+              parsed._parseSource = "cli";
+            } catch {
+              parsed = null;
+            }
+          }
+
+          // fallback to JS parser on the generated text
+          if (!parsed || !parsed.model) {
+            try {
+              parsed = parseUseContentWithConditionals(useText);
+              parsed._parseSource = "text";
+            } catch (e) {
+              parsed = { error: String(e && e.message ? e.message : e) };
+            }
+          }
+        } finally {
+          try {
+            if (fs.existsSync(tmpPath)) fs.unlinkSync(tmpPath);
+          } catch (e) {
+            console.error("Error deleting temp USE file:", e);
+          }
         }
-        return res.json({ success: true, useText, parsed });
+
+        // Ensure common fields exist for clients: query_operations on classes and associations,
+        // and constraints array (may be populated by CLI parse or local parser).
+        try {
+          if (!parsed) parsed = { error: "no parse result" };
+          if (!Array.isArray(parsed.constraints)) parsed.constraints = [];
+          if (Array.isArray(parsed.classes)) {
+            for (const c of parsed.classes) {
+              if (!Array.isArray(c.query_operations)) c.query_operations = [];
+              if (!Array.isArray(c.operations)) c.operations = c.operations || [];
+            }
+          }
+          if (Array.isArray(parsed.associations)) {
+            for (const a of parsed.associations) {
+              if (!Array.isArray(a.query_operations)) a.query_operations = a.query_operations || [];
+            }
+          }
+        } catch (e) {
+          console.error("Error normalizing parsed structure:", e);
+        }
+
+        return res.json({ success: true, useText, parsed, cli: cliRes });
       }
       const modelName = (json.model || json.name || "model").replace(
         /[^A-Za-z0-9_-]/g,
@@ -1278,3 +1499,4 @@ module.exports.parseUseContent = parseUseContentWithConditionals;
 // Ensure `parseAssociationText` and `parseClassText` are properly defined and exported
 module.exports.parseAssociationText = parseAssociationText;
 module.exports.parseClassText = parseClassText;
+module.exports.buildUseText = buildUseText;
