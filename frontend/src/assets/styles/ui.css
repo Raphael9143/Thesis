@@ -120,6 +120,10 @@
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+input:hover, select:hover, textarea:hover {
+  border-color: var(--uml-box-border);
+}
+
 @media (max-width: 900px) {
 	.grid--3 {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
