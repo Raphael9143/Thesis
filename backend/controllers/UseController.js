@@ -495,6 +495,130 @@ function buildClassText(cls) {
   return lines.join("\n");
 }
 
+// Build constraints block text from an array of constraint entries or raw_text
+function buildConstraintsText(constraints, rawText, includeHeader = true) {
+  const lines = [];
+  const cons = Array.isArray(constraints) ? constraints.slice() : [];
+  // If no structured constraints, try extracting from rawText
+  if ((!cons || !cons.length) && rawText && typeof rawText === "string") {
+    try {
+      const raw = String(rawText || "");
+      const consMatch = raw.match(/(?:\r?\n|^)\s*constraints\s*([\s\S]*?)$/i);
+      if (consMatch && consMatch[1]) {
+        const block = String(consMatch[1] || "").trim();
+        const parts = block
+          .split(/\r?\n\s*\r?\n/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+        for (const p of parts) cons.push(p);
+      }
+    } catch {
+      // ignore
+    }
+  }
+
+  if (!cons || !cons.length) return "";
+  if (includeHeader) {
+    lines.push("constraints");
+    lines.push("");
+  }
+  for (const c of cons) {
+    try {
+      if (!c) continue;
+      if (typeof c === "string") {
+        lines.push(c.trim());
+        lines.push("");
+        continue;
+      }
+      const ctx = c.context || c.contextName || c.context_name || c.header || "";
+      const kind = (c.kind || "").toLowerCase();
+      const name = c.name || c.label || "";
+      const expr = (c.expression || c.expr || c.body || c.raw || "").toString().trim();
+
+      if (ctx && /::/.test(ctx)) {
+        lines.push(`context ${ctx}`);
+        if ((kind === "pre" || kind === "post") && expr) {
+          if (name) lines.push(`  ${kind} ${name}: ${expr}`);
+          else lines.push(`  ${kind}: ${expr}`);
+        } else if ((kind === "invariant" || kind === "inv") && expr) {
+          const nm = name ? ` ${name}` : "";
+          lines.push(`  inv${nm}: ${expr}`);
+        } else if (expr) {
+          lines.push(`  ${expr}`);
+        }
+        lines.push("");
+        continue;
+      }
+
+      if (ctx && (kind === "invariant" || kind === "inv")) {
+        const nm = name ? ` ${name}` : "";
+        lines.push(`context ${ctx} inv${nm}:`);
+        if (expr) {
+          const bodyLines = expr.split(/\r?\n/);
+          for (const bl of bodyLines) lines.push(`  ${bl}`);
+        }
+        lines.push("");
+        continue;
+      }
+
+      if (ctx && (kind === "pre" || kind === "post")) {
+        const nm = name ? ` ${name}` : "";
+        lines.push(`context ${ctx} ${kind}${nm}:`);
+        if (expr) {
+          const bodyLines = expr.split(/\r?\n/);
+          for (const bl of bodyLines) lines.push(`  ${bl}`);
+        }
+        lines.push("");
+        continue;
+      }
+
+      if (ctx) {
+        lines.push(`context ${ctx}`);
+        if (expr) {
+          const bodyLines = expr.split(/\r?\n/);
+          for (const bl of bodyLines) lines.push(`  ${bl}`);
+        }
+        lines.push("");
+        continue;
+      }
+
+      if (expr) {
+        lines.push(expr);
+        lines.push("");
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return lines.join("\n");
+}
+
+// Parse constraints text into structured array using existing parser helper
+function parseConstraintsText(text) {
+  if (!text || typeof text !== "string") return [];
+  try {
+    // reuse parseUseContent which extracts 'context' blocks and pre/post/inv
+    const parsed = parseUseContent(text);
+    // If parsed.constraints found, return them; else return split raw constraints
+    if (Array.isArray(parsed.constraints) && parsed.constraints.length) return parsed.constraints;
+    // fallback: split by blank lines in the constraints section
+    const consMatch = text.match(/(?:\r?\n|^)\s*constraints\s*([\s\S]*?)$/i);
+    const out = [];
+    if (consMatch && consMatch[1]) {
+      const block = String(consMatch[1] || "").trim();
+      const parts = block.split(/\r?\n\s*\r?\n/).map((s) => s.trim()).filter(Boolean);
+      for (const p of parts) out.push({ raw: p, expression: p });
+    } else {
+      // no explicit constraints header: split whole text
+      const parts = text.split(/\r?\n\s*\r?\n/).map((s) => s.trim()).filter(Boolean);
+      for (const p of parts) out.push({ raw: p, expression: p });
+    }
+    return out;
+  } catch {
+    return [{ raw: text, expression: text }];
+  }
+}
+
 const UseController = {
   // Get a stored USE model by id with related entities
   getById: async (req, res) => {
@@ -961,6 +1085,74 @@ const UseController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+  // Serialize constraints: accept { constraints: [...], raw_text? }
+  serializeConstraints: async (req, res) => {
+    try {
+      const body = req.body || {};
+      let constraints = [];
+      let rawText = body.raw_text || body.rawText || null;
+
+      // Accept either:
+      // - { constraints: [ ... ] }
+      // - { constraint: { ... } } (single constraint)
+      // - a single constraint object as the request body (has context/kind/expression)
+      if (Array.isArray(body.constraints)) {
+        constraints = body.constraints.slice();
+      } else if (Array.isArray(body.constraint)) {
+        constraints = body.constraint.slice();
+      } else if (body && typeof body === "object") {
+        // body itself may be a single constraint object
+        const maybe = body;
+        const hasConstraintFields =
+          Object.prototype.hasOwnProperty.call(maybe, "context") ||
+          Object.prototype.hasOwnProperty.call(maybe, "kind") ||
+          Object.prototype.hasOwnProperty.call(maybe, "expression") ||
+          Object.prototype.hasOwnProperty.call(maybe, "raw");
+        if (hasConstraintFields && !body.constraints) {
+          constraints = [maybe];
+        }
+      }
+
+      // Create a normalized copy of constraints to avoid mutating caller objects.
+      let normalizedConstraints = [];
+      if (Array.isArray(constraints)) {
+        normalizedConstraints = constraints.map((orig) => {
+          const c = Object.assign({}, orig || {});
+          if (!c.kind && c.type) c.kind = String(c.type).toLowerCase();
+          // normalize common variants: 'precondition' -> 'pre', 'postcondition' -> 'post',
+          // 'invariant'/'inv' -> 'invariant'
+          if (c.kind && typeof c.kind === "string") {
+            const kk = c.kind.toLowerCase();
+            if (kk.indexOf("pre") !== -1) c.kind = "pre";
+            else if (kk.indexOf("post") !== -1) c.kind = "post";
+            else if (kk.indexOf("inv") !== -1) c.kind = "invariant";
+            else c.kind = kk;
+          }
+          if (!c.expression && (c.raw || c.expr)) {
+            c.expression = c.raw || c.expr;
+          }
+          if (c.expression && !c.raw) c.raw = c.expression;
+          return c;
+        });
+      }
+
+      // If caller requested no_header or we're serializing a single constraint,
+      // omit the top-level `constraints` header to return just the context/body.
+      const noHeaderFlag = body.no_header === true;
+      const hasSingle = Array.isArray(constraints) && constraints.length === 1;
+      const includeHeader = !(noHeaderFlag || hasSingle);
+      const toSend = normalizedConstraints.length ? normalizedConstraints : constraints;
+      const txt = buildConstraintsText(toSend, rawText, includeHeader);
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      return res.send(txt);
+    } catch (err) {
+      console.error("serializeConstraints error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+  
 
   // Deserialize an operation: accept either a class block or a single operation line
   deserializeOperation: async (req, res) => {
@@ -1559,6 +1751,25 @@ const UseController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+  // Deserialize constraints block into structured JSON
+  deserializeConstraints: async (req, res) => {
+    try {
+      const text = (req.body && req.body.text) || "";
+      if (!text || typeof text !== "string") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Constraints text required" });
+      }
+
+      const parsed = parseConstraintsText(text);
+      return res.json({ success: true, data: parsed });
+    } catch (err) {
+      console.error("deserializeConstraints error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
 };
 
 module.exports = UseController;
@@ -1569,3 +1780,5 @@ module.exports.parseAssociationText = parseAssociationText;
 module.exports.parseClassText = parseClassText;
 module.exports.buildUseText = buildUseText;
 module.exports.buildClassText = buildClassText;
+module.exports.buildConstraintsText = buildConstraintsText;
+module.exports.parseConstraintsText = parseConstraintsText;

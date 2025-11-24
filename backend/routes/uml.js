@@ -136,6 +136,38 @@ router.post("/serialize/association", UseController.serializeAssociation);
  */
 router.post("/serialize/operation", UseController.serializeOperation);
 
+// Serialize constraints block
+/**
+ * @swagger
+ * /api/uml/serialize/constraint:
+ *   post:
+ *     summary: Serialize constraints JSON or raw_text into a .use constraints block
+ *     tags:
+ *       - UML
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: constraints
+ *         description: JSON object containing `constraints` array or `raw_text`
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             constraints:
+ *               type: array
+ *               items:
+ *                 type: object
+ *             raw_text:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Plain text `constraints` block
+ *       400:
+ *         description: Invalid request body
+ */
+router.post("/serialize/constraint", UseController.serializeConstraints);
+
 /**
  * @swagger
  * /api/uml/deserialize/class:
@@ -220,5 +252,33 @@ router.post("/deserialize/association", UseController.deserializeAssociation);
  *         description: Invalid request body
  */
 router.post("/deserialize/operation", UseController.deserializeOperation);
+
+// Deserialize constraints block
+/**
+ * @swagger
+ * /api/uml/deserialize/constraint:
+ *   post:
+ *     summary: Deserialize a .use constraints block into structured JSON
+ *     tags:
+ *       - UML
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: constraints
+ *         description: Object with `text` containing the constraints block
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             text:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: JSON array of parsed constraints
+ *       400:
+ *         description: Invalid request body
+ */
+router.post("/deserialize/constraint", UseController.deserializeConstraints);
 
 module.exports = router;
