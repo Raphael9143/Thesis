@@ -47,6 +47,21 @@ export default function AssociationModal({ assoc, classes = [], onChange, onClos
     onChange && onChange({ ...assoc, parts });
   };
 
+  const handleTypeChange = (newType) => {
+    const parts = Array.isArray(assoc.parts) ? [...assoc.parts] : [];
+    // If switching to non n-ary, limit to two participants (binary association)
+    if (newType !== 'n-ary') {
+      const trimmed = parts.slice(0, 2);
+      while (trimmed.length < 2) {
+        trimmed.push({ class: classes[0]?.name || '', multiplicity: '', role: classes[0]?.name || '' });
+      }
+      onChange && onChange({ ...assoc, type: newType, parts: trimmed });
+      return;
+    }
+    // n-ary - keep existing parts
+    onChange && onChange({ ...assoc, type: newType, parts });
+  };
+
   const addPart = () => {
     const parts = [
       ...(assoc.parts || []),
@@ -117,7 +132,7 @@ export default function AssociationModal({ assoc, classes = [], onChange, onClos
             <select
               className="uml-modal-input"
               value={assoc.type || 'association'}
-              onChange={(e) => onChange && onChange({ ...assoc, type: e.target.value })}
+              onChange={(e) => handleTypeChange(e.target.value)}
             >
               <option value="association">Association</option>
               <option value="aggregation">Aggregation</option>
@@ -171,16 +186,24 @@ export default function AssociationModal({ assoc, classes = [], onChange, onClos
                 onChange={(e) => updatePart(i, { multiplicity: e.target.value })}
                 required
               />
-              <button type="button" className="icon-btn" title="Remove participant" onClick={() => removePart(i)}>
+              <button
+                type="button"
+                className="icon-btn"
+                title="Remove participant"
+                onClick={() => removePart(i)}
+                disabled={assoc.type !== 'n-ary' && (assoc.parts || []).length <= 2}
+              >
                 <i className="fa fa-trash" />
               </button>
             </div>
           ))}
-          <div style={{ marginTop: 8 }}>
-            <button type="button" className="icon-btn" title="Add participant" onClick={addPart}>
-              <i className="fa fa-plus" />
-            </button>
-          </div>
+          {assoc.type === 'n-ary' && (
+            <div className="participant-add-btn-container">
+              <button type="button" className="icon-btn" title="Add participant" onClick={addPart}>
+                <i className="fa fa-plus" />
+              </button>
+            </div>
+          )}
         </div>
 
         {assoc.type === 'associationclass' && (
