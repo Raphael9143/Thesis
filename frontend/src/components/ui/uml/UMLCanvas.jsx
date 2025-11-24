@@ -136,15 +136,32 @@ const UMLCanvas = ({
       centroid.x /= valid.length;
       centroid.y /= valid.length;
       // draw connector lines from centroid to each part
+      // If multiple parts connect to the same class, offset their lines so they don't overlap
+      const nameToIndices = valid.reduce((acc, c, i) => {
+        const nm = c.name || `__anon_${i}`;
+        (acc[nm] = acc[nm] || []).push(i);
+        return acc;
+      }, {});
+      const spacing = 8; // px between parallel lines
       const lines = valid.map((c, i) => {
         const pt = c.rect ? intersectBorder(c.rect, c.center, centroid) : c.center;
+        const indices = nameToIndices[c.name || `__anon_${i}`] || [i];
+        const occIndex = indices.indexOf(i);
+        const count = indices.length;
+        const offsetAmount = (occIndex - (count - 1) / 2) * spacing;
+        // perpendicular to direction centroid -> pt
+        const dirX = pt.x - centroid.x;
+        const dirY = pt.y - centroid.y;
+        const len = Math.sqrt(dirX * dirX + dirY * dirY) || 1;
+        const perpX = (-dirY / len) * offsetAmount;
+        const perpY = (dirX / len) * offsetAmount;
         return (
           <line
             key={`n-${idx}-${i}`}
-            x1={centroid.x}
-            y1={centroid.y}
-            x2={pt.x}
-            y2={pt.y}
+            x1={centroid.x + perpX}
+            y1={centroid.y + perpY}
+            x2={pt.x + perpX}
+            y2={pt.y + perpY}
             stroke="#333"
             strokeWidth={2}
           />
