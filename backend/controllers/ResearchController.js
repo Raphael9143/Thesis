@@ -1517,6 +1517,106 @@ const ResearchController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+
+  // Add multiple contributors by email (OWNER or MODERATOR can perform)
+  addContributors: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+
+      const projectId = parseInt(req.params.projectId, 10);
+      if (!projectId)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid project id" });
+
+      const { emails } = req.body || {};
+      if (!Array.isArray(emails) || emails.length === 0)
+        return res
+          .status(400)
+          .json({ success: false, message: "emails array is required" });
+
+      // Normalize and dedupe emails
+      const normalized = Array.from(
+        new Set(
+          emails
+            .map((e) => (e || "").toString().trim().toLowerCase())
+            .filter((e) => e)
+        )
+      );
+
+      const project = await ResearchProject.findByPk(projectId);
+      if (!project)
+        return res
+          .status(404)
+          .json({ success: false, message: "Project not found" });
+
+      // Permission: owner or moderator
+      let allowed = false;
+      if (project.owner_id === req.user.userId) allowed = true;
+      else {
+        const requesterMembership = await ResearchProjectMember.findOne({
+          where: { research_project_id: projectId, user_id: req.user.userId },
+        });
+        if (requesterMembership && ["OWNER", "MODERATOR"].includes(requesterMembership.role))
+          allowed = true;
+      }
+      if (!allowed)
+        return res
+          .status(403)
+          .json({ success: false, message: "Only owner or moderator can add contributors" });
+
+      const User = require("../models/User");
+
+      const added = [];
+      const skipped = [];
+      const not_found = [];
+
+      for (const email of normalized) {
+        const user = await User.findOne({ where: { email } });
+        if (!user) {
+          not_found.push(email);
+          continue;
+        }
+
+        // Check existing membership
+        const existing = await ResearchProjectMember.findOne({
+          where: { research_project_id: projectId, user_id: user.id },
+        });
+
+        if (existing) {
+          // if already contributor, skip; if owner/moderator, do not downgrade
+          if (existing.role === "CONTRIBUTOR") {
+            skipped.push({ user_id: user.id, email });
+            continue;
+          }
+          if (["OWNER", "MODERATOR"].includes(existing.role)) {
+            // do not change role
+            skipped.push({ user_id: user.id, email, role: existing.role });
+            continue;
+          }
+        }
+
+        // Create membership as contributor
+        await ResearchProjectMember.create({
+          research_project_id: projectId,
+          user_id: user.id,
+          role: "CONTRIBUTOR",
+          joined_at: new Date(),
+        });
+        added.push({ user_id: user.id, email });
+      }
+
+      return res.json({ success: true, data: { added, skipped, not_found } });
+    } catch (err) {
+      console.error("addContributors error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
 };
 
 module.exports = ResearchController;

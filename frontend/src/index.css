@@ -14,20 +14,33 @@
   --color-danger: #e53935; /* danger / required star */
   --color-dark: #1a1a1a; /* buttons */
   --bg-gradient: linear-gradient(135deg, #fef6e4 0%, #e3f2fd 45%, #f3e8ff 100%);
-	--brand: #6d28d9;
-	--brand-strong: #5b21b6;
-	--accent: #2563eb;
-	--accent-strong: #1e40af;
-	--secondary: #10b981;
-	--muted: #64748b;
-	--surface: #ffffff;
-	--surface-muted: #f8fafc;
-	--border: #e5e7eb;
-	--black: #000;
-	--white: #fff;
-	--red: #ef4444;
+  --brand: #6d28d9;
+  --brand-strong: #5b21b6;
+  --accent: #2563eb;
+  --accent-strong: #1e40af;
+  --secondary: #10b981;
+  --muted: #64748b;
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --border: #e5e7eb;
+  --black: #000;
+  --white: #fff;
+  --red: #ef4444;
   --btn-color: #2b6cb0;
   --btn-hover: #2c5282;
+
+  --box-1: #8ce4ff;
+  --box-2: #feee91;
+  --box-3: #ffa239;
+  --box-4: #ff5656;
+  --shadow-1: 0 6px 15px rgba(140, 228, 255, 0.45);
+  --glow-1: 0 0 18px rgba(140, 228, 255, 0.7);
+  --shadow-2: 0 6px 15px rgba(254, 238, 145, 0.45);
+  --glow-2: 0 0 18px rgba(254, 238, 145, 0.7);
+  --shadow-3: 0 6px 15px rgba(255, 162, 57, 0.45);
+  --glow-3: 0 0 18px rgba(255, 162, 57, 0.7);
+  --shadow-4: 0 6px 15px rgba(255, 86, 86, 0.45);
+  --glow-4: 0 0 18px rgba(255, 86, 86, 0.7);
 
   --uml-box-background: #fff8b4;
   --uml-box-border: #0000ff;

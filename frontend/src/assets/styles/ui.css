@@ -102,7 +102,7 @@
 	color: var(--btn-color);
 }
 
-.btn .fa {
+.btn .fa, .btn .fa-solid {
   margin-right: 6px;
 }
 

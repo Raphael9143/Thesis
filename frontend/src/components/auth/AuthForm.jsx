@@ -169,8 +169,16 @@ export default function AuthForm({
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit" className="auth-line-btn" disabled={loading}>
-          {loading ? (type === 'login' ? 'Logging in...' : 'Registering...') : type === 'login' ? 'Login' : 'Register'}
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          <span>
+            {loading
+              ? type === 'login'
+                ? 'Logging in...'
+                : 'Registering...'
+              : type === 'login'
+                ? 'Login'
+                : 'Register'}
+          </span>
         </button>
         {showSwitch && (
           <p className="switch">

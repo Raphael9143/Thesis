@@ -569,6 +569,57 @@ router.post(
   ResearchController.addModerator
 );
 
+// POST /api/research/projects/:projectId/contributors - add multiple contributors by email
+/**
+ * @swagger
+ * /api/research/projects/{projectId}/contributors:
+ *   post:
+ *     summary: Add contributors to project by email (owner or moderator)
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: projectId
+ *         required: true
+ *         type: integer
+ *         description: Project ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - emails
+ *             properties:
+ *               emails:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                   format: email
+ *                 description: List of contributor emails to add
+ *     responses:
+ *       200:
+ *         description: Contributors added or updated
+ *       400:
+ *         description: Invalid input
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden (not owner/moderator)
+ *       404:
+ *         description: Project or user not found
+ *       500:
+ *         description: Internal server error
+ */
+router.post(
+  "/projects/:projectId/contributors",
+  auth,
+  ResearchController.addContributors
+);
+
 // GET /api/research/projects/:id - get project by id
 /**
  * @swagger

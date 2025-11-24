@@ -72,7 +72,8 @@ export default function ResearcherHome() {
                   setShowAuth(true);
                 }}
               >
-                Explore Research
+                <i className="fa-solid fa-microscope" />
+                <span>Explore Research</span>
               </button>
               <button
                 className="btn btn-signin"
@@ -81,7 +82,8 @@ export default function ResearcherHome() {
                   setShowAuth(true);
                 }}
               >
-                Get Started
+                <i className="fa-solid fa-rocket" />
+                <span>Get Started</span>
               </button>
             </div>
             <div className="switch-to-education">
