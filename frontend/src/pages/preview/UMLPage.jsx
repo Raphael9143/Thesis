@@ -3,9 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
 import { useNotifications } from '../../contexts/NotificationContext';
 import '../../assets/styles/components/ui/UMLPreview.css';
-import { offsetAlong, pushOutward, perpOffset, intersectBorder, fmtMultiplicity } from '../../utils/umlUtils';
+import { offsetAlong, pushOutward, intersectBorder } from '../../utils/umlUtils';
 import useBoxMeasurements from '../../hooks/useBoxMeasurements';
-import useMultiplicityPositions from '../../hooks/useMultiplicityPositions';
 import useBoxDrag from '../../hooks/useBoxDrag';
 import useRoleDrag from '../../hooks/useRoleDrag';
 import UMLHeader from '../../components/ui/uml/UMLHeader';
@@ -64,12 +63,6 @@ export default function UMLPage() {
     });
     setPositions(p);
   }, [classes, enums]);
-
-  const multiplicityPositions = useMultiplicityPositions(associations, centerOf, getRect, {
-    perpOffset,
-    offsetAlong,
-    intersectBorder,
-  });
 
   const { startDrag } = useBoxDrag({ setPositions, containerRef, positionsRef });
 
@@ -197,8 +190,6 @@ export default function UMLPage() {
           rolePositions={rolePositions}
           associations={associations}
           startRoleDrag={startRoleDrag}
-          fmtMultiplicity={fmtMultiplicity}
-          multiplicityPositions={multiplicityPositions}
           roleActiveKey={roleActiveKey}
         />
 
