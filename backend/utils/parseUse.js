@@ -194,7 +194,8 @@ function parseUseContent(content) {
           const p = {
             class: m[1],
             multiplicity: m[2].trim(),
-            role: m[3] || m[1].toLowerCase(),
+            // role is optional in USE syntax — do not invent a role name when missing
+            role: m[3] || null,
           };
           if (/\b(composition|composite)\b/i.test(l)) p.kind = "composition";
           else if (/\b(aggregation)\b/i.test(l)) p.kind = "aggregation";
@@ -202,7 +203,7 @@ function parseUseContent(content) {
         } else {
           const m2 = l.match(/([A-Za-z0-9_]+)(?:\s+role\s+([A-Za-z0-9_]+))?/i);
           if (m2)
-            parts.push({ class: m2[1], multiplicity: null, role: m2[2] || m2[1].toLowerCase() });
+            parts.push({ class: m2[1], multiplicity: null, role: m2[2] || null });
         }
         // attributes handled in 'attributes' mode above
       } else if (mode === "operations") {
