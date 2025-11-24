@@ -409,6 +409,39 @@
   width: 6rem;
 }
 
+.uml-tree-edit-btn {
+  cursor: pointer;
+  color: #666;
+  transition: color 0.2s, transform 0.15s;
+}
+
+.uml-tree-edit-btn:hover {
+  color: var(--brand);
+}
+
+.uml-model-tree-detail-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+}
+
+.uml-model-tree-detail-text.edit {
+  background-color: rgb(247, 247, 247);
+  color: var(--black);
+  border-radius: 0;
+  border: none;
+  height: 100%;
+}
+
+.uml-model-tree-detail .modal-container {
+  height: 70vh;
+}
+
+.uml-model-tree-detail .modal-body {
+  height: 80%;
+}
+
 .uml-title-input::placeholder,
 .uml-attr-name::placeholder {
   color: #888;

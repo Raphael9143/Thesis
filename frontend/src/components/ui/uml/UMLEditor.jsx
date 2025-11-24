@@ -761,7 +761,7 @@ export default function UMLEditor({ initialModel = null }) {
             onSelect={handleTreeSelect}
           />
           <button
-            className="export-button"
+            className="btn btn-outline export-button"
             onClick={handleExport}
             disabled={exporting}
             title={exportError || 'Export USE model'}

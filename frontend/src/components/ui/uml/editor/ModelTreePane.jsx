@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import '../../../../assets/styles/components/ui/UMLEditor.css';
 import TreeSection from './TreeSection';
 import TreeLeaf from './TreeLeaf';
+import Modal from '../../../ui/Modal';
 import useSerialize from '../../../../hooks/useSerialize';
 import useDeserialize from '../../../../hooks/useDeserialize';
 
@@ -18,7 +19,7 @@ export default function ModelTreePane({
   const [selected, setSelected] = useState(null);
   const [detailText, setDetailText] = useState('');
   const [readOnlyText, setReadOnlyText] = useState('');
-  const [editing, setEditing] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const {
     serializeClass,
     serializeAssociation,
@@ -46,7 +47,6 @@ export default function ModelTreePane({
 
   const handleSelect = (key, payload) => {
     setSelected({ key, payload });
-    setEditing(false);
     setDetailText('');
     setReadOnlyText('');
     // Show human-friendly USE text when possible (serialize JSON -> USE)
@@ -119,22 +119,17 @@ export default function ModelTreePane({
         // fallback: save text as notes
         onUpdateNode && onUpdateNode(selected.key, detailText);
       }
-      setEditing(false);
+      setModalOpen(false);
     } catch (e) {
       // show raw text in detailText if deserialize failed
       console.error('Deserialize failed', e);
       // still call onUpdateNode with raw text to preserve behavior
       onUpdateNode && onUpdateNode(selected.key, detailText);
-      setEditing(false);
+      // keep modal closed; leave editing state managed by modal
     }
   };
 
-  const handleCancel = () => {
-    if (!selected) return;
-    // exit edit mode and restore read-only text
-    setEditing(false);
-    setDetailText('');
-  };
+  // modal cancel handled inline by closing modal
 
   return (
     <div className="uml-model-tree">
@@ -258,35 +253,50 @@ export default function ModelTreePane({
       <div className="uml-model-tree-detail">
         {selected ? (
           <div>
-            {!editing ? (
-              <div>
-                <pre className="uml-model-tree-detail-text" style={{ whiteSpace: 'pre-wrap' }}>
-                  {serializing || deserializing ? 'Loading...' : readOnlyText}
-                </pre>
-                <div style={{ marginTop: 8 }}>
-                  <button onClick={() => setEditing(true)}>Edit</button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <textarea
-                  className="uml-model-tree-detail-text"
-                  rows={10}
-                  value={detailText || readOnlyText}
-                  onChange={(e) => setDetailText(e.target.value)}
+            <div style={{ position: 'relative' }}>
+              <pre className="uml-model-tree-detail-text" style={{ whiteSpace: 'pre-wrap' }}>
+                {serializing || deserializing ? 'Loading...' : readOnlyText}
+              </pre>
+              <span
+                className="uml-tree-edit-btn"
+                style={{ position: 'absolute', top: 6, right: 6 }}
+                aria-label="Edit"
+                onClick={() => {
+                  setDetailText(readOnlyText || '');
+                  setModalOpen(true);
+                }}
+              >
+                <i
+                  className="fa-solid fa-pen"
+                  onClick={() => {
+                    setDetailText(readOnlyText || '');
+                    setModalOpen(true);
+                  }}
                 />
-                <div className="uml-model-tree-detail-actions">
-                  <button onClick={handleCancel}>Cancel</button>
-                  <button onClick={handleSave} disabled={deserializing}>
-                    Save
-                  </button>
-                </div>
-              </div>
-            )}
+              </span>
+            </div>
           </div>
         ) : (
           <div className="uml-model-tree-empty">Select a node to view/edit details</div>
         )}
+
+        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={'Edit'}>
+          <textarea
+            className="uml-model-tree-detail-text edit"
+            rows={12}
+            value={detailText || readOnlyText}
+            onChange={(e) => setDetailText(e.target.value)}
+            style={{ width: '100%' }}
+          />
+          <div className="uml-model-tree-detail-actions">
+            <button className="btn btn-outline btn-sm" onClick={() => setModalOpen(false)}>
+              Cancel
+            </button>
+            <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={deserializing}>
+              Save
+            </button>
+          </div>
+        </Modal>
       </div>
     </div>
   );
