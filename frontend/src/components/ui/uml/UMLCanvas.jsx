@@ -14,6 +14,15 @@ function drawDiamondPoints(tip, other, size = 14) {
   return [tip, left, back, right];
 }
 
+function diamondAtBorderRight(borderPoint, size = 14) {
+  // Reuse drawDiamondPoints so the diamond matches composition/aggregation
+  // appearance used for binary associations. Create a fictitious "other"
+  // point directly to the right so drawDiamondPoints produces a horizontal
+  // diamond anchored at the border point.
+  const other = { x: borderPoint.x + size * 2, y: borderPoint.y };
+  return drawDiamondPoints(borderPoint, other, size);
+}
+
 export default function UMLCanvas({
   associations,
   classes = [],
@@ -93,6 +102,65 @@ export default function UMLCanvas({
             const left = centers[0];
             const right = centers[1];
             if (!left.center || !right.center) return null;
+
+            // Self-association: both ends reference the same class -> draw a rectangular loop
+            if (left.name && right.name && left.name === right.name) {
+              const rect = left.rect;
+              const center = left.center;
+              if (!rect || !center) return null;
+
+              // Get precise top and right border points aligned to center
+              const topPoint = intersectBorder(rect, center, { x: center.x, y: center.y - 200 });
+              const rightPoint = intersectBorder(rect, center, { x: center.x + 200, y: center.y });
+
+              const key = `${left.name}|${left.name}`;
+              const indices = pairToIndices[key] || [idx];
+              const occIndex = indices.indexOf(idx);
+              const count = indices.length;
+              const baseDist = 80; // outward distance
+              const spacing = 20; // spacing between multiple self-assoc loops
+              const upDist = baseDist + (occIndex - (count - 1) / 2) * spacing;
+              const rightOffset = baseDist + (occIndex - (count - 1) / 2) * spacing;
+
+              const pUp = { x: topPoint.x, y: topPoint.y - upDist };
+              const pRightTop = { x: rightPoint.x + rightOffset, y: pUp.y };
+              // align bottom of right leg to the right border y to ensure horizontal entry
+              const pRightBottom = { x: rightPoint.x + rightOffset, y: rightPoint.y };
+
+              // tip/other were previously used for drawDiamondPoints; not needed now
+
+              return (
+                <g key={`assoc-self-${idx}`}>
+                  <polyline
+                    points={`${topPoint.x},${topPoint.y} ${pUp.x},${pUp.y} ${pRightTop.x},${pRightTop.y} ${pRightBottom.x},${pRightBottom.y} ${rightPoint.x},${rightPoint.y}`}
+                    fill="none"
+                    stroke="#333"
+                    strokeWidth={2}
+                  />
+                  {type === 'composition' && (
+                    <polygon
+                      points={diamondAtBorderRight(rightPoint)
+                        .map((pt) => `${pt.x},${pt.y}`)
+                        .join(' ')}
+                      fill="#333"
+                      stroke="#333"
+                      strokeWidth={1}
+                    />
+                  )}
+                  {type === 'aggregation' && (
+                    <polygon
+                      points={diamondAtBorderRight(rightPoint)
+                        .map((pt) => `${pt.x},${pt.y}`)
+                        .join(' ')}
+                      fill="#fff"
+                      stroke="#333"
+                      strokeWidth={1.5}
+                    />
+                  )}
+                </g>
+              );
+            }
+
             const p1 = left.rect ? intersectBorder(left.rect, left.center, right.center) : left.center;
             const p2 = right.rect ? intersectBorder(right.rect, right.center, left.center) : right.center;
             // Offset parallel associations between the same pair so they don't overlap
