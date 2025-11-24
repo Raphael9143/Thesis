@@ -1,5 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import '../../assets/styles/components/ui/ClassCard.css';
+import userAPI from '../../../services/userAPI';
 
 export default function ClassCard({
   title,
@@ -8,6 +9,8 @@ export default function ClassCard({
   image,
   onClick,
   badge,
+  id,
+  resourceType, // 'class' or 'course'
   description,
   className,
   maxDescriptionChars = 26,
@@ -16,6 +19,8 @@ export default function ClassCard({
     typeof window !== 'undefined' && sessionStorage.getItem('role')
       ? sessionStorage.getItem('role').toString().toLowerCase()
       : null;
+  const [status, setStatus] = useState(badge);
+  const [statusLoading, setStatusLoading] = useState(false);
   const handleKeyPress = (e) => {
     if (!onClick) return;
     if (e.key === 'Enter' || e.key === ' ') onClick();
@@ -54,7 +59,42 @@ export default function ClassCard({
 
         {code && role === 'teacher' && <div className="class-card__code">{code}</div>}
 
-        {badge && <div className="class-card__badge">{badge.toUpperCase()}</div>}
+        {status && role === 'teacher' && status.toString().toLowerCase() === 'draft' ? (
+          <div
+            className={`class-card__badge class-card__badge--clickable ${
+              statusLoading ? 'is-loading' : ''
+            }`}
+            onClick={async (e) => {
+              e.stopPropagation();
+              if (!id || statusLoading) return;
+              try {
+                setStatusLoading(true);
+                if (resourceType === 'course') {
+                  await userAPI.patchCourseStatus(id, 'active');
+                } else {
+                  await userAPI.patchClassStatus(id, 'active');
+                }
+                setStatus('active');
+              } catch (err) {
+                console.error('Failed to change status', err);
+              } finally {
+                setStatusLoading(false);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                e.currentTarget.click();
+              }
+            }}
+          >
+            {status.toUpperCase()}
+          </div>
+        ) : (
+          status && <div className="class-card__badge">{status.toUpperCase()}</div>
+        )}
       </div>
 
       <div className="class-card__meta">

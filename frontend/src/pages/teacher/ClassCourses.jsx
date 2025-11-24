@@ -85,6 +85,8 @@ export default function ClassCoursesPage() {
                   key={course.id || course.course_id}
                   title={course.name || course.title || course.course_name}
                   code={course.code || course.course_code}
+                  id={course.id || course.course_id}
+                  resourceType="course"
                   subtitle={course.semester || ''}
                   image={course.image || course.thumbnail}
                   description={course.description || ''}

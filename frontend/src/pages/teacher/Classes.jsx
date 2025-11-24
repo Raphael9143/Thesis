@@ -75,6 +75,8 @@ export default function ClassesPage() {
                   key={c.id}
                   title={c.name}
                   code={c.code}
+                  id={c.id}
+                  resourceType="class"
                   subtitle={`${c.year || ''}`}
                   image={c.image || c.thumbnail}
                   badge={c.status}

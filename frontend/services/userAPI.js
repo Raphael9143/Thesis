@@ -35,6 +35,8 @@ const userAPI = {
   createClass: (data) => axiosClient.post('class', data),
   updateClass: (id, data) => axiosClient.put(`class/${id}`, data),
   deleteClass: (id) => axiosClient.delete(`class/${id}`),
+  // Patch class status (e.g., set to 'active' or 'draft')
+  patchClassStatus: (id, status) => axiosClient.patch(`class/${id}/status`, { status }),
   // Student: get enrolled classes (requires student bearer token)
   getStudentEnrolledClasses: () => axiosClient.get('student/enrolled-classes'),
   // Course related
@@ -113,6 +115,8 @@ const userAPI = {
   getCourseById: (courseId) => axiosClient.get(`courses/${courseId}`),
   // Create a new course
   createCourse: (data, config) => axiosClient.post('courses', data, config),
+  // Patch course status (e.g., set to 'active' or 'draft')
+  patchCourseStatus: (id, status) => axiosClient.patch(`courses/${id}/status`, { status }),
 
   // Lectures
   // Create lecture: accepts FormData (for file uploads) or JSON payload
