@@ -3,11 +3,11 @@ import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
 import NotificationPopup from '../../components/ui/NotificationPopup';
 import userAPI from '../../../services/userAPI';
+import generateRandomCode from '../../utils/generateRandomCode';
 import '../../assets/styles/components/teacher/CreateClassModal.css';
 
 export default function CreateClassModal({ open, onClose, onCreated }) {
   const [name, setName] = useState('');
-  const [code, setCode] = useState('');
   const [description, setDescription] = useState('');
   const [year, setYear] = useState(new Date().getFullYear());
   const [maxStudents, setMaxStudents] = useState(30);
@@ -68,7 +68,7 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
     if (!open) {
       // reset when modal closes
       setName('');
-      setCode('');
+
       setDescription('');
       setYear(new Date().getFullYear());
       setMaxStudents(30);
@@ -80,16 +80,17 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
   const onSubmit = async (e, status = 'active') => {
     // allow calling from a button click (which may pass no event) or from form submit
     if (e?.preventDefault) e.preventDefault();
-    if (!name || !code) {
+    if (!name) {
       setNotifyMsg('Please fill in all required fields');
       setNotifyType('error');
       setNotifyOpen(true);
       return;
     }
     try {
+      const codeToUse = generateRandomCode(5);
       const payload = {
         name,
-        code,
+        code: codeToUse,
         description,
         year: Number(year),
         max_students: Number(maxStudents),
@@ -107,7 +108,6 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
 
         // reset form
         setName('');
-        setCode('');
         setDescription('');
         setYear(new Date().getFullYear());
         setMaxStudents(30);
@@ -117,8 +117,8 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
         (async () => {
           const failures = [];
           const teacherName = sessionStorage.getItem('full_name') || 'Your teacher';
-          const title = `Added to class ${name || code}`;
-          const body = `You have been added to class ${name || code} by ${teacherName}. Please check your classes.`;
+          const title = `Added to class ${name || codeToUse}`;
+          const body = `You have been added to class ${name || codeToUse} by ${teacherName}. Please check your classes.`;
 
           for (const email of emailsToNotify) {
             try {
@@ -162,12 +162,6 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
             label="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            required={true}
-          />
-          <FormField
-            label="Code"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
             required={true}
           />
         </div>
@@ -252,7 +246,6 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
             className="btn btn-signin"
             onClick={() => {
               setName('');
-              setCode('');
               setDescription('');
               setSelectedStudentEmails([]);
               setMaxStudents(30);

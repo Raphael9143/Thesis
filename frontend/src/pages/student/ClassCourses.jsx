@@ -73,7 +73,8 @@ export default function StudentClassCoursesPage() {
                 <ClassCard
                   key={course.id || course.course_id}
                   title={course.name || course.title || course.course_name}
-                  subtitle={course.code || course.course_code || ''}
+                  code={course.code || course.course_code}
+                  subtitle={course.semester || ''}
                   image={course.image || course.thumbnail}
                   description={course.description || ''}
                   onClick={() =>

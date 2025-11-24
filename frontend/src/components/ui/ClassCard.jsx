@@ -4,6 +4,7 @@ import '../../assets/styles/components/ui/ClassCard.css';
 export default function ClassCard({
   title,
   subtitle,
+  code,
   image,
   onClick,
   badge,
@@ -11,6 +12,10 @@ export default function ClassCard({
   className,
   maxDescriptionChars = 26,
 }) {
+  const role =
+    typeof window !== 'undefined' && sessionStorage.getItem('role')
+      ? sessionStorage.getItem('role').toString().toLowerCase()
+      : null;
   const handleKeyPress = (e) => {
     if (!onClick) return;
     if (e.key === 'Enter' || e.key === ' ') onClick();
@@ -46,6 +51,8 @@ export default function ClassCard({
         ) : (
           <div className="class-card__placeholder">{initials || 'NA'}</div>
         )}
+
+        {code && role === 'teacher' && <div className="class-card__code">{code}</div>}
 
         {badge && <div className="class-card__badge">{badge.toUpperCase()}</div>}
       </div>

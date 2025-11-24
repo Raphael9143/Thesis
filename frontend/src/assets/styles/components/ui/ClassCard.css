@@ -57,6 +57,19 @@
   font-weight: 600;
 }
 
+.class-card__code {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(17,24,39,0.9);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+}
+
 .class-card__meta {
   padding: 10px 12px 14px 12px;
   display: flex;

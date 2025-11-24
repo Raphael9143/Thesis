@@ -3,11 +3,11 @@ import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
 import NotificationPopup from '../../components/ui/NotificationPopup';
 import userAPI from '../../../services/userAPI';
+import generateRandomCode from '../../utils/generateRandomCode';
 import '../../assets/styles/components/teacher/CreateClassModal.css';
 
 export default function CreateCourseModal({ open, onClose, defaultClassId = null, onCreated }) {
   const [courseName, setCourseName] = useState('');
-  const [courseCode, setCourseCode] = useState('');
   const [description, setDescription] = useState('');
   const [semester, setSemester] = useState('');
 
@@ -19,7 +19,6 @@ export default function CreateCourseModal({ open, onClose, defaultClassId = null
   useEffect(() => {
     if (!open) {
       setCourseName('');
-      setCourseCode('');
       setDescription('');
       setSemester('');
     }
@@ -27,17 +26,18 @@ export default function CreateCourseModal({ open, onClose, defaultClassId = null
 
   const onSubmit = async (e) => {
     if (e?.preventDefault) e.preventDefault();
-    if (!courseName || !courseCode || !defaultClassId) {
-      setNotifyMsg('course_name, course_code and class_id are required');
+    if (!courseName || !defaultClassId) {
+      setNotifyMsg('course_name and class_id are required');
       setNotifyType('error');
       setNotifyOpen(true);
       return;
     }
     setSubmitting(true);
     try {
+      const codeToUse = generateRandomCode(5);
       const payload = {
         course_name: courseName,
-        course_code: courseCode,
+        course_code: codeToUse,
         description,
         semester,
         class_id: defaultClassId,
@@ -74,12 +74,6 @@ export default function CreateCourseModal({ open, onClose, defaultClassId = null
             onChange={(e) => setCourseName(e.target.value)}
             required={true}
           />
-          <FormField
-            label="Course code"
-            value={courseCode}
-            onChange={(e) => setCourseCode(e.target.value)}
-            required={true}
-          />
         </div>
 
         <div className="create-class-row mt">
@@ -110,7 +104,6 @@ export default function CreateCourseModal({ open, onClose, defaultClassId = null
             className="btn btn-signin"
             onClick={() => {
               setCourseName('');
-              setCourseCode('');
               setDescription('');
               setSemester('');
             }}
