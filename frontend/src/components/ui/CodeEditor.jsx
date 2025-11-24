@@ -9,7 +9,6 @@ export default function CodeEditor({
   rows = 12,
   className = '',
 }) {
-  const [useSpaces, setUseSpaces] = useState(true);
   const [lineCount, setLineCount] = useState(1);
   const numbersRef = useRef(null);
   const textareaRef = useRef(null);
@@ -29,7 +28,7 @@ export default function CodeEditor({
     e.preventDefault();
     const el = textareaRef.current;
     if (!el) return;
-    const indent = useSpaces ? '  ' : '\t';
+    const indent = '  ';
     const start = el.selectionStart;
     const end = el.selectionEnd;
     const currentValue = value || '';
@@ -85,17 +84,6 @@ export default function CodeEditor({
 
   return (
     <div className={`code-editor-wrapper ${className}`.trim()}>
-      <div className="editor-controls">
-        <label className="inline-flex align-center gap-8">
-          <input
-            type="checkbox"
-            checked={useSpaces}
-            onChange={(e) => setUseSpaces(e.target.checked)}
-            disabled={disabled}
-          />
-          Use 2 spaces for Tab key
-        </label>
-      </div>
       <div className="code-editor-container">
         <div className="line-numbers" ref={numbersRef} aria-hidden="true">
           {Array.from({ length: lineCount }).map((_, idx) => (
