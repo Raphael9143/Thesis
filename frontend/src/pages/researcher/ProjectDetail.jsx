@@ -10,6 +10,7 @@ import toFullUrl from '../../utils/FullURLFile';
 import DashedDivider from '../../components/ui/DashedDivider';
 import { useNotifications } from '../../contexts/NotificationContext';
 import AddModeratorModal from '../../components/researcher/AddModeratorModal';
+import AddContributorsModal from '../../components/researcher/AddContributorsModal';
 import ContributionHistory from './ContributionHistory';
 import ProjectSettings from './ProjectSettings';
 import Tabs from '../../components/ui/Tabs';
@@ -30,6 +31,7 @@ export default function ResearcherProjectDetail() {
   const [starred, setStarred] = useState(false);
   const [starLoading, setStarLoading] = useState(false);
   const [addModeratorOpen, setAddModeratorOpen] = useState(false);
+  const [addContribOpen, setAddContribOpen] = useState(false);
   // inline preview handled by FilePreview; no modal state required
 
   // Determine active tab from URL
@@ -58,6 +60,12 @@ export default function ResearcherProjectDetail() {
     if (!members || !members.owner) return false;
     const currentUserId = sessionStorage.getItem('userId');
     return members.owner.id === Number(currentUserId);
+  }, [members]);
+
+  const isModerator = useMemo(() => {
+    if (!members || !Array.isArray(members.moderators)) return false;
+    const currentUserId = sessionStorage.getItem('userId');
+    return members.moderators.some((m) => m.id === Number(currentUserId));
   }, [members]);
 
   useTitle(titleText);
@@ -192,6 +200,12 @@ export default function ResearcherProjectDetail() {
                       Add Moderator
                     </button>
                   )}
+                  {(isOwner || isModerator) && (
+                    <button className="btn btn-primary btn-sm" onClick={() => setAddContribOpen(true)}>
+                      <i className="fa fa-user-plus project-detail-moderator-icon" />
+                      Add Contributors
+                    </button>
+                  )}
                   <a
                     onClick={handleToggleStar}
                     disabled={starLoading}
@@ -265,6 +279,12 @@ export default function ResearcherProjectDetail() {
       <AddModeratorModal
         open={addModeratorOpen}
         onClose={() => setAddModeratorOpen(false)}
+        onAdded={fetchMembers}
+        projectId={projectId}
+      />
+      <AddContributorsModal
+        open={addContribOpen}
+        onClose={() => setAddContribOpen(false)}
         onAdded={fetchMembers}
         projectId={projectId}
       />
