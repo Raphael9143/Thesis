@@ -5,6 +5,7 @@ import TreeLeaf from './TreeLeaf';
 import Modal from '../../../ui/Modal';
 import useSerialize from '../../../../hooks/useSerialize';
 import useDeserialize from '../../../../hooks/useDeserialize';
+import { useRef } from 'react';
 
 export default function ModelTreePane({
   modelName = 'Model',
@@ -20,6 +21,7 @@ export default function ModelTreePane({
   const [detailText, setDetailText] = useState('');
   const [readOnlyText, setReadOnlyText] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
+  const serializeTokenRef = useRef(0);
   const {
     serializeClass,
     serializeAssociation,
@@ -51,10 +53,13 @@ export default function ModelTreePane({
     setReadOnlyText('');
     // Show human-friendly USE text when possible (serialize JSON -> USE)
     const trySerialize = async () => {
+      // capture token to ignore stale responses if selection changes or save occurs
+      const myToken = ++serializeTokenRef.current;
       if (!payload) return;
       try {
         if (key.startsWith('class:')) {
           const res = await serializeClass(payload);
+          if (serializeTokenRef.current !== myToken) return; // stale
           const text = res?.data?.data || res?.data || res;
           setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
         } else if (key.startsWith('assoc:')) {
@@ -73,13 +78,16 @@ export default function ModelTreePane({
           setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
         } else if (key.startsWith('op:') || key.startsWith('qop:')) {
           const res = await serializeOperation(payload);
+          if (serializeTokenRef.current !== myToken) return; // stale
           const text = res?.data?.data || res?.data || res;
           setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
         } else {
           // default to showing notes or JSON
+          if (serializeTokenRef.current !== myToken) return; // stale
           setReadOnlyText(payload && payload._notes ? payload._notes : JSON.stringify(payload, null, 2));
         }
       } catch {
+        if (serializeTokenRef.current !== myToken) return; // stale
         setReadOnlyText(payload && payload._notes ? payload._notes : JSON.stringify(payload, null, 2));
       }
     };
@@ -119,6 +127,10 @@ export default function ModelTreePane({
         // fallback: save text as notes
         onUpdateNode && onUpdateNode(selected.key, detailText);
       }
+      // update displayed text immediately so user sees their change
+      setReadOnlyText(detailText);
+      // bump token to cancel any in-flight serialize responses
+      serializeTokenRef.current++;
       setModalOpen(false);
     } catch (e) {
       // show raw text in detailText if deserialize failed
