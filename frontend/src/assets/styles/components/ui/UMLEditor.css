@@ -133,12 +133,19 @@
 }
 .uml-tool-item {
   padding: 8px;
-  border: 1px dashed #ccc;
   border-radius: 6px;
   cursor: grab;
   margin-bottom: 8px;
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Make toolbox SVG icons a bit larger for better visibility */
+.uml-tool-item svg {
+  width: 96px;  
+  height: 72px;
+  display: block;
+  margin: 0 auto;
 }
 .uml-toolbox-actions {
   margin-top: 12px;
