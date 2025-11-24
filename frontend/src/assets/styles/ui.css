@@ -127,6 +127,12 @@ textarea:hover {
   border-color: var(--uml-box-border);
 }
 
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--uml-box-border);
+}
+
 @media (max-width: 900px) {
   .grid--3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -321,3 +327,44 @@ pre {
   width: 100%;
   box-sizing: border-box;
 }
+
+/* Date group header used to group list items by creation date */
+.date-group-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f3f6ff;
+  border: 1px solid #e6eefc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 12px 0 6px 0;
+  cursor: pointer;
+  font-weight: 700;
+  color: #1f2937;
+}
+.date-group-bar .date-group-left {
+  font-size: 13px;
+}
+.date-group-bar .date-group-right {
+  font-size: 12px;
+  color: #475569;
+}
+.date-group-bar .caret {
+  margin-left: 8px;
+  font-weight: 600;
+}
+.date-group-bar.collapsed {
+  opacity: 0.95;
+}
+
+/* Small date badge card (optional individual badge style) */
+.date-badge {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+}
+.date-badge .due {
+  color: #c53030; /* red */
+  font-weight: 600;
+}
+

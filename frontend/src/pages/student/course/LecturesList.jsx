@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Section from '../../../components/ui/Section';
 import Card from '../../../components/ui/Card';
@@ -6,6 +6,7 @@ import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import '../../../assets/styles/pages/ClassDetail.css';
 import useTitle from '../../../hooks/useTitle';
+import DateGroupBar from '../../../components/ui/DateGroupBar';
 
 export default function StudentLecturesList() {
   const { id, courseId: routeCourseId } = useParams();
@@ -50,26 +51,79 @@ export default function StudentLecturesList() {
 
   useTitle(`Lectures - ${classInfo?.name || (routeCourseId ? 'Course' : '')}`);
 
+  const formatKey = (d) => {
+    if (!d) return 'unknown';
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return 'unknown';
+    return dt.toISOString().slice(0, 10); // YYYY-MM-DD
+  };
+
+  const formatLabel = (d) => {
+    if (!d) return 'Unknown';
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return 'Unknown';
+    return dt.toLocaleDateString();
+  };
+
+  const groups = useMemo(() => {
+    const map = new Map();
+    (lectures || []).forEach((l) => {
+      const key = formatKey(l.created_at || l.created || l.createdAt || Date.now());
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(l);
+    });
+    return Array.from(map.entries())
+      .map(([key, items]) => ({
+        key,
+        label: formatLabel(items[0].created_at || items[0].created || items[0].createdAt),
+        items,
+      }))
+      .sort((a, b) => (a.key < b.key ? 1 : -1));
+  }, [lectures]);
+
+  const [collapsed, setCollapsed] = useState(new Set());
+  const toggleGroup = (key) => {
+    setCollapsed((prev) => {
+      const np = new Set(prev);
+      if (np.has(key)) np.delete(key);
+      else np.add(key);
+      return np;
+    });
+  };
+
   return (
     <Section>
       <Card>
         <div className="class-detail__panel">
-          <h4 className="no-margin">Lectures</h4>
           {loading && <div>Loading contents...</div>}
           {error && <div className="text-error">{error}</div>}
           {!loading && !error && lectures.length === 0 && <div>No lectures.</div>}
           {!loading && !error && lectures.length > 0 && (
-            <ul className="class-detail__list">
-              {lectures.map((l) => (
-                <li
-                  key={l.id}
-                  className="class-detail__list-item"
-                  onClick={() => navigate(`/education/student/classes/${id}/courses/${courseIdState}/lectures/${l.id}`)}
-                >
-                  <div className="class-detail__item-title">{l.title}</div>
-                </li>
+            <div>
+              {groups.map((g) => (
+                <div key={g.key}>
+                  <DateGroupBar
+                    dateLabel={g.label}
+                    count={g.items.length}
+                    collapsed={collapsed.has(g.key)}
+                    onToggle={() => toggleGroup(g.key)}
+                  />
+                  <ul className="class-detail__list" style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}>
+                    {g.items.map((l) => (
+                      <li
+                        key={l.id}
+                        className="class-detail__list-item"
+                        onClick={() => {
+                          navigate(`/education/student/classes/${id}/courses/${courseIdState}/lectures/${l.id}`);
+                        }}
+                      >
+                        <div className="class-detail__item-title">{l.title}</div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       </Card>

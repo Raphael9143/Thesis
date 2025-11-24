@@ -41,7 +41,7 @@ export default function ClassCard({
       <div className="class-card__thumb">
         {image ? <img src={image} alt={title} /> : <div className="class-card__placeholder">{initials || 'NA'}</div>}
 
-        {badge && <div className="class-card__badge">{badge}</div>}
+        {badge && <div className="class-card__badge">{badge.toUpperCase()}</div>}
       </div>
 
       <div className="class-card__meta">

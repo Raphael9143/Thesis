@@ -153,7 +153,8 @@ export default function LecturePreview() {
                     className="btn btn-primary btn-sm"
                     download
                   >
-                    Download
+                    <i className="fa-solid fa-download"></i>
+                    <span>Download</span>
                   </a>
                 )}
               </div>

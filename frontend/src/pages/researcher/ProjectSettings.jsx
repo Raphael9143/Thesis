@@ -119,7 +119,8 @@ export default function ProjectSettings({ project, isOwner, onProjectUpdate }) {
           onClick={handleCloseProject}
           disabled={closing || project?.status === 'CLOSED'}
         >
-          {closing ? 'Closing...' : project?.status === 'CLOSED' ? 'Project Closed' : 'Close Project'}
+          <i className="fa-solid fa-ban"></i>
+          <span>{closing ? 'Closing...' : project?.status === 'CLOSED' ? 'Project Closed' : 'Close Project'}</span>
         </button>
       </div>
     </div>

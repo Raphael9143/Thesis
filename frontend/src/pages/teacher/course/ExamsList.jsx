@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Section from '../../../components/ui/Section';
 import Card from '../../../components/ui/Card';
@@ -6,6 +6,7 @@ import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import '../../../assets/styles/pages/ClassDetail.css';
 import CreateExamForm from '../../../components/teacher/CreateExamForm';
+import DateGroupBar from '../../../components/ui/DateGroupBar';
 import { useNotifications } from '../../../contexts/NotificationContext';
 import useTitle from '../../../hooks/useTitle';
 
@@ -75,6 +76,46 @@ export default function ExamsList() {
     }
   };
 
+  const formatKey = (d) => {
+    if (!d) return 'unknown';
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return 'unknown';
+    return dt.toISOString().slice(0, 10); // YYYY-MM-DD
+  };
+
+  const formatLabel = (d) => {
+    if (!d) return 'Unknown';
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return 'Unknown';
+    return dt.toLocaleDateString();
+  };
+
+  const groups = useMemo(() => {
+    const map = new Map();
+    (exams || []).forEach((e) => {
+      const key = formatKey(e.start_date);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(e);
+    });
+    return Array.from(map.entries())
+      .map(([key, items]) => ({
+        key,
+        label: formatLabel(items[0].start_date),
+        items,
+      }))
+      .sort((a, b) => (a.key < b.key ? 1 : -1));
+  }, [exams]);
+
+  const [collapsed, setCollapsed] = useState(new Set());
+  const toggleGroup = (key) => {
+    setCollapsed((prev) => {
+      const np = new Set(prev);
+      if (np.has(key)) np.delete(key);
+      else np.add(key);
+      return np;
+    });
+  };
+
   const cancelExam = async (e) => {
     if (!confirm('Delete this exam?')) return;
     try {
@@ -113,52 +154,64 @@ export default function ExamsList() {
           </div>
           {!loading && !error && exams.length === 0 && <div>No exams.</div>}
           {!loading && !error && exams.length > 0 && (
-            <ul className="class-detail__list">
-              {exams.map((ex) => (
-                <li key={ex.id || ex.exam_id} className="class-detail__list-item">
-                  <div className="flex-between full-width">
-                    <div
-                      className="clickable"
-                      onClick={() =>
-                        navigate(
-                          `/education/teacher/classes/${id}/courses/${courseIdState}/exams/${ex.id || ex.exam_id}`
-                        )
-                      }
-                    >
-                      <div className="font-700 truncate">{ex.title}</div>
-                    </div>
-                    <div className="display-flex gap-8 ml-12">
-                      {ex.status === 'draft' ? (
-                        <>
-                          <button
-                            className="btn btn-icon"
-                            title="Publish"
-                            onClick={() => publishExam(ex.id || ex.exam_id)}
+            <div>
+              {groups.map((g) => (
+                <div key={g.key}>
+                  <DateGroupBar
+                    dateLabel={g.label}
+                    count={g.items.length}
+                    collapsed={collapsed.has(g.key)}
+                    onToggle={() => toggleGroup(g.key)}
+                  />
+                  <ul className="class-detail__list" style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}>
+                    {g.items.map((ex) => (
+                      <li key={ex.id || ex.exam_id} className="class-detail__list-item">
+                        <div className="flex-between full-width">
+                          <div
+                            className="clickable"
+                            onClick={() =>
+                              navigate(
+                                `/education/teacher/classes/${id}/courses/${courseIdState}/exams/${ex.id || ex.exam_id}`
+                              )
+                            }
                           >
-                            <i className="fa fa-paper-plane" />
-                          </button>
-                          <button className="btn btn-icon" title="Delete" onClick={() => cancelExam(ex)}>
-                            <i className="fa fa-times" />
-                          </button>
-                          <button className="btn btn-icon" title="Update" onClick={() => updateExam(ex)}>
-                            <i className="fa fa-edit" />
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <button className="btn btn-icon" title="Delete" onClick={() => cancelExam(ex)}>
-                            <i className="fa fa-times" />
-                          </button>
-                          <button className="btn btn-icon" title="Update" onClick={() => updateExam(ex)}>
-                            <i className="fa fa-edit" />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </li>
+                            <div className="font-700 truncate">{ex.title}</div>
+                          </div>
+                          <div className="display-flex gap-8 ml-12">
+                            {ex.status === 'draft' ? (
+                              <>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Publish"
+                                  onClick={() => publishExam(ex.id || ex.exam_id)}
+                                >
+                                  <i className="fa fa-paper-plane" />
+                                </button>
+                                <button className="btn btn-icon" title="Delete" onClick={() => cancelExam(ex)}>
+                                  <i className="fa fa-times" />
+                                </button>
+                                <button className="btn btn-icon" title="Update" onClick={() => updateExam(ex)}>
+                                  <i className="fa fa-edit" />
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button className="btn btn-icon" title="Delete" onClick={() => cancelExam(ex)}>
+                                  <i className="fa fa-times" />
+                                </button>
+                                <button className="btn btn-icon" title="Update" onClick={() => updateExam(ex)}>
+                                  <i className="fa fa-edit" />
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       </Card>

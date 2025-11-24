@@ -188,7 +188,8 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
             disabled={umlLoading}
             title="Preview UML model"
           >
-            {umlLoading ? 'Parsing...' : 'UML Preview'}
+            <i className="fa-solid fa-diagram-next"></i>
+            <span>{umlLoading ? 'Parsing...' : 'UML Preview'}</span>
           </button>
         )}
         {showPreviewButton && (
@@ -198,7 +199,8 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
             disabled={saveLoading}
             title="Store UML model into Storage"
           >
-            {saveLoading ? 'Storing...' : 'Storage'}
+            <i className="fa-solid fa-database"></i>
+            <span>{saveLoading ? 'Storing...' : 'Storage'}</span>
           </button>
         )}
       </div>

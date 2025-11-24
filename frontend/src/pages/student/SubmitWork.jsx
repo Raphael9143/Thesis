@@ -148,15 +148,9 @@ export default function SubmitWork() {
       {!loading && !error && (
         <div className="submit-container">
           <div className="submit-toggle">
-            <button
-              className={`btn btn-sm ${mode === 'editor' ? 'btn-primary' : ''}`}
-              onClick={() => setMode('editor')}
-              disabled={submitting}
-            >
-              Write Code
-            </button>
             <label className={`btn btn-signin btn-sm ${mode === 'file' ? 'btn-primary' : ''}`}>
-              Upload File
+              <i className="fa-solid fa-upload"></i>
+              <span>Upload File</span>
               <input
                 type="file"
                 accept=".use,.txt"
@@ -209,7 +203,8 @@ export default function SubmitWork() {
                 onClick={onSubmit}
                 disabled={submitting || isExpired || (attempts && attempts.remaining_attempts <= 0)}
               >
-                {submitting ? 'Submitting...' : 'Submit'}
+                <i className="fa-solid fa-paper-plane"></i>
+                <span>{submitting ? 'Submitting...' : 'Submit'}</span>
               </button>
 
               <span style={{ marginLeft: 8 }}>

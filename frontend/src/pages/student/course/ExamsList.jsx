@@ -6,6 +6,7 @@ import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import '../../../assets/styles/pages/ClassDetail.css';
 import useAttemptMap from '../../../hooks/useAttemptMap';
+import DateGroupBar from '../../../components/ui/DateGroupBar';
 import useTitle from '../../../hooks/useTitle';
 import useLatestScoreMap from '../../../hooks/useLatestScoreMap';
 import useDueDateStatus from '../../../hooks/useDueDateStatus';
@@ -69,10 +70,50 @@ export default function StudentExamsList() {
 
   useTitle(`Exams - ${classInfo?.name || (routeCourseId ? 'Course' : '')}`);
 
+  const formatKey = (d) => {
+    if (!d) return 'unknown';
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return 'unknown';
+    return dt.toISOString().slice(0, 10);
+  };
+
+  const formatLabel = (d) => {
+    if (!d) return 'Unknown';
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return 'Unknown';
+    return dt.toLocaleDateString();
+  };
+
+  const groups = useMemo(() => {
+    const map = new Map();
+    (exams || []).forEach((e) => {
+      const key = formatKey(e.start_date);
+      if (!map.has(key)) map.set(key, []);
+      map.get(key).push(e);
+    });
+    return Array.from(map.entries())
+      .map(([key, items]) => ({
+        key,
+        label: formatLabel(items[0].start_date),
+        items,
+      }))
+      .sort((a, b) => (a.key < b.key ? 1 : -1));
+  }, [exams]);
+
+  const [collapsed, setCollapsed] = useState(new Set());
+  const toggleGroup = (key) => {
+    setCollapsed((prev) => {
+      const np = new Set(prev);
+      if (np.has(key)) np.delete(key);
+      else np.add(key);
+      return np;
+    });
+  };
+
   const ExamListItem = ({ ex }) => {
     const idv = ex.id || ex.exam_id;
     const dueField = ex.end_date || null;
-    const { formatted, daysLeft, className } = useDueDateStatus(dueField);
+    const { daysLeft, className } = useDueDateStatus(dueField);
     return (
       <li
         key={idv}
@@ -96,10 +137,7 @@ export default function StudentExamsList() {
           </div>
         )}
         <div className="class-detail__item-title">{ex.title}</div>
-        <small className={`due-date ${className}`}>
-          {formatted}
-          {daysLeft !== null ? ` (${daysLeft}d)` : ''}
-        </small>
+        <small className={`due-date ${className}`}>{daysLeft !== null ? ` ${daysLeft}d left.` : ''}</small>
       </li>
     );
   };
@@ -108,16 +146,27 @@ export default function StudentExamsList() {
     <Section>
       <Card>
         <div className="class-detail__panel">
-          <h4 className="no-margin">Exams</h4>
           {loading && <div>Loading contents...</div>}
           {error && <div className="text-error">{error}</div>}
           {!loading && !error && exams.length === 0 && <div>No exams.</div>}
           {!loading && !error && exams.length > 0 && (
-            <ul className="class-detail__list">
-              {exams.map((ex) => (
-                <ExamListItem key={ex.id || ex.exam_id} ex={ex} />
+            <div>
+              {groups.map((g) => (
+                <div key={g.key}>
+                  <DateGroupBar
+                    dateLabel={g.label}
+                    count={g.items.length}
+                    collapsed={collapsed.has(g.key)}
+                    onToggle={() => toggleGroup(g.key)}
+                  />
+                  <ul className="class-detail__list" style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}>
+                    {g.items.map((ex) => (
+                      <ExamListItem key={ex.id || ex.exam_id} ex={ex} />
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </div>
       </Card>
