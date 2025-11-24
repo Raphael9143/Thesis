@@ -22,6 +22,7 @@ export default function ModelTreePane({
   const [readOnlyText, setReadOnlyText] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const serializeTokenRef = useRef(0);
+  const textareaRef = useRef(null);
   const {
     serializeClass,
     serializeAssociation,
@@ -138,6 +139,65 @@ export default function ModelTreePane({
       // still call onUpdateNode with raw text to preserve behavior
       onUpdateNode && onUpdateNode(selected.key, detailText);
       // keep modal closed; leave editing state managed by modal
+    }
+  };
+
+  const handleTabKey = (e) => {
+    if (e.key !== 'Tab') return;
+    e.preventDefault();
+    const el = textareaRef.current;
+    if (!el) return;
+    const indent = '  '; // 2 spaces
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const currentValue = detailText || '';
+
+    if (start !== end) {
+      // Multi-line selection
+      const before = currentValue.substring(0, start);
+      const selected = currentValue.substring(start, end);
+      const after = currentValue.substring(end);
+      const lines = selected.split('\n');
+
+      if (e.shiftKey) {
+        // Outdent
+        const outdented = lines.map((line) => {
+          if (line.startsWith(indent)) return line.slice(indent.length);
+          if (line.startsWith('\t')) return line.slice(1);
+          return line;
+        });
+        const joined = outdented.join('\n');
+        const newVal = before + joined + after;
+        const newStart = start;
+        const newEnd = start + joined.length;
+        setDetailText(newVal);
+        requestAnimationFrame(() => {
+          el.selectionStart = newStart;
+          el.selectionEnd = newEnd;
+        });
+      } else {
+        // Indent
+        const indented = lines.map((line) => indent + line).join('\n');
+        const newVal = before + indented + after;
+        const newStart = start;
+        const newEnd = start + indented.length;
+        setDetailText(newVal);
+        requestAnimationFrame(() => {
+          el.selectionStart = newStart;
+          el.selectionEnd = newEnd;
+        });
+      }
+    } else {
+      // Single caret insert
+      const before = currentValue.substring(0, start);
+      const after = currentValue.substring(end);
+      const newVal = before + indent + after;
+      setDetailText(newVal);
+      requestAnimationFrame(() => {
+        const pos = start + indent.length;
+        el.selectionStart = pos;
+        el.selectionEnd = pos;
+      });
     }
   };
 
@@ -294,10 +354,12 @@ export default function ModelTreePane({
 
         <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={'Edit'}>
           <textarea
+            ref={textareaRef}
             className="uml-model-tree-detail-text edit"
             rows={12}
             value={detailText || readOnlyText}
             onChange={(e) => setDetailText(e.target.value)}
+            onKeyDown={handleTabKey}
             style={{ width: '100%' }}
           />
           <div className="uml-model-tree-detail-actions">

@@ -29,7 +29,7 @@ export default function CodeEditor({
     e.preventDefault();
     const el = textareaRef.current;
     if (!el) return;
-    const indent = useSpaces ? '    ' : '\t';
+    const indent = useSpaces ? '  ' : '\t';
     const start = el.selectionStart;
     const end = el.selectionEnd;
     const currentValue = value || '';
@@ -93,7 +93,7 @@ export default function CodeEditor({
             onChange={(e) => setUseSpaces(e.target.checked)}
             disabled={disabled}
           />
-          Use 4 spaces for Tab
+          Use 2 spaces for Tab key
         </label>
       </div>
       <div className="code-editor-container">
