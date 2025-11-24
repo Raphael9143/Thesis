@@ -113,7 +113,6 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 input, select, textarea {
-  width: 100%;
   background: #fff;
   color: #000;
   border: 1px solid #d0d0d0;
