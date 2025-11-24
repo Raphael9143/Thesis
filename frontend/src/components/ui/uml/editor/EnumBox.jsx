@@ -16,6 +16,7 @@ export default function EnumBox({
   onDeleteValue,
   onCommitAddValue,
   onCancelAddValue,
+  onDeleteEnum,
 }) {
   return (
     <div
@@ -50,6 +51,14 @@ export default function EnumBox({
               onClick={(e) => {
                 e.stopPropagation();
                 onCancelEdit && onCancelEdit(en.name, 'enum');
+              }}
+            />
+            <i
+              className="fa fa-trash uml-icon-btn"
+              title="Delete enum"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteEnum && onDeleteEnum(en.name);
               }}
             />
           </div>

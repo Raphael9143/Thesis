@@ -286,6 +286,26 @@ export default function UMLEditor({ initialModel = null }) {
     });
   };
 
+  const deleteEnum = (enumName) => {
+    // Remove the enum
+    setEnums((prev) => prev.filter((e) => e.name !== enumName));
+
+    // cleanup enum edit buffers
+    setEnumEditBuffers((prev) => {
+      const np = { ...prev };
+      delete np[enumName];
+      return np;
+    });
+
+    // Remove positions related to the enum
+    setPositions((prev) => {
+      const np = { ...prev };
+      const key = `enum:${enumName}`;
+      if (np[key]) delete np[key];
+      return np;
+    });
+  };
+
   // start adding attribute inline for a class
   const startAddingAttr = (clsName) => {
     setNewAttrInputs((n) => ({ ...n, [clsName]: { name: '', type: '', adding: true } }));
@@ -766,7 +786,8 @@ export default function UMLEditor({ initialModel = null }) {
             disabled={exporting}
             title={exportError || 'Export USE model'}
           >
-            {exporting ? 'Exporting…' : 'Export'}
+            <i className="fa-solid fa-arrow-up-right-from-square"></i>
+            <span>{exporting ? 'Exporting…' : 'Export'}</span>
           </button>
           {exportError && <div className="export-error">{exportError}</div>}
         </div>
@@ -843,6 +864,7 @@ export default function UMLEditor({ initialModel = null }) {
                   onDeleteValue={(idx) => deleteEnumValue(en.name, idx)}
                   onCommitAddValue={() => commitAddingEnumValue(en.name)}
                   onCancelAddValue={() => cancelAddingEnumValue(en.name)}
+                  onDeleteEnum={(name) => deleteEnum(name)}
                   classes={classes}
                 />
               );
