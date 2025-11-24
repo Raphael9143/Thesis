@@ -150,86 +150,34 @@ function buildUseText(modelJson) {
   // Enums
   if (Array.isArray(modelJson.enums)) {
     for (const en of modelJson.enums) {
-      const name = en.name || "Enum";
-      const vals = Array.isArray(en.values)
-        ? en.values
-        : String(en.values || "")
-            .split(/,/)
-            .map((s) => s.trim())
-            .filter(Boolean);
-      lines.push(`enum ${name} { ${vals.join(", ")} }`);
-      lines.push("");
+      try {
+        const t = buildEnumText(en);
+        if (t && String(t).trim()) {
+          lines.push(t);
+          lines.push("");
+        }
+      } catch {
+        // fallback: ignore
+      }
     }
   }
 
   // Associations
   // NOTE: associations will be appended after classes to keep classes grouped first
 
-  // Classes
+  // Classes: reuse buildClassText helper for consistent formatting
   if (Array.isArray(modelJson.classes)) {
     for (const cls of modelJson.classes) {
-      const parts = [];
-      if (cls.isAbstract) parts.push("abstract");
-      let header = `class ${cls.name || "Unnamed"}`;
-      if (Array.isArray(cls.superclasses) && cls.superclasses.length) {
-        header += ` < ${cls.superclasses.join(", ")}`;
-      }
-      if (parts.length) header = parts.join(" ") + " " + header;
-      lines.push(header);
-
-      if (Array.isArray(cls.attributes) && cls.attributes.length) {
-        lines.push("  attributes");
-        for (const a of cls.attributes) {
-          if (typeof a === "string") {
-            lines.push("    " + a);
-          } else if (a && typeof a === "object") {
-            const t = a.type ? ` : ${a.type}` : "";
-            lines.push(`    ${a.name || "unnamed"}${t}`);
-          }
+      try {
+        const t = buildClassText(cls);
+        if (t && String(t).trim()) {
+          lines.push(t);
+          lines.push("");
         }
+      } catch (e) {
+        // fallback: ignore class formatting errors
+        console.error("Error building class text:", e && e.message ? e.message : e);
       }
-
-      // combine plain operations and query_operations, but preserve body information
-      const allOps = [];
-      if (Array.isArray(cls.operations)) allOps.push(...cls.operations);
-      if (Array.isArray(cls.query_operations)) allOps.push(...cls.query_operations);
-      if (allOps.length) {
-        lines.push("  operations");
-        for (const op of allOps) {
-          if (typeof op === "string") {
-            lines.push("    " + op);
-            continue;
-          }
-          if (!op || typeof op !== "object") continue;
-
-          const sig = op.signature !== undefined ? `(${op.signature})` : "()";
-          const ret = op.returnType ? ` : ${op.returnType}` : "";
-          const name = op.name || op.fullName || "op";
-
-          if (op.body && String(op.body).trim()) {
-            const b = String(op.body);
-            const trimmed = b.trim();
-            const isBlock = /\n/.test(b) || /^begin\b/i.test(trimmed);
-            if (isBlock) {
-              // multi-line block: write signature line then indent body lines
-              lines.push(`    ${name}${sig}${ret}`);
-              const bodyLines = b.split(/\r?\n/);
-              for (const l of bodyLines) {
-                lines.push("      " + l);
-              }
-            } else {
-              // single-line expression: use inline '='
-              lines.push(`    ${name}${sig}${ret} = ${trimmed}`);
-            }
-          } else {
-            // no body
-            lines.push(`    ${name}${sig}${ret}`);
-          }
-        }
-      }
-
-      lines.push("end");
-      lines.push("");
     }
   }
 
@@ -247,132 +195,19 @@ function buildUseText(modelJson) {
       }
     }
   }
-
-  // Constraints: render as a top-level 'constraints' block with indented bodies
-  // If no structured constraints are provided, try to extract 'context' blocks from raw_text
-  let constraints = Array.isArray(modelJson.constraints)
-    ? modelJson.constraints.slice()
-    : [];
-  if ((!constraints || !constraints.length) && modelJson.raw_text &&
-    typeof modelJson.raw_text === "string") {
-    try {
-      const raw = String(modelJson.raw_text || "");
-      // If the raw text contains a 'constraints' section, capture each top-level
-      // constraint (separated by blank lines) and preserve them as raw strings
-      // so the exporter can re-emit them verbatim.
-      const consMatch = raw.match(/(?:\r?\n|^)\s*constraints\s*([\s\S]*?)$/i);
-      if (consMatch && consMatch[1]) {
-        const block = String(consMatch[1] || "").trim();
-        const parts = block
-          .split(/\r?\n\s*\r?\n/)
-          .map((s) => s.trim())
-          .filter(Boolean);
-        for (const p of parts) constraints.push(p);
-      }
-
-      // Also attempt to extract 'context' blocks (for structured invariants)
-      const ctxRe = /context\s+([^\r\n]+)([\s\S]*?)(?=(?:\r?\n)\s*context\b|\r?\n\s*\r?\n|$)/gim;
-      let m;
-      while ((m = ctxRe.exec(raw)) !== null) {
-        const header = (m[1] || "").trim();
-        const body = (m[2] || "").trim();
-        // header may be 'Class inv name' or an operation signature
-        const invMatch = header.match(/^([A-Za-z0-9_:<>]+)\s+inv\s+([A-Za-z0-9_]+)$/i);
-        if (invMatch) {
-          constraints.push({
-            context: invMatch[1],
-            kind: "invariant",
-            name: invMatch[2],
-            expression: body,
-          });
-        } else {
-          // fallback: store header and body
-          constraints.push({ context: header, kind: "constraint", expression: body });
-        }
-      }
-    } catch {
-      // ignore extraction errors
+  // Constraints: delegate to shared helper to ensure consistent formatting
+  try {
+    const consText = buildConstraintsText(
+      modelJson.constraints || [],
+      modelJson.raw_text || "",
+      true
+    );
+    if (consText && String(consText).trim()) {
+      lines.push(consText);
     }
-  }
-
-  if (Array.isArray(constraints) && constraints.length) {
-    lines.push("constraints");
-    lines.push("");
-    for (const c of constraints) {
-      try {
-        if (!c) continue;
-        if (typeof c === "string") {
-          // raw constraint text (assume already formatted)
-          lines.push(c.trim());
-          lines.push("");
-          continue;
-        }
-
-        const ctx = c.context || c.contextName || c.context_name || c.header || "";
-        const kind = (c.kind || "").toLowerCase();
-        const name = c.name || c.label || "";
-        const expr = (c.expression || c.expr || c.body || c.raw || "").toString().trim();
-
-        // If ctx is an operation signature (contains '::'), render header and pre/post
-        if (ctx && /::/.test(ctx)) {
-          lines.push(`context ${ctx}`);
-          if ((kind === "pre" || kind === "post") && expr) {
-            if (name) lines.push(`  ${kind} ${name}: ${expr}`);
-            else lines.push(`  ${kind}: ${expr}`);
-          } else if ((kind === "invariant" || kind === "inv") && expr) {
-            // operation-level invariant: print as inv name then body
-            const nm = name ? ` ${name}` : "";
-            lines.push(`  inv${nm}: ${expr}`);
-          } else if (expr) {
-            lines.push(`  ${expr}`);
-          }
-          lines.push("");
-          continue;
-        }
-
-        // Class-level constraints: usually invariants named via 'inv'
-        if (ctx && (kind === "invariant" || kind === "inv")) {
-          const nm = name ? ` ${name}` : "";
-          lines.push(`context ${ctx} inv${nm}:`);
-          if (expr) {
-            const bodyLines = expr.split(/\r?\n/);
-            for (const bl of bodyLines) lines.push(`  ${bl}`);
-          }
-          lines.push("");
-          continue;
-        }
-
-        // pre/post attached to a named context (non-operation)
-        if (ctx && (kind === "pre" || kind === "post")) {
-          const nm = name ? ` ${name}` : "";
-          lines.push(`context ${ctx} ${kind}${nm}:`);
-          if (expr) {
-            const bodyLines = expr.split(/\r?\n/);
-            for (const bl of bodyLines) lines.push(`  ${bl}`);
-          }
-          lines.push("");
-          continue;
-        }
-
-        // Generic fallback: print header if we have context, else dump expression
-        if (ctx) {
-          lines.push(`context ${ctx}`);
-          if (expr) {
-            const bodyLines = expr.split(/\r?\n/);
-            for (const bl of bodyLines) lines.push(`  ${bl}`);
-          }
-          lines.push("");
-          continue;
-        }
-
-        if (expr) {
-          lines.push(expr);
-          lines.push("");
-        }
-      } catch {
-        // ignore formatting errors for individual constraints
-      }
-    }
+  } catch (e) {
+    // fallback: ignore constraint formatting errors
+    console.error("Error building constraints text:", e && e.message ? e.message : e);
   }
 
   return lines.join("\n");
@@ -552,7 +387,13 @@ function buildConstraintsText(constraints, rawText, includeHeader = true) {
         continue;
       }
       const ctx = c.context || c.contextName || c.context_name || c.header || "";
-      const kind = (c.kind || "").toLowerCase();
+      // Accept either `kind` or legacy `type` fields and normalize common variants
+      let kindRaw = "";
+      if (c && typeof c === "object") kindRaw = c.kind || c.type || "";
+      let kind = (kindRaw || "").toString().toLowerCase();
+      if (kind.indexOf("pre") !== -1) kind = "pre";
+      else if (kind.indexOf("post") !== -1) kind = "post";
+      else if (kind.indexOf("inv") !== -1) kind = "invariant";
       const name = c.name || c.label || "";
       const expr = (c.expression || c.expr || c.body || c.raw || "").toString().trim();
 
