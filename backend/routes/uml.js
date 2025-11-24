@@ -136,6 +136,31 @@ router.post("/serialize/association", UseController.serializeAssociation);
  */
 router.post("/serialize/operation", UseController.serializeOperation);
 
+// Serialize single enum JSON to a .use enum block
+/**
+ * @swagger
+ * /api/uml/serialize/enum:
+ *   post:
+ *     summary: Serialize a single enum JSON into a .use enum block
+ *     tags:
+ *       - UML
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: enum
+ *         description: JSON object describing an enum (name, values)
+ *         required: true
+ *         schema:
+ *           type: object
+ *     responses:
+ *       200:
+ *         description: Plain text of the enum block
+ *       400:
+ *         description: Invalid request body
+ */
+router.post("/serialize/enum", UseController.serializeEnum);
+
 // Serialize constraints block
 /**
  * @swagger
@@ -280,5 +305,33 @@ router.post("/deserialize/operation", UseController.deserializeOperation);
  *         description: Invalid request body
  */
 router.post("/deserialize/constraint", UseController.deserializeConstraints);
+
+// Deserialize a .use enum block into JSON
+/**
+ * @swagger
+ * /api/uml/deserialize/enum:
+ *   post:
+ *     summary: Deserialize a .use enum block into JSON
+ *     tags:
+ *       - UML
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: enum
+ *         description: .use enum block text
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             text:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: JSON representation of the enum
+ *       400:
+ *         description: Invalid request body
+ */
+router.post("/deserialize/enum", UseController.deserializeEnum);
 
 module.exports = router;

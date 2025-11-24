@@ -409,6 +409,27 @@ function buildAssociationText(assoc) {
   return lines.join("\n");
 }
 
+// Build a single enum `.use` text from an enum JSON object.
+function buildEnumText(enm) {
+  if (!enm || typeof enm !== "object") return "";
+  const name = enm.name || enm.enumName || "Enum";
+  const vals = Array.isArray(enm.values)
+    ? enm.values.map((v) => String(v).trim()).filter(Boolean)
+    : String(enm.values || "").split(/,/).map((s) => s.trim()).filter(Boolean);
+  return `enum ${name} { ${vals.join(", ")} }`;
+}
+
+// Parse an enum `.use` text into JSON { name, values: [] }
+function parseEnumText(text) {
+  if (!text || typeof text !== "string") return null;
+  const m = text.match(/^\s*enum\s+([A-Za-z0-9_]+)\s*\{([\s\S]*?)\}\s*$/i);
+  if (!m) return null;
+  const name = m[1];
+  const body = (m[2] || "").trim();
+  const values = body.length ? body.split(/,/) .map((s) => s.trim()).filter(Boolean) : [];
+  return { name, values };
+}
+
 function buildClassText(cls) {
   if (!cls || typeof cls !== "object") return "";
   const lines = [];
@@ -1048,6 +1069,25 @@ const UseController = {
       return res.send(text);
     } catch (err) {
       console.error("serializeAssociation error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+  // Serialize an enum JSON into `.use` enum text
+  serializeEnum: async (req, res) => {
+    try {
+      const enm = req.body;
+      if (!enm || typeof enm !== "object") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Enum JSON body required" });
+      }
+      const txt = buildEnumText(enm);
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      return res.send(txt);
+    } catch (err) {
+      console.error("serializeEnum error:", err);
       return res
         .status(500)
         .json({ success: false, message: "Internal Server Error" });
@@ -1751,6 +1791,28 @@ const UseController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+  // Deserialize an enum `.use` block into JSON
+  deserializeEnum: async (req, res) => {
+    try {
+      const text = (req.body && req.body.text) || "";
+      if (!text || typeof text !== "string") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Enum .use text required" });
+      }
+      const parsed = parseEnumText(text);
+      if (!parsed)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid enum text" });
+      return res.json({ success: true, data: parsed });
+    } catch (err) {
+      console.error("deserializeEnum error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
   // Deserialize constraints block into structured JSON
   deserializeConstraints: async (req, res) => {
     try {
@@ -1782,3 +1844,5 @@ module.exports.buildUseText = buildUseText;
 module.exports.buildClassText = buildClassText;
 module.exports.buildConstraintsText = buildConstraintsText;
 module.exports.parseConstraintsText = parseConstraintsText;
+module.exports.buildEnumText = buildEnumText;
+module.exports.parseEnumText = parseEnumText;
