@@ -50,7 +50,8 @@ export default function useLinkDrag({
         const bottom = top + BOX_MIN_H;
         if (x >= left && x <= right && y >= top && y <= bottom) target = name;
       });
-      if (target && target !== linkDrag.from) setChoice({ from: linkDrag.from, to: target, x, y });
+      // allow creating associations back onto the same class (self-association)
+      if (target) setChoice({ from: linkDrag.from, to: target, x, y });
       setLinkDrag(null);
     };
     window.addEventListener('pointermove', onMove);
