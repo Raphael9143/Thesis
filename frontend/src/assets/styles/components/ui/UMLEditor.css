@@ -359,9 +359,7 @@
   color: var(--black);
   transform: translateY(-2px);
 }
-.fa:hover {
-  color: var(--brand);
-}
+
 /* Additional input styles for modal/class editing */
 .uml-title-input {
   background: #fff;
