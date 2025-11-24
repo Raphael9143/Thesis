@@ -29,6 +29,8 @@ function parseAssociationText(useText) {
         mode = "parts";
       }
     } else if (mode === "parts") {
+      // stop at 'end' marker or skip it
+      if (/^end\b/i.test(line)) break;
       const match = line.match(partRe);
       if (match) {
         assoc.parts.push({
