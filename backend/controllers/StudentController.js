@@ -1,19 +1,19 @@
 const StudentController = {
-  // Lấy danh sách các lớp đã enrolled của sinh viên hiện tại
+  // Get list of classes the current student is enrolled in
   getEnrolledClasses: async (req, res) => {
     try {
       const Student = require("../models/Student");
       const ClassStudent = require("../models/ClassStudent");
       const Class = require("../models/Class");
       const studentId = req.user.userId;
-      // Kiểm tra student tồn tại
+      // Check student exists
       const student = await Student.findByPk(studentId);
       if (!student) {
         return res
           .status(404)
           .json({ success: false, message: "Student not found!" });
       }
-      // Lấy danh sách class đã enrolled
+      // Get list of enrolled classes
       const classStudents = await ClassStudent.findAll({
         where: { student_id: studentId },
         include: [{ model: Class }],
@@ -30,14 +30,14 @@ const StudentController = {
     }
   },
 
-  // Lấy thông tin profile sinh viên hiện tại
+  // Get current student's profile
   getProfile: async (req, res) => {
     try {
       const User = require("../models/User");
       const Student = require("../models/Student");
       const ClassStudent = require("../models/ClassStudent");
       const userId = req.user.userId;
-      // Lấy thông tin user và kiểm tra role
+      // Get user and verify role
       const user = await User.findByPk(userId, {
         attributes: { exclude: ["password"] },
       });
@@ -47,7 +47,7 @@ const StudentController = {
           .json({ success: false, message: "Student not found!" });
       }
 
-      // Lấy profile sinh viên
+      // Get student profile
       const student = await Student.findByPk(userId);
       if (!student) {
         return res
@@ -55,7 +55,7 @@ const StudentController = {
           .json({ success: false, message: "Student profile not found!" });
       }
 
-      // Lấy danh sách lớp đã/enrolled (chỉ lấy id để gọn nhẹ)
+      // Get list of enrolled class ids (kept minimal)
       const classLinks = await ClassStudent.findAll({
         where: { student_id: userId },
         attributes: ["class_id"],
@@ -76,7 +76,7 @@ const StudentController = {
     }
   },
 
-  // Sửa thông tin profile sinh viên hiện tại
+  // Update current student's profile
   updateProfile: async (req, res) => {
     try {
       const Student = require("../models/Student");
@@ -89,7 +89,7 @@ const StudentController = {
           .status(404)
           .json({ success: false, message: "Student not found!" });
       }
-      // Cập nhật các trường cho phép
+      // Update allowed fields
       if (student_code !== undefined) student.student_code = student_code;
       if (major !== undefined) student.major = major;
       if (year !== undefined) student.year = year;
@@ -145,7 +145,7 @@ const StudentController = {
           return res.status(403).json({ success: false, message: "Forbidden" });
         }
       }
-      // Lấy danh sách lớp của sinh viên
+      // Get list of classes for the student
       const ClassStudent = require("../models/ClassStudent");
       const classLinks = await ClassStudent.findAll({
         where: { student_id: targetStudentId },
@@ -154,7 +154,7 @@ const StudentController = {
       const classIds = classLinks.map((l) => l.class_id);
       if (classIds.length === 0) return res.json({ success: true, data: [] });
 
-      // Lấy courses của các lớp
+      // Get courses for those classes
       const ClassCourse = require("../models/ClassCourse");
       const classCourses = await ClassCourse.findAll({
         where: { class_id: classIds },
@@ -180,7 +180,7 @@ const StudentController = {
       const Exam = require("../models/Exam");
       const Submission = require("../models/Submission");
 
-      // Lấy danh sách assignment (qua assignment_courses)
+      // Get list of assignments (via assignment_courses)
       const assignmentCourses = await AssignmentCourse.findAll({
         where: { course_id: courseIds },
         include: [
@@ -192,7 +192,7 @@ const StudentController = {
         ],
       });
 
-      // Lấy exams trực tiếp theo course_id
+      // Get exams directly by course_id
       const exams = await Exam.findAll({
         where: { course_id: courseIds },
         attributes: [

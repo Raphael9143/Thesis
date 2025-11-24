@@ -3,7 +3,7 @@ const ClassStudent = require("../models/ClassStudent");
 const User = require("../models/User");
 
 const ClassController = {
-  // Lấy tất cả các lớp (chỉ admin)
+  // Get all classes (admin only)
   getAllClasses: async (req, res) => {
     try {
       if (!req.user || req.user.role !== "admin") {
@@ -30,18 +30,18 @@ const ClassController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
-  // Lấy số lượng học sinh của lớp
+  // Get student count for a class
   getStudentCountOfClass: async (req, res) => {
     try {
       const class_id = req.params.id;
-      // Kiểm tra lớp tồn tại
+      // Check class exists
       const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
         return res
           .status(404)
           .json({ success: false, message: "Class not found." });
       }
-      // Đếm số lượng học sinh
+      // Count number of students
       const count = await ClassStudent.count({ where: { class_id } });
       res.json({ success: true, class_id, student_count: count });
     } catch (error) {
@@ -51,13 +51,13 @@ const ClassController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
-  // Lấy danh sách sinh viên của lớp (phân trang)
+  // Get students of class (paginated)
   // Query params: page (integer, default 1). Page size fixed to 20.
   getStudentsOfClass: async (req, res) => {
     try {
       const class_id = req.params.id;
 
-      // Kiểm tra lớp tồn tại
+      // Check class exists
       const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
         return res
@@ -70,7 +70,7 @@ const ClassController = {
       const pageSize = 20;
       const offset = (page - 1) * pageSize;
 
-      // Lấy danh sách sinh viên phân trang
+      // Retrieve paginated list of students
       const Student = require("../models/Student");
       const { count, rows } = await ClassStudent.findAndCountAll({
         where: { class_id },
@@ -127,7 +127,7 @@ const ClassController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
-  // Xóa lớp học (chỉ admin)
+  // Delete class (admin only)
   deleteClass: async (req, res) => {
     try {
       const class_id = req.params.id;
@@ -158,7 +158,7 @@ const ClassController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
-  // Xóa nhiều học sinh khỏi lớp học
+  // Remove multiple students from a class
   removeStudentFromClass: async (req, res) => {
     try {
       const class_id = req.params.id;
@@ -172,7 +172,7 @@ const ClassController = {
           .json({ success: false, message: "student_ids (array) is required." });
       }
 
-      // Tìm lớp học
+      // Find class
       const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
         return res
@@ -180,7 +180,7 @@ const ClassController = {
           .json({ success: false, message: "Class not found." });
       }
 
-      // Chỉ admin hoặc giáo viên chủ nhiệm mới được xóa học sinh
+      // Only admin or homeroom teacher can remove students
       if (userRole !== "admin" && foundClass.teacher_id !== user_id) {
         return res.status(403).json({
           success: false,
@@ -189,7 +189,7 @@ const ClassController = {
         });
       }
 
-      // Xóa các học sinh khỏi lớp
+      // Remove students from class
       const deleted = await ClassStudent.destroy({
         where: {
           class_id,
@@ -216,7 +216,7 @@ const ClassController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
-  // Sửa trạng thái lớp học
+  // Update class status
   updateClassStatus: async (req, res) => {
     try {
       const class_id = req.params.id;
@@ -224,7 +224,7 @@ const ClassController = {
       const userRole = req.user.role;
       const { status } = req.body;
 
-      // Danh sách status hợp lệ
+      // Valid status list
       const validStatus = [
         "draft",
         "active",
@@ -239,7 +239,7 @@ const ClassController = {
           .json({ success: false, message: "Invalid or missing status." });
       }
 
-      // Tìm lớp học
+      // Find class
       const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
         return res
@@ -247,7 +247,7 @@ const ClassController = {
           .json({ success: false, message: "Class not found." });
       }
 
-      // Chỉ admin hoặc giáo viên chủ nhiệm mới được sửa
+      // Only admin or homeroom teacher can update the class
       if (userRole !== "admin" && foundClass.teacher_id !== user_id) {
         return res.status(403).json({
           success: false,
@@ -276,7 +276,7 @@ const ClassController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
-  // Thêm học sinh vào lớp học
+  // Add students to class
   addStudentToClass: async (req, res) => {
     try {
       const class_id = req.params.id;
@@ -296,7 +296,7 @@ const ClassController = {
         });
       }
 
-      // Tìm lớp học
+      // Find class
       const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
         return res
@@ -304,7 +304,7 @@ const ClassController = {
           .json({ success: false, message: "Class not found." });
       }
 
-      // Chỉ admin hoặc giáo viên chủ nhiệm mới được thêm học sinh
+      // Only admin or homeroom teacher can add students
       if (userRole !== "admin" && foundClass.teacher_id !== user_id) {
         return res.status(403).json({
           success: false,
@@ -312,7 +312,7 @@ const ClassController = {
         });
       }
 
-      // Tìm tất cả học sinh theo email, role STUDENT và đã có bản ghi students
+      // Find all users by email with role STUDENT and student profile
       const Student = require("../models/Student");
       const students = await User.findAll({
         where: { email: studentEmails, role: "STUDENT" },
@@ -329,7 +329,7 @@ const ClassController = {
         });
       }
 
-      // Kiểm tra học sinh đã có trong lớp chưa
+      // Check whether students already exist in the class
       const existed = await ClassStudent.findAll({
         where: {
           class_id,
@@ -345,21 +345,21 @@ const ClassController = {
         });
       }
 
-      // Kiểm tra giới hạn max_students
+      // Check max_students limit
       if (foundClass.max_students !== null && foundClass.max_students > 0) {
         const currentCount = await ClassStudent.count({ where: { class_id } });
         const availableSlots = foundClass.max_students - currentCount;
         if (availableSlots <= 0) {
           return res
             .status(400)
-            .json({ success: false, message: "Lớp đã đủ số lượng học sinh." });
+            .json({ success: false, message: "Class has reached maximum number of students." });
         }
         if (newStudents.length > availableSlots) {
           newStudents = newStudents.slice(0, availableSlots);
         }
       }
 
-      // Thêm vào bảng class_students
+      // Insert into class_students table
       const now = new Date();
       const classStudents = newStudents.map((s) => ({
         class_id,
@@ -369,7 +369,7 @@ const ClassController = {
       }));
       const created = await ClassStudent.bulkCreate(classStudents);
 
-      // Sau khi thêm học sinh, cập nhật current_students
+      // After adding students, update current_students
       const updatedCount = await ClassStudent.count({ where: { class_id } });
       foundClass.current_students = updatedCount;
       await foundClass.save();
@@ -394,14 +394,14 @@ const ClassController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
-  // Sửa thông tin lớp học
+  // Update class information
   updateClass: async (req, res) => {
     try {
       const classId = req.params.id;
       const userId = req.user.userId;
       const userRole = req.user.role;
 
-      // Tìm lớp học
+      // Find class
       const foundClass = await Class.findByPk(classId);
       if (!foundClass) {
         return res
@@ -409,7 +409,7 @@ const ClassController = {
           .json({ success: false, message: "Class not found." });
       }
 
-      // Chỉ admin hoặc giáo viên chủ nhiệm mới được sửa
+      // Only admin or homeroom teacher can update
       if (userRole !== "admin" && foundClass.teacher_id !== userId) {
         return res.status(403).json({
           success: false,
@@ -418,7 +418,7 @@ const ClassController = {
       }
 
       const { name, code, description, year, status } = req.body;
-      // Chỉ cập nhật các trường được phép
+      // Only update allowed fields
       if (name !== undefined) foundClass.name = name;
       if (code !== undefined) foundClass.code = code;
       if (description !== undefined) foundClass.description = description;
@@ -457,7 +457,7 @@ const ClassController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
-  // Tạo lớp học (chỉ teacher)
+  // Create class (teacher only)
   createClass: async (req, res) => {
     try {
       if (req.user.role !== "TEACHER") {
@@ -491,9 +491,9 @@ const ClassController = {
         teacher_id: req.user.userId,
         max_students,
       });
-      // Thêm học sinh vào lớp nếu có
+      // Add students to class if provided
       if (Array.isArray(studentEmails) && studentEmails.length > 0) {
-        // Tìm các user có email trong danh sách, role STUDENT và đã có bản ghi students
+        // Find users with emails in the list, role STUDENT and with student profile
         const Student = require("../models/Student");
         const students = await User.findAll({
           where: { email: studentEmails, role: "STUDENT" },
@@ -546,7 +546,7 @@ const ClassController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
-  // Lấy thông tin lớp học theo id
+  // Get class information by id
   getClassById: async (req, res) => {
     try {
       const classId = req.params.id;
@@ -565,7 +565,7 @@ const ClassController = {
           .status(404)
           .json({ success: false, message: "Class not found." });
       }
-      // Chỉ admin, giáo viên chủ nhiệm, hoặc sinh viên thuộc lớp mới được lấy
+      // Only admin, homeroom teacher, or a student member of the class can view
       if (
         user.role === "admin" ||
         (user.role === "TEACHER" && foundClass.teacher_id === user.userId)
@@ -573,7 +573,7 @@ const ClassController = {
         return res.json({ success: true, data: foundClass });
       }
       if (user.role === "STUDENT") {
-        // Kiểm tra sinh viên có trong lớp không
+        // Check whether the student is a member of the class
         const isMember = await ClassStudent.findOne({
           where: { class_id: classId, student_id: user.userId },
         });

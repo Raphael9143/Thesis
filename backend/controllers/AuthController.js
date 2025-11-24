@@ -20,7 +20,7 @@ const AuthController = {
         });
       }
 
-      // Kiểm tra email đã tồn tại
+      // Check if email already exists
       const existingEmail = await User.findOne({ where: { email } });
       if (existingEmail) {
         return res.status(400).json({
@@ -29,11 +29,11 @@ const AuthController = {
         });
       }
 
-      // Mã hóa password
+      // Hash the password
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-      // Chỉ cho phép đăng ký role là 'STUDENT', 'TEACHER' hoặc 'RESEARCHER'
+      // Only allow registering roles 'STUDENT', 'TEACHER' or 'RESEARCHER'
       let regRole = "STUDENT";
       if (
         role &&
@@ -42,7 +42,7 @@ const AuthController = {
         regRole = role.toUpperCase();
       }
 
-      // Chuẩn hóa gender
+      // Normalize gender
       let regGender = null;
       if (
         gender &&
@@ -87,14 +87,14 @@ const AuthController = {
         const Teacher = require("../models/Teacher");
         await Teacher.create({
           teacher_id: newUser.id,
-          teacher_code: "", // Có thể sinh mã tự động hoặc cập nhật sau
+          teacher_code: "", // Can generate teacher_code automatically or update later
         });
       }
 
       // If role is RESEARCHER, create an associated Researcher record
       if (regRole === "RESEARCHER") {
         const Researcher = require("../models/Researcher");
-        // Sinh researcher_code tự động dạng RES0001, RES0002...
+        // Generate researcher_code automatically like RES0001, RES0002...
         const lastResearcher = await Researcher.findOne({
           order: [["researcher_id", "DESC"]],
         });
@@ -147,7 +147,7 @@ const AuthController = {
     } catch (error) {
       console.error("Register error:", error);
 
-      // Xử lý lỗi validation của Sequelize
+      // Handle Sequelize validation errors
       if (error.name === "SequelizeValidationError") {
         return res.status(400).json({
           success: false,

@@ -31,7 +31,7 @@ const CourseController = {
           message: "course_name, course_code and class_id are required.",
         });
       }
-      // Chỉ cho phép TEACHER tạo môn học
+      // Only allow TEACHER to create courses
       const user = await User.findByPk(req.user.userId);
       if (!user || user.role !== "TEACHER") {
         return res.status(403).json({
@@ -39,12 +39,12 @@ const CourseController = {
           message: "Only teachers can create courses.",
         });
       }
-      // Kiểm tra class tồn tại
+      // Check class exists
       const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
         return res.status(404).json({ success: false, message: "Class does not exist." });
       }
-      // Kiểm tra giáo viên đứng lớp có đúng không
+      // Verify the class's homeroom teacher matches the requester
       if (foundClass.teacher_id !== user.id) {
         return res.status(403).json({
           success: false,
@@ -69,7 +69,7 @@ const CourseController = {
         created_by,
         created_at: new Date(),
       });
-      // Tạo mapping vào class_courses (chỉ id, class_id, course_id)
+      // Create mapping in class_courses (id, class_id, course_id)
       const classCourse = await ClassCourse.create({
         class_id,
         course_id: newCourse.course_id,
@@ -83,18 +83,18 @@ const CourseController = {
       res.status(500).json({ success: false, message: "Server error" });
     }
   },
-  // Lấy danh sách môn học theo lớp
+  // Get list of courses by class
   getCoursesByClass: async (req, res) => {
     try {
       const classId = req.params.classId;
-      // Kiểm tra class tồn tại
+      // Check class exists
       const foundClass = await Class.findByPk(classId);
       if (!foundClass) {
         return res
           .status(404)
           .json({ success: false, message: "Class not found." });
       }
-      // Lấy danh sách courses qua quan hệ N-N
+      // Retrieve courses via N-N relationship
       const courses = await foundClass.getCourses();
       res.json({ success: true, data: courses });
     } catch (error) {
@@ -108,25 +108,25 @@ const CourseController = {
       const { status, name, description } = req.body;
       const userId = req.user.userId;
       const userRole = req.user.role;
-      // Tìm class_course
+      // Find class_course
       const classCourse = await ClassCourse.findByPk(id);
       if (!classCourse) {
         return res
           .status(404)
           .json({ success: false, message: "ClassCourse not found." });
       }
-      // Lấy thông tin lớp để kiểm tra quyền
+      // Get class info to check permissions
       const foundClass = await Class.findByPk(classCourse.class_id);
       if (!foundClass) {
         return res
           .status(404)
           .json({ success: false, message: "Class not found." });
       }
-      // Chỉ giáo viên chủ nhiệm hoặc admin mới được sửa
+      // Only homeroom teacher or admin can update
       if (userRole !== "ADMIN" && foundClass.teacher_id !== userId) {
         return res.status(403).json({
           success: false,
-          message: "Bạn không có quyền cập nhật lớp môn học này.",
+          message: "You don't have permission to update this class course.",
         });
       }
       // Cập nhật vào Course
@@ -141,7 +141,7 @@ const CourseController = {
         if (!["ACTIVE", "DRAFT", "INACTIVE"].includes(status)) {
           return res.status(400).json({
             success: false,
-            message: "Chỉ cho phép status là ACTIVE hoặc INACTIVE.",
+            message: "Only status ACTIVE or INACTIVE are allowed.",
           });
         }
         course.status = status;

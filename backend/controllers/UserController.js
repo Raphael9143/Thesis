@@ -1,15 +1,15 @@
 const User = require("../models/User");
 
 const UserController = {
-  // Xóa tài khoản người dùng
+  // Delete user account
   deleteUser: async (req, res) => {
     try {
       const userId = req.params.id;
-      // Chỉ admin hoặc chính chủ mới được xóa
+      // Only admin or the account owner can delete
       if (req.user.role !== "ADMIN" && req.user.userId != userId) {
         return res.status(403).json({
           success: false,
-          message: "Bạn không có quyền xóa tài khoản này.",
+          message: "You don't have permission to delete this account.",
         });
       }
       const user = await User.findByPk(userId);
@@ -27,10 +27,11 @@ const UserController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
-  // Lấy danh sách email của tất cả sinh viên
+  // Get list of emails for all students
   getStudentEmails: async (req, res) => {
     try {
-      // Chỉ admin hoặc teacher có thể gọi endpoint này? Hiện để mọi user đã authenticated
+      // Only admin or teacher should call this endpoint?
+      // Currently allowed for any authenticated user
       const students = await User.findAll({
         where: { role: "STUDENT" },
         attributes: ["email"],
@@ -44,7 +45,7 @@ const UserController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
-  // Lấy userId theo email (query param ?email=...)
+  // Get userId by email (query param ?email=...)
   getUserIdByEmail: async (req, res) => {
     try {
       const { email } = req.query;

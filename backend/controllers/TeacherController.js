@@ -3,11 +3,11 @@ const Class = require("../models/Class");
 const User = require("../models/User");
 
 const TeacherController = {
-  // Lấy profile giảng viên hiện tại
+  // Get current teacher profile
   getProfile: async (req, res) => {
     try {
       const userId = req.user.userId;
-      // Lấy user
+      // Get user
       const user = await User.findByPk(userId, {
         attributes: { exclude: ["password"] },
       });
@@ -16,14 +16,14 @@ const TeacherController = {
           .status(404)
           .json({ success: false, message: "Teacher not found!" });
       }
-      // Lấy teacher profile
+      // Get teacher profile
       const teacher = await Teacher.findByPk(userId);
       if (!teacher) {
         return res
           .status(404)
           .json({ success: false, message: "Teacher profile not found!" });
       }
-      // Lấy các lớp đã/đang dạy
+      // Get classes taught by the teacher
       const courses = await Class.findAll({
         where: { teacher_id: userId },
         attributes: ["id"],
@@ -41,7 +41,7 @@ const TeacherController = {
       res.status(500).json({ success: false, message: "Server error" });
     }
   },
-  // Sửa thông tin profile giảng viên hiện tại
+  // Update current teacher profile
   updateProfile: async (req, res) => {
     try {
       const teacherId = req.user.userId;
@@ -52,7 +52,7 @@ const TeacherController = {
           .status(404)
           .json({ success: false, message: "Teacher not found!" });
       }
-      // Cập nhật các trường cho phép
+      // Update allowed fields
       if (teacher_code !== undefined) teacher.teacher_code = teacher_code;
       if (department !== undefined) teacher.department = department;
       if (description !== undefined) teacher.description = description;
@@ -88,11 +88,11 @@ const TeacherController = {
     }
   },
 
-  // Lấy danh sách các lớp mà giáo viên quản lý
+  // Get list of classes the teacher manages
   getManagedClasses: async (req, res) => {
     try {
       const userId = req.user.userId;
-      // Kiểm tra role
+      // Check role
       const user = await User.findByPk(userId);
       if (!user || user.role !== "TEACHER") {
         return res.status(403).json({
@@ -100,7 +100,7 @@ const TeacherController = {
           message: "Only teachers can view their managed classes.",
         });
       }
-      // Lấy danh sách lớp
+      // Get class list
       const classes = await Class.findAll({
         where: { teacher_id: userId },
         attributes: [
@@ -125,11 +125,11 @@ const TeacherController = {
       res.status(500).json({ success: false, message: "Server error" });
     }
   },
-  // Lấy danh sách môn học giáo viên đã dạy (từ các lớp giáo viên làm chủ nhiệm)
+  // Get courses the teacher has taught (from homeroom classes)
   getTaughtCourses: async (req, res) => {
     try {
       const userId = req.user.userId;
-      // Kiểm tra role
+      // Check role
       const user = await User.findByPk(userId);
       if (!user || user.role !== "TEACHER") {
         return res.status(403).json({
@@ -138,7 +138,7 @@ const TeacherController = {
         });
       }
 
-      // Lấy danh sách các lớp do giáo viên làm chủ nhiệm (đã và đang)
+      // Get homeroom classes (past and present)
       const classes = await Class.findAll({
         where: { teacher_id: userId },
         attributes: ["id"],
@@ -149,7 +149,7 @@ const TeacherController = {
         return res.json({ success: true, data: [] });
       }
 
-      // Lấy các bản ghi class_courses và include Course
+      // Get class_courses records and include Course
       const ClassCourse = require("../models/ClassCourse");
       const Course = require("../models/Course");
       const links = await ClassCourse.findAll({
@@ -157,7 +157,7 @@ const TeacherController = {
         include: [{ model: Course, as: "course" }],
       });
 
-      // Lọc unique courses theo course_id
+      // Filter unique courses by course_id
       const uniqueMap = new Map();
       for (const link of links) {
         const course = link.course;

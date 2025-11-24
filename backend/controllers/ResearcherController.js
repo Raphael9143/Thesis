@@ -1,7 +1,7 @@
 const Researcher = require("../models/Researcher");
 
 const ResearcherController = {
-  // Lấy thông tin profile researcher hiện tại
+  // Get current researcher profile
   getProfile: async (req, res) => {
     try {
       const researcherId = req.user.userId;
@@ -18,7 +18,7 @@ const ResearcherController = {
     }
   },
 
-  // Sửa thông tin profile researcher hiện tại
+  // Update current researcher profile
   updateProfile: async (req, res) => {
     try {
       const researcherId = req.user.userId;
@@ -36,7 +36,7 @@ const ResearcherController = {
           .json({ success: false, message: "Researcher not found!" });
       }
 
-      // Cập nhật các trường cho phép
+      // Update allowed fields
       if (department !== undefined) researcher.department = department;
       if (field_of_study !== undefined)
         researcher.field_of_study = field_of_study;
