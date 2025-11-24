@@ -620,6 +620,31 @@ export default function UMLEditor({ initialModel = null }) {
         }
         return;
       }
+      if (key.startsWith('enum:')) {
+        const name = key.split(':')[1];
+        // replace or rename enum
+        setEnums((s) =>
+          s.map((e) => {
+            if (e.name !== name) return e;
+            const newName = text.name || name;
+            return { ...e, ...text, name: newName };
+          })
+        );
+        // if renamed, update positions
+        if (text.name && text.name !== key.split(':')[1]) {
+          const oldName = key.split(':')[1];
+          const newName = text.name;
+          setPositions((p) => {
+            const np = { ...p };
+            if (np[`enum:${oldName}`]) {
+              np[`enum:${newName}`] = np[`enum:${oldName}`];
+              delete np[`enum:${oldName}`];
+            }
+            return np;
+          });
+        }
+        return;
+      }
       if (key.startsWith('op:')) {
         const parts = key.split(':');
         const className = parts[1];
@@ -672,6 +697,12 @@ export default function UMLEditor({ initialModel = null }) {
       if (Number.isFinite(idx)) {
         setAssociations((s) => s.map((a, i) => (i === idx ? { ...a, _notes: text } : a)));
       }
+      return;
+    }
+    // enum:name -> store as _notes on the enum
+    if (key.startsWith('enum:')) {
+      const name = key.split(':')[1];
+      setEnums((s) => s.map((e) => (e.name === name ? { ...e, _notes: text } : e)));
       return;
     }
     // inv:id (not directly mutable here - constraints are managed by useConstraints hook)

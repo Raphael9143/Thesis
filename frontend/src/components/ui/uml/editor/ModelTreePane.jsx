@@ -24,6 +24,7 @@ export default function ModelTreePane({
     serializeAssociation,
     serializeOperation,
     serializeConstraint,
+    serializeEnum,
     loading: serializing,
   } = useSerialize();
   const {
@@ -31,6 +32,7 @@ export default function ModelTreePane({
     deserializeAssociation,
     deserializeOperation,
     deserializeConstraint,
+    deserializeEnum,
     loading: deserializing,
   } = useDeserialize();
 
@@ -64,6 +66,11 @@ export default function ModelTreePane({
           const res = await serializeConstraint(payload);
           const text = res?.data?.data || res?.data || res;
           setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
+        } else if (key.startsWith('enum:')) {
+          // enum -> USE
+          const res = await serializeEnum(payload);
+          const text = res?.data?.data || res?.data || res;
+          setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
         } else if (key.startsWith('op:') || key.startsWith('qop:')) {
           const res = await serializeOperation(payload);
           const text = res?.data?.data || res?.data || res;
@@ -95,6 +102,10 @@ export default function ModelTreePane({
       } else if (selected.key.startsWith('inv:') || selected.key.startsWith('cond:')) {
         // deserialize constraint text -> JSON shape expected by backend
         const res = await deserializeConstraint({ text: detailText });
+        const payload = res?.data?.data || res?.data || res;
+        if (payload) onUpdateNode && onUpdateNode(selected.key, payload);
+      } else if (selected.key.startsWith('enum:')) {
+        const res = await deserializeEnum({ text: detailText });
         const payload = res?.data?.data || res?.data || res;
         if (payload) onUpdateNode && onUpdateNode(selected.key, payload);
       } else if (selected.key.startsWith('op:') || selected.key.startsWith('qop:')) {

@@ -6,8 +6,6 @@ export default function useSerialize() {
   const [error, setError] = useState(null);
 
   const serializeClass = async (data) => {
-    console.log(JSON.stringify(data));
-
     setLoading(true);
     setError(null);
     try {
@@ -63,5 +61,27 @@ export default function useSerialize() {
     }
   };
 
-  return { serializeClass, serializeAssociation, serializeOperation, serializeConstraint, loading, error };
+  const serializeEnum = async (data) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await userAPI.serializeEnum(data);
+      return res;
+    } catch (e) {
+      setError(e);
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    serializeClass,
+    serializeAssociation,
+    serializeOperation,
+    serializeConstraint,
+    serializeEnum,
+    loading,
+    error,
+  };
 }

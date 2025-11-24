@@ -61,5 +61,27 @@ export default function useDeserialize() {
     }
   };
 
-  return { deserializeClass, deserializeAssociation, deserializeOperation, deserializeConstraint, loading, error };
+  const deserializeEnum = async (data) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await userAPI.deserializeEnum(data);
+      return res;
+    } catch (e) {
+      setError(e);
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    deserializeClass,
+    deserializeAssociation,
+    deserializeOperation,
+    deserializeConstraint,
+    deserializeEnum,
+    loading,
+    error,
+  };
 }
