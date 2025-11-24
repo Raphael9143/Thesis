@@ -49,13 +49,13 @@ const TeacherController = require("../controllers/TeacherController");
  * @swagger
  * /api/teacher/classes:
  *   get:
- *     summary: Lấy danh sách các lớp mà giáo viên quản lý
+ *     summary: Get list of classes managed by the teacher
  *     tags: [Teacher]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Danh sách lớp mà giáo viên quản lý
+ *         description: List of classes managed by the teacher
  *         content:
  *           application/json:
  *             schema:
@@ -105,13 +105,13 @@ router.get("/classes", auth, TeacherController.getManagedClasses);
  * @swagger
  * /api/teacher/courses:
  *   get:
- *     summary: Lấy danh sách môn học giáo viên đã dạy (từ các lớp giáo viên làm chủ nhiệm)
+ *     summary: Get list of courses taught by the teacher (from homeroom classes)
  *     tags: [Teacher]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Danh sách môn học (unique)
+ *         description: List of courses (unique)
  *         content:
  *           application/json:
  *             schema:
@@ -136,13 +136,13 @@ router.get("/courses", auth, TeacherController.getTaughtCourses);
  * @swagger
  * /api/teacher/profile:
  *   get:
- *     summary: Lấy thông tin profile giảng viên hiện tại
+ *     summary: Get current teacher's profile
  *     tags: [Teacher]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Thông tin profile giảng viên
+ *         description: Teacher profile information
  *         content:
  *           application/json:
  *             schema:
@@ -163,7 +163,7 @@ router.get("/profile", auth, TeacherController.getProfile);
  * @swagger
  * /api/teacher/profile:
  *   patch:
- *     summary: Sửa thông tin profile giảng viên hiện tại
+ *     summary: Update current teacher's profile
  *     tags: [Teacher]
  *     security:
  *       - bearerAuth: []

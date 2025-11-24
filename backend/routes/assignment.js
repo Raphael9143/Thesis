@@ -10,7 +10,7 @@ const AssignmentController = require("../controllers/AssignmentController");
  * @swagger
  * /api/assignments:
  *   post:
- *     summary: Tạo bài tập mới (chỉ giáo viên)
+ *     summary: Create a new assignment (teacher only)
  *     tags: [Assignment]
  *     security:
  *       - bearerAuth: []
@@ -46,7 +46,7 @@ const AssignmentController = require("../controllers/AssignmentController");
  *                 example: "Bài tập OCL số 1"
  *               description:
  *                 type: string
- *                 example: "Viết ràng buộc OCL cho mô hình lớp."
+ *                 example: "Write OCL constraints for the class model."
  *               attachment:
  *                 type: string
  *                 format: binary
@@ -98,11 +98,11 @@ router.post(
  * @swagger
  * /api/assignments:
  *   get:
- *     summary: Lấy tất cả bài tập
+ *     summary: Get all assignments
  *     tags: [Assignment]
  *     responses:
  *       200:
- *         description: Danh sách bài tập
+ *         description: List of assignments
  *         content:
  *           application/json:
  *             schema:
@@ -121,7 +121,7 @@ router.get("/", AssignmentController.getAllAssignments);
  * @swagger
  * /api/assignments/class/{classId}:
  *   get:
- *     summary: Lấy tất cả bài tập theo lớp
+ *     summary: Get all assignments for a class
  *     tags: [Assignment]
  *     parameters:
  *       - in: path
@@ -129,10 +129,10 @@ router.get("/", AssignmentController.getAllAssignments);
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID của lớp
+ *         description: Class ID
  *     responses:
  *       200:
- *         description: Danh sách bài tập theo lớp
+ *         description: List of assignments for the class
  *         content:
  *           application/json:
  *             schema:
@@ -151,7 +151,7 @@ router.get("/class/:classId", AssignmentController.getAssignmentsByClass);
  * @swagger
  * /api/assignments/course/{id}:
  *   get:
- *     summary: Lấy tất cả bài tập của một môn học theo course id
+ *     summary: Get all assignments for a course by course id
  *     tags: [Assignment]
  *     security:
  *       - bearerAuth: []
@@ -164,7 +164,7 @@ router.get("/class/:classId", AssignmentController.getAssignmentsByClass);
  *         description: Course ID
  *     responses:
  *       200:
- *         description: Danh sách bài tập của môn học
+ *         description: List of assignments for the course
  */
 router.get("/course/:id", auth, AssignmentController.getAssignmentsByCourseId);
 
@@ -373,7 +373,7 @@ router.patch(
  * @swagger
  * /api/assignments/add-to-class:
  *   post:
- *     summary: Thêm assignment đã có trong database vào lớp (qua course)
+ *     summary: Add an existing assignment from the database to a class (via course)
  *     tags: [Assignment]
  *     security:
  *       - bearerAuth: []
@@ -402,7 +402,7 @@ router.patch(
  *                 example: 5
  *     responses:
  *       200:
- *         description: Assignment đã được thêm vào lớp (qua course)
+ *         description: Assignment added to class (via course)
  *         content:
  *           application/json:
  *             schema:
@@ -415,7 +415,7 @@ router.patch(
  *       400:
  *         description: Bad request
  *       404:
- *         description: Assignment hoặc Course không tồn tại
+ *         description: Assignment or Course not found
  *       500:
  *         description: Internal Server Error
  */
@@ -425,7 +425,7 @@ router.post("/add-to-class", auth, AssignmentController.addAssignmentToClass);
  * @swagger
  * /api/assignments/{id}:
  *   delete:
- *     summary: Xoá assignment khỏi database (chỉ admin)
+ *     summary: Delete an assignment from the database (admin only)
  *     tags: [Assignment]
  *     security:
  *       - bearerAuth: []
@@ -440,7 +440,7 @@ router.post("/add-to-class", auth, AssignmentController.addAssignmentToClass);
  *       200:
  *         description: Đã xoá assignment khỏi database
  *       403:
- *         description: Chỉ admin mới được xoá assignment
+ *         description: Only admin can delete assignments
  *       404:
  *         description: Assignment không tồn tại
  *       500:
@@ -452,7 +452,7 @@ router.delete("/:id", auth, AssignmentController.deleteAssignment);
  * @swagger
  * /api/assignments/{id}:
  *   get:
- *     summary: Lấy bài tập theo id
+ *     summary: Get assignment by id
  *     tags: [Assignment]
  *     parameters:
  *       - in: path
@@ -463,7 +463,7 @@ router.delete("/:id", auth, AssignmentController.deleteAssignment);
  *         description: ID của bài tập
  *     responses:
  *       200:
- *         description: Thông tin bài tập
+ *         description: Assignment information
  *         content:
  *           application/json:
  *             schema:
@@ -474,7 +474,7 @@ router.delete("/:id", auth, AssignmentController.deleteAssignment);
  *                 data:
  *                   $ref: '#/components/schemas/Assignment'
  *       404:
- *         description: Assignment không tồn tại
+ *         description: Assignment not found
  *       500:
  *         description: Internal Server Error
  */

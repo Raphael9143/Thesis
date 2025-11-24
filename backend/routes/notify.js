@@ -14,7 +14,7 @@ const { emitToUser, emitToUserWithAck } = require("../realtime/socket");
  * @swagger
  * /api/notify/{userId}:
  *   post:
- *     summary: Gửi thông báo in-app đến một người dùng (WebSocket)
+ *     summary: Send an in-app notification to a user (WebSocket)
  *     description: Phát sự kiện 'notification' qua Socket.IO tới user theo room `user:{userId}`.
  *     tags: [Notification]
  *     security:
@@ -25,7 +25,7 @@ const { emitToUser, emitToUserWithAck } = require("../realtime/socket");
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID của người dùng nhận thông báo
+ *         description: ID of the recipient user
  *     requestBody:
  *       required: false
  *       content:
@@ -47,7 +47,7 @@ const { emitToUser, emitToUserWithAck } = require("../realtime/socket");
  *                   assignmentId: 123
  *     responses:
  *       200:
- *         description: Đã gửi thông báo (emit) đến user qua Socket.IO
+ *         description: Notification emitted to user via Socket.IO
  *         content:
  *           application/json:
  *             schema:
@@ -97,7 +97,7 @@ router.post("/:userId", auth, (req, res) => {
  *                 example: 5000
  *     responses:
  *       200:
- *         description: Kết quả gửi thông báo với ack
+ *         description: Result of sending notification with acknowledgement
  *         content:
  *           application/json:
  *             schema:

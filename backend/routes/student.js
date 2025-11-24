@@ -8,13 +8,13 @@ const StudentController = require('../controllers/StudentController');
  * @swagger
  * /api/student/enrolled-classes:
  *   get:
- *     summary: Lấy danh sách các lớp mà sinh viên hiện tại đã tham gia
+ *     summary: Get list of classes the current student is enrolled in
  *     tags: [Student]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Danh sách các lớp đã enrolled
+ *         description: List of enrolled classes
  *         content:
  *           application/json:
  *             schema:
@@ -39,13 +39,13 @@ const StudentController = require('../controllers/StudentController');
  * @swagger
  * /api/student/profile:
  *   get:
- *     summary: Lấy thông tin profile sinh viên hiện tại
+ *     summary: Get current student's profile
  *     tags: [Student]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Thông tin profile sinh viên (gồm cả thông tin user)
+ *         description: Student profile information (including user data)
  *         content:
  *           application/json:
  *             schema:
@@ -88,7 +88,7 @@ const StudentController = require('../controllers/StudentController');
  *           format: date-time
  *     StudentProfile:
  *       type: object
- *       description: Thông tin hợp nhất giữa User và Student
+ *       description: Combined information from User and Student
  *       properties:
  *         id:
  *           type: integer
@@ -142,7 +142,7 @@ const StudentController = require('../controllers/StudentController');
  * @swagger
  * /api/student/profile:
  *   patch:
- *     summary: Sửa thông tin profile sinh viên hiện tại
+ *     summary: Update current student's profile
  *     tags: [Student]
  *     security:
  *       - bearerAuth: []
@@ -181,10 +181,10 @@ const StudentController = require('../controllers/StudentController');
  *         description: Student not found
  */
 
-// Lấy profile sinh viên hiện tại
+// Get current student's profile
 router.get('/profile', auth, StudentController.getProfile);
 
-// Sửa thông tin profile sinh viên
+// Update current student's profile
 router.patch('/profile', auth, StudentController.updateProfile);
 
 router.get('/enrolled-classes', auth, StudentController.getEnrolledClasses);
@@ -199,7 +199,7 @@ router.get('/enrolled-classes', auth, StudentController.getEnrolledClasses);
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Danh sách assignments/exams với thông tin nộp bài
+ *         description: List of assignments/exams with submission information
  *         content:
  *           application/json:
  *             schema:

@@ -7,13 +7,13 @@ const CourseController = require("../controllers/CourseController");
  * @swagger
  * /api/courses:
  *   get:
- *     summary: Lấy danh sách tất cả môn học
+ *     summary: Get list of all courses
  *     tags: [Course]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Danh sách môn học
+ *         description: List of courses
  *         content:
  *           application/json:
  *             schema:
@@ -32,7 +32,7 @@ router.get("/", auth, CourseController.getAllCourses);
  * @swagger
  * /api/courses:
  *   post:
- *     summary: Tạo môn học mới và ánh xạ với lớp học
+ *     summary: Create a new course and map it to a class
  *     tags: [Course]
  *     security:
  *       - bearerAuth: []
@@ -55,7 +55,7 @@ router.get("/", auth, CourseController.getAllCourses);
  *                 example: "CS2025"
  *               description:
  *                 type: string
- *                 example: "Môn học về các kỹ thuật lập trình nâng cao."
+ *                 example: "Course about advanced programming techniques."
  *               semester:
  *                 type: string
  *                 example: "Spring 2025"
@@ -69,7 +69,7 @@ router.get("/", auth, CourseController.getAllCourses);
  *                 example: ACTIVE
  *     responses:
  *       201:
- *         description: Môn học đã được tạo và ánh xạ với lớp học
+ *         description: Course created and mapped to the class
  *         content:
  *           application/json:
  *             schema:
@@ -97,7 +97,7 @@ router.post("/", auth, CourseController.createCourse);
  * @swagger
  * /api/courses/by-class/{classId}:
  *   get:
- *     summary: Lấy danh sách môn học theo lớp
+ *     summary: Get list of courses for a class
  *     tags: [Course]
  *     security:
  *       - bearerAuth: []
@@ -107,10 +107,10 @@ router.post("/", auth, CourseController.createCourse);
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID lớp học
+ *         description: Class ID
  *     responses:
  *       200:
- *         description: Danh sách môn học của lớp
+ *         description: List of courses for the class
  *         content:
  *           application/json:
  *             schema:
@@ -131,7 +131,7 @@ router.get("/by-class/:classId", auth, CourseController.getCoursesByClass);
  * @swagger
  * /api/courses/{id}:
  *   patch:
- *     summary: Cập nhật thông tin lớp môn học (class_courses)
+ *     summary: Update class-course mapping information (class_courses)
  *     tags: [Course]
  *     security:
  *       - bearerAuth: []
@@ -156,15 +156,15 @@ router.get("/by-class/:classId", auth, CourseController.getCoursesByClass);
  *                 example: ACTIVE
  *               name:
  *                 type: string
- *                 description: Tên môn học (course_name)
+ *                 description: Course name (`course_name`)
  *                 example: "Lập trình nâng cao"
  *               description:
  *                 type: string
- *                 description: Mô tả môn học
- *                 example: "Môn học về các kỹ thuật lập trình nâng cao."
+ *                 description: Course description
+ *                 example: "Course about advanced programming techniques."
  *     responses:
  *       200:
- *         description: Cập nhật thành công
+ *         description: Update successful
  *         content:
  *           application/json:
  *             schema:
@@ -191,7 +191,7 @@ router.patch("/:id", auth, CourseController.updateClassCourse);
  * @swagger
  * /api/courses/{id}/status:
  *   patch:
- *     summary: Cập nhật trạng thái (status) của môn học
+ *     summary: Update course status
  *     tags: [Course]
  *     security:
  *       - bearerAuth: []
@@ -201,7 +201,7 @@ router.patch("/:id", auth, CourseController.updateClassCourse);
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID của môn học (course)
+ *         description: Course ID
  *     requestBody:
  *       required: true
  *       content:
@@ -217,7 +217,7 @@ router.patch("/:id", auth, CourseController.updateClassCourse);
  *                 example: ACTIVE
  *     responses:
  *       200:
- *         description: Cập nhật status thành công
+ *         description: Status update successful
  *         content:
  *           application/json:
  *             schema:
@@ -243,7 +243,7 @@ router.patch("/:id/status", auth, CourseController.updateCourseStatus);
  * @swagger
  * /api/courses/{id}:
  *   delete:
- *     summary: Xóa môn học
+ *     summary: Delete a course
  *     tags: [Course]
  *     security:
  *       - bearerAuth: []
@@ -277,7 +277,7 @@ router.delete("/:id", auth, CourseController.deleteCourse);
  * @swagger
  * /api/courses/{id}:
  *   get:
- *     summary: Lấy thông tin môn học theo id
+ *     summary: Get course information by id
  *     tags: [Course]
  *     security:
  *       - bearerAuth: []
@@ -287,10 +287,10 @@ router.delete("/:id", auth, CourseController.deleteCourse);
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID của môn học (course)
+ *         description: Course ID
  *     responses:
  *       200:
- *         description: Thông tin môn học
+ *         description: Course information
  *         content:
  *           application/json:
  *             schema:
@@ -311,7 +311,7 @@ router.get("/:id", auth, CourseController.getCourseById);
  * @swagger
  * /api/courses/by-code/{code}:
  *   get:
- *     summary: Lấy thông tin môn học theo mã code
+ *     summary: Get course information by code
  *     tags: [Course]
  *     security:
  *       - bearerAuth: []
@@ -321,10 +321,10 @@ router.get("/:id", auth, CourseController.getCourseById);
  *         schema:
  *           type: string
  *         required: true
- *         description: Mã code của môn học (course_code)
+ *         description: Course code (`course_code`)
  *     responses:
  *       200:
- *         description: Thông tin môn học
+ *         description: Course information
  *         content:
  *           application/json:
  *             schema:

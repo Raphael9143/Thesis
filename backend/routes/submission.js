@@ -8,7 +8,7 @@ const SubmissionController = require("../controllers/SubmissionController");
  * @swagger
  * /api/submissions:
  *   post:
- *     summary: Nộp bài (chỉ sinh viên đã đăng ký lớp của môn học)
+ *     summary: Submit assignment/exam (only students enrolled in the course)
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []
@@ -58,12 +58,12 @@ router.post(
   conditionalSubmissionUpload,
   SubmissionController.submitAssignment
 );
-// Giáo viên chấm điểm submission (cập nhật score và feedback)
+// Teacher grades a submission (update score and feedback)
 /**
  * @swagger
  * /api/submissions/{id}/grade:
  *   patch:
- *     summary: Giáo viên chấm điểm một submission (cập nhật score và feedback)
+ *     summary: Teacher grades a submission (update score and feedback)
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []
@@ -93,12 +93,12 @@ router.post(
  */
 router.patch("/:id/grade", auth, SubmissionController.gradeSubmission);
 
-// Lấy thông tin submission theo id
+// Get submission information by id
 /**
  * @swagger
  * /api/submissions/{id}:
  *   get:
- *     summary: Lấy thông tin submission theo id (ADMIN, TEACHER hoặc chính sinh viên)
+ *     summary: Get submission by id (ADMIN, TEACHER or the student who submitted)
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []
@@ -114,12 +114,12 @@ router.patch("/:id/grade", auth, SubmissionController.gradeSubmission);
  */
 router.get("/:id", auth, SubmissionController.getSubmissionById);
 
-// Lấy tất cả submissions của một assignment
+// Get all submissions for an assignment
 /**
  * @swagger
  * /api/submissions/assignment/{id}:
  *   get:
- *     summary: Lấy tất cả submissions của một assignment (ADMIN hoặc teacher của course)
+ *     summary: Get all submissions for an assignment (ADMIN or course teacher)
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []
@@ -139,12 +139,12 @@ router.get(
   SubmissionController.getSubmissionsByAssignment
 );
 
-// Lấy tất cả submissions của một exam
+// Get all submissions for an exam
 /**
  * @swagger
  * /api/submissions/exam/{id}:
  *   get:
- *     summary: Lấy tất cả submissions của một exam (ADMIN hoặc teacher của course)
+ *     summary: Get all submissions for an exam (ADMIN or course teacher)
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []
@@ -165,7 +165,7 @@ router.get("/exam/:id", auth, SubmissionController.getSubmissionsByExam);
  * @swagger
  * /api/submissions/exam/{id}/remaining-attempts:
  *   get:
- *     summary: Lấy số lần nộp còn lại của sinh viên cho exam
+ *     summary: Get remaining submission attempts for a student in an exam
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []
@@ -191,7 +191,7 @@ router.get(
  * @swagger
  * /api/submissions/assignment/{id}/history:
  *   get:
- *     summary: Lấy lịch sử nộp bài của sinh viên cho assignment
+ *     summary: Get submission history for a student for an assignment
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []
@@ -222,7 +222,7 @@ router.get(
  * @swagger
  * /api/submissions/exam/{id}/history:
  *   get:
- *     summary: Lấy lịch sử nộp bài của sinh viên cho exam
+ *     summary: Get submission history for a student for an exam
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []
@@ -253,7 +253,7 @@ router.get(
  * @swagger
  * /api/submissions/assignment/{id}/latest-score:
  *   get:
- *     summary: Lấy điểm của sinh viên (submission cuối cùng) theo assignment
+ *     summary: Get student's score (latest submission) for an assignment
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []
@@ -269,7 +269,7 @@ router.get(
  *         required: false
  *         schema:
  *           type: integer
- *         description: Bắt buộc với teacher/admin; student tự lấy của mình
+ *         description: Required for teacher/admin; student retrieves own score
  *     responses:
  *       200:
  *         description: Latest score info
@@ -284,7 +284,7 @@ router.get(
  * @swagger
  * /api/submissions/exam/{id}/latest-score:
  *   get:
- *     summary: Lấy điểm của sinh viên (submission cuối cùng) theo exam
+ *     summary: Get student's score (latest submission) for an exam
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []
@@ -300,7 +300,7 @@ router.get(
  *         required: false
  *         schema:
  *           type: integer
- *         description: Bắt buộc với teacher/admin; student tự lấy của mình
+ *         description: Required for teacher/admin; student retrieves own score
  *     responses:
  *       200:
  *         description: Latest score info
@@ -316,7 +316,7 @@ router.get(
  * @swagger
  * /api/submissions/assignment/{id}/remaining-attempts:
  *   get:
- *     summary: Lấy số lần nộp còn lại của sinh viên cho assignment
+ *     summary: Get remaining submission attempts for a student in an assignment
  *     tags: [Submission]
  *     security:
  *       - bearerAuth: []

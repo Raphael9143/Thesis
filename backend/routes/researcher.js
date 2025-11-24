@@ -54,13 +54,13 @@ const ResearcherController = require("../controllers/ResearcherController");
  * @swagger
  * /api/researcher/profile:
  *   get:
- *     summary: Lấy thông tin profile researcher hiện tại
+ *     summary: Get current researcher's profile
  *     tags: [Researcher]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Thông tin profile researcher
+ *         description: Researcher profile information
  *         content:
  *           application/json:
  *             schema:
@@ -80,7 +80,7 @@ const ResearcherController = require("../controllers/ResearcherController");
  * @swagger
  * /api/researcher/profile:
  *   patch:
- *     summary: Sửa thông tin profile researcher hiện tại
+ *     summary: Update current researcher's profile
  *     tags: [Researcher]
  *     security:
  *       - bearerAuth: []
@@ -136,10 +136,10 @@ const ResearcherController = require("../controllers/ResearcherController");
  *         description: Researcher not found
  */
 
-// Lấy profile researcher hiện tại
+// Get current researcher's profile
 router.get("/profile", auth, ResearcherController.getProfile);
 
-// Sửa thông tin profile researcher
+// Update current researcher's profile
 router.patch("/profile", auth, ResearcherController.updateProfile);
 
 module.exports = router;

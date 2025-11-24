@@ -7,7 +7,7 @@ const UserController = require("../controllers/UserController");
  * @swagger
  * /api/users/{id}:
  *   delete:
- *     summary: Xóa tài khoản người dùng
+ *     summary: Delete user account
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
@@ -43,13 +43,13 @@ router.delete("/:id", auth, UserController.deleteUser);
  * @swagger
  * /api/users/students/emails:
  *   get:
- *     summary: Lấy danh sách email của tất cả sinh viên
+ *     summary: Get list of all student emails
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Danh sách email
+ *         description: List of emails
  *         content:
  *           application/json:
  *             schema:
@@ -72,7 +72,7 @@ router.get("/students/emails", auth, UserController.getStudentEmails);
  * @swagger
  * /api/users/by-email:
  *   get:
- *     summary: Lấy userId theo email
+ *     summary: Get userId by email
  *     tags: [User]
  *     security:
  *       - bearerAuth: []
@@ -82,7 +82,7 @@ router.get("/students/emails", auth, UserController.getStudentEmails);
  *         schema:
  *           type: string
  *         required: true
- *         description: Email cần tra cứu
+ *         description: Email to lookup
  *     responses:
  *       200:
  *         description: User id and email

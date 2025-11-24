@@ -11,7 +11,7 @@ const conditionalLectureUpload = require("../middlewares/conditionalUpload")(
  * @swagger
  * /api/lectures:
  *   post:
- *     summary: Tạo bài giảng (chỉ giáo viên chủ nhiệm của lớp có môn học đó)
+ *     summary: Create a lecture (only the course's homeroom teacher)
  *     tags: [Lecture]
  *     security:
  *       - bearerAuth: []
@@ -65,7 +65,7 @@ router.post(
  * @swagger
  * /api/lectures/{id}:
  *   get:
- *     summary: Lấy chi tiết bài giảng theo id
+ *     summary: Get lecture details by id
  *     tags: [Lecture]
  *     parameters:
  *       - in: path
@@ -224,7 +224,7 @@ router.patch(
  *         description: Course ID
  *     responses:
  *       200:
- *         description: Danh sách bài giảng của môn học
+ *         description: List of lectures for the course
  */
 router.get("/course/:id", auth, LectureController.getLecturesByCourseId);
 

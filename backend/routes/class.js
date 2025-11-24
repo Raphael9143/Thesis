@@ -7,20 +7,20 @@ const requireRole = require("../middlewares/role");
  * @swagger
  * /api/class/{id}/student-count:
  *   get:
- *     summary: Lấy số lượng học sinh của lớp
+ *     summary: Get student count for a class
  *     tags: [Class]
  *     security:
  *       - bearerAuth: []
- *     parameters:
+*     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID lớp học
+*         description: Class ID
  *     responses:
  *       200:
- *         description: Số lượng học sinh
+ *         description: Number of students
  *         content:
  *           application/json:
  *             schema:
@@ -42,26 +42,26 @@ router.get("/:id/student-count", auth, ClassController.getStudentCountOfClass);
  * @swagger
  * /api/class/{id}/students:
  *   get:
- *     summary: Lấy danh sách sinh viên của lớp
+ *     summary: Get list of students in a class
  *     tags: [Class]
  *     security:
  *       - bearerAuth: []
- *     parameters:
+*     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID lớp học
+*         description: Class ID
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *         required: false
- *         description: Số trang (mỗi trang chứa 20 sinh viên). Mặc định 1.
+ *         description: Page number (20 students per page). Default 1.
  *     responses:
  *       200:
- *         description: Danh sách sinh viên
+ *         description: Student list
  *         content:
  *           application/json:
  *             schema:
@@ -113,13 +113,13 @@ router.get("/:id/students", auth, ClassController.getStudentsOfClass);
  *     tags: [Class]
  *     security:
  *       - bearerAuth: []
- *     parameters:
+*     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID lớp học
+*         description: Class ID
  *     responses:
  *       200:
  *         description: Class deleted
@@ -136,17 +136,17 @@ router.delete("/:id", auth, requireRole("admin"), ClassController.deleteClass);
  * @swagger
  * /api/class/{id}/students:
  *   delete:
- *     summary: Xóa học sinh khỏi lớp học (chỉ teacher chủ nhiệm hoặc admin)
+ *     summary: Remove students from class (homeroom teacher or admin)
  *     tags: [Class]
  *     security:
  *       - bearerAuth: []
- *     parameters:
+*     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID lớp học
+*         description: Class ID
  *     requestBody:
  *       required: true
  *       content:
@@ -184,17 +184,17 @@ router.delete(
  * @swagger
  * /api/class/{id}/status:
  *   patch:
- *     summary: Sửa trạng thái lớp học (chỉ teacher chủ nhiệm hoặc admin)
+ *     summary: Update class status (homeroom teacher or admin)
  *     tags: [Class]
  *     security:
  *       - bearerAuth: []
- *     parameters:
+*     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID lớp học
+*         description: Class ID
  *     requestBody:
  *       required: true
  *       content:
@@ -237,17 +237,17 @@ router.patch(
  * @swagger
  * /api/class/{id}/students:
  *   post:
- *     summary: Thêm học sinh vào lớp học (chỉ teacher chủ nhiệm hoặc admin)
+ *     summary: Add students to class (homeroom teacher or admin)
  *     tags: [Class]
  *     security:
  *       - bearerAuth: []
- *     parameters:
+*     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID lớp học
+*         description: Class ID
  *     requestBody:
  *       required: true
  *       content:
@@ -285,17 +285,17 @@ router.post(
  * @swagger
  * /api/class/{id}:
  *   put:
- *     summary: Sửa thông tin lớp học (chỉ teacher chủ nhiệm hoặc admin)
+ *     summary: Update class information (homeroom teacher or admin)
  *     tags: [Class]
  *     security:
  *       - bearerAuth: []
- *     parameters:
+*     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID lớp học
+*         description: Class ID
  *     requestBody:
  *       required: true
  *       content:
@@ -314,7 +314,7 @@ router.post(
  *                 type: integer
  *               max_students:
  *                 type: integer
- *                 description: "Giới hạn số lượng học sinh có thể tham gia lớp."
+*                 description: "Maximum number of students allowed in the class."
  *               status:
  *                 type: string
  *                 enum: [active, archived]
@@ -341,11 +341,11 @@ router.put(
  * @swagger
  * /api/class:
  *   post:
- *     summary: Tạo lớp học (chỉ teacher)
+ *     summary: Create class (teacher only)
  *     tags: [Class]
  *     security:
  *       - bearerAuth: []
- *     requestBody:
+*     requestBody:
  *       required: true
  *       content:
  *         application/json:
@@ -363,7 +363,7 @@ router.put(
  *                 example: "UML101"
  *               description:
  *                 type: string
- *                 example: "Lớp học về UML và OCL cho sinh viên năm 3."
+*                 example: "Class about UML and OCL for 3rd year students."
  *               # semester (removed)
  *               year:
  *                 type: integer
@@ -371,7 +371,7 @@ router.put(
  *               max_students:
  *                 type: integer
  *                 example: 50
- *                 description: "Giới hạn số lượng học sinh có thể tham gia lớp."
+ *                 description: "Maximum number of students allowed in the class."
  *               status:
  *                 type: string
  *                 enum: [active, archived]
@@ -397,13 +397,13 @@ router.post("/", auth, requireRole("TEACHER"), ClassController.createClass);
  * @swagger
  * /api/class:
  *   get:
- *     summary: Lấy tất cả các lớp (chỉ admin)
+ *     summary: Get all classes (admin only)
  *     tags: [Class]
  *     security:
  *       - bearerAuth: []
- *     responses:
+*     responses:
  *       200:
- *         description: Danh sách lớp học
+ *         description: List of classes
  *         content:
  *           application/json:
  *             schema:
@@ -426,20 +426,20 @@ router.get("/", auth, ClassController.getAllClasses);
  * @swagger
  * /api/class/{id}:
  *   get:
- *     summary: Lấy thông tin lớp học theo id
+ *     summary: Get class information by id
  *     tags: [Class]
  *     security:
  *       - bearerAuth: []
- *     parameters:
+*     parameters:
  *       - in: path
  *         name: id
  *         schema:
  *           type: integer
  *         required: true
- *         description: ID lớp học
+*         description: Class ID
  *     responses:
  *       200:
- *         description: Thông tin lớp học
+*         description: Class information
  *         content:
  *           application/json:
  *             schema:

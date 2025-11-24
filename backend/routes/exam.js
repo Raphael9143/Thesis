@@ -11,7 +11,7 @@ const conditionalExamUpload = require("../middlewares/conditionalUpload")(
  * @swagger
  * /api/exams:
  *   post:
- *     summary: Tạo bài thi (chỉ giáo viên)
+ *     summary: Create exam (teacher only)
  *     tags: [Exam]
  *     security:
  *       - bearerAuth: []
@@ -272,7 +272,7 @@ router.delete("/:id", auth, ExamController.deleteExam);
  * @swagger
  * /api/exams/{id}:
  *   get:
- *     summary: Lấy chi tiết bài thi theo id
+ *     summary: Get exam details by id
  *     tags: [Exam]
  *     parameters:
  *       - in: path
@@ -303,7 +303,7 @@ router.get("/:id", ExamController.getExamById);
  *         description: Course ID
  *     responses:
  *       200:
- *         description: Danh sách bài thi của môn học
+ *         description: List of exams for the course
  */
 router.get("/course/:id", auth, ExamController.getExamsByCourseId);
 
