@@ -78,16 +78,6 @@
   background: var(--accent-strong);
 }
 
-.btn--secondary {
-  background: #d1fae5;
-  color: #065f46;
-  border: 1px solid #a7f3d0;
-}
-
-.btn--secondary:hover {
-  background: #a7f3d0;
-}
-
 /* Marketing-style buttons */
 .btn-primary {
   background: var(--btn-color);

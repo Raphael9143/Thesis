@@ -229,7 +229,7 @@ export default function ResearcherProjectDetail() {
                         />
                         {model.file_path && (
                           <div className="project-detail-model-download">
-                            <a className="btn btn--secondary" href={toFullUrl(model.file_path)} download>
+                            <a href={toFullUrl(model.file_path)} download>
                               Download
                             </a>
                           </div>
