@@ -153,8 +153,13 @@ const UMLCanvas = ({
       return (
         <g key={`nary-${idx}`}>
           {lines}
-          {/* central marker */}
-          <circle cx={centroid.x} cy={centroid.y} r={6} fill="#fff" stroke="#333" strokeWidth={2} />
+          {/* central marker: render a small diamond (white fill, bordered) */}
+          <polygon
+            points={`${centroid.x},${centroid.y - 8} ${centroid.x + 8},${centroid.y} ${centroid.x},${centroid.y + 8} ${centroid.x - 8},${centroid.y}`}
+            fill="#fff"
+            stroke="#333"
+            strokeWidth={2}
+          />
           {/* associationclass for n-ary */}
           {type === 'associationclass' &&
             a.attributes &&
