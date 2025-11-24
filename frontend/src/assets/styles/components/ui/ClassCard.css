@@ -5,12 +5,14 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform .18s ease, box-shadow .18s ease;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
   cursor: pointer;
 }
 
 .class-card:focus {
-  outline: 3px solid rgba(59,130,246,0.3);
+  outline: 3px solid rgba(59, 130, 246, 0.3);
 }
 
 .class-card__thumb {
@@ -47,11 +49,12 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: rgba(17,24,39,0.9);
-  color: #fff;
+  background: #d1fae5;
+  color: #065f46;
   padding: 4px 8px;
   border-radius: 999px;
   font-size: 12px;
+  font-weight: 600;
 }
 
 .class-card__meta {
@@ -87,7 +90,7 @@
 
 .class-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 8px 20px rgba(17,24,39,0.08);
+  box-shadow: 0 8px 20px rgba(17, 24, 39, 0.08);
 }
 
 .class-card:active {
