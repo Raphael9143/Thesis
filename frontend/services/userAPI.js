@@ -197,6 +197,8 @@ const userAPI = {
   getResearchProjectStarred: (id) => axiosClient.get(`research/projects/${id}/starred`),
   // POST /api/research/projects/{id}/moderator { email }
   addResearchProjectModerator: (id, email) => axiosClient.post(`research/projects/${id}/moderator`, { email }),
+  // POST /api/research/projects/{id}/contributors { emails: [] }
+  addResearchProjectContributors: (id, data) => axiosClient.post(`research/projects/${id}/contributors`, data),
   // POST /api/research/projects/{id}/contribute - FormData with file, title, description, name
   postProjectContribution: (id, formData) =>
     axiosClient.post(`research/projects/${id}/contribute`, formData, {
