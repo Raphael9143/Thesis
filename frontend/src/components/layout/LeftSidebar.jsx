@@ -2,7 +2,11 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../assets/styles/components/layout/LeftSidebar.css';
 
-export default function LeftSidebar({ isLoggedIn = false, collapsed = false, onToggleCollapse = () => {} }) {
+export default function LeftSidebar({
+  isLoggedIn = false,
+  collapsed = false,
+  onToggleCollapse = () => {},
+}) {
   const navigate = useNavigate();
   const role = (sessionStorage.getItem('role') || '').toString().toLowerCase();
 
@@ -18,7 +22,10 @@ export default function LeftSidebar({ isLoggedIn = false, collapsed = false, onT
   };
 
   return (
-    <aside className={`leftsidebar ${collapsed ? 'leftsidebar--collapsed' : ''}`} aria-expanded={!collapsed}>
+    <aside
+      className={`leftsidebar ${collapsed ? 'leftsidebar--collapsed' : ''}`}
+      aria-expanded={!collapsed}
+    >
       <div className="leftsidebar__brand">
         <img
           src="https://icon.icepanel.io/Technology/svg/Unified-Modelling-Language-%28UML%29.svg"
@@ -42,7 +49,9 @@ export default function LeftSidebar({ isLoggedIn = false, collapsed = false, onT
         </button>
         <button
           className="leftsidebar__link"
-          onClick={() => goto(role === 'student' ? '/education/student/classes' : '/education/teacher/classes')}
+          onClick={() =>
+            goto(role === 'student' ? '/education/student/classes' : '/education/teacher/classes')
+          }
         >
           <i className="fa fa-book" aria-hidden />
           <span>Classes</span>
@@ -57,7 +66,9 @@ export default function LeftSidebar({ isLoggedIn = false, collapsed = false, onT
         {isLoggedIn && (
           <button
             className="leftsidebar__link"
-            onClick={() => goto(role === 'student' ? '/education/student/profile' : '/education/teacher/profile')}
+            onClick={() =>
+              goto(role === 'student' ? '/education/student/profile' : '/education/teacher/profile')
+            }
           >
             <i className="fa fa-user" aria-hidden />
             <span>Profile</span>

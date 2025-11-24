@@ -17,12 +17,16 @@ export default function NotificationCenter({ onClose }) {
         </span>
       </div>
       <div className="notif-center__body">
-        {(!notifications || notifications.length === 0) && <div className="notif-empty">No notifications</div>}
+        {(!notifications || notifications.length === 0) && (
+          <div className="notif-empty">No notifications</div>
+        )}
         {notifications.map((n) => (
           <div key={n.id} className={`notif-item ${n.read ? 'notif-item--read' : ''}`}>
             <div className="notif-item__meta">
               <div className="notif-item__title">{n.title}</div>
-              <div className="notif-item__time">{new Date(n.ts || Date.now()).toLocaleString()}</div>
+              <div className="notif-item__time">
+                {new Date(n.ts || Date.now()).toLocaleString()}
+              </div>
             </div>
             <div className="notif-item__body">{n.body}</div>
             <div className="notif-item__actions">

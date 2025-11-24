@@ -18,7 +18,8 @@ export default function RecentProjectsCarousel({ projects, onJoinClick }) {
   const processedProjects = extendedProjects.map((project) => {
     const raw = project.description || 'No description available.';
     const decoded = raw.replace(/\\n/g, '\n');
-    const truncated = decoded.length > MAX_DESC ? decoded.slice(0, MAX_DESC).trimEnd() + '…' : decoded;
+    const truncated =
+      decoded.length > MAX_DESC ? decoded.slice(0, MAX_DESC).trimEnd() + '…' : decoded;
     return { ...project, _decoded: decoded, _truncated: truncated, _truncateClass: 'truncate' };
   });
 
@@ -53,17 +54,25 @@ export default function RecentProjectsCarousel({ projects, onJoinClick }) {
             <i className="fa fa-chevron-left"></i>
           </button>
           <div className="carousel-wrapper">
-            <div className="carousel-track" style={{ transform: `translateX(-${currentSlide * (100 / 3)}%)` }}>
+            <div
+              className="carousel-track"
+              style={{ transform: `translateX(-${currentSlide * (100 / 3)}%)` }}
+            >
               {processedProjects.map((project, index) => (
                 <div key={`${project.id}-${index}`} className="carousel-slide">
                   <div className="project-card">
                     <div className="project-card-header">
                       <h3 className="project-card-title">{project.title || 'Untitled Project'}</h3>
-                      <span className={`project-badge project-badge-${project.status?.toLowerCase()}`}>
+                      <span
+                        className={`project-badge project-badge-${project.status?.toLowerCase()}`}
+                      >
                         {project.status || 'Active'}
                       </span>
                     </div>
-                    <p className={`project-card-description ${project._truncateClass || ''}`} title={project._decoded}>
+                    <p
+                      className={`project-card-description ${project._truncateClass || ''}`}
+                      title={project._decoded}
+                    >
                       {project._truncated}
                     </p>
                     <div className="project-card-meta">
@@ -76,7 +85,10 @@ export default function RecentProjectsCarousel({ projects, onJoinClick }) {
                         <span>{new Date(project.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <button className="btn btn-primary btn-sm" onClick={() => onJoinClick(project.id)}>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => onJoinClick(project.id)}
+                    >
                       <i className="fa fa-sign-in-alt"></i> Join Now
                     </button>
                   </div>

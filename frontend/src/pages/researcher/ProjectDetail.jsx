@@ -83,7 +83,9 @@ export default function ResearcherProjectDetail() {
         try {
           push({
             title: newStarred ? 'Starred project' : 'Unstarred project',
-            body: newStarred ? 'Project added to your starred list' : 'Project removed from your starred list',
+            body: newStarred
+              ? 'Project added to your starred list'
+              : 'Project removed from your starred list',
           });
         } catch (notifyErr) {
           console.error('Notification error:', notifyErr);
@@ -187,7 +189,9 @@ export default function ResearcherProjectDetail() {
                 <div className="project-detail-actions">
                   <button
                     className="btn btn-primary btn-sm"
-                    onClick={() => navigate(`/researcher/projects/${projectId}/contribute/${model?.id || ''}`)}
+                    onClick={() =>
+                      navigate(`/researcher/projects/${projectId}/contribute/${model?.id || ''}`)
+                    }
                     disabled={!model?.id}
                     title={!model?.id ? 'No model available' : 'Post contribution'}
                   >
@@ -195,13 +199,19 @@ export default function ResearcherProjectDetail() {
                     Contribute
                   </button>
                   {isOwner && (
-                    <button className="btn btn-primary btn-sm" onClick={() => setAddModeratorOpen(true)}>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => setAddModeratorOpen(true)}
+                    >
                       <i className="fa fa-user-plus project-detail-moderator-icon" />
                       Add Moderator
                     </button>
                   )}
                   {(isOwner || isModerator) && (
-                    <button className="btn btn-primary btn-sm" onClick={() => setAddContribOpen(true)}>
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => setAddContribOpen(true)}
+                    >
                       <i className="fa fa-user-plus project-detail-moderator-icon" />
                       Add Contributors
                     </button>
@@ -236,17 +246,24 @@ export default function ResearcherProjectDetail() {
                         )}
                       </div>
                     ) : (
-                      <div className="project-detail-model-preview">No model found for this project.</div>
+                      <div className="project-detail-model-preview">
+                        No model found for this project.
+                      </div>
                     )}
                   </div>
 
                   <div className="project-detail-about-section">
                     <div className="project-detail-about-title">About</div>
                     {project?.description && (
-                      <p className="project-detail-about-description" style={{ whiteSpace: 'pre-line' }}>
+                      <p
+                        className="project-detail-about-description"
+                        style={{ whiteSpace: 'pre-line' }}
+                      >
                         {(() => {
                           const replaced = project.description.replace(/\\n/g, '\n');
-                          return replaced.length > 500 ? replaced.slice(0, 500).trimEnd() + '…' : replaced;
+                          return replaced.length > 500
+                            ? replaced.slice(0, 500).trimEnd() + '…'
+                            : replaced;
                         })()}
                       </p>
                     )}

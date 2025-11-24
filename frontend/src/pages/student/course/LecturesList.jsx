@@ -27,7 +27,10 @@ export default function StudentLecturesList() {
         if (cls?.success && cls.data) {
           setClassInfo(cls.data);
         }
-        const courseId = routeCourseId || (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) || id;
+        const courseId =
+          routeCourseId ||
+          (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) ||
+          id;
         setCourseIdState(courseId);
         const lectRes = await userAPI.getLecturesByCourse(courseId);
         if (!mounted) return;
@@ -108,13 +111,18 @@ export default function StudentLecturesList() {
                     collapsed={collapsed.has(g.key)}
                     onToggle={() => toggleGroup(g.key)}
                   />
-                  <ul className="class-detail__list" style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}>
+                  <ul
+                    className="class-detail__list"
+                    style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}
+                  >
                     {g.items.map((l) => (
                       <li
                         key={l.id}
                         className="class-detail__list-item"
                         onClick={() => {
-                          navigate(`/education/student/classes/${id}/courses/${courseIdState}/lectures/${l.id}`);
+                          navigate(
+                            `/education/student/classes/${id}/courses/${courseIdState}/lectures/${l.id}`
+                          );
                         }}
                       >
                         <div className="class-detail__item-title">{l.title}</div>

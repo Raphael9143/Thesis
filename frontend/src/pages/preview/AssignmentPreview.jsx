@@ -57,7 +57,12 @@ export default function AssignmentPreview() {
 
   const dueAt = useMemo(() => {
     if (!assignment) return null;
-    return assignment.end_date || assignment?.courses?.[0]?.assignment_course?.due_date || assignment.due_date || null;
+    return (
+      assignment.end_date ||
+      assignment?.courses?.[0]?.assignment_course?.due_date ||
+      assignment.due_date ||
+      null
+    );
   }, [assignment]);
 
   const isExpired = useMemo(() => {
@@ -164,7 +169,9 @@ export default function AssignmentPreview() {
             </>
           )}
 
-          {role === 'student' && contentTab === 'history' && <SubmissionHistory type="assignment" id={resourceId} />}
+          {role === 'student' && contentTab === 'history' && (
+            <SubmissionHistory type="assignment" id={resourceId} />
+          )}
           {!isExpired && role === 'student' && contentTab !== 'history' && (
             <>
               <DashedDivider />
@@ -174,32 +181,11 @@ export default function AssignmentPreview() {
               <SubmitWork />
             </>
           )}
-
-          {/* {role === 'student' && classId && courseId && (
-            <div className="mt-16">
-              <h4 className="no-margin">Submit your work (.use)</h4>
-              <div className="mt-8">
-                <Link
-                  to={`/education/student/classes/${classId}/courses/${courseId}/assignments/${resourceId}/submit`}
-                  className={`btn btn-primary btn-sm ${isExpired ? 'disabled' : ''}`}
-                  aria-disabled={isExpired}
-                  onClick={(e) => {
-                    if (isExpired) {
-                      e.preventDefault();
-                      push({ title: 'Closed', body: 'Submissions are closed for this assignment.' });
-                    }
-                  }}
-                >
-                  Go to Submit Page
-                </Link>
-              </div>
-              {isExpired && <small className="text-error">Submissions are closed for this assignment.</small>}
-            </div>
-          )} */}
           {role === 'teacher' && (
             <div className="meta-small mt-12">
               <small>
-                Created: {fmtDate(assignment.created_at)} • Updated: {fmtDate(assignment.updated_at)}
+                Created: {fmtDate(assignment.created_at)} • Updated:{' '}
+                {fmtDate(assignment.updated_at)}
               </small>
             </div>
           )}

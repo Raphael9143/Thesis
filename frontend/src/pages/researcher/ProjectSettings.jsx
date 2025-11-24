@@ -21,13 +21,19 @@ export default function ProjectSettings({ project, isOwner, onProjectUpdate }) {
       const res = await userAPI.updateResearchProjectVisibility(project.id, newVisibility);
       if (res?.success) {
         setVisibility(newVisibility);
-        push({ title: 'Success', body: `Project visibility changed to ${newVisibility.toLowerCase()}` });
+        push({
+          title: 'Success',
+          body: `Project visibility changed to ${newVisibility.toLowerCase()}`,
+        });
         if (onProjectUpdate) onProjectUpdate({ ...project, visibility: newVisibility });
       } else {
         push({ title: 'Error', body: res?.message || 'Failed to update visibility' });
       }
     } catch (err) {
-      push({ title: 'Error', body: err?.response?.data?.message || err.message || 'Failed to update visibility' });
+      push({
+        title: 'Error',
+        body: err?.response?.data?.message || err.message || 'Failed to update visibility',
+      });
     } finally {
       setSaving(false);
     }
@@ -38,7 +44,9 @@ export default function ProjectSettings({ project, isOwner, onProjectUpdate }) {
       push({ title: 'Permission denied', body: 'Only the owner can close the project' });
       return;
     }
-    if (!window.confirm('Are you sure you want to close this project? This action cannot be undone.')) {
+    if (
+      !window.confirm('Are you sure you want to close this project? This action cannot be undone.')
+    ) {
       return;
     }
     setClosing(true);
@@ -51,7 +59,10 @@ export default function ProjectSettings({ project, isOwner, onProjectUpdate }) {
         push({ title: 'Error', body: res?.message || 'Failed to close project' });
       }
     } catch (err) {
-      push({ title: 'Error', body: err?.response?.data?.message || err.message || 'Failed to close project' });
+      push({
+        title: 'Error',
+        body: err?.response?.data?.message || err.message || 'Failed to close project',
+      });
     } finally {
       setClosing(false);
     }
@@ -73,8 +84,8 @@ export default function ProjectSettings({ project, isOwner, onProjectUpdate }) {
         </div>
         <div className="settings-visibility-contents">
           <p className="settings-section-description">
-            Control who can view your project. Public projects are visible to everyone, while private projects are only
-            visible to members.
+            Control who can view your project. Public projects are visible to everyone, while
+            private projects are only visible to members.
           </p>
           <div className="settings-visibility-options">
             <label className="settings-radio-option">
@@ -120,7 +131,13 @@ export default function ProjectSettings({ project, isOwner, onProjectUpdate }) {
           disabled={closing || project?.status === 'CLOSED'}
         >
           <i className="fa-solid fa-ban"></i>
-          <span>{closing ? 'Closing...' : project?.status === 'CLOSED' ? 'Project Closed' : 'Close Project'}</span>
+          <span>
+            {closing
+              ? 'Closing...'
+              : project?.status === 'CLOSED'
+                ? 'Project Closed'
+                : 'Close Project'}
+          </span>
         </button>
       </div>
     </div>

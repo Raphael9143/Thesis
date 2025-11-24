@@ -1,5 +1,6 @@
 export default function useDueDateStatus(dueDateISO) {
-  if (!dueDateISO) return { formatted: 'No due date', daysLeft: null, status: 'normal', className: '' };
+  if (!dueDateISO)
+    return { formatted: 'No due date', daysLeft: null, status: 'normal', className: '' };
 
   const due = new Date(dueDateISO);
   const now = new Date();

@@ -57,7 +57,9 @@ export default function StarredProjects() {
       <Card>
         {loading && <div>Loading starred projects...</div>}
         {error && <div className="text-error">{error}</div>}
-        {!loading && !error && projects.length === 0 && <div>No starred projects. Star projects to see them here.</div>}
+        {!loading && !error && projects.length === 0 && (
+          <div>No starred projects. Star projects to see them here.</div>
+        )}
         {!loading && !error && projects.length > 0 && (
           <div className="grid-cards">
             {projects.map((p) => (
@@ -67,7 +69,9 @@ export default function StarredProjects() {
                 subtitle={`${p.my_role || 'Member'}`}
                 description={p.description || ''}
                 badge={p.status || ''}
-                onClick={() => navigate(`/researcher/projects/${p.id}/details`, { state: { project: p } })}
+                onClick={() =>
+                  navigate(`/researcher/projects/${p.id}/details`, { state: { project: p } })
+                }
               />
             ))}
           </div>

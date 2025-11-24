@@ -78,8 +78,16 @@ export default function EnumEditor({
             if (editingName === en.name && editingType === 'enum') {
               return (
                 <div key={idx} className="uml-enum-var editing">
-                  <input className="uml-enum-input" value={text} onChange={(e) => onUpdateValue(idx, e.target.value)} />
-                  <i className="fa fa-trash uml-icon-btn" title="Delete value" onClick={() => onDeleteValue(idx)} />
+                  <input
+                    className="uml-enum-input"
+                    value={text}
+                    onChange={(e) => onUpdateValue(idx, e.target.value)}
+                  />
+                  <i
+                    className="fa fa-trash uml-icon-btn"
+                    title="Delete value"
+                    onClick={() => onDeleteValue(idx)}
+                  />
                 </div>
               );
             }

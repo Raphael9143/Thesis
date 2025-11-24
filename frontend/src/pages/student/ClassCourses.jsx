@@ -24,7 +24,8 @@ export default function StudentClassCoursesPage() {
         if (!mounted) return;
         if (clsRes?.success && clsRes.data) {
           // page title will be handled by hook
-          const maybeCourses = clsRes.data.courses || clsRes.data.course_list || clsRes.data.courses_taught;
+          const maybeCourses =
+            clsRes.data.courses || clsRes.data.course_list || clsRes.data.courses_taught;
           if (Array.isArray(maybeCourses) && maybeCourses.length > 0) {
             setCourses(maybeCourses);
             setLoading(false);
@@ -62,7 +63,9 @@ export default function StudentClassCoursesPage() {
           {loading && <div>Loading courses...</div>}
           {error && <div className="text-error">{error}</div>}
 
-          {!loading && !error && courses.length === 0 && <div>No courses found for this class.</div>}
+          {!loading && !error && courses.length === 0 && (
+            <div>No courses found for this class.</div>
+          )}
 
           {!loading && !error && courses.length > 0 && (
             <div className="grid-cards">
@@ -74,7 +77,9 @@ export default function StudentClassCoursesPage() {
                   image={course.image || course.thumbnail}
                   description={course.description || ''}
                   onClick={() =>
-                    navigate(`/education/student/classes/${id}/courses/${course.id || course.course_id}/lectures`)
+                    navigate(
+                      `/education/student/classes/${id}/courses/${course.id || course.course_id}/lectures`
+                    )
                   }
                 />
               ))}

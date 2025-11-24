@@ -41,7 +41,9 @@ const AddStudentsModal = ({ open, onClose, classId, onAdded }) => {
   const suggestions = useMemo(() => {
     const q = studentEmailsInput.trim().toLowerCase();
     if (!q) return [];
-    return studentEmails.filter((e) => e.toLowerCase().includes(q) && !selectedStudentEmails.includes(e)).slice(0, 10);
+    return studentEmails
+      .filter((e) => e.toLowerCase().includes(q) && !selectedStudentEmails.includes(e))
+      .slice(0, 10);
   }, [studentEmailsInput, studentEmails, selectedStudentEmails]);
 
   const addEmail = (email) => {
@@ -69,7 +71,9 @@ const AddStudentsModal = ({ open, onClose, classId, onAdded }) => {
     }
     setLoading(true);
     try {
-      const res = await userAPI.addStudentsToClass(classId, { studentEmails: selectedStudentEmails });
+      const res = await userAPI.addStudentsToClass(classId, {
+        studentEmails: selectedStudentEmails,
+      });
       if (res?.success) {
         push({ title: 'Success', body: 'Students added to class' });
         onAdded?.(res.data);
@@ -106,7 +110,12 @@ const AddStudentsModal = ({ open, onClose, classId, onAdded }) => {
         {suggestions.length > 0 && (
           <div className="suggestions">
             {suggestions.map((s) => (
-              <button key={s} className="btn btn-signin btn-sm" onClick={() => addEmail(s)} style={{ margin: 4 }}>
+              <button
+                key={s}
+                className="btn btn-signin btn-sm"
+                onClick={() => addEmail(s)}
+                style={{ margin: 4 }}
+              >
                 {s}
               </button>
             ))}

@@ -122,7 +122,8 @@ export default function ContributionDetail() {
       }
     } catch (err) {
       console.error('Review error:', err);
-      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to submit review';
+      const errorMessage =
+        err?.response?.data?.message || err?.message || 'Failed to submit review';
 
       // If error is validation error, refresh to show validation_report
       if (err?.response?.data?.success === false && err?.response?.data?.message) {
@@ -234,7 +235,9 @@ export default function ContributionDetail() {
             onChange={setActiveTab}
           />
 
-          {activeTab === 'details' && <ContributionDetailsTab contribution={contribution} useModel={useModel} />}
+          {activeTab === 'details' && (
+            <ContributionDetailsTab contribution={contribution} useModel={useModel} />
+          )}
 
           {activeTab === 'changes' && (
             <ContributionChangesTab

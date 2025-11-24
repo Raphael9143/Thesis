@@ -43,7 +43,9 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
   const suggestions = useMemo(() => {
     const q = studentEmailsInput.trim().toLowerCase();
     if (!q) return [];
-    return studentEmails.filter((e) => e.toLowerCase().includes(q) && !selectedStudentEmails.includes(e)).slice(0, 10);
+    return studentEmails
+      .filter((e) => e.toLowerCase().includes(q) && !selectedStudentEmails.includes(e))
+      .slice(0, 10);
   }, [studentEmailsInput, studentEmails, selectedStudentEmails]);
 
   const addEmail = (email) => {
@@ -156,8 +158,18 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
     <Modal open={open} onClose={onClose} title="Create Class">
       <form onSubmit={onSubmit} className="create-class-modal-form">
         <div className="create-class-row">
-          <FormField label="Name" value={name} onChange={(e) => setName(e.target.value)} required={true} />
-          <FormField label="Code" value={code} onChange={(e) => setCode(e.target.value)} required={true} />
+          <FormField
+            label="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required={true}
+          />
+          <FormField
+            label="Code"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            required={true}
+          />
         </div>
         <div className="create-class-row mt">
           <FormField
@@ -203,7 +215,12 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
           {suggestions.length > 0 && (
             <div className="suggestions">
               {suggestions.map((s) => (
-                <button key={s} className="btn btn-signin btn-sm" onClick={() => addEmail(s)} style={{ margin: 4 }}>
+                <button
+                  key={s}
+                  className="btn btn-signin btn-sm"
+                  onClick={() => addEmail(s)}
+                  style={{ margin: 4 }}
+                >
                   {s}
                 </button>
               ))}
@@ -249,7 +266,12 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
         </div>
       </form>
 
-      <NotificationPopup message={notifyMsg} open={notifyOpen} type={notifyType} onClose={() => setNotifyOpen(false)} />
+      <NotificationPopup
+        message={notifyMsg}
+        open={notifyOpen}
+        type={notifyType}
+        onClose={() => setNotifyOpen(false)}
+      />
     </Modal>
   );
 }

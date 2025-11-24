@@ -34,7 +34,10 @@ export default function LecturesList() {
           // Title for this view will be handled by useClassCourseTitle / useTitle hooks
         }
 
-        const courseId = routeCourseId || (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) || id;
+        const courseId =
+          routeCourseId ||
+          (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) ||
+          id;
         setCourseIdState(courseId);
 
         const lectRes = await userAPI.getLecturesByCourse(courseId);
@@ -167,14 +170,19 @@ export default function LecturesList() {
                     collapsed={collapsed.has(g.key)}
                     onToggle={() => toggleGroup(g.key)}
                   />
-                  <ul className="class-detail__list" style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}>
+                  <ul
+                    className="class-detail__list"
+                    style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}
+                  >
                     {g.items.map((l) => (
                       <li key={l.id} className="class-detail__list-item">
                         <div className="flex-between full-width">
                           <div
                             className="clickable"
                             onClick={() =>
-                              navigate(`/education/teacher/classes/${id}/courses/${courseIdState}/lectures/${l.id}`)
+                              navigate(
+                                `/education/teacher/classes/${id}/courses/${courseIdState}/lectures/${l.id}`
+                              )
                             }
                           >
                             <div className="font-700 truncate">{l.title}</div>
@@ -182,22 +190,42 @@ export default function LecturesList() {
                           <div className="display-flex gap-8 ml-12">
                             {l.status === 'draft' ? (
                               <>
-                                <button className="btn btn-icon" title="Publish" onClick={() => publishLecture(l.id)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Publish"
+                                  onClick={() => publishLecture(l.id)}
+                                >
                                   <i className="fa fa-paper-plane" />
                                 </button>
-                                <button className="btn btn-icon" title="Delete" onClick={() => cancelLecture(l)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Delete"
+                                  onClick={() => cancelLecture(l)}
+                                >
                                   <i className="fa fa-times" />
                                 </button>
-                                <button className="btn btn-icon" title="Update" onClick={() => updateLecture(l)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Update"
+                                  onClick={() => updateLecture(l)}
+                                >
                                   <i className="fa fa-edit" />
                                 </button>
                               </>
                             ) : (
                               <>
-                                <button className="btn btn-icon" title="Delete" onClick={() => cancelLecture(l)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Delete"
+                                  onClick={() => cancelLecture(l)}
+                                >
                                   <i className="fa fa-times" />
                                 </button>
-                                <button className="btn btn-icon" title="Update" onClick={() => updateLecture(l)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Update"
+                                  onClick={() => updateLecture(l)}
+                                >
                                   <i className="fa fa-edit" />
                                 </button>
                               </>

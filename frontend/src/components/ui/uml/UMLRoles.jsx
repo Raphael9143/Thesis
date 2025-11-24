@@ -15,7 +15,12 @@ const UMLRoles = ({ rolePositions, associations, startRoleDrag, roleActiveKey })
         <div
           key={key}
           className={`uml-role-label ${roleActiveKey === key ? 'dragging' : ''}`}
-          style={{ position: 'absolute', left: pos.x, top: pos.y, transform: 'translate(-50%,-50%)' }}
+          style={{
+            position: 'absolute',
+            left: pos.x,
+            top: pos.y,
+            transform: 'translate(-50%,-50%)',
+          }}
           onMouseDown={(e) => startRoleDrag(key, ownerName, e)}
           onPointerDown={(e) => startRoleDrag(key, ownerName, e)}
           onTouchStart={(e) => startRoleDrag(key, ownerName, e)}

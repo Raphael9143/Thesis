@@ -44,7 +44,13 @@ export default function UMLPage() {
   const GAP_Y = 40;
   const BOX_MIN_H = 60;
 
-  const { centerOf, getRect } = useBoxMeasurements({ boxRefs, positions, containerRef, BOX_W, BOX_MIN_H });
+  const { centerOf, getRect } = useBoxMeasurements({
+    boxRefs,
+    positions,
+    containerRef,
+    BOX_W,
+    BOX_MIN_H,
+  });
 
   useEffect(() => {
     positionsRef.current = positions;
@@ -59,35 +65,47 @@ export default function UMLPage() {
       p[c.name] = { x: col * (BOX_W + GAP_X) + 40, y: row * (BOX_MIN_H + GAP_Y) + 40 };
     });
     enums.forEach((e, i) => {
-      p[`enum:${e.name}`] = { x: (perRow + 1) * (BOX_W + GAP_X) + 40, y: i * (BOX_MIN_H + GAP_Y) + 40 };
+      p[`enum:${e.name}`] = {
+        x: (perRow + 1) * (BOX_W + GAP_X) + 40,
+        y: i * (BOX_MIN_H + GAP_Y) + 40,
+      };
     });
     setPositions(p);
   }, [classes, enums]);
 
   const { startDrag } = useBoxDrag({ setPositions, containerRef, positionsRef });
 
-  const { rolePositions, setRolePositions, startRoleDrag, roleActiveKey, rolePreviewTarget } = useRoleDrag({
-    boxRefs,
-    containerRef,
-    initialPositions: {},
-  });
+  const { rolePositions, setRolePositions, startRoleDrag, roleActiveKey, rolePreviewTarget } =
+    useRoleDrag({
+      boxRefs,
+      containerRef,
+      initialPositions: {},
+    });
 
   useEffect(() => {
     const rp = {};
     associations.forEach((a, i) => {
       const parts = Array.isArray(a.parts) ? a.parts : [];
-      const centers = parts.map((p) => ({ name: p.class, center: centerOf(p.class), rect: getRect(p.class), raw: p }));
+      const centers = parts.map((p) => ({
+        name: p.class,
+        center: centerOf(p.class),
+        rect: getRect(p.class),
+        raw: p,
+      }));
       centers.forEach((c, idx) => {
         if (!c.center) return;
-        const other = centers.find((x) => x !== c && x.center) || { center: { x: c.center.x + 20, y: c.center.y } };
-        const p = c.rect ? intersectBorder(c.rect, c.center, other.center) : offsetAlong(c.center, other.center, 14);
+        const other = centers.find((x) => x !== c && x.center) || {
+          center: { x: c.center.x + 20, y: c.center.y },
+        };
+        const p = c.rect
+          ? intersectBorder(c.rect, c.center, other.center)
+          : offsetAlong(c.center, other.center, 14);
         rp[`${i}:${idx}`] = pushOutward(p, c.center, 18);
       });
     });
     setRolePositions(rp);
   }, [positions, associations, centerOf, getRect, setRolePositions]);
 
-  // If model not provided in router state, try load from sessionStorage or parse using API based on query param
   useEffect(() => {
     if (modelState) return; // already have model
     const load = async () => {
@@ -161,7 +179,14 @@ export default function UMLPage() {
 
   return (
     <div className="uml-page">
-      <div style={{ padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{
+          padding: 12,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <h2>UML Preview - {model.model || 'Model'}</h2>
         <div style={{ display: 'flex', gap: 8 }}>
           <button

@@ -66,7 +66,10 @@ export default function SubmitWork() {
 
   const endAt = useMemo(() => {
     if (!meta) return null;
-    if (isAssignment) return meta.end_date || meta?.courses?.[0]?.assignment_course?.due_date || meta.due_date || null;
+    if (isAssignment)
+      return (
+        meta.end_date || meta?.courses?.[0]?.assignment_course?.due_date || meta.due_date || null
+      );
     if (isExam) return meta.end_date || null;
     return null;
   }, [meta, isAssignment, isExam]);
@@ -95,7 +98,10 @@ export default function SubmitWork() {
     if (mode === 'editor') {
       const trimmed = (code || '').trim();
       if (!trimmed) {
-        push({ title: 'Missing code', body: 'Please type your .use code or switch to file upload.' });
+        push({
+          title: 'Missing code',
+          body: 'Please type your .use code or switch to file upload.',
+        });
         return;
       }
       const blob = new Blob([trimmed], { type: 'text/plain' });
@@ -127,7 +133,9 @@ export default function SubmitWork() {
         }
         // Navigate back to preview
         if (isAssignment) {
-          navigate(`/education/student/classes/${classId}/courses/${courseId}/assignments/${assignmentId}`);
+          navigate(
+            `/education/student/classes/${classId}/courses/${courseId}/assignments/${assignmentId}`
+          );
         } else if (isExam) {
           navigate(`/education/student/classes/${classId}/courses/${courseId}/exams/${examId}`);
         }
@@ -188,7 +196,10 @@ export default function SubmitWork() {
             </div>
           ) : (
             <div className="file-pane">
-              <p>Select a file using the &quot;Upload File&quot; button above to load its content into the editor.</p>
+              <p>
+                Select a file using the &quot;Upload File&quot; button above to load its content
+                into the editor.
+              </p>
             </div>
           )}
 

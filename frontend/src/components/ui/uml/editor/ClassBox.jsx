@@ -80,7 +80,11 @@ export default function ClassBox({
         ) : (
           <>
             <div className="uml-box-actions">
-              <div className="uml-connector" title="Drag to link" onPointerDown={(e) => startLinkDrag(e, c.name)} />
+              <div
+                className="uml-connector"
+                title="Drag to link"
+                onPointerDown={(e) => startLinkDrag(e, c.name)}
+              />
             </div>
             <div>{c.name}</div>
             <i

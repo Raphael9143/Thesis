@@ -84,7 +84,11 @@ export default function EnumBox({
           {(Array.isArray(en.values) ? en.values : []).map((v, idx) => (
             <div className="uml-attr" key={idx}>
               {editingName === en.name ? (
-                <input className="uml-attr-name" value={v} onChange={(e) => onUpdateValue(idx, e.target.value)} />
+                <input
+                  className="uml-attr-name"
+                  value={v}
+                  onChange={(e) => onUpdateValue(idx, e.target.value)}
+                />
               ) : (
                 <div>{v}</div>
               )}

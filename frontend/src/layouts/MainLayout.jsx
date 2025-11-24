@@ -8,11 +8,14 @@ export default function MainLayout() {
   const location = useLocation();
   const [leftCollapsed, setLeftCollapsed] = React.useState(false);
 
-  const showEducationNavbar = location.pathname.startsWith('/education') && location.pathname !== '/education';
+  const showEducationNavbar =
+    location.pathname.startsWith('/education') && location.pathname !== '/education';
   const isLoggedIn = sessionStorage.getItem('isLogin') === 'true';
 
   const wrapperClass =
-    isLoggedIn && showEducationNavbar ? `app-bg app-with-sidebar${leftCollapsed ? ' collapsed' : ''}` : 'app-bg';
+    isLoggedIn && showEducationNavbar
+      ? `app-bg app-with-sidebar${leftCollapsed ? ' collapsed' : ''}`
+      : 'app-bg';
 
   return (
     <PageInfoProvider>
@@ -46,7 +49,9 @@ function PageInfoBar() {
   const location = useLocation();
 
   // only show the subnav toggle on course detail pages
-  const isCoursePage = /^\/education\/(teacher|student)\/classes\/[^/]+\/courses\//.test(location.pathname);
+  const isCoursePage = /^\/education\/(teacher|student)\/classes\/[^/]+\/courses\//.test(
+    location.pathname
+  );
 
   return (
     <div className="page-info" aria-hidden={title ? 'false' : 'true'}>

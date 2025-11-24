@@ -15,7 +15,8 @@ const useRoleDrag = ({ boxRefs, containerRef, initialPositions = {} }) => {
 
   useEffect(() => {
     const getXY = (ev) => {
-      if (ev.touches && ev.touches[0]) return { clientX: ev.touches[0].clientX, clientY: ev.touches[0].clientY };
+      if (ev.touches && ev.touches[0])
+        return { clientX: ev.touches[0].clientX, clientY: ev.touches[0].clientY };
       return { clientX: ev.clientX, clientY: ev.clientY };
     };
 
@@ -102,7 +103,14 @@ const useRoleDrag = ({ boxRefs, containerRef, initialPositions = {} }) => {
         : { clientX: e.clientX, clientY: e.clientY };
     const { clientX, clientY } = clientXY;
     const pos = rolePositions[key] || { x: 0, y: 0 };
-    roleDraggingRef.current = { key, ownerName, startX: clientX, startY: clientY, origX: pos.x, origY: pos.y };
+    roleDraggingRef.current = {
+      key,
+      ownerName,
+      startX: clientX,
+      startY: clientY,
+      origX: pos.x,
+      origY: pos.y,
+    };
     setRoleActiveKey(key);
     if (e.pointerId && e.currentTarget && e.currentTarget.setPointerCapture) {
       try {

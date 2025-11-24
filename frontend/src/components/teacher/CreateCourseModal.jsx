@@ -83,7 +83,11 @@ export default function CreateCourseModal({ open, onClose, defaultClassId = null
         </div>
 
         <div className="create-class-row mt">
-          <FormField label="Semester" value={semester} onChange={(e) => setSemester(e.target.value)} />
+          <FormField
+            label="Semester"
+            value={semester}
+            onChange={(e) => setSemester(e.target.value)}
+          />
         </div>
 
         <div className="create-class-row mt">

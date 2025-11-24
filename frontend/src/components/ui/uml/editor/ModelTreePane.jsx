@@ -43,7 +43,9 @@ export default function ModelTreePane({
   const toggleOpen = (key) => setOpenKeys((o) => ({ ...o, [key]: !o[key] }));
 
   // Build lists preserving original indices so updates can target the correct entry
-  const invariantList = constraints.map((c, i) => ({ c, idx: i })).filter((x) => x.c && x.c.type === 'invariant');
+  const invariantList = constraints
+    .map((c, i) => ({ c, idx: i }))
+    .filter((x) => x.c && x.c.type === 'invariant');
   const prepostList = constraints
     .map((c, i) => ({ c, idx: i }))
     .filter((x) => x.c && (x.c.type === 'precondition' || x.c.type === 'postcondition'));
@@ -62,34 +64,48 @@ export default function ModelTreePane({
           const res = await serializeClass(payload);
           if (serializeTokenRef.current !== myToken) return; // stale
           const text = res?.data?.data || res?.data || res;
-          setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
+          setReadOnlyText(
+            typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2)
+          );
         } else if (key.startsWith('assoc:')) {
           const res = await serializeAssociation(payload);
           const text = res?.data?.data || res?.data || res;
-          setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
+          setReadOnlyText(
+            typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2)
+          );
         } else if (key.startsWith('inv:') || key.startsWith('cond:')) {
           // constraint -> USE
           const res = await serializeConstraint(payload);
           const text = res?.data?.data || res?.data || res;
-          setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
+          setReadOnlyText(
+            typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2)
+          );
         } else if (key.startsWith('enum:')) {
           // enum -> USE
           const res = await serializeEnum(payload);
           const text = res?.data?.data || res?.data || res;
-          setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
+          setReadOnlyText(
+            typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2)
+          );
         } else if (key.startsWith('op:') || key.startsWith('qop:')) {
           const res = await serializeOperation(payload);
           if (serializeTokenRef.current !== myToken) return; // stale
           const text = res?.data?.data || res?.data || res;
-          setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
+          setReadOnlyText(
+            typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2)
+          );
         } else {
           // default to showing notes or JSON
           if (serializeTokenRef.current !== myToken) return; // stale
-          setReadOnlyText(payload && payload._notes ? payload._notes : JSON.stringify(payload, null, 2));
+          setReadOnlyText(
+            payload && payload._notes ? payload._notes : JSON.stringify(payload, null, 2)
+          );
         }
       } catch {
         if (serializeTokenRef.current !== myToken) return; // stale
-        setReadOnlyText(payload && payload._notes ? payload._notes : JSON.stringify(payload, null, 2));
+        setReadOnlyText(
+          payload && payload._notes ? payload._notes : JSON.stringify(payload, null, 2)
+        );
       }
     };
     trySerialize();
@@ -207,8 +223,15 @@ export default function ModelTreePane({
     <div className="uml-model-tree">
       <div className="uml-model-tree-root">
         <div className="uml-tree-item root">
-          <span className="uml-tree-label" onClick={() => toggleOpen('root')} role="button" tabIndex={0}>
-            <i className={`fa-regular ${openKeys['root'] ? 'fa-folder-open' : 'fa-folder-closed'} uml-tree-toggle`} />
+          <span
+            className="uml-tree-label"
+            onClick={() => toggleOpen('root')}
+            role="button"
+            tabIndex={0}
+          >
+            <i
+              className={`fa-regular ${openKeys['root'] ? 'fa-folder-open' : 'fa-folder-closed'} uml-tree-toggle`}
+            />
             <span className="uml-tree-text">{modelName}</span>
           </span>
         </div>
@@ -221,7 +244,12 @@ export default function ModelTreePane({
             count={classes.length}
           >
             {classes.map((c) => (
-              <TreeLeaf key={c.name} label={c.name} onClick={() => handleSelect(`class:${c.name}`, c)} indent={12} />
+              <TreeLeaf
+                key={c.name}
+                label={c.name}
+                onClick={() => handleSelect(`class:${c.name}`, c)}
+                indent={12}
+              />
             ))}
           </TreeSection>
 
@@ -285,7 +313,9 @@ export default function ModelTreePane({
                 <TreeLeaf
                   key={`${entry.c}:${idx}`}
                   label={`${entry.c}.${typeof entry.op === 'string' ? entry.op : entry.op.name || 'op'}`}
-                  onClick={() => handleSelect(`op:${entry.c}:${idx}`, { class: entry.c, op: entry.op })}
+                  onClick={() =>
+                    handleSelect(`op:${entry.c}:${idx}`, { class: entry.c, op: entry.op })
+                  }
                   indent={12}
                 />
               ))}
@@ -303,7 +333,9 @@ export default function ModelTreePane({
                 <TreeLeaf
                   key={`qop:${entry.c}:${idx}`}
                   label={`${entry.c}.${entry.op?.name || entry.op || 'qop'}`}
-                  onClick={() => handleSelect(`qop:${entry.c}:${idx}`, { class: entry.c, op: entry.op })}
+                  onClick={() =>
+                    handleSelect(`qop:${entry.c}:${idx}`, { class: entry.c, op: entry.op })
+                  }
                   indent={12}
                 />
               ))}
@@ -316,7 +348,12 @@ export default function ModelTreePane({
             count={enumerations.length}
           >
             {enumerations.map((e) => (
-              <TreeLeaf key={e.name} label={e.name} onClick={() => handleSelect(`enum:${e.name}`, e)} indent={12} />
+              <TreeLeaf
+                key={e.name}
+                label={e.name}
+                onClick={() => handleSelect(`enum:${e.name}`, e)}
+                indent={12}
+              />
             ))}
           </TreeSection>
         </div>
@@ -366,7 +403,11 @@ export default function ModelTreePane({
             <button className="btn btn-outline btn-sm" onClick={() => setModalOpen(false)}>
               Cancel
             </button>
-            <button className="btn btn-primary btn-sm" onClick={handleSave} disabled={deserializing}>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={handleSave}
+              disabled={deserializing}
+            >
               Save
             </button>
           </div>

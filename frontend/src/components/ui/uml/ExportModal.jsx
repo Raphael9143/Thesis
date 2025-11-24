@@ -20,7 +20,11 @@ export default function ExportModal({ fileContent, onClose }) {
     <div className="use-export-overlay" role="dialog" aria-modal="true" onClick={onClose}>
       <div className="use-export-container" onClick={(e) => e.stopPropagation()}>
         <div className="use-export-actions">
-          <span className={`icon-btn ${copied ? 'active' : ''}`} title="Copy to clipboard" onClick={handleCopy}>
+          <span
+            className={`icon-btn ${copied ? 'active' : ''}`}
+            title="Copy to clipboard"
+            onClick={handleCopy}
+          >
             <i className="fa fa-copy" />
           </span>
           <span className="icon-btn" title="Close" onClick={onClose}>

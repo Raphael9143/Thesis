@@ -102,7 +102,9 @@ export default function StudentsList() {
       const res = await userAPI.removeStudentsFromClass(id, { studentIds: [s.id] });
       if (res?.success) {
         // remove from UI list
-        setStudents((prev) => prev.filter((x) => (x.classStudentId || x.id) !== (s.classStudentId || s.id)));
+        setStudents((prev) =>
+          prev.filter((x) => (x.classStudentId || x.id) !== (s.classStudentId || s.id))
+        );
         push({ title: 'Removed', body: 'Student removed from class' });
       } else {
         push({ title: 'Error', body: res?.message || 'Failed to remove student' });
@@ -155,7 +157,9 @@ export default function StudentsList() {
                         className="btn btn-icon"
                         title="View submissions"
                         onClick={() =>
-                          navigate(`/education/teacher/classes/${id}/courses/${courseId}/students/${s.id}/submissions`)
+                          navigate(
+                            `/education/teacher/classes/${id}/courses/${courseId}/students/${s.id}/submissions`
+                          )
                         }
                       >
                         <i className="fa fa-eye" />

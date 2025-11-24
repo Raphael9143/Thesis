@@ -32,7 +32,15 @@ export default function UserRow({ user, role }) {
       >
         {initials}
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between', flex: 1 }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          justifyContent: 'space-between',
+          flex: 1,
+        }}
+      >
         <div>
           <div style={{ fontWeight: 600 }}>{user.full_name}</div>
         </div>

@@ -104,7 +104,10 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
       }
       push({ title: 'USE storage', body: 'Model stored successfully.' });
     } catch (err) {
-      push({ title: 'Error', body: `Failed to store model: ${err?.response?.data?.message || String(err)}` });
+      push({
+        title: 'Error',
+        body: `Failed to store model: ${err?.response?.data?.message || String(err)}`,
+      });
     } finally {
       setSaveLoading(false);
     }
@@ -118,7 +121,11 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
   if (mime === 'application/pdf' || ext === 'pdf') {
     previewContent = (
       <div style={{ height: 700 }}>
-        <iframe src={url} title={filename || 'pdf'} style={{ width: '100%', height: '100%', border: 0 }} />
+        <iframe
+          src={url}
+          title={filename || 'pdf'}
+          style={{ width: '100%', height: '100%', border: 0 }}
+        />
       </div>
     );
   }
@@ -133,7 +140,11 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
       const g = `https://docs.google.com/gview?url=${enc}&embedded=true`;
       previewContent = (
         <div style={{ height: 700 }}>
-          <iframe src={g} title={filename || 'doc'} style={{ width: '100%', height: '100%', border: 0 }} />
+          <iframe
+            src={g}
+            title={filename || 'doc'}
+            style={{ width: '100%', height: '100%', border: 0 }}
+          />
         </div>
       );
     } catch (err) {
@@ -173,7 +184,11 @@ export default function FilePreview({ url, filename, mimetype, filePath }) {
   if (!previewContent) {
     previewContent = (
       <div style={{ height: 500 }}>
-        <iframe src={url} title={filename || 'file'} style={{ width: '100%', height: '100%', border: 0 }} />
+        <iframe
+          src={url}
+          title={filename || 'file'}
+          style={{ width: '100%', height: '100%', border: 0 }}
+        />
       </div>
     );
   }

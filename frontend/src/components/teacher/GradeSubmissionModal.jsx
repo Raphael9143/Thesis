@@ -12,7 +12,11 @@ export default function GradeSubmissionModal({ open, onClose, submission, onGrad
 
   useEffect(() => {
     if (open && submission) {
-      setScore(typeof submission.score !== 'undefined' && submission.score !== null ? String(submission.score) : '');
+      setScore(
+        typeof submission.score !== 'undefined' && submission.score !== null
+          ? String(submission.score)
+          : ''
+      );
       setFeedback(submission.feedback ?? '');
     }
   }, [open, submission]);
@@ -72,7 +76,12 @@ export default function GradeSubmissionModal({ open, onClose, submission, onGrad
           <button className="btn btn-signin" type="button" onClick={onClose} disabled={submitting}>
             Cancel
           </button>
-          <button className="btn btn-primary btn-sm" type="button" onClick={handleSubmit} disabled={submitting}>
+          <button
+            className="btn btn-primary btn-sm"
+            type="button"
+            onClick={handleSubmit}
+            disabled={submitting}
+          >
             {submitting ? 'Saving…' : 'Save'}
           </button>
         </div>

@@ -23,7 +23,9 @@ export default function useConstraints(initial = []) {
   const [constraintDraft, setConstraintDraft] = useState(null);
 
   const openConstraintModal = useCallback((draft = null) => {
-    setConstraintDraft(draft || { id: uid('con'), type: 'inv', name: '', expression: '', ownerClass: null });
+    setConstraintDraft(
+      draft || { id: uid('con'), type: 'inv', name: '', expression: '', ownerClass: null }
+    );
   }, []);
 
   const createConstraint = useCallback(

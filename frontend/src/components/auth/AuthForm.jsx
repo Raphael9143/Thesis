@@ -53,7 +53,10 @@ export default function AuthForm({
       }
       if (!data.success) {
         setMessage(
-          data.message || (type === 'login' ? 'Wrong email or password!' : 'Failed to register, please try again!')
+          data.message ||
+            (type === 'login'
+              ? 'Wrong email or password!'
+              : 'Failed to register, please try again!')
         );
         return;
       }
@@ -91,7 +94,8 @@ export default function AuthForm({
         sessionStorage.setItem('full_name', nameToUse);
         // Frontend-only avatar: use ui-avatars.com and do not persist backend avatar_url
         try {
-          const uiAvatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(nameToUse || 'User');
+          const uiAvatar =
+            'https://ui-avatars.com/api/?name=' + encodeURIComponent(nameToUse || 'User');
           sessionStorage.setItem('avatar_url', uiAvatar);
         } catch (err) {
           console.warn('Failed to set avatar in sessionStorage', err);
@@ -119,7 +123,11 @@ export default function AuthForm({
       {title && <h3>{title}</h3>}
       {subtitle && <div className="text-muted mb-8">{subtitle}</div>}
       {roles.length > 1 && (
-        <RoleTabs role={role} onChange={setRole} options={roles.map((r) => ({ value: r.value, label: r.label }))} />
+        <RoleTabs
+          role={role}
+          onChange={setRole}
+          options={roles.map((r) => ({ value: r.value, label: r.label }))}
+        />
       )}
       <form onSubmit={handleSubmit} className="auth-line-form">
         {type === 'register' && (
@@ -143,7 +151,12 @@ export default function AuthForm({
           />
         )}
         {type === 'register' && (
-          <select className="auth-line-input" value={gender} onChange={(e) => setGender(e.target.value)} required>
+          <select
+            className="auth-line-input"
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            required
+          >
             <option value="" disabled>
               Select gender
             </option>

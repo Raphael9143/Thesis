@@ -150,7 +150,10 @@ export default function StudentSubmissions() {
           >
             Assignments
           </button>
-          <button className={`btn ${kind === 'exams' ? 'btn-primary' : 'btn-signin'}`} onClick={() => setKind('exams')}>
+          <button
+            className={`btn ${kind === 'exams' ? 'btn-primary' : 'btn-signin'}`}
+            onClick={() => setKind('exams')}
+          >
             Exams
           </button>
         </div>
@@ -158,7 +161,9 @@ export default function StudentSubmissions() {
         {loading && <div>Loading {kind}...</div>}
         {error && <div className="text-error">{error}</div>}
 
-        {!loading && !error && items.length === 0 && <div>No {kind} found for this student in this course.</div>}
+        {!loading && !error && items.length === 0 && (
+          <div>No {kind} found for this student in this course.</div>
+        )}
 
         {!loading && !error && items.length > 0 && (
           <table className="table students-table">
@@ -180,11 +185,15 @@ export default function StudentSubmissions() {
                   <td>{it.title}</td>
                   <td>{it.due_date ? new Date(it.due_date).toLocaleString() : '-'}</td>
                   <td>
-                    {typeof it.submissions_count !== 'undefined' ? `${it.submissions_count}/${it.attempt_limit}` : '-'}
+                    {typeof it.submissions_count !== 'undefined'
+                      ? `${it.submissions_count}/${it.attempt_limit}`
+                      : '-'}
                   </td>
                   <td>
                     <a className="score-btn" onClick={() => handleOpenGrade(it)}>
-                      {typeof it.score !== 'undefined' && it.score !== null ? `${String(it.score)}` : 'Not graded'}
+                      {typeof it.score !== 'undefined' && it.score !== null
+                        ? `${String(it.score)}`
+                        : 'Not graded'}
                     </a>
                   </td>
                   <td>

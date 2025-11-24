@@ -33,15 +33,20 @@ export default function UMLEditor({ initialModel = null }) {
   const [associations, setAssociations] = useState(starter.associations || []);
   const [conditionals, setConditionals] = useState(starter.conditionals || []);
   const [positions, setPositions] = useState({});
-  const { constraints, setConstraints, constraintDraft, setConstraintDraft, createConstraint } = useConstraints(
-    starter.constraints || []
-  );
+  const { constraints, setConstraints, constraintDraft, setConstraintDraft, createConstraint } =
+    useConstraints(starter.constraints || []);
   const [nextIndex, setNextIndex] = useState((starter.classes?.length || 0) + 1);
 
   const BOX_W = 220;
   const BOX_MIN_H = 60;
 
-  const { centerOf, getRect } = useBoxMeasurements({ boxRefs, positions, containerRef, BOX_W, BOX_MIN_H });
+  const { centerOf, getRect } = useBoxMeasurements({
+    boxRefs,
+    positions,
+    containerRef,
+    BOX_W,
+    BOX_MIN_H,
+  });
   const { startDrag } = useBoxDrag({ setPositions, containerRef, positionsRef });
 
   useEffect(() => {
@@ -116,7 +121,6 @@ export default function UMLEditor({ initialModel = null }) {
   }, [positions]);
 
   const onToolDragStart = (ev, type) => ev.dataTransfer.setData('application/uml', type);
-  // constraints handled by useConstraints hook (openConstraintModal, createConstraint, deleteConstraint)
   const onCanvasDragOver = (e) => e.preventDefault();
   const onCanvasDrop = (e) => {
     e.preventDefault();
@@ -127,13 +131,19 @@ export default function UMLEditor({ initialModel = null }) {
     if (type === 'class') {
       const name = `Class${nextIndex}`;
       setClasses((s) => [...s, { name, attributes: [], superclasses: [] }]);
-      setPositions((p) => ({ ...p, [name]: { x: Math.max(12, x - BOX_W / 2), y: Math.max(12, y - 28) } }));
+      setPositions((p) => ({
+        ...p,
+        [name]: { x: Math.max(12, x - BOX_W / 2), y: Math.max(12, y - 28) },
+      }));
       setNextIndex((n) => n + 1);
     }
     if (type === 'enum') {
       const name = `Enum${nextIndex}`;
       setEnums((s) => [...s, { name, values: [] }]);
-      setPositions((p) => ({ ...p, [`enum:${name}`]: { x: Math.max(12, x - BOX_W / 2), y: Math.max(12, y - 28) } }));
+      setPositions((p) => ({
+        ...p,
+        [`enum:${name}`]: { x: Math.max(12, x - BOX_W / 2), y: Math.max(12, y - 28) },
+      }));
       setNextIndex((n) => n + 1);
     }
     // no drag-to-add for constraints; use modal
@@ -161,23 +171,31 @@ export default function UMLEditor({ initialModel = null }) {
   };
 
   // useLinkDrag hook handles temporary link line, pointer listeners and choice
-  const { linkDrag, startLinkDrag, choice, setChoice, assocModal, setAssocModal, addAssociation, addGeneralization } =
-    useLinkDrag({
-      positionsRef,
-      containerRef,
-      BOX_W,
-      BOX_MIN_H,
-      onAddAssociation: (assoc) => setAssociations((s) => [...s, assoc]),
-      onAddGeneralization: (sub, sup) =>
-        setClasses((s) =>
-          s.map((c) => {
-            if (c.name === sub) {
-              return { ...c, superclasses: Array.from(new Set([...(c.superclasses || []), sup])) };
-            }
-            return c;
-          })
-        ),
-    });
+  const {
+    linkDrag,
+    startLinkDrag,
+    choice,
+    setChoice,
+    assocModal,
+    setAssocModal,
+    addAssociation,
+    addGeneralization,
+  } = useLinkDrag({
+    positionsRef,
+    containerRef,
+    BOX_W,
+    BOX_MIN_H,
+    onAddAssociation: (assoc) => setAssociations((s) => [...s, assoc]),
+    onAddGeneralization: (sub, sup) =>
+      setClasses((s) =>
+        s.map((c) => {
+          if (c.name === sub) {
+            return { ...c, superclasses: Array.from(new Set([...(c.superclasses || []), sup])) };
+          }
+          return c;
+        })
+      ),
+  });
 
   // addAssociation and addGeneralization provided by hook and routed above
 
@@ -185,9 +203,9 @@ export default function UMLEditor({ initialModel = null }) {
   const [editValue, setEditValue] = useState('');
   const [attrEditBuffers, setAttrEditBuffers] = useState({}); // staged attribute edits per class
   const [enumEditBuffers, setEnumEditBuffers] = useState({}); // staged enum value edits per enum
-  const [newAttrInputs, setNewAttrInputs] = useState({}); // { [className]: { name:'', type:'', adding: bool } }
+  const [newAttrInputs, setNewAttrInputs] = useState({});
   // assocModal handled by hook
-  const [newEnumInputs, setNewEnumInputs] = useState({}); // { [enumName]: { value:'', adding: bool } }
+  const [newEnumInputs, setNewEnumInputs] = useState({});
   // operations will be exposed/editable from the ModelTree pane below the canvas
 
   // (modal actions inline in modal below)
@@ -218,7 +236,8 @@ export default function UMLEditor({ initialModel = null }) {
         setAssociations((as) =>
           as.map((a) => ({
             ...a,
-            parts: a.parts?.map((p) => ({ ...p, class: p.class === oldName ? val : p.class })) || [],
+            parts:
+              a.parts?.map((p) => ({ ...p, class: p.class === oldName ? val : p.class })) || [],
           }))
         );
         setPositions((p) => {
@@ -251,7 +270,8 @@ export default function UMLEditor({ initialModel = null }) {
         setAssociations((as) =>
           as.map((a) => ({
             ...a,
-            parts: a.parts?.map((p) => ({ ...p, class: p.class === oldName ? val : p.class })) || [],
+            parts:
+              a.parts?.map((p) => ({ ...p, class: p.class === oldName ? val : p.class })) || [],
           }))
         );
         setPositions((p) => {
@@ -342,7 +362,9 @@ export default function UMLEditor({ initialModel = null }) {
       setAttrEditBuffers((prev) => ({ ...prev, [clsName]: [...(prev[clsName] || []), attrObj] }));
     } else {
       setClasses((s) =>
-        s.map((c) => (c.name === clsName ? { ...c, attributes: [...(c.attributes || []), attrObj] } : c))
+        s.map((c) =>
+          c.name === clsName ? { ...c, attributes: [...(c.attributes || []), attrObj] } : c
+        )
       );
     }
 
@@ -383,15 +405,19 @@ export default function UMLEditor({ initialModel = null }) {
     if (editingName === clsName) {
       setAttrEditBuffers((prev) => ({
         ...prev,
-        [clsName]: (prev[clsName] || classes.find((c) => c.name === clsName)?.attributes || []).filter(
-          (_, i) => i !== idx
-        ),
+        [clsName]: (
+          prev[clsName] ||
+          classes.find((c) => c.name === clsName)?.attributes ||
+          []
+        ).filter((_, i) => i !== idx),
       }));
       return;
     }
 
     setClasses((s) =>
-      s.map((c) => (c.name === clsName ? { ...c, attributes: c.attributes.filter((_, i) => i !== idx) } : c))
+      s.map((c) =>
+        c.name === clsName ? { ...c, attributes: c.attributes.filter((_, i) => i !== idx) } : c
+      )
     );
   };
 
@@ -419,7 +445,9 @@ export default function UMLEditor({ initialModel = null }) {
     if (editingName === enumName) {
       setEnumEditBuffers((prev) => ({ ...prev, [enumName]: [...(prev[enumName] || []), val] }));
     } else {
-      setEnums((s) => s.map((e) => (e.name === enumName ? { ...e, values: [...(e.values || []), val] } : e)));
+      setEnums((s) =>
+        s.map((e) => (e.name === enumName ? { ...e, values: [...(e.values || []), val] } : e))
+      );
     }
     setNewEnumInputs((n) => ({ ...n, [enumName]: { value: '', adding: false } }));
   };
@@ -432,15 +460,17 @@ export default function UMLEditor({ initialModel = null }) {
     if (editingName === enumName) {
       setEnumEditBuffers((prev) => ({
         ...prev,
-        [enumName]: (prev[enumName] || enums.find((e) => e.name === enumName)?.values || []).map((v, i) =>
-          i === idx ? value : v
+        [enumName]: (prev[enumName] || enums.find((e) => e.name === enumName)?.values || []).map(
+          (v, i) => (i === idx ? value : v)
         ),
       }));
       return;
     }
 
     setEnums((s) =>
-      s.map((e) => (e.name === enumName ? { ...e, values: e.values.map((v, i) => (i === idx ? value : v)) } : e))
+      s.map((e) =>
+        e.name === enumName ? { ...e, values: e.values.map((v, i) => (i === idx ? value : v)) } : e
+      )
     );
   };
 
@@ -455,7 +485,11 @@ export default function UMLEditor({ initialModel = null }) {
       return;
     }
 
-    setEnums((s) => s.map((e) => (e.name === enumName ? { ...e, values: e.values.filter((_, i) => i !== idx) } : e)));
+    setEnums((s) =>
+      s.map((e) =>
+        e.name === enumName ? { ...e, values: e.values.filter((_, i) => i !== idx) } : e
+      )
+    );
   };
 
   // attribute editing helpers remain in this file; types/options are provided to components
@@ -466,7 +500,9 @@ export default function UMLEditor({ initialModel = null }) {
       if (a == null) return null;
       if (typeof a === 'string') {
         const parts = a.split(':').map((s) => s.trim());
-        return parts.length > 1 ? { name: parts[0], type: parts.slice(1).join(':') } : { name: parts[0] };
+        return parts.length > 1
+          ? { name: parts[0], type: parts.slice(1).join(':') }
+          : { name: parts[0] };
       }
       if (typeof a === 'object') return { name: a.name || '', type: a.type || '' };
       return { name: String(a) };
@@ -475,7 +511,9 @@ export default function UMLEditor({ initialModel = null }) {
     const parseConditionalRaw = (raw) => {
       if (!raw || typeof raw !== 'string') return null;
       // try to extract if (cond) then <then> else <else> endif
-      const m = raw.match(/^\s*if\s*\(([\s\S]*?)\)\s*then\s*([\s\S]*?)\s*else\s*([\s\S]*?)\s*endif\s*$/i);
+      const m = raw.match(
+        /^\s*if\s*\(([\s\S]*?)\)\s*then\s*([\s\S]*?)\s*else\s*([\s\S]*?)\s*endif\s*$/i
+      );
       if (m) {
         return { condition: m[1].trim(), then: m[2].trim(), else: m[3].trim(), raw: raw.trim() };
       }
@@ -491,7 +529,12 @@ export default function UMLEditor({ initialModel = null }) {
       }
       if (c.raw) return parseConditionalRaw(c.raw);
       // fallback - try to stringify
-      return { condition: c.condition || '', then: c.then || '', else: c.else || '', raw: JSON.stringify(c) };
+      return {
+        condition: c.condition || '',
+        then: c.then || '',
+        else: c.else || '',
+        raw: JSON.stringify(c),
+      };
     };
 
     const normalizeConstraint = (c) => {
@@ -518,7 +561,9 @@ export default function UMLEditor({ initialModel = null }) {
       })),
       classes: classes.map((c) => ({
         name: c.name,
-        attributes: Array.isArray(c.attributes) ? c.attributes.map(normalizeAttr).filter(Boolean) : [],
+        attributes: Array.isArray(c.attributes)
+          ? c.attributes.map(normalizeAttr).filter(Boolean)
+          : [],
         operations: c.operations || [],
         query_operations: c.query_operations || [],
         superclasses: c.superclasses || [],
@@ -528,10 +573,14 @@ export default function UMLEditor({ initialModel = null }) {
         name: a.name || '',
         parts: a.parts || [],
         type: a.type || 'association',
-        attributes: Array.isArray(a.attributes) ? a.attributes.map(normalizeAttr).filter(Boolean) : [],
+        attributes: Array.isArray(a.attributes)
+          ? a.attributes.map(normalizeAttr).filter(Boolean)
+          : [],
       })),
       constraints: (constraints || []).map(normalizeConstraint).filter(Boolean),
-      conditionals: Array.isArray(conditionals) ? conditionals.map(normalizeConditional).filter(Boolean) : [],
+      conditionals: Array.isArray(conditionals)
+        ? conditionals.map(normalizeConditional).filter(Boolean)
+        : [],
     };
   };
 
@@ -555,7 +604,9 @@ export default function UMLEditor({ initialModel = null }) {
       const data = res?.data ?? res;
       // Accept either plain string or structured object
       const useText =
-        typeof data === 'string' ? data : data.useText || data.fileContent || JSON.stringify(data, null, 2);
+        typeof data === 'string'
+          ? data
+          : data.useText || data.fileContent || JSON.stringify(data, null, 2);
       setExportedText(useText);
       setExportModalVisible(true);
     } catch (e) {
@@ -636,7 +687,9 @@ export default function UMLEditor({ initialModel = null }) {
       if (key.startsWith('assoc:')) {
         const idx = parseInt(key.split(':')[1], 10);
         if (Number.isFinite(idx)) {
-          setAssociations((s) => s.map((a, i) => (i === idx ? { ...(text || {}), name: text.name || a.name } : a)));
+          setAssociations((s) =>
+            s.map((a, i) => (i === idx ? { ...(text || {}), name: text.name || a.name } : a))
+          );
         }
         return;
       }
@@ -727,7 +780,6 @@ export default function UMLEditor({ initialModel = null }) {
     }
     // inv:id (not directly mutable here - constraints are managed by useConstraints hook)
     if (key.startsWith('inv:') || key.startsWith('cond:')) {
-      // key is like 'inv:<index>' or 'cond:<index>' where index is the position in constraints array
       const parts = key.split(':');
       const idx = parseInt(parts[1], 10);
       if (Number.isFinite(idx)) {
@@ -754,7 +806,8 @@ export default function UMLEditor({ initialModel = null }) {
           const ops = Array.isArray(c.operations) ? [...c.operations] : [];
           if (ops[idx]) {
             const op = ops[idx];
-            const newOp = typeof op === 'string' ? { name: op, _notes: text } : { ...op, _notes: text };
+            const newOp =
+              typeof op === 'string' ? { name: op, _notes: text } : { ...op, _notes: text };
             ops[idx] = newOp;
             return { ...c, operations: ops };
           }
@@ -793,15 +846,26 @@ export default function UMLEditor({ initialModel = null }) {
         </div>
 
         <div className="uml-canvas-area">
-          <div ref={containerRef} onDragOver={onCanvasDragOver} onDrop={onCanvasDrop} className="uml-canvas">
+          <div
+            ref={containerRef}
+            onDragOver={onCanvasDragOver}
+            onDrop={onCanvasDrop}
+            className="uml-canvas"
+          >
             {/* svg layer */}
-            <UMLCanvas associations={associations} classes={classes} centerOf={centerOf} getRect={getRect} />
+            <UMLCanvas
+              associations={associations}
+              classes={classes}
+              centerOf={centerOf}
+              getRect={getRect}
+            />
 
             {/* render boxes with existing UML CSS classes */}
             {[...classes].map((c) => {
               const pos = positions[c.name] || { x: 40, y: 40 };
               const newAttr = newAttrInputs[c.name] || { name: '', type: '', adding: false };
-              const attrs = editingName === c.name ? (attrEditBuffers[c.name] ?? c.attributes) : c.attributes;
+              const attrs =
+                editingName === c.name ? (attrEditBuffers[c.name] ?? c.attributes) : c.attributes;
               return (
                 <ClassBox
                   key={c.name}
@@ -936,7 +1000,9 @@ export default function UMLEditor({ initialModel = null }) {
           </div>
         </div>
 
-        {exportModalVisible && <ExportModal fileContent={exportedText} onClose={() => setExportModalVisible(false)} />}
+        {exportModalVisible && (
+          <ExportModal fileContent={exportedText} onClose={() => setExportModalVisible(false)} />
+        )}
       </div>
     </UmlEditorContext.Provider>
   );

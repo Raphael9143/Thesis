@@ -102,7 +102,9 @@ export default function SubmissionsView() {
                       <td>{idx + 1}</td>
                       <td>{s.student?.student_code || s.student_id || 'Unknown'}</td>
                       <td>{s.student?.user?.full_name || '-'}</td>
-                      <td>{s.submission_time ? new Date(s.submission_time).toLocaleString() : '-'}</td>
+                      <td>
+                        {s.submission_time ? new Date(s.submission_time).toLocaleString() : '-'}
+                      </td>
                       <td>{s.attempt_number ?? '-'}</td>
                       <td>
                         <a
@@ -112,7 +114,9 @@ export default function SubmissionsView() {
                             setGradeModalOpen(true);
                           }}
                         >
-                          {typeof s.score !== 'undefined' && s.score !== null ? String(s.score) : 'Not graded'}
+                          {typeof s.score !== 'undefined' && s.score !== null
+                            ? String(s.score)
+                            : 'Not graded'}
                         </a>
                       </td>
                       <td>
@@ -133,7 +137,12 @@ export default function SubmissionsView() {
                       </td>
                       <td>
                         {s.attachment ? (
-                          <a className="score-btn" href={toFullUrl(s.attachment)} target="_blank" rel="noreferrer">
+                          <a
+                            className="score-btn"
+                            href={toFullUrl(s.attachment)}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
                             Download
                           </a>
                         ) : (
@@ -152,7 +161,9 @@ export default function SubmissionsView() {
               onGraded={(updated) => {
                 // updated may be the updated submission object; update list
                 if (!updated) return;
-                setSubmissions((prev) => prev.map((p) => (p.id === (updated.id || p.id) ? { ...p, ...updated } : p)));
+                setSubmissions((prev) =>
+                  prev.map((p) => (p.id === (updated.id || p.id) ? { ...p, ...updated } : p))
+                );
               }}
             />
             {/* Preview now opens on a dedicated page via /file/preview */}

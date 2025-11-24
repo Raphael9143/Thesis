@@ -30,7 +30,10 @@ export default function ResearcherSidebar({ collapsed = false, onToggleCollapse 
   };
 
   return (
-    <aside className={`leftsidebar ${collapsed ? 'leftsidebar--collapsed' : ''}`} aria-expanded={!collapsed}>
+    <aside
+      className={`leftsidebar ${collapsed ? 'leftsidebar--collapsed' : ''}`}
+      aria-expanded={!collapsed}
+    >
       <div className="leftsidebar__brand">
         <img
           src="https://icon.icepanel.io/Technology/svg/Unified-Modelling-Language-%28UML%29.svg"

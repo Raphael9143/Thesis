@@ -33,7 +33,10 @@ export default function UMLCanvas({
   rolePreviewTarget,
 }) {
   return (
-    <svg className="uml-canvas-svg" style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' }}>
+    <svg
+      className="uml-canvas-svg"
+      style={{ position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' }}
+    >
       {/* Draw generalizations (inheritance) first */}
       {Array.isArray(classes) &&
         classes.map((c, idx) => {
@@ -59,7 +62,14 @@ export default function UMLCanvas({
 
             return (
               <g key={`gen-${idx}-${sidx}`}>
-                <line x1={pFrom.x} y1={pFrom.y} x2={base.x} y2={base.y} stroke="#333" strokeWidth={2} />
+                <line
+                  x1={pFrom.x}
+                  y1={pFrom.y}
+                  x2={base.x}
+                  y2={base.y}
+                  stroke="#333"
+                  strokeWidth={2}
+                />
                 <polygon
                   points={`${pTo.x},${pTo.y} ${pLeft.x},${pLeft.y} ${pRight.x},${pRight.y}`}
                   fill="#fff"
@@ -161,8 +171,12 @@ export default function UMLCanvas({
               );
             }
 
-            const p1 = left.rect ? intersectBorder(left.rect, left.center, right.center) : left.center;
-            const p2 = right.rect ? intersectBorder(right.rect, right.center, left.center) : right.center;
+            const p1 = left.rect
+              ? intersectBorder(left.rect, left.center, right.center)
+              : left.center;
+            const p2 = right.rect
+              ? intersectBorder(right.rect, right.center, left.center)
+              : right.center;
             // Offset parallel associations between the same pair so they don't overlap
             const n1 = left.name || '';
             const n2 = right.name || '';
@@ -203,7 +217,6 @@ export default function UMLCanvas({
                     strokeWidth={1.5}
                   />
                 )}
-                {/* associationclass: render a small class box near middle and connect with dashed line */}
                 {type === 'associationclass' &&
                   a.attributes &&
                   (() => {
@@ -223,7 +236,14 @@ export default function UMLCanvas({
                             {att.name + (att.type ? ` : ${att.type}` : '')}
                           </text>
                         ))}
-                        <line x1={mid.x} y1={mid.y} x2={bx} y2={by + boxH / 2} stroke="#333" strokeDasharray="6 4" />
+                        <line
+                          x1={mid.x}
+                          y1={mid.y}
+                          x2={bx}
+                          y2={by + boxH / 2}
+                          stroke="#333"
+                          strokeDasharray="6 4"
+                        />
                       </g>
                     );
                   })()}
@@ -234,7 +254,10 @@ export default function UMLCanvas({
           // N-ary association: compute centroid and connect to each participant
           const valid = centers.filter((c) => c.center);
           if (valid.length < 2) return null;
-          const centroid = valid.reduce((acc, c) => ({ x: acc.x + c.center.x, y: acc.y + c.center.y }), { x: 0, y: 0 });
+          const centroid = valid.reduce(
+            (acc, c) => ({ x: acc.x + c.center.x, y: acc.y + c.center.y }),
+            { x: 0, y: 0 }
+          );
           centroid.x /= valid.length;
           centroid.y /= valid.length;
           // draw connector lines from centroid to each part

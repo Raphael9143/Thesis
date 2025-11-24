@@ -107,7 +107,9 @@ export default function ExamPreview() {
               </div>
               <div>
                 <strong>Available</strong>{' '}
-                {exam.start_date || exam.end_date ? formatAvailable(exam.start_date, exam.end_date, '') : 'Available'}
+                {exam.start_date || exam.end_date
+                  ? formatAvailable(exam.start_date, exam.end_date, '')
+                  : 'Available'}
               </div>
               <div>
                 {exam.attachment && (
@@ -157,7 +159,9 @@ export default function ExamPreview() {
               </div>
             </>
           )}
-          {role === 'student' && contentTab === 'history' && <SubmissionHistory type="exam" id={resourceId} />}
+          {role === 'student' && contentTab === 'history' && (
+            <SubmissionHistory type="exam" id={resourceId} />
+          )}
           {!isExpired && role === 'student' && contentTab !== 'history' && (
             <>
               <DashedDivider />
@@ -167,27 +171,6 @@ export default function ExamPreview() {
               <SubmitWork />
             </>
           )}
-          {/* 
-          {role === 'student' && classId && courseId && (
-            <div className="mt-16">
-              <div className="mt-8">
-                <Link
-                  to={`/education/student/classes/${classId}/courses/${courseId}/exams/${resourceId}/submit`}
-                  className={`btn btn-primary btn-sm ${isExpired ? 'disabled' : ''}`}
-                  aria-disabled={isExpired}
-                  onClick={(e) => {
-                    if (isExpired) {
-                      e.preventDefault();
-                      push({ title: 'Closed', body: 'Submissions are closed for this exam.' });
-                    }
-                  }}
-                >
-                  Go to Submit Page
-                </Link>
-              </div>
-              {isExpired && <small className="text-error">Submissions are closed for this exam.</small>}
-            </div>
-          )} */}
           {role === 'teacher' && (
             <div className="meta-small mt-12">
               <small>

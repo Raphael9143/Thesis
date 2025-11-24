@@ -18,13 +18,19 @@ export default function ContributionChangesTab({
 }) {
   const navigate = useNavigate();
   const canResubmit =
-    contribution.contributor_id === currentUserId && ['PENDING', 'NEEDS_EDIT'].includes(contribution.status);
+    contribution.contributor_id === currentUserId &&
+    ['PENDING', 'NEEDS_EDIT'].includes(contribution.status);
   const renderDiff = () => {
     if (!originalModel || !useModel) {
-      return <div className="contribution-diff-error">Unable to show changes - missing model data</div>;
+      return (
+        <div className="contribution-diff-error">Unable to show changes - missing model data</div>
+      );
     }
 
-    const diffLines = computeDiff(originalModel.raw_text, useModel.raw_text, { context: 3, collapse: true });
+    const diffLines = computeDiff(originalModel.raw_text, useModel.raw_text, {
+      context: 3,
+      collapse: true,
+    });
 
     return (
       <div className="contribution-diff-container">
@@ -46,7 +52,9 @@ export default function ContributionChangesTab({
               return (
                 <div key={idx} className="contribution-diff-line contribution-diff-line-skip">
                   <span className="contribution-diff-line-num">…</span>
-                  <span className="contribution-diff-line-text">Skipped {item.skipCount} unchanged lines</span>
+                  <span className="contribution-diff-line-text">
+                    Skipped {item.skipCount} unchanged lines
+                  </span>
                 </div>
               );
             }
@@ -57,7 +65,10 @@ export default function ContributionChangesTab({
               return '';
             })();
             return (
-              <div key={idx} className={`contribution-diff-line contribution-diff-line-${item.type}`}>
+              <div
+                key={idx}
+                className={`contribution-diff-line contribution-diff-line-${item.type}`}
+              >
                 <span className="contribution-diff-line-num">{lineNumDisplay}</span>
                 <span className="contribution-diff-line-text">{item.line || ' '}</span>
               </div>
@@ -81,11 +92,13 @@ export default function ContributionChangesTab({
           <div className="contribution-detail-validation-section">
             <h3>Validation Report</h3>
             <div className="contribution-detail-validation-error">
-              <i className="fa fa-exclamation-triangle" /> {validationError || contribution.validation_report}
+              <i className="fa fa-exclamation-triangle" />{' '}
+              {validationError || contribution.validation_report}
             </div>
             {validationError && (
               <div style={{ marginTop: '8px', fontSize: '13px', color: '#991b1b' }}>
-                <i className="fa fa-info-circle" /> This validation error will be saved when you submit your review.
+                <i className="fa fa-info-circle" /> This validation error will be saved when you
+                submit your review.
               </div>
             )}
           </div>
@@ -98,7 +111,8 @@ export default function ContributionChangesTab({
         <div className="contribution-detail-resubmit-section">
           <h3>Edit Contribution</h3>
           <p className="contribution-detail-resubmit-hint">
-            You can edit and resubmit this contribution to address feedback or fix validation errors.
+            You can edit and resubmit this contribution to address feedback or fix validation
+            errors.
           </p>
           <button
             className="btn btn-primary btn-sm"
@@ -127,13 +141,25 @@ export default function ContributionChangesTab({
             rows={5}
           />
           <div className="contribution-detail-review-actions">
-            <button className="btn btn-success" onClick={() => handleReview('ACCEPT')} disabled={submitting}>
+            <button
+              className="btn btn-success"
+              onClick={() => handleReview('ACCEPT')}
+              disabled={submitting}
+            >
               <i className="fa fa-check" /> Accept
             </button>
-            <button className="btn btn-warning" onClick={() => handleReview('NEEDS_EDIT')} disabled={submitting}>
+            <button
+              className="btn btn-warning"
+              onClick={() => handleReview('NEEDS_EDIT')}
+              disabled={submitting}
+            >
               <i className="fa fa-edit" /> Request Edits
             </button>
-            <button className="btn btn-danger" onClick={() => handleReview('REJECT')} disabled={submitting}>
+            <button
+              className="btn btn-danger"
+              onClick={() => handleReview('REJECT')}
+              disabled={submitting}
+            >
               <i className="fa fa-times" /> Reject
             </button>
           </div>

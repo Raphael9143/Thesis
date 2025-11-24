@@ -56,7 +56,8 @@ const userAPI = {
   addStudentsToClass: (classId, data) => axiosClient.post(`class/${classId}/students`, data),
   // Get assignments submitted or available for a given student in a course
   // GET /api/student/{studentId}/assignments?course={courseId}
-  getStudentAssignments: (studentId, params) => axiosClient.get(`student/${studentId}/assignments`, { params }),
+  getStudentAssignments: (studentId, params) =>
+    axiosClient.get(`student/${studentId}/assignments`, { params }),
   // Get exams for a given student in a course
   // GET /api/student/{studentId}/exams?course={courseId}
   getStudentExams: (studentId, params) => axiosClient.get(`student/${studentId}/exams`, { params }),
@@ -68,27 +69,32 @@ const userAPI = {
   getSubmissionsByExam: (examId) => axiosClient.get(`submissions`, { params: { exam: examId } }),
   // Some backends expose path-style endpoints for submissions by assignment/exam
   // e.g. GET /api/submissions/assignment/{id} and GET /api/submissions/exam/{id}
-  getSubmissionsByAssignmentId: (assignmentId) => axiosClient.get(`submissions/assignment/${assignmentId}`),
+  getSubmissionsByAssignmentId: (assignmentId) =>
+    axiosClient.get(`submissions/assignment/${assignmentId}`),
   getSubmissionsByExamId: (examId) => axiosClient.get(`submissions/exam/${examId}`),
   // History endpoints (student's submission attempts history)
   // GET /api/submissions/assignment/{id}/history
-  getAssignmentSubmissionHistory: (assignmentId) => axiosClient.get(`submissions/assignment/${assignmentId}/history`),
+  getAssignmentSubmissionHistory: (assignmentId) =>
+    axiosClient.get(`submissions/assignment/${assignmentId}/history`),
   // GET /api/submissions/exam/{id}/history
   getExamSubmissionHistory: (examId) => axiosClient.get(`submissions/exam/${examId}/history`),
   // Latest score endpoints for current student
   // GET /api/submissions/assignment/{id}/latest-score
-  getAssignmentLatestScore: (assignmentId) => axiosClient.get(`submissions/assignment/${assignmentId}/latest-score`),
+  getAssignmentLatestScore: (assignmentId) =>
+    axiosClient.get(`submissions/assignment/${assignmentId}/latest-score`),
   // GET /api/submissions/exam/{id}/latest-score
   getExamLatestScore: (examId) => axiosClient.get(`submissions/exam/${examId}/latest-score`),
   // Remaining attempts
-  getExamRemainingAttempts: (examId) => axiosClient.get(`submissions/exam/${examId}/remaining-attempts`),
+  getExamRemainingAttempts: (examId) =>
+    axiosClient.get(`submissions/exam/${examId}/remaining-attempts`),
   getAssignmentRemainingAttempts: (assignmentId) =>
     axiosClient.get(`submissions/assignment/${assignmentId}/remaining-attempts`),
   // Get single submission by id
   // GET /api/submissions/{id}
   getSubmissionById: (id) => axiosClient.get(`submissions/${id}`),
   // Grade a submission: PATCH /api/submissions/{id}/grade with payload { score, feedback }
-  gradeSubmission: (submissionId, data) => axiosClient.patch(`submissions/${submissionId}/grade`, data),
+  gradeSubmission: (submissionId, data) =>
+    axiosClient.patch(`submissions/${submissionId}/grade`, data),
   // Create a submission (student): POST /api/submissions (multipart/form-data)
   // Requires exactly one of { assignment_id, exam_id } and an attachment (.use file)
   submitSubmission: (formData) =>
@@ -101,7 +107,8 @@ const userAPI = {
     axiosClient.delete(`class/${classId}/students/${classStudentId}`),
   // Remove multiple students from a class
   // DELETE /api/class/{classId}/students with body { studentIds: [1,2,3] }
-  removeStudentsFromClass: (classId, data) => axiosClient.delete(`class/${classId}/students`, { data }),
+  removeStudentsFromClass: (classId, data) =>
+    axiosClient.delete(`class/${classId}/students`, { data }),
   // Get a single course by id
   getCourseById: (courseId) => axiosClient.get(`courses/${courseId}`),
   // Create a new course
@@ -118,7 +125,6 @@ const userAPI = {
   patchLectureStatus: (id, status) => axiosClient.patch(`lectures/${id}/status`, { status }),
 
   // Assignments
-  // Create assignment: expects FormData (required .use file under field 'file', optional attachments)
   createAssignment: (data, config) => axiosClient.post('assignments', data, config),
   // Update assignment (id, data FormData or JSON)
   updateAssignment: (id, data, config) => axiosClient.put(`assignments/${id}`, data, config),
@@ -128,7 +134,6 @@ const userAPI = {
   patchAssignmentStatus: (id, status) => axiosClient.patch(`assignments/${id}/status`, { status }),
 
   // Exams
-  // Create exam: accepts FormData with fields: course_id, title, description, start_date, end_date, file
   createExam: (data, config) => axiosClient.post('exams', data, config),
   // Update exam (id, data FormData or JSON)
   updateExam: (id, data, config) => axiosClient.put(`exams/${id}`, data, config),
@@ -187,7 +192,8 @@ const userAPI = {
   // POST /api/research/projects { title, description }
   createResearchProject: (data) => axiosClient.post('research/projects', data),
   // PATCH /api/research/projects/{id}/status { status }
-  patchResearchProjectStatus: (id, status) => axiosClient.patch(`research/projects/${id}/status`, { status }),
+  patchResearchProjectStatus: (id, status) =>
+    axiosClient.patch(`research/projects/${id}/status`, { status }),
   // PATCH /api/research/projects/{id}/visibility { visibility }
   updateResearchProjectVisibility: (id, visibility) =>
     axiosClient.patch(`research/projects/${id}/visibility`, { visibility }),
@@ -196,9 +202,11 @@ const userAPI = {
   // GET /api/research/projects/{id}/starred -> returns { project_id, is_starred }
   getResearchProjectStarred: (id) => axiosClient.get(`research/projects/${id}/starred`),
   // POST /api/research/projects/{id}/moderator { email }
-  addResearchProjectModerator: (id, email) => axiosClient.post(`research/projects/${id}/moderator`, { email }),
+  addResearchProjectModerator: (id, email) =>
+    axiosClient.post(`research/projects/${id}/moderator`, { email }),
   // POST /api/research/projects/{id}/contributors { emails: [] }
-  addResearchProjectContributors: (id, data) => axiosClient.post(`research/projects/${id}/contributors`, data),
+  addResearchProjectContributors: (id, data) =>
+    axiosClient.post(`research/projects/${id}/contributors`, data),
   // POST /api/research/projects/{id}/contribute - FormData with file, title, description, name
   postProjectContribution: (id, formData) =>
     axiosClient.post(`research/projects/${id}/contribute`, formData, {
@@ -212,17 +220,20 @@ const userAPI = {
     axiosClient.get(`research/projects/${id}/contributions/mine?page=${page}`),
   // GET /api/research/projects/{id}/contributions/by-status?status=PENDING&page=1
   getContributionsByStatus: (id, status, page = 1) =>
-    axiosClient.get(`research/projects/${id}/contributions/by-status?status=${status}&page=${page}`),
+    axiosClient.get(
+      `research/projects/${id}/contributions/by-status?status=${status}&page=${page}`
+    ),
   // GET /api/research/contributions/{id} - Get contribution details
   getContributionById: (id) => axiosClient.get(`research/contributions/${id}`),
-  // POST /api/research/contributions/{id}/review - Submit review { action, notes, validationReport }
-  reviewContribution: (id, reviewData) => axiosClient.post(`research/contributions/${id}/review`, reviewData),
+  reviewContribution: (id, reviewData) =>
+    axiosClient.post(`research/contributions/${id}/review`, reviewData),
   // GET /api/use/models/{id} - Get specific model file content
   getUseModelById: (id) => axiosClient.get(`use/models/${id}`),
   // GET /api/research/contributions/{id}/comments - Get comments for a contribution
   getContributionComments: (id) => axiosClient.get(`research/contributions/${id}/comments`),
   // POST /api/research/contributions/{id}/comments - Add comment { comment_text }
-  addContributionComment: (id, data) => axiosClient.post(`research/contributions/${id}/comments`, data),
+  addContributionComment: (id, data) =>
+    axiosClient.post(`research/contributions/${id}/comments`, data),
   // POST /api/research/contributions/{id}/resubmit - Resubmit contribution { path, rawText }
   resubmitContribution: (id, data) => axiosClient.patch(`research/contributions/${id}`, data),
 };

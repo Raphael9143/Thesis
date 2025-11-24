@@ -33,7 +33,10 @@ export default function ExamsList() {
           setClassInfo(cls.data);
         }
 
-        const courseId = routeCourseId || (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) || id;
+        const courseId =
+          routeCourseId ||
+          (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) ||
+          id;
         setCourseIdState(courseId);
 
         const examRes = await userAPI.getExamsByCourse(courseId);
@@ -163,7 +166,10 @@ export default function ExamsList() {
                     collapsed={collapsed.has(g.key)}
                     onToggle={() => toggleGroup(g.key)}
                   />
-                  <ul className="class-detail__list" style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}>
+                  <ul
+                    className="class-detail__list"
+                    style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}
+                  >
                     {g.items.map((ex) => (
                       <li key={ex.id || ex.exam_id} className="class-detail__list-item">
                         <div className="flex-between full-width">
@@ -187,19 +193,35 @@ export default function ExamsList() {
                                 >
                                   <i className="fa fa-paper-plane" />
                                 </button>
-                                <button className="btn btn-icon" title="Delete" onClick={() => cancelExam(ex)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Delete"
+                                  onClick={() => cancelExam(ex)}
+                                >
                                   <i className="fa fa-times" />
                                 </button>
-                                <button className="btn btn-icon" title="Update" onClick={() => updateExam(ex)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Update"
+                                  onClick={() => updateExam(ex)}
+                                >
                                   <i className="fa fa-edit" />
                                 </button>
                               </>
                             ) : (
                               <>
-                                <button className="btn btn-icon" title="Delete" onClick={() => cancelExam(ex)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Delete"
+                                  onClick={() => cancelExam(ex)}
+                                >
                                   <i className="fa fa-times" />
                                 </button>
-                                <button className="btn btn-icon" title="Update" onClick={() => updateExam(ex)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Update"
+                                  onClick={() => updateExam(ex)}
+                                >
                                   <i className="fa fa-edit" />
                                 </button>
                               </>
@@ -228,7 +250,9 @@ export default function ExamsList() {
         }}
         onUpdated={(updated) => {
           if (updated)
-            setExams((s) => s.map((x) => ((x.id || x.exam_id) === (updated.id || updated.exam_id) ? updated : x)));
+            setExams((s) =>
+              s.map((x) => ((x.id || x.exam_id) === (updated.id || updated.exam_id) ? updated : x))
+            );
           setEditingExam(null);
         }}
       />

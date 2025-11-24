@@ -51,10 +51,21 @@ export default function ChoicePopup({ choice, onPickType, onGeneralization, onCa
           </svg>
         </IconButton>
 
-        <IconButton title="Association Class" onClick={() => onPickType && onPickType('associationclass')}>
+        <IconButton
+          title="Association Class"
+          onClick={() => onPickType && onPickType('associationclass')}
+        >
           <svg width="56" height="24" viewBox="0 0 56 24" className="uml-choice-svg">
             <line x1="4" y1="12" x2="30" y2="12" stroke="#222" strokeWidth="2" />
-            <rect x="34" y="4" width="18" height="16" fill="white" stroke="#222" strokeWidth="1.5" />
+            <rect
+              x="34"
+              y="4"
+              width="18"
+              height="16"
+              fill="white"
+              stroke="#222"
+              strokeWidth="1.5"
+            />
           </svg>
         </IconButton>
 

@@ -1,5 +1,11 @@
 import React from 'react';
-import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, Outlet } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  createRoutesFromElements,
+  Route,
+  RouterProvider,
+  Outlet,
+} from 'react-router-dom';
 import MainLayout from './layouts/MainLayout';
 import EducationLogin from './pages/EducationLogin';
 import ResearcherHome from './pages/ResearcherHome';
@@ -76,8 +82,14 @@ const router = createBrowserRouter(
           <Route path="projects/:projectId/contributions" element={<ResearcherProjectDetail />} />
           <Route path="projects/:projectId/settings" element={<ResearcherProjectDetail />} />
           <Route path="projects/:projectId/contribute/:modelId" element={<PostContribution />} />
-          <Route path="projects/:projectId/contributions/:contributionId" element={<ContributionDetail />} />
-          <Route path="projects/:projectId/contributions/:contributionId/resubmit" element={<ResubmitContribution />} />
+          <Route
+            path="projects/:projectId/contributions/:contributionId"
+            element={<ContributionDetail />}
+          />
+          <Route
+            path="projects/:projectId/contributions/:contributionId/resubmit"
+            element={<ResubmitContribution />}
+          />
           <Route path="resources" element={<ResearcherResources />} />
           <Route path="starred" element={<StarredProjects />} />
           <Route path="profile" element={<ResearcherProfile />} />

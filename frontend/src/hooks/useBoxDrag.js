@@ -11,7 +11,8 @@ const useBoxDrag = ({ setPositions, containerRef, positionsRef }) => {
 
   useEffect(() => {
     const getXY = (ev) => {
-      if (ev.touches && ev.touches[0]) return { clientX: ev.touches[0].clientX, clientY: ev.touches[0].clientY };
+      if (ev.touches && ev.touches[0])
+        return { clientX: ev.touches[0].clientX, clientY: ev.touches[0].clientY };
       return { clientX: ev.clientX, clientY: ev.clientY };
     };
 

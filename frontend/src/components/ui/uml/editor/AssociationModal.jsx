@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import NotificationPopup from '../../NotificationPopup';
 
-export default function AssociationModal({ assoc, classes = [], onChange, onClose, onSave, onDelete }) {
+export default function AssociationModal({
+  assoc,
+  classes = [],
+  onChange,
+  onClose,
+  onSave,
+  onDelete,
+}) {
   const [errors, setErrors] = useState([]);
   const [showNotification, setShowNotification] = useState(false);
 
@@ -53,7 +60,11 @@ export default function AssociationModal({ assoc, classes = [], onChange, onClos
     if (newType !== 'n-ary') {
       const trimmed = parts.slice(0, 2);
       while (trimmed.length < 2) {
-        trimmed.push({ class: classes[0]?.name || '', multiplicity: '', role: classes[0]?.name || '' });
+        trimmed.push({
+          class: classes[0]?.name || '',
+          multiplicity: '',
+          role: classes[0]?.name || '',
+        });
       }
       onChange && onChange({ ...assoc, type: newType, parts: trimmed });
       return;
@@ -83,7 +94,8 @@ export default function AssociationModal({ assoc, classes = [], onChange, onClos
   };
 
   const addAttr = () =>
-    onChange && onChange({ ...assoc, attributes: [...(assoc.attributes || []), { name: '', type: 'String' }] });
+    onChange &&
+    onChange({ ...assoc, attributes: [...(assoc.attributes || []), { name: '', type: 'String' }] });
   const removeAttr = (i) => {
     const attrs = (assoc.attributes || []).slice();
     attrs.splice(i, 1);
@@ -98,7 +110,8 @@ export default function AssociationModal({ assoc, classes = [], onChange, onClos
     parts.forEach((p, i) => {
       if (!p.class || !p.class.trim()) errs.push(`Participant #${i + 1}: class is required`);
       if (!p.role || !p.role.trim()) errs.push(`Participant #${i + 1}: role is required`);
-      if (!p.multiplicity || !p.multiplicity.trim()) errs.push(`Participant #${i + 1}: multiplicity is required`);
+      if (!p.multiplicity || !p.multiplicity.trim())
+        errs.push(`Participant #${i + 1}: multiplicity is required`);
     });
     // associationclass attributes validation
     if (assoc.type === 'associationclass') {
@@ -228,7 +241,12 @@ export default function AssociationModal({ assoc, classes = [], onChange, onClos
                   <option value="Boolean">Boolean</option>
                   <option value="Float">Float</option>
                 </select>
-                <button type="button" className="icon-btn" title="Remove attribute" onClick={() => removeAttr(i)}>
+                <button
+                  type="button"
+                  className="icon-btn"
+                  title="Remove attribute"
+                  onClick={() => removeAttr(i)}
+                >
                   <i className="fa fa-trash" />
                 </button>
               </div>
@@ -242,7 +260,12 @@ export default function AssociationModal({ assoc, classes = [], onChange, onClos
         )}
 
         <div className="uml-modal-actions">
-          <button type="button" className="icon-btn" title="Cancel" onClick={() => onClose && onClose()}>
+          <button
+            type="button"
+            className="icon-btn"
+            title="Cancel"
+            onClick={() => onClose && onClose()}
+          >
             <i className="fa fa-times" />
           </button>
           {typeof onDelete === 'function' && assoc && (

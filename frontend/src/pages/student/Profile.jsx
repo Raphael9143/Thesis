@@ -43,7 +43,8 @@ export default function StudentProfile() {
           // Capture a fixed frontend-only avatar URL on first load
           try {
             if (!fixedAvatar) {
-              const ui = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.full_name || 'User');
+              const ui =
+                'https://ui-avatars.com/api/?name=' + encodeURIComponent(p.full_name || 'User');
               setFixedAvatar(ui);
             }
           } catch (err) {
@@ -121,7 +122,9 @@ export default function StudentProfile() {
   };
 
   const avatarSrc =
-    fixedAvatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent((profile && profile.full_name) || 'User');
+    fixedAvatar ||
+    'https://ui-avatars.com/api/?name=' +
+      encodeURIComponent((profile && profile.full_name) || 'User');
 
   if (error) {
     return (
@@ -161,7 +164,10 @@ export default function StudentProfile() {
                 </div>
                 {!editing ? (
                   <div className="edit-actions-btns">
-                    <button className="btn btn-primary btn-sm edit-btn" onClick={() => setEditing(true)}>
+                    <button
+                      className="btn btn-primary btn-sm edit-btn"
+                      onClick={() => setEditing(true)}
+                    >
                       Edit
                     </button>
                   </div>
@@ -199,10 +205,19 @@ export default function StudentProfile() {
                   }}
                 >
                   <div className="form-row">
-                    <FormField label="Full Name" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+                    <FormField
+                      label="Full Name"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                    />
                   </div>
                   <div className="form-row">
-                    <FormField label="Date of Birth" type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
+                    <FormField
+                      label="Date of Birth"
+                      type="date"
+                      value={dob}
+                      onChange={(e) => setDob(e.target.value)}
+                    />
                     <FormField
                       label="Gender"
                       value={gender}
@@ -221,14 +236,27 @@ export default function StudentProfile() {
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
                     />
-                    <FormField label="Address" value={address} onChange={(e) => setAddress(e.target.value)} />
+                    <FormField
+                      label="Address"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                    />
                   </div>
                   <div className="form-row">
                     <FormField label="Student Code" value={studentCode} readOnly />
-                    <FormField label="Major" value={major} onChange={(e) => setMajor(e.target.value)} />
+                    <FormField
+                      label="Major"
+                      value={major}
+                      onChange={(e) => setMajor(e.target.value)}
+                    />
                   </div>
                   <div className="form-row">
-                    <FormField label="Year" type="number" value={year} onChange={(e) => setYear(e.target.value)} />
+                    <FormField
+                      label="Year"
+                      type="number"
+                      value={year}
+                      onChange={(e) => setYear(e.target.value)}
+                    />
                   </div>
                 </form>
               )}

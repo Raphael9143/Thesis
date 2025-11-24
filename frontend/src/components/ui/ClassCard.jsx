@@ -27,7 +27,9 @@ export default function ClassCard({
   const normalizedDesc = useMemo(() => {
     if (!description) return '';
     const replaced = description.replace(/\\n/g, '\n');
-    return replaced.length > maxDescriptionChars ? replaced.slice(0, maxDescriptionChars).trimEnd() + '…' : replaced;
+    return replaced.length > maxDescriptionChars
+      ? replaced.slice(0, maxDescriptionChars).trimEnd() + '…'
+      : replaced;
   }, [description, maxDescriptionChars]);
 
   return (
@@ -39,7 +41,11 @@ export default function ClassCard({
       onKeyPress={handleKeyPress}
     >
       <div className="class-card__thumb">
-        {image ? <img src={image} alt={title} /> : <div className="class-card__placeholder">{initials || 'NA'}</div>}
+        {image ? (
+          <img src={image} alt={title} />
+        ) : (
+          <div className="class-card__placeholder">{initials || 'NA'}</div>
+        )}
 
         {badge && <div className="class-card__badge">{badge.toUpperCase()}</div>}
       </div>

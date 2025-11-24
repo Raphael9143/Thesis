@@ -85,7 +85,12 @@ export default function AddModeratorModal({ open, onClose, onAdded, projectId })
         </div>
       </form>
 
-      <NotificationPopup message={notifyMsg} open={notifyOpen} type={notifyType} onClose={() => setNotifyOpen(false)} />
+      <NotificationPopup
+        message={notifyMsg}
+        open={notifyOpen}
+        type={notifyType}
+        onClose={() => setNotifyOpen(false)}
+      />
     </Modal>
   );
 }

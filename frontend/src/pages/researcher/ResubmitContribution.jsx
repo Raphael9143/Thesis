@@ -79,7 +79,9 @@ export default function ResubmitContribution() {
       if (res?.success) {
         push({ title: 'Success', body: 'Contribution resubmitted successfully' });
         setTimeout(() => {
-          navigate(`/researcher/projects/${contribution.research_project_id}/contributions/${contributionId}`);
+          navigate(
+            `/researcher/projects/${contribution.research_project_id}/contributions/${contributionId}`
+          );
         }, 1000);
       } else {
         push({ title: 'Error', body: res?.message || 'Failed to resubmit contribution' });
@@ -94,7 +96,9 @@ export default function ResubmitContribution() {
 
   const handleCancel = () => {
     if (contribution) {
-      navigate(`/researcher/projects/${contribution.research_project_id}/contributions/${contributionId}`);
+      navigate(
+        `/researcher/projects/${contribution.research_project_id}/contributions/${contributionId}`
+      );
     } else {
       navigate(-1);
     }
@@ -140,7 +144,12 @@ export default function ResubmitContribution() {
             <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
               {submitting ? 'Resubmitting...' : 'Resubmit'}
             </button>
-            <button type="button" className="btn btn-signin" onClick={handleCancel} disabled={submitting}>
+            <button
+              type="button"
+              className="btn btn-signin"
+              onClick={handleCancel}
+              disabled={submitting}
+            >
               Cancel
             </button>
           </div>

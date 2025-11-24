@@ -138,7 +138,9 @@ export default function StudentAssignmentsList() {
           </div>
         )}
         <div className="class-detail__item-title">{a.title}</div>
-        <small className={`due-date ${className}`}>{daysLeft !== null ? ` ${daysLeft}d left.` : ''}</small>
+        <small className={`due-date ${className}`}>
+          {daysLeft !== null ? ` ${daysLeft}d left.` : ''}
+        </small>
       </li>
     );
   };
@@ -160,7 +162,10 @@ export default function StudentAssignmentsList() {
                     collapsed={collapsed.has(g.key)}
                     onToggle={() => toggleGroup(g.key)}
                   />
-                  <ul className="class-detail__list" style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}>
+                  <ul
+                    className="class-detail__list"
+                    style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}
+                  >
                     {g.items.map((a) => (
                       <AssignmentListItem key={a.assignment_id || a.id} a={a} />
                     ))}

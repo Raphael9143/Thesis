@@ -18,7 +18,12 @@ export default function ResearcherHome() {
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyMessage, _setNotifyMessage] = useState('');
   const [notifyType, _setNotifyType] = useState('success');
-  const [stats, setStats] = useState({ projects: 0, contributions: 0, use_models: 0, researchers: 0 });
+  const [stats, setStats] = useState({
+    projects: 0,
+    contributions: 0,
+    use_models: 0,
+    researchers: 0,
+  });
   const [recentProjects, setRecentProjects] = useState([]);
 
   useEffect(() => {
@@ -60,9 +65,9 @@ export default function ResearcherHome() {
           <div className="hero-content">
             <h1 className="hero__title">Explore the Frontier of OCL & UML Research</h1>
             <p className="hero__subtitle">
-              Welcome to the Research Hub - a collaborative environment for model-driven engineering, OCL constraint
-              sharing, and UML-based innovation. Connect with global researchers, publish studies, and enhance modeling
-              knowledge.
+              Welcome to the Research Hub - a collaborative environment for model-driven
+              engineering, OCL constraint sharing, and UML-based innovation. Connect with global
+              researchers, publish studies, and enhance modeling knowledge.
             </p>
             <div className="hero-buttons">
               <button
@@ -89,7 +94,10 @@ export default function ResearcherHome() {
             <div className="switch-to-education">
               <p>
                 Looking for educational resources?{' '}
-                <a className="researcher-auth-switch-button" onClick={() => navigate('/education/home')}>
+                <a
+                  className="researcher-auth-switch-button"
+                  onClick={() => navigate('/education/home')}
+                >
                   Go to Education Portal
                 </a>
               </p>
@@ -126,13 +134,22 @@ export default function ResearcherHome() {
             </div>
           </div>
           <div className="hero-images hero-half">
-            <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800" alt="research teamwork" />
+            <img
+              src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=800"
+              alt="research teamwork"
+            />
             <img
               src="https://cdn-dynmedia-1.microsoft.com/is/image/microsoftcorp/55132-uml-diagramming-and-database-modeling-1?resMode=sharp2&op_usm=1.5,0.65,15,0&wid=752&hei=580&qlt=100&fmt=png-alpha&fit=constrain"
               alt="uml modeling"
             />
-            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800" alt="coding group" />
-            <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800" alt="research lab" />
+            <img
+              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800"
+              alt="coding group"
+            />
+            <img
+              src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800"
+              alt="research lab"
+            />
           </div>
         </section>
 
@@ -156,7 +173,10 @@ export default function ResearcherHome() {
             {authType === 'login' ? (
               <p>
                 Don&apos;t have any account?{' '}
-                <a className="researcher-auth-switch-button" onClick={() => setAuthType('register')}>
+                <a
+                  className="researcher-auth-switch-button"
+                  onClick={() => setAuthType('register')}
+                >
                   Register
                 </a>
               </p>
@@ -191,8 +211,8 @@ export default function ResearcherHome() {
                   </div>
                   <h4>Collaborative Research</h4>
                   <p>
-                    Work with researchers worldwide on cutting-edge UML and OCL projects. Share models, constraints, and
-                    insights.
+                    Work with researchers worldwide on cutting-edge UML and OCL projects. Share
+                    models, constraints, and insights.
                   </p>
                 </div>
               </Card>
@@ -203,8 +223,8 @@ export default function ResearcherHome() {
                   </div>
                   <h4>Quality Models</h4>
                   <p>
-                    Access {stats.use_models.toLocaleString()}+ validated USE models with comprehensive documentation
-                    and testing.
+                    Access {stats.use_models.toLocaleString()}+ validated USE models with
+                    comprehensive documentation and testing.
                   </p>
                 </div>
               </Card>
@@ -215,8 +235,8 @@ export default function ResearcherHome() {
                   </div>
                   <h4>Innovation Hub</h4>
                   <p>
-                    Contribute to {stats.projects.toLocaleString()}+ active projects and advance model-driven
-                    engineering research.
+                    Contribute to {stats.projects.toLocaleString()}+ active projects and advance
+                    model-driven engineering research.
                   </p>
                 </div>
               </Card>

@@ -5,7 +5,14 @@ import userAPI from '../../../services/userAPI';
 import { useNotifications } from '../../contexts/NotificationContext';
 import '../../assets/styles/pages/CreateLecture.css';
 
-export default function CreateExamForm({ open, onClose, defaultCourseId = null, onCreated, exam = null, onUpdated }) {
+export default function CreateExamForm({
+  open,
+  onClose,
+  defaultCourseId = null,
+  onCreated,
+  exam = null,
+  onUpdated,
+}) {
   const { push } = useNotifications();
   const [form, setForm] = useState({
     course_id: defaultCourseId || '',
@@ -176,7 +183,8 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
       if (files && files.length > 0) fd.append('file', files[0]);
 
       // append status only when explicitly provided (so updates can keep existing status)
-      if (typeof status !== 'undefined' && status !== null && status !== '') fd.append('status', status);
+      if (typeof status !== 'undefined' && status !== null && status !== '')
+        fd.append('status', status);
 
       let res;
       if (exam && (exam.id || exam.exam_id)) {
@@ -232,7 +240,14 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
   return (
     <Modal open={open} onClose={onClose} title={exam ? 'Edit exam' : 'Create new exam'}>
       <form className="create-lecture-form" onSubmit={(e) => e.preventDefault()}>
-        <FormField label="Title" name="title" value={form.title} onChange={update} placeholder="Exam title" required />
+        <FormField
+          label="Title"
+          name="title"
+          value={form.title}
+          onChange={update}
+          placeholder="Exam title"
+          required
+        />
         <FormField
           label="Type"
           name="type"
@@ -308,19 +323,39 @@ export default function CreateExamForm({ open, onClose, defaultCourseId = null, 
         <div className="create-lecture-form__actions">
           {exam ? (
             <>
-              <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
+              <button
+                type="button"
+                className="btn btn-signin"
+                onClick={onClose}
+                disabled={submitting}
+              >
                 Cancel
               </button>
-              <button type="button" className="btn btn-primary btn-sm" onClick={() => doSubmit()} disabled={submitting}>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => doSubmit()}
+                disabled={submitting}
+              >
                 {submitting ? 'Applying…' : 'Apply'}
               </button>
             </>
           ) : (
             <>
-              <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
+              <button
+                type="button"
+                className="btn btn-signin"
+                onClick={onClose}
+                disabled={submitting}
+              >
                 Cancel
               </button>
-              <button type="button" className="btn btn-signin" onClick={() => doSubmit('draft')} disabled={submitting}>
+              <button
+                type="button"
+                className="btn btn-signin"
+                onClick={() => doSubmit('draft')}
+                disabled={submitting}
+              >
                 Save as draft
               </button>
               <button

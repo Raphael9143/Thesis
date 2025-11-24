@@ -14,7 +14,9 @@ import '../../assets/styles/components/ui/SubmissionHistory.css';
  */
 export default function SubmissionHistory({ type, id }) {
   const role = (typeof window !== 'undefined' && sessionStorage.getItem('role')) || null;
-  const { history, loading, error, refetch } = useSubmissionHistory(type, id, { enabled: role === 'student' });
+  const { history, loading, error, refetch } = useSubmissionHistory(type, id, {
+    enabled: role === 'student',
+  });
 
   React.useEffect(() => {
     // initial fetch already in hook; refetch if id changes
@@ -29,7 +31,11 @@ export default function SubmissionHistory({ type, id }) {
       {error && <div className="text-error">{error}</div>}
       {!loading &&
         !error &&
-        (history && history.length > 0 ? <HistoryTable history={history} /> : <div>No submissions yet.</div>)}
+        (history && history.length > 0 ? (
+          <HistoryTable history={history} />
+        ) : (
+          <div>No submissions yet.</div>
+        ))}
     </div>
   );
 }
@@ -53,7 +59,9 @@ function HistoryTable({ history }) {
         </thead>
         <tbody>
           {history.map((s) => {
-            const ts = new Date(s.submission_time || s.created_at || s.updated_at || Date.now()).toLocaleString();
+            const ts = new Date(
+              s.submission_time || s.created_at || s.updated_at || Date.now()
+            ).toLocaleString();
             return (
               <tr key={s.id}>
                 <td>{s.attempt_number != null ? s.attempt_number : '-'}</td>

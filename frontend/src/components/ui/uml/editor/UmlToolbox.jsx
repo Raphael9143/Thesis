@@ -13,7 +13,15 @@ export default function UmlToolbox({ onToolDragStart }) {
       >
         {/* UML class icon: rectangle with header and attributes compartment */}
         <svg width="64" height="44" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="1" width="62" height="42" fill="#fff8b4" stroke="#0000ff" strokeWidth="1" />
+          <rect
+            x="1"
+            y="1"
+            width="62"
+            height="42"
+            fill="#fff8b4"
+            stroke="#0000ff"
+            strokeWidth="1"
+          />
           <line x1="1" y1="14" x2="63" y2="14" stroke="#0000ff" strokeWidth="1" />
           <line x1="1" y1="28" x2="63" y2="28" stroke="#ddd" strokeWidth="1" />
           <text x="16" y="9" fontSize="6" fontFamily="sans-serif" fill="#111">
@@ -37,7 +45,15 @@ export default function UmlToolbox({ onToolDragStart }) {
       >
         {/* UML enumeration icon: stereotype + values */}
         <svg width="64" height="44" viewBox="0 0 64 44" xmlns="http://www.w3.org/2000/svg">
-          <rect x="1" y="6" width="62" height="36" fill="#fff8b4" stroke="#0000ff" strokeWidth="1" />
+          <rect
+            x="1"
+            y="6"
+            width="62"
+            height="36"
+            fill="#fff8b4"
+            stroke="#0000ff"
+            strokeWidth="1"
+          />
           <text x="9" y="14 " fontSize="6" fontFamily="sans-serif" fill="#666">
             {'<<enumeration>>'}
           </text>

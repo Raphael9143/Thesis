@@ -83,8 +83,18 @@ export default function CreateProjectModal({ open, onClose, onCreated }) {
   return (
     <Modal open={open} onClose={onClose} title="Create Project">
       <form onSubmit={(e) => onSubmit(e, false)} className="create-project-modal-form">
-        <FormField label="Title" value={title} onChange={(e) => setTitle(e.target.value)} required={true} />
-        <FormField label="Description" value={description} onChange={(e) => setDescription(e.target.value)} textarea />
+        <FormField
+          label="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required={true}
+        />
+        <FormField
+          label="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          textarea
+        />
 
         <div className="create-project-modal-actions">
           <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
@@ -93,13 +103,23 @@ export default function CreateProjectModal({ open, onClose, onCreated }) {
           <button type="submit" className="btn btn-signin" disabled={submitting}>
             {submitting ? 'Saving...' : 'Save as Draft'}
           </button>
-          <button type="button" className="btn btn-primary btn-sm" onClick={(e) => onSubmit(e, true)} disabled={submitting}>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={(e) => onSubmit(e, true)}
+            disabled={submitting}
+          >
             {submitting ? 'Publishing...' : 'Publish'}
           </button>
         </div>
       </form>
 
-      <NotificationPopup message={notifyMsg} open={notifyOpen} type={notifyType} onClose={() => setNotifyOpen(false)} />
+      <NotificationPopup
+        message={notifyMsg}
+        open={notifyOpen}
+        type={notifyType}
+        onClose={() => setNotifyOpen(false)}
+      />
     </Modal>
   );
 }

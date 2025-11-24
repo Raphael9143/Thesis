@@ -87,7 +87,9 @@ export default function ContributionComments({ contributionId }) {
                 <div className="contribution-comment-header">
                   <span className="contribution-comment-author">
                     {comment.user?.full_name || 'Unknown'}
-                    {comment.user_id === currentUserId && <span className="contribution-comment-you"> (You)</span>}
+                    {comment.user_id === currentUserId && (
+                      <span className="contribution-comment-you"> (You)</span>
+                    )}
                   </span>
                   <span className="contribution-comment-date">{fmtDate(comment.created_at)}</span>
                 </div>
@@ -109,7 +111,11 @@ export default function ContributionComments({ contributionId }) {
           rows={3}
         />
         <div className="contribution-comment-form-button">
-          <button type="submit" className="btn btn-primary btn-sm" disabled={submitting || !commentText.trim()}>
+          <button
+            type="submit"
+            className="btn btn-primary btn-sm"
+            disabled={submitting || !commentText.trim()}
+          >
             {submitting ? 'Commenting...' : 'Comment'}
           </button>
         </div>

@@ -65,7 +65,11 @@ export default function StatusContributions({ status }) {
   }
 
   if (contributions.length === 0) {
-    return <div className="project-detail-empty">No {formatStatus(status).toLowerCase()} contributions.</div>;
+    return (
+      <div className="project-detail-empty">
+        No {formatStatus(status).toLowerCase()} contributions.
+      </div>
+    );
   }
 
   return (
@@ -75,16 +79,23 @@ export default function StatusContributions({ status }) {
           <div
             key={contrib.id}
             className="contribution-card"
-            onClick={() => navigate(`/researcher/projects/${projectId}/contributions/${contrib.id}`)}
+            onClick={() =>
+              navigate(`/researcher/projects/${projectId}/contributions/${contrib.id}`)
+            }
             style={{ cursor: 'pointer' }}
           >
             <div className="contribution-card-header">
               <h3 className="contribution-card-title">{contrib.title}</h3>
-              <span className="contribution-card-status" style={{ backgroundColor: getStatusColor(contrib.status) }}>
+              <span
+                className="contribution-card-status"
+                style={{ backgroundColor: getStatusColor(contrib.status) }}
+              >
                 {formatStatus(contrib.status)}
               </span>
             </div>
-            {contrib.description && <p className="contribution-card-description">{contrib.description}</p>}
+            {contrib.description && (
+              <p className="contribution-card-description">{contrib.description}</p>
+            )}
             <div className="contribution-card-meta">
               <span className="contribution-card-contributor">
                 <i className="fa fa-user" /> {contrib.contributor?.full_name || 'Unknown'}
@@ -135,7 +146,9 @@ export default function StatusContributions({ status }) {
             <button
               className="pagination-next"
               disabled={currentPage >= pagination.totalPages}
-              onClick={() => setSearchParams({ page: Math.min(pagination.totalPages, currentPage + 1) })}
+              onClick={() =>
+                setSearchParams({ page: Math.min(pagination.totalPages, currentPage + 1) })
+              }
               style={{ marginLeft: 8 }}
             >
               <i className="fa-solid fa-forward"></i>

@@ -60,7 +60,8 @@ export default function LecturePreview() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      if (!lecture || !Array.isArray(lecture.attachments) || lecture.attachments.length === 0) return;
+      if (!lecture || !Array.isArray(lecture.attachments) || lecture.attachments.length === 0)
+        return;
       try {
         // clone attachments to avoid mutating source objects owned elsewhere
         const copy = lecture.attachments.map((a) => ({ ...a }));
@@ -133,7 +134,8 @@ export default function LecturePreview() {
           <div className="preview-meta">
             <div className="preview-header">
               <div>
-                <strong>Course:</strong> {lecture.course?.course_name || lecture.course?.course_name || ''}
+                <strong>Course:</strong>{' '}
+                {lecture.course?.course_name || lecture.course?.course_name || ''}
               </div>
               <div>
                 <strong>Publish date:</strong> {fmtDate(lecture.publish_date)}
@@ -169,14 +171,21 @@ export default function LecturePreview() {
                 const raw = a.__url || a.url || a.path || a.filename || a;
                 const url = toFullUrl(raw);
                 const name =
-                  a.originalname || a.filename || (typeof a === 'string' ? String(a).split('/').pop() : 'attachment');
+                  a.originalname ||
+                  a.filename ||
+                  (typeof a === 'string' ? String(a).split('/').pop() : 'attachment');
                 return (
                   <div key={idx} className="attachment-item">
                     {isImage ? (
                       <img src={url} alt={name} className="img-responsive" />
                     ) : (
                       <div>
-                        <FilePreview url={url} filename={name} mimetype={a.mimetype} filePath={raw} />
+                        <FilePreview
+                          url={url}
+                          filename={name}
+                          mimetype={a.mimetype}
+                          filePath={raw}
+                        />
                       </div>
                     )}
                   </div>
@@ -196,7 +205,12 @@ export default function LecturePreview() {
         </div>
       </Card>
 
-      <NotificationPopup message={notifyMsg} open={notifyOpen} type={notifyType} onClose={() => setNotifyOpen(false)} />
+      <NotificationPopup
+        message={notifyMsg}
+        open={notifyOpen}
+        type={notifyType}
+        onClose={() => setNotifyOpen(false)}
+      />
     </Section>
   );
 }

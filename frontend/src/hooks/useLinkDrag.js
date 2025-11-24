@@ -89,5 +89,14 @@ export default function useLinkDrag({
     [onAddGeneralization]
   );
 
-  return { linkDrag, startLinkDrag, choice, setChoice, assocModal, setAssocModal, addAssociation, addGeneralization };
+  return {
+    linkDrag,
+    startLinkDrag,
+    choice,
+    setChoice,
+    assocModal,
+    setAssocModal,
+    addAssociation,
+    addGeneralization,
+  };
 }

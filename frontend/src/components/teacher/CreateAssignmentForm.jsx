@@ -39,10 +39,18 @@ export default function CreateAssignmentForm({
             type: assignment.type || 'SINGLE',
             submission_limit: assignment.submission_limit ?? 1,
             description: assignment.description || assignment.desc || '',
-            start_date_date: assignment.start_date ? new Date(assignment.start_date).toISOString().slice(0, 10) : '',
-            start_date_time: assignment.start_date ? new Date(assignment.start_date).toTimeString().slice(0, 5) : '',
-            end_date_date: assignment.end_date ? new Date(assignment.end_date).toISOString().slice(0, 10) : '',
-            end_date_time: assignment.end_date ? new Date(assignment.end_date).toTimeString().slice(0, 5) : '',
+            start_date_date: assignment.start_date
+              ? new Date(assignment.start_date).toISOString().slice(0, 10)
+              : '',
+            start_date_time: assignment.start_date
+              ? new Date(assignment.start_date).toTimeString().slice(0, 5)
+              : '',
+            end_date_date: assignment.end_date
+              ? new Date(assignment.end_date).toISOString().slice(0, 10)
+              : '',
+            end_date_time: assignment.end_date
+              ? new Date(assignment.end_date).toTimeString().slice(0, 5)
+              : '',
           });
         } catch (err) {
           console.error('parse assignment dates error', err);
@@ -116,7 +124,8 @@ export default function CreateAssignmentForm({
           : '1'
       );
       // only append status when explicitly provided (so updates can keep existing status)
-      if (typeof status !== 'undefined' && status !== null && status !== '') fd.append('status', status);
+      if (typeof status !== 'undefined' && status !== null && status !== '')
+        fd.append('status', status);
       if (form.description) fd.append('description', form.description);
       // combine date+time fields into ISO datetimes (if provided)
       if (form.start_date_date) {
@@ -218,7 +227,11 @@ export default function CreateAssignmentForm({
   };
 
   return (
-    <Modal open={open} onClose={onClose} title={assignment ? 'Edit assignment' : 'Create new assignment'}>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={assignment ? 'Edit assignment' : 'Create new assignment'}
+    >
       <form className="create-lecture-form" onSubmit={(e) => e.preventDefault()}>
         <FormField
           label="Title"
@@ -298,24 +311,50 @@ export default function CreateAssignmentForm({
           />
         </div>
 
-        <FormField label="Model" name="file" type="file" inputRef={fileRef} inputProps={{ accept: '.use' }} />
+        <FormField
+          label="Model"
+          name="file"
+          type="file"
+          inputRef={fileRef}
+          inputProps={{ accept: '.use' }}
+        />
 
         <div className="create-lecture-form__actions">
           {assignment ? (
             <>
-              <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
+              <button
+                type="button"
+                className="btn btn-signin"
+                onClick={onClose}
+                disabled={submitting}
+              >
                 Cancel
               </button>
-              <button type="button" className="btn btn-primary btn-sm" onClick={() => doSubmit()} disabled={submitting}>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => doSubmit()}
+                disabled={submitting}
+              >
                 {submitting ? 'Applying…' : 'Apply'}
               </button>
             </>
           ) : (
             <>
-              <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
+              <button
+                type="button"
+                className="btn btn-signin"
+                onClick={onClose}
+                disabled={submitting}
+              >
                 Cancel
               </button>
-              <button type="button" className="btn btn-signin" onClick={() => doSubmit('draft')} disabled={submitting}>
+              <button
+                type="button"
+                className="btn btn-signin"
+                onClick={() => doSubmit('draft')}
+                disabled={submitting}
+              >
                 Save as draft
               </button>
               <button

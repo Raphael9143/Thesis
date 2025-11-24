@@ -31,7 +31,10 @@ export default function StudentExamsList() {
         if (cls?.success && cls.data) {
           setClassInfo(cls.data);
         }
-        const courseId = routeCourseId || (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) || id;
+        const courseId =
+          routeCourseId ||
+          (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) ||
+          id;
         setCourseIdState(courseId);
         const examRes = await userAPI.getExamsByCourse(courseId);
         if (!mounted) return;
@@ -54,7 +57,10 @@ export default function StudentExamsList() {
     };
   }, [id, routeCourseId]);
 
-  const examIds = useMemo(() => (exams || []).map((e) => e.exam_id || e.id).filter(Boolean), [exams]);
+  const examIds = useMemo(
+    () => (exams || []).map((e) => e.exam_id || e.id).filter(Boolean),
+    [exams]
+  );
   const { attemptsMap: hookAttemptsMap } = useAttemptMap('exam', examIds, {
     enabled: examIds.length > 0,
   });
@@ -137,7 +143,9 @@ export default function StudentExamsList() {
           </div>
         )}
         <div className="class-detail__item-title">{ex.title}</div>
-        <small className={`due-date ${className}`}>{daysLeft !== null ? ` ${daysLeft}d left.` : ''}</small>
+        <small className={`due-date ${className}`}>
+          {daysLeft !== null ? ` ${daysLeft}d left.` : ''}
+        </small>
       </li>
     );
   };
@@ -159,7 +167,10 @@ export default function StudentExamsList() {
                     collapsed={collapsed.has(g.key)}
                     onToggle={() => toggleGroup(g.key)}
                   />
-                  <ul className="class-detail__list" style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}>
+                  <ul
+                    className="class-detail__list"
+                    style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}
+                  >
                     {g.items.map((ex) => (
                       <ExamListItem key={ex.id || ex.exam_id} ex={ex} />
                     ))}

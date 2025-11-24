@@ -126,19 +126,39 @@ export default function CreateLectureForm({
         <div className="create-lecture-form__actions">
           {lecture ? (
             <>
-              <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
+              <button
+                type="button"
+                className="btn btn-signin"
+                onClick={onClose}
+                disabled={submitting}
+              >
                 Cancel
               </button>
-              <button type="button" className="btn btn-primary btn-sm" onClick={() => doSubmit()} disabled={submitting}>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => doSubmit()}
+                disabled={submitting}
+              >
                 {submitting ? 'Applying…' : 'Apply'}
               </button>
             </>
           ) : (
             <>
-              <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
+              <button
+                type="button"
+                className="btn btn-signin"
+                onClick={onClose}
+                disabled={submitting}
+              >
                 Cancel
               </button>
-              <button type="button" className="btn btn-signin" onClick={() => doSubmit('draft')} disabled={submitting}>
+              <button
+                type="button"
+                className="btn btn-signin"
+                onClick={() => doSubmit('draft')}
+                disabled={submitting}
+              >
                 Save as Draft
               </button>
               <button

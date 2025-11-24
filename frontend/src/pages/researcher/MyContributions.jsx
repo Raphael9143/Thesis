@@ -75,16 +75,23 @@ export default function MyContributions() {
           <div
             key={contrib.id}
             className="contribution-card"
-            onClick={() => navigate(`/researcher/projects/${projectId}/contributions/${contrib.id}`)}
+            onClick={() =>
+              navigate(`/researcher/projects/${projectId}/contributions/${contrib.id}`)
+            }
             style={{ cursor: 'pointer' }}
           >
             <div className="contribution-card-header">
               <h3 className="contribution-card-title">{contrib.title}</h3>
-              <span className="contribution-card-status" style={{ backgroundColor: getStatusColor(contrib.status) }}>
+              <span
+                className="contribution-card-status"
+                style={{ backgroundColor: getStatusColor(contrib.status) }}
+              >
                 {formatStatus(contrib.status)}
               </span>
             </div>
-            {contrib.description && <p className="contribution-card-description">{contrib.description}</p>}
+            {contrib.description && (
+              <p className="contribution-card-description">{contrib.description}</p>
+            )}
             <div className="contribution-card-meta">
               <span className="contribution-card-date">
                 <i className="fa fa-calendar" /> {new Date(contrib.created_at).toLocaleDateString()}
@@ -132,7 +139,9 @@ export default function MyContributions() {
             <button
               className="pagination-next"
               disabled={currentPage >= pagination.totalPages}
-              onClick={() => setSearchParams({ page: Math.min(pagination.totalPages, currentPage + 1) })}
+              onClick={() =>
+                setSearchParams({ page: Math.min(pagination.totalPages, currentPage + 1) })
+              }
               style={{ marginLeft: 8 }}
             >
               <i className="fa-solid fa-forward"></i>

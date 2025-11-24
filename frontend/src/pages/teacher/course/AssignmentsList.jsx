@@ -35,7 +35,10 @@ export default function AssignmentsList() {
           // title will be handled by hooks below
         }
 
-        const courseId = routeCourseId || (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) || id;
+        const courseId =
+          routeCourseId ||
+          (cls?.success && cls.data && (cls.data.course_id || cls.data.courseId)) ||
+          id;
         setCourseIdState(courseId);
 
         const assignRes = await userAPI.getAssignmentsByCourse(courseId);
@@ -66,7 +69,9 @@ export default function AssignmentsList() {
     try {
       const res = await userAPI.patchAssignmentStatus(assignmentId, 'published');
       if (res?.success) {
-        setAssignments((s) => s.map((x) => ((x.assignment_id || x.id) === assignmentId ? res.data : x)));
+        setAssignments((s) =>
+          s.map((x) => ((x.assignment_id || x.id) === assignmentId ? res.data : x))
+        );
         push({ title: 'Success', body: 'Assignment published.' });
       }
     } catch (err) {
@@ -150,7 +155,10 @@ export default function AssignmentsList() {
           <div className="flex-between">
             <h4 className="no-margin">Assignments</h4>
             <div className="create-button-section">
-              <button className="btn btn-primary btn-sm" onClick={() => setAssignmentModalOpen(true)}>
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => setAssignmentModalOpen(true)}
+              >
                 New Assignment
               </button>
             </div>
@@ -166,7 +174,10 @@ export default function AssignmentsList() {
                     collapsed={collapsed.has(g.key)}
                     onToggle={() => toggleGroup(g.key)}
                   />
-                  <ul className="class-detail__list" style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}>
+                  <ul
+                    className="class-detail__list"
+                    style={{ display: collapsed.has(g.key) ? 'none' : 'flex' }}
+                  >
                     {g.items.map((a) => (
                       <li key={a.assignment_id || a.id} className="class-detail__list-item">
                         <div className="flex-between full-width">
@@ -195,19 +206,35 @@ export default function AssignmentsList() {
                                 >
                                   <i className="fa fa-paper-plane" />
                                 </button>
-                                <button className="btn btn-icon" title="Delete" onClick={() => cancelAssignment(a)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Delete"
+                                  onClick={() => cancelAssignment(a)}
+                                >
                                   <i className="fa fa-times" />
                                 </button>
-                                <button className="btn btn-icon" title="Update" onClick={() => updateAssignment(a)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Update"
+                                  onClick={() => updateAssignment(a)}
+                                >
                                   <i className="fa fa-edit" />
                                 </button>
                               </>
                             ) : (
                               <>
-                                <button className="btn btn-icon" title="Delete" onClick={() => cancelAssignment(a)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Delete"
+                                  onClick={() => cancelAssignment(a)}
+                                >
                                   <i className="fa fa-times" />
                                 </button>
-                                <button className="btn btn-icon" title="Update" onClick={() => updateAssignment(a)}>
+                                <button
+                                  className="btn btn-icon"
+                                  title="Update"
+                                  onClick={() => updateAssignment(a)}
+                                >
                                   <i className="fa fa-edit" />
                                 </button>
                               </>
@@ -237,7 +264,9 @@ export default function AssignmentsList() {
         onUpdated={(updated) => {
           if (updated)
             setAssignments((s) =>
-              s.map((x) => ((x.assignment_id || x.id) === (updated.assignment_id || updated.id) ? updated : x))
+              s.map((x) =>
+                (x.assignment_id || x.id) === (updated.assignment_id || updated.id) ? updated : x
+              )
             );
           setEditingAssignment(null);
         }}

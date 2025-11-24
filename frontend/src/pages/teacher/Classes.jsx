@@ -54,7 +54,11 @@ export default function ClassesPage() {
     <Section>
       <Card>
         <div className="create-class-header">
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setModalOpen(true)}>
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={() => setModalOpen(true)}
+          >
             Create class
           </button>
         </div>
@@ -80,7 +84,11 @@ export default function ClassesPage() {
           )}
         </div>
       </Card>
-      <CreateClassModal open={modalOpen} onClose={() => setModalOpen(false)} onCreated={(cls) => onCreateClass(cls)} />
+      <CreateClassModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onCreated={(cls) => onCreateClass(cls)}
+      />
     </Section>
   );
 }

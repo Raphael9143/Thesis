@@ -64,9 +64,13 @@ export default function Submissions() {
     const kind = tab === 'assignments' ? 'assignment' : 'exam';
     // navigate to dedicated submissions route for this activity
     if (kind === 'assignment') {
-      navigate(`/education/teacher/classes/${classId}/courses/${courseId}/submissions/assignment/${a.id}`);
+      navigate(
+        `/education/teacher/classes/${classId}/courses/${courseId}/submissions/assignment/${a.id}`
+      );
     } else {
-      navigate(`/education/teacher/classes/${classId}/courses/${courseId}/submissions/exam/${a.id}`);
+      navigate(
+        `/education/teacher/classes/${classId}/courses/${courseId}/submissions/exam/${a.id}`
+      );
     }
   };
 
@@ -103,10 +107,14 @@ export default function Submissions() {
                     <div className="activity-card-inner">
                       <div>
                         <div className="activity-title">{a.title}</div>
-                        <div className="activity-meta">{a.end_date ? new Date(a.end_date).toLocaleString() : '-'}</div>
+                        <div className="activity-meta">
+                          {a.end_date ? new Date(a.end_date).toLocaleString() : '-'}
+                        </div>
                       </div>
                       <div className="activity-right">
-                        <div className="activity-submissions">Submissions: {a.submissions_count ?? '-'}</div>
+                        <div className="activity-submissions">
+                          Submissions: {a.submissions_count ?? '-'}
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -12,7 +12,11 @@ export default function ConstraintModal({ draft, onChange, onCancel, onCreate })
             rows={4}
             className="uml-modal-input"
             placeholder={
-              `Optional: prefix with ` + '`inv: ClassName: `' + ` or ` + '`pre: ClassName: `' + `, then the expression`
+              `Optional: prefix with ` +
+              '`inv: ClassName: `' +
+              ` or ` +
+              '`pre: ClassName: `' +
+              `, then the expression`
             }
             value={draft.expression || ''}
             onChange={(e) => onChange && onChange(e.target.value)}
@@ -22,7 +26,10 @@ export default function ConstraintModal({ draft, onChange, onCancel, onCreate })
           <button onClick={onCancel} title="Cancel">
             <i className="fa fa-times" /> Cancel
           </button>
-          <button onClick={() => onCreate && onCreate(draft.expression || '')} title="Create constraint">
+          <button
+            onClick={() => onCreate && onCreate(draft.expression || '')}
+            title="Create constraint"
+          >
             <i className="fa fa-save" /> Create
           </button>
         </div>

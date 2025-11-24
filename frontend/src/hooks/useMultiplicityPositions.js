@@ -7,12 +7,22 @@ import { useMemo } from 'react';
 // - getRect: function(name) -> rect or null
 // - perpOffset: utility
 // - offsetAlong, intersectBorder: utilities
-const useMultiplicityPositions = (associations, centerOf, getRect, { perpOffset, offsetAlong, intersectBorder }) =>
+const useMultiplicityPositions = (
+  associations,
+  centerOf,
+  getRect,
+  { perpOffset, offsetAlong, intersectBorder }
+) =>
   useMemo(() => {
     const mp = {};
     associations.forEach((a, i) => {
       const parts = Array.isArray(a.parts) ? a.parts : [];
-      const centers = parts.map((p) => ({ name: p.class, center: centerOf(p.class), rect: getRect(p.class), raw: p }));
+      const centers = parts.map((p) => ({
+        name: p.class,
+        center: centerOf(p.class),
+        rect: getRect(p.class),
+        raw: p,
+      }));
       // for each part compute multiplicity position
       centers.forEach((c, idx) => {
         if (!c.center) return;
@@ -24,7 +34,9 @@ const useMultiplicityPositions = (associations, centerOf, getRect, { perpOffset,
         } else {
           anchorTarget = { x: c.center.x + 20, y: c.center.y };
         }
-        const p = c.rect ? intersectBorder(c.rect, c.center, anchorTarget) : offsetAlong(c.center, anchorTarget, 14);
+        const p = c.rect
+          ? intersectBorder(c.rect, c.center, anchorTarget)
+          : offsetAlong(c.center, anchorTarget, 14);
         mp[`${i}:${idx}`] = perpOffset(p, c.center, anchorTarget, 14, 6);
       });
     });

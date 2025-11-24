@@ -72,8 +72,10 @@ const intersectBorder = (rect, from, to) => {
 
 const fmtMultiplicity = (part) => {
   if (!part) return '';
-  if (typeof part.multiplicity === 'string' && part.multiplicity.trim()) return part.multiplicity.trim();
-  if (typeof part.cardinality === 'string' && part.cardinality.trim()) return part.cardinality.trim();
+  if (typeof part.multiplicity === 'string' && part.multiplicity.trim())
+    return part.multiplicity.trim();
+  if (typeof part.cardinality === 'string' && part.cardinality.trim())
+    return part.cardinality.trim();
   const min = part.min ?? part.lower ?? part.lowerBound ?? '';
   const max = part.max ?? part.upper ?? part.upperBound ?? '';
   if ((min === '' || min === null) && (max === '' || max === null)) {

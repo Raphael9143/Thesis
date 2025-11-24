@@ -1,7 +1,13 @@
 import React, { useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import '../../assets/styles/components/ui/NotificationPopup.css';
-export default function NotificationPopup({ message, open, duration = 3000, type = 'info', onClose }) {
+export default function NotificationPopup({
+  message,
+  open,
+  duration = 3000,
+  type = 'info',
+  onClose,
+}) {
   const isOpen = Boolean(open ?? message);
 
   useEffect(() => {

@@ -11,7 +11,11 @@ const useBoxMeasurements = ({ boxRefs, positions, containerRef, BOX_W = 220, BOX
   const centerOf = useCallback(
     (name) => {
       const p = positions[name] || { x: 0, y: 0 };
-      const el = (boxRefs && boxRefs.current && (boxRefs.current[name] || boxRefs.current[`enum:${name}`])) || null;
+      const el =
+        (boxRefs &&
+          boxRefs.current &&
+          (boxRefs.current[name] || boxRefs.current[`enum:${name}`])) ||
+        null;
       const w = (el && el.offsetWidth) || BOX_W;
       const h = (el && el.offsetHeight) || BOX_MIN_H;
       return { x: p.x + w / 2, y: p.y + h / 2 };
@@ -21,11 +25,20 @@ const useBoxMeasurements = ({ boxRefs, positions, containerRef, BOX_W = 220, BOX
 
   const getRect = useCallback(
     (name) => {
-      const el = (boxRefs && boxRefs.current && (boxRefs.current[name] || boxRefs.current[`enum:${name}`])) || null;
+      const el =
+        (boxRefs &&
+          boxRefs.current &&
+          (boxRefs.current[name] || boxRefs.current[`enum:${name}`])) ||
+        null;
       if (!el || !containerRef?.current) return null;
       const r = el.getBoundingClientRect();
       const containerRect = containerRef.current.getBoundingClientRect();
-      return { left: r.left - containerRect.left, top: r.top - containerRect.top, width: r.width, height: r.height };
+      return {
+        left: r.left - containerRect.left,
+        top: r.top - containerRect.top,
+        width: r.width,
+        height: r.height,
+      };
     },
     [boxRefs, containerRef]
   );
