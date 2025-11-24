@@ -218,7 +218,7 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
               {suggestions.map((s) => (
                 <button
                   key={s}
-                  className="btn btn-signin btn-sm"
+                  className="btn btn-outline btn-sm"
                   onClick={() => addEmail(s)}
                   style={{ margin: 4 }}
                 >
@@ -242,7 +242,7 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
         </div>
 
         <div className="create-class-actions">
-          <button type="button" className="btn btn-signin btn-sm" onClick={onClose}>
+          <button type="button" className="btn btn-outline btn-sm" onClick={onClose}>
             <i className="fa-solid fa-arrow-left"></i>
             <span>Cancel</span>
           </button>

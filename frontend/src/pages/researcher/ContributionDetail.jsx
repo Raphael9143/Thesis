@@ -181,7 +181,7 @@ export default function ContributionDetail() {
       <Section>
         <Card>
           <div className="contribution-detail-error">{error || 'Contribution not found'}</div>
-          <button className="btn btn-signin btn-sm" onClick={() => navigate(-1)}>
+          <button className="btn btn-outline btn-sm" onClick={() => navigate(-1)}>
             Back
           </button>
         </Card>
@@ -195,7 +195,7 @@ export default function ContributionDetail() {
     <Section>
       <Card>
         <div className="contribution-detail-header">
-          <button className="btn btn-signin btn-sm" onClick={() => navigate(-1)}>
+          <button className="btn btn-outline btn-sm" onClick={() => navigate(-1)}>
             <i className="fa fa-arrow-left" /> Back
           </button>
           <div

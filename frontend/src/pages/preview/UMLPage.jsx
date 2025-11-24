@@ -190,7 +190,7 @@ export default function UMLPage() {
         <h2>UML Preview - {model.model || 'Model'}</h2>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
-            className="btn btn-signin btn-sm"
+            className="btn btn-outline btn-sm"
             onClick={() => {
               // navigate to editor, pass current parsed model in router state
               navigate('/uml/editor', { state: { model } });

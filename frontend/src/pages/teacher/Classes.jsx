@@ -59,7 +59,8 @@ export default function ClassesPage() {
             className="btn btn-primary btn-sm"
             onClick={() => setModalOpen(true)}
           >
-            Create class
+            <i className="fa-solid fa-chalkboard-user"></i>
+            <span>New class</span>
           </button>
         </div>
 

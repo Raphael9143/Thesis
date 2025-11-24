@@ -115,7 +115,7 @@ const AddStudentsModal = ({ open, onClose, classId, onAdded }) => {
           <button className="btn btn-primary btn-sm" onClick={submit} disabled={loading}>
             {loading ? 'Adding...' : 'Add students'}
           </button>
-          <button className="btn btn-signin" onClick={onClose} disabled={loading}>
+          <button className="btn btn-outline btn-sm" onClick={onClose} disabled={loading}>
             Cancel
           </button>
         </div>

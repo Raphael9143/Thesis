@@ -174,7 +174,7 @@ export default function StudentProfile() {
                 ) : (
                   <div className="edit-actions-btns">
                     <button
-                      className="btn btn-signin cancel-btn"
+                      className="btn btn-outline btn-sm cancel-btn"
                       onClick={() => {
                         setEditing(false);
                         setFullName(profile.full_name || '');

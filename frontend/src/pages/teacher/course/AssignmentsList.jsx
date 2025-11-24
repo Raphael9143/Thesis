@@ -159,7 +159,8 @@ export default function AssignmentsList() {
                 className="btn btn-primary btn-sm"
                 onClick={() => setAssignmentModalOpen(true)}
               >
-                New Assignment
+                <i className="fa-regular fa-file-lines" />
+                <span>New Assignment</span>
               </button>
             </div>
           </div>

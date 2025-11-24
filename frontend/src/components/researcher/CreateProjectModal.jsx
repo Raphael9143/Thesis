@@ -97,10 +97,15 @@ export default function CreateProjectModal({ open, onClose, onCreated }) {
         />
 
         <div className="create-project-modal-actions">
-          <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={onClose}
+            disabled={submitting}
+          >
             Cancel
           </button>
-          <button type="submit" className="btn btn-signin" disabled={submitting}>
+          <button type="submit" className="btn btn-outline btn-sm" disabled={submitting}>
             {submitting ? 'Saving...' : 'Save as Draft'}
           </button>
           <button

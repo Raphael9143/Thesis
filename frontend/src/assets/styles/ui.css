@@ -95,7 +95,8 @@
 }
 
 .btn .fa,
-.btn .fa-solid {
+.btn .fa-solid,
+.btn .fa-regular {
   margin-right: 6px;
 }
 
@@ -288,16 +289,13 @@ textarea:focus {
 
 /* small icon buttons used in lists */
 .btn.btn-icon {
-  padding: 6px 8px;
-  border-radius: 8px;
   background: transparent;
-  border: 1px solid var(--border);
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 .btn.btn-icon:hover {
-  background: var(--surface-muted);
+  color: var(--brand);
 }
 .btn.btn-icon i {
   pointer-events: none;

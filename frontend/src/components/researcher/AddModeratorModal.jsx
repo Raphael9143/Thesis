@@ -76,7 +76,12 @@ export default function AddModeratorModal({ open, onClose, onAdded, projectId })
         />
 
         <div className="create-project-modal-actions">
-          <button type="button" className="btn btn-signin" onClick={onClose} disabled={submitting}>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={onClose}
+            disabled={submitting}
+          >
             Cancel
           </button>
           <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>

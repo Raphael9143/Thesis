@@ -81,7 +81,7 @@ export default function ResearcherHome() {
                 <span>Explore Research</span>
               </button>
               <button
-                className="btn btn-signin"
+                className="btn btn-outline btn-sm"
                 onClick={() => {
                   setAuthType('register');
                   setShowAuth(true);

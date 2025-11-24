@@ -117,7 +117,7 @@ export default function ResubmitContribution() {
       <Section>
         <Card>
           <div className="text-error">{error || 'Contribution not found'}</div>
-          <button className="btn btn-signin" onClick={() => navigate(-1)}>
+          <button className="btn btn-outline btn-sm" onClick={() => navigate(-1)}>
             Back
           </button>
         </Card>
@@ -146,7 +146,7 @@ export default function ResubmitContribution() {
             </button>
             <button
               type="button"
-              className="btn btn-signin"
+              className="btn btn-outline btn-sm"
               onClick={handleCancel}
               disabled={submitting}
             >

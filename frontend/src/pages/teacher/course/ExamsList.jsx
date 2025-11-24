@@ -151,7 +151,8 @@ export default function ExamsList() {
             <h4 className="no-margin">Exams</h4>
             <div className="create-button-section">
               <button className="btn btn-primary btn-sm" onClick={() => setExamModalOpen(true)}>
-                New Exam
+                <i className="fa-solid fa-file-pen"></i>
+                <span>New Exam</span>
               </button>
             </div>
           </div>

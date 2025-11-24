@@ -153,7 +153,8 @@ export default function LecturesList() {
             <h4 className="no-margin">Lectures</h4>
             <div className="create-button-section">
               <button className="btn btn-primary btn-sm" onClick={() => setLectureModalOpen(true)}>
-                New Lecture
+                <i className="fa-solid fa-book"></i>
+                <span>New Lecture</span>
               </button>
             </div>
           </div>

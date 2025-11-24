@@ -106,7 +106,7 @@ export default function PostContribution() {
       <Section>
         <Card>
           <div className="text-error">{error}</div>
-          <button className="btn btn-signin" onClick={handleCancel}>
+          <button className="btn btn-outline btn-sm" onClick={handleCancel}>
             Back to Project
           </button>
         </Card>
@@ -155,7 +155,7 @@ export default function PostContribution() {
             </button>
             <button
               type="button"
-              className="btn btn-signin"
+              className="btn btn-outline btn-sm"
               onClick={handleCancel}
               disabled={submitting}
             >

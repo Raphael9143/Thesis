@@ -325,11 +325,12 @@ export default function CreateExamForm({
             <>
               <button
                 type="button"
-                className="btn btn-signin"
+                className="btn btn-outline btn-sm"
                 onClick={onClose}
                 disabled={submitting}
               >
-                Cancel
+                <i className="fa-solid fa-arrow-left"></i>
+                <span>Cancel</span>
               </button>
               <button
                 type="button"
@@ -337,26 +338,29 @@ export default function CreateExamForm({
                 onClick={() => doSubmit()}
                 disabled={submitting}
               >
-                {submitting ? 'Applying…' : 'Apply'}
+                <i className="fa-solid fa-check"></i>
+                <span>Apply</span>
               </button>
             </>
           ) : (
             <>
               <button
                 type="button"
-                className="btn btn-signin"
+                className="btn btn-outline btn-sm"
                 onClick={onClose}
                 disabled={submitting}
               >
-                Cancel
+                <i className="fa-solid fa-arrow-left"></i>
+                <span>Cancel</span>
               </button>
               <button
                 type="button"
-                className="btn btn-signin"
+                className="btn btn-outline btn-sm"
                 onClick={() => doSubmit('draft')}
                 disabled={submitting}
               >
-                Save as draft
+                <i className="fa-solid fa-file-pen"></i>
+                <span>Draft</span>
               </button>
               <button
                 type="button"
@@ -364,7 +368,8 @@ export default function CreateExamForm({
                 onClick={() => doSubmit('published')}
                 disabled={submitting}
               >
-                {submitting ? 'Submitting…' : 'Publish'}
+                <i className="fa-solid fa-upload"></i>
+                <span>Publish</span>
               </button>
             </>
           )}

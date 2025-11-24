@@ -156,7 +156,7 @@ export default function SubmitWork() {
       {!loading && !error && (
         <div className="submit-container">
           <div className="submit-toggle">
-            <label className={`btn btn-signin btn-sm ${mode === 'file' ? 'btn-primary' : ''}`}>
+            <label className={`btn btn-outline btn-sm ${mode === 'file' ? 'btn-primary' : ''}`}>
               <i className="fa-solid fa-upload"></i>
               <span>Upload File</span>
               <input

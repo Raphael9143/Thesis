@@ -65,7 +65,8 @@ export default function ClassCoursesPage() {
       <Card>
         <div className="create-course-header">
           <button className="btn btn-primary btn-sm" onClick={() => setCreateCourseOpen(true)}>
-            New Course
+            <i className="fa-solid fa-layer-group"></i>
+            <span>New Course</span>
           </button>
         </div>
 

@@ -121,9 +121,12 @@ export default function StudentsList() {
   return (
     <Section>
       <Card>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <div
+          style={{ display: 'flex', justifyContent: 'end', alignItems: 'center', marginBottom: 12 }}
+        >
           <button className="btn btn-primary btn-sm" onClick={() => setAddModalOpen(true)}>
-            Add student
+            <i className="fa-solid fa-user-plus"></i>
+            <span>Add student</span>
           </button>
         </div>
         {loading && <div>Loading students...</div>}
