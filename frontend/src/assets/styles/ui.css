@@ -102,6 +102,10 @@
 	color: var(--btn-color);
 }
 
+.btn .fa {
+  margin-right: 6px;
+}
+
 .btn-signin:hover {
 	background: var(--btn-hover);
 	color: #fff;

@@ -56,7 +56,8 @@ export default function ResearcherProjects() {
       <Card>
         <div className="create-button-section">
           <button className="btn btn-primary btn-sm" onClick={() => setCreateModalOpen(true)}>
-            Create Project
+            <i className="fa fa-project-diagram" aria-hidden />
+            <span>New Project</span>
           </button>
         </div>
         {loading && <div>Loading projects...</div>}
