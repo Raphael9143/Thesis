@@ -157,10 +157,12 @@ const userAPI = {
   serializeClass: (data) => axiosClient.post('uml/serialize/class', data),
   serializeAssociation: (data) => axiosClient.post('uml/serialize/association', data),
   serializeOperation: (data) => axiosClient.post('uml/serialize/operation', data),
+  serializeConstraint: (data) => axiosClient.post('uml/serialize/constraint', data),
   // USE -> JSON (deserialize)
   deserializeClass: (data) => axiosClient.post('uml/deserialize/class', data),
   deserializeAssociation: (data) => axiosClient.post('uml/deserialize/association', data),
   deserializeOperation: (data) => axiosClient.post('uml/deserialize/operation', data),
+  deserializeConstraint: (data) => axiosClient.post('uml/deserialize/constraint', data),
   // GET /api/use/models
   getUseModels: () => axiosClient.get('use/models'),
   // Researcher projects
