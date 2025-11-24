@@ -33,7 +33,7 @@ export default function UMLEditor({ initialModel = null }) {
   const [associations, setAssociations] = useState(starter.associations || []);
   const [conditionals, setConditionals] = useState(starter.conditionals || []);
   const [positions, setPositions] = useState({});
-  const { constraints, constraintDraft, setConstraintDraft, createConstraint } = useConstraints(
+  const { constraints, setConstraints, constraintDraft, setConstraintDraft, createConstraint } = useConstraints(
     starter.constraints || []
   );
   const [nextIndex, setNextIndex] = useState((starter.classes?.length || 0) + 1);
@@ -675,7 +675,22 @@ export default function UMLEditor({ initialModel = null }) {
       return;
     }
     // inv:id (not directly mutable here - constraints are managed by useConstraints hook)
-    if (key.startsWith('inv:')) {
+    if (key.startsWith('inv:') || key.startsWith('cond:')) {
+      // key is like 'inv:<index>' or 'cond:<index>' where index is the position in constraints array
+      const parts = key.split(':');
+      const idx = parseInt(parts[1], 10);
+      if (Number.isFinite(idx)) {
+        setConstraints((s) => {
+          const ns = Array.isArray(s) ? [...s] : [];
+          // incoming payload may not have id; keep existing id if present
+          const existing = ns[idx] || {};
+          ns[idx] = { ...existing, ...(text || {}) };
+          return ns;
+        });
+      } else {
+        // append
+        setConstraints((s) => [...(s || []), text]);
+      }
       return;
     }
     if (key.startsWith('op:')) {

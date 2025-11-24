@@ -19,12 +19,28 @@ export default function ModelTreePane({
   const [detailText, setDetailText] = useState('');
   const [readOnlyText, setReadOnlyText] = useState('');
   const [editing, setEditing] = useState(false);
-  const { serializeClass, serializeAssociation, serializeOperation, loading: serializing } = useSerialize();
-  const { deserializeClass, deserializeAssociation, deserializeOperation, loading: deserializing } = useDeserialize();
+  const {
+    serializeClass,
+    serializeAssociation,
+    serializeOperation,
+    serializeConstraint,
+    loading: serializing,
+  } = useSerialize();
+  const {
+    deserializeClass,
+    deserializeAssociation,
+    deserializeOperation,
+    deserializeConstraint,
+    loading: deserializing,
+  } = useDeserialize();
 
   const toggleOpen = (key) => setOpenKeys((o) => ({ ...o, [key]: !o[key] }));
 
-  const prepostList = constraints.filter((c) => c.type === 'precondition' || c.type === 'postcondition');
+  // Build lists preserving original indices so updates can target the correct entry
+  const invariantList = constraints.map((c, i) => ({ c, idx: i })).filter((x) => x.c && x.c.type === 'invariant');
+  const prepostList = constraints
+    .map((c, i) => ({ c, idx: i }))
+    .filter((x) => x.c && (x.c.type === 'precondition' || x.c.type === 'postcondition'));
 
   const handleSelect = (key, payload) => {
     setSelected({ key, payload });
@@ -41,6 +57,11 @@ export default function ModelTreePane({
           setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
         } else if (key.startsWith('assoc:')) {
           const res = await serializeAssociation(payload);
+          const text = res?.data?.data || res?.data || res;
+          setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
+        } else if (key.startsWith('inv:') || key.startsWith('cond:')) {
+          // constraint -> USE
+          const res = await serializeConstraint(payload);
           const text = res?.data?.data || res?.data || res;
           setReadOnlyText(typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2));
         } else if (key.startsWith('op:') || key.startsWith('qop:')) {
@@ -69,6 +90,11 @@ export default function ModelTreePane({
         if (payload) onUpdateNode && onUpdateNode(selected.key, payload);
       } else if (selected.key.startsWith('assoc:')) {
         const res = await deserializeAssociation({ text: detailText });
+        const payload = res?.data?.data || res?.data || res;
+        if (payload) onUpdateNode && onUpdateNode(selected.key, payload);
+      } else if (selected.key.startsWith('inv:') || selected.key.startsWith('cond:')) {
+        // deserialize constraint text -> JSON shape expected by backend
+        const res = await deserializeConstraint({ text: detailText });
         const payload = res?.data?.data || res?.data || res;
         if (payload) onUpdateNode && onUpdateNode(selected.key, payload);
       } else if (selected.key.startsWith('op:') || selected.key.startsWith('qop:')) {
@@ -143,16 +169,14 @@ export default function ModelTreePane({
             onToggle={() => toggleOpen('invariants')}
             count={constraints.filter((c) => c.type === 'invariant').length}
           >
-            {constraints
-              .filter((c) => c.type === 'invariant')
-              .map((c) => (
-                <TreeLeaf
-                  key={c.id}
-                  label={c.name || c.type || c.id}
-                  onClick={() => handleSelect(`inv:${c.id}`, c)}
-                  indent={12}
-                />
-              ))}
+            {invariantList.map((entry) => (
+              <TreeLeaf
+                key={`inv:${entry.idx}`}
+                label={entry.c?.name || entry.c?.type || String(entry.idx)}
+                onClick={() => handleSelect(`inv:${entry.idx}`, entry.c)}
+                indent={12}
+              />
+            ))}
           </TreeSection>
 
           <TreeSection
@@ -161,11 +185,11 @@ export default function ModelTreePane({
             onToggle={() => toggleOpen('prepost')}
             count={prepostList.length}
           >
-            {prepostList.map((c, i) => (
+            {prepostList.map((entry) => (
               <TreeLeaf
-                key={`cond:${i}`}
-                label={c.name || c.id || 'condition'}
-                onClick={() => handleSelect(`cond:${i}`, c)}
+                key={`cond:${entry.idx}`}
+                label={entry.c?.name || entry.c?.id || 'condition'}
+                onClick={() => handleSelect(`cond:${entry.idx}`, entry.c)}
                 indent={12}
               />
             ))}
@@ -242,7 +266,9 @@ export default function ModelTreePane({
                 />
                 <div className="uml-model-tree-detail-actions">
                   <button onClick={handleCancel}>Cancel</button>
-                  <button onClick={handleSave}>Save</button>
+                  <button onClick={handleSave} disabled={deserializing}>
+                    Save
+                  </button>
                 </div>
               </div>
             )}

@@ -47,5 +47,19 @@ export default function useDeserialize() {
     }
   };
 
-  return { deserializeClass, deserializeAssociation, deserializeOperation, loading, error };
+  const deserializeConstraint = async (data) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await userAPI.deserializeConstraint(data);
+      return res;
+    } catch (e) {
+      setError(e);
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { deserializeClass, deserializeAssociation, deserializeOperation, deserializeConstraint, loading, error };
 }

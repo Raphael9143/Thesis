@@ -49,5 +49,19 @@ export default function useSerialize() {
     }
   };
 
-  return { serializeClass, serializeAssociation, serializeOperation, loading, error };
+  const serializeConstraint = async (data) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await userAPI.serializeConstraint(data);
+      return res;
+    } catch (e) {
+      setError(e);
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { serializeClass, serializeAssociation, serializeOperation, serializeConstraint, loading, error };
 }
