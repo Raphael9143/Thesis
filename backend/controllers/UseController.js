@@ -1294,51 +1294,55 @@ const UseController = {
           }
         }
 
-        // constraints: attempt to parse contexts from raw content (simple split)
+        // constraints: parse structured constraints and synchronize DB rows
         if (parsed && parsed.model) {
-          // crude extraction: find 'constraints' section in CLI output or raw content
-          const cliText =
-            cliResult && cliResult.stdout ? cliResult.stdout : content;
-          const consIdx = cliText.search(/\nconstraints\b/i);
-          if (consIdx >= 0) {
-            const consText = cliText.slice(consIdx);
-            // split contexts by blank lines that start with 'context'
-            const ctxRe = /context\s+([\s\S]*?)(?=\n\s*context\b|$)/gi;
-            let cm;
-            while ((cm = ctxRe.exec(consText)) !== null) {
-              const block = cm[0].trim();
-              const header = block.split("\n")[0];
-              let contextName = null,
-                kind = null,
-                name = null,
-                expr = block.split("\n").slice(1).join("\n").trim();
-              const m1 = header.match(
-                /^context\s+([^\s]+)\s*:\s*([A-Za-z0-9_]+)\s+inv\s+([^:]+):?/i
-              );
-              if (m1) {
-                contextName = m1[2];
-                kind = "invariant";
-                name = m1[3] || null;
-              } else {
-                const m2 = header.match(
-                  /^context\s+([A-Za-z0-9_:]+)\s*(?:\(|$)/i
-                );
-                if (m2) {
-                  contextName = m2[1];
-                  kind = "constraint";
+          // Prefer structured constraints produced by parser/CLI; fallback to parsing raw text
+          let constraintsArr = [];
+          try {
+            if (Array.isArray(parsed.constraints) && parsed.constraints.length) {
+              constraintsArr = parsed.constraints.slice();
+            } else {
+              // attempt to parse from CLI output first, then raw content
+              const consSource = cliResult && cliResult.stdout ? cliResult.stdout : content;
+              constraintsArr = parseConstraintsText(consSource || "");
+            }
+          } catch {
+            constraintsArr = [];
+          }
+
+          // Normalize constraints into DB rows
+          const toCreate = [];
+          if (Array.isArray(constraintsArr) && constraintsArr.length) {
+            for (const c of constraintsArr) {
+              try {
+                const ctx = c.context || c.contextName || c.context_name || c.header || null;
+                let kind = c.kind || c.type || null;
+                if (kind && typeof kind === "string") {
+                  const kk = kind.toLowerCase();
+                  if (kk.indexOf("pre") !== -1) kind = "pre";
+                  else if (kk.indexOf("post") !== -1) kind = "post";
+                  else if (kk.indexOf("inv") !== -1) kind = "invariant";
+                  else kind = kk;
                 }
-              }
-              await UseConstraint.create(
-                {
+                const name = c.name || c.label || null;
+                const expr = c.expression || c.expr || c.body || c.raw || "";
+                toCreate.push({
                   use_model_id: modelRow.id,
-                  context: contextName,
+                  context: ctx,
                   kind,
                   name,
                   expression: expr,
-                },
-                { transaction: t }
-              );
+                });
+              } catch {
+                // skip bad constraint entries
+              }
             }
+          }
+
+          // synchronize: remove existing constraints for this model and bulk-insert
+          await UseConstraint.destroy({ where: { use_model_id: modelRow.id }, transaction: t });
+          if (toCreate.length) {
+            await UseConstraint.bulkCreate(toCreate, { transaction: t });
           }
         }
 
