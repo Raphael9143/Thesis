@@ -489,3 +489,8 @@
   background: #fafafa;
   cursor: pointer;
 }
+
+.participant-add-btn-container {
+  display: flex;
+  justify-content: end;
+}
