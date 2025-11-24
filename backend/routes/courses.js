@@ -152,7 +152,7 @@ router.get("/by-class/:classId", auth, CourseController.getCoursesByClass);
  *               # start_week and end_week removed from schema
  *               status:
  *                 type: string
- *                 enum: [ACTIVE, INACTIVE]
+ *                 enum: [ACTIVE, DRAFT, INACTIVE]
  *                 example: ACTIVE
  *               name:
  *                 type: string

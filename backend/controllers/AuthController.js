@@ -2,11 +2,11 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// Secret key cho JWT (trong thực tế nên để trong .env file)
+// Secret key for JWT (in production this should live in .env)
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const AuthController = {
-  // Đăng ký
+  // Register
 
   register: async (req, res) => {
     try {
@@ -16,8 +16,7 @@ const AuthController = {
       if (!email || !password || !full_name) {
         return res.status(400).json({
           success: false,
-          message:
-            "Vui lòng điền đầy đủ thông tin (email, password, full_name)",
+          message: "Please provide required fields: email, password, full_name",
         });
       }
 
@@ -61,10 +60,10 @@ const AuthController = {
         dob,
       });
 
-      // Nếu là student thì tạo luôn bản ghi students
+      // If role is STUDENT, create an associated Student record
       if (regRole === "STUDENT") {
         const Student = require("../models/Student");
-        // Sinh student_code tự động dạng OCL0001, OCL0002...
+        // Generate student_code as OCL0001, OCL0002, ...
         const lastStudent = await Student.findOne({
           order: [["student_id", "DESC"]],
         });
@@ -83,7 +82,7 @@ const AuthController = {
         });
       }
 
-      // Nếu là teacher thì tạo luôn bản ghi teachers
+      // If role is TEACHER, create an associated Teacher record
       if (regRole === "TEACHER") {
         const Teacher = require("../models/Teacher");
         await Teacher.create({
@@ -92,7 +91,7 @@ const AuthController = {
         });
       }
 
-      // Nếu là researcher thì tạo luôn bản ghi researchers
+      // If role is RESEARCHER, create an associated Researcher record
       if (regRole === "RESEARCHER") {
         const Researcher = require("../models/Researcher");
         // Sinh researcher_code tự động dạng RES0001, RES0002...
@@ -114,7 +113,7 @@ const AuthController = {
         });
       }
 
-      // Tạo JWT token
+      // Create JWT token
       const token = jwt.sign(
         {
           userId: newUser.id,
@@ -171,7 +170,7 @@ const AuthController = {
     }
   },
 
-  // Đăng nhập
+  // Login
   login: async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -180,7 +179,7 @@ const AuthController = {
       if (!email || !password) {
         return res.status(400).json({
           success: false,
-          message: "Please fill in email and password!",
+          message: "Please provide email and password",
         });
       }
 
@@ -235,11 +234,11 @@ const AuthController = {
     }
   },
 
-  // Lấy thông tin user hiện tại
+  // Get current user profile
   getProfile: async (req, res) => {
     try {
       const user = await User.findByPk(req.user.userId, {
-        attributes: { exclude: ["password"] }, // Không trả về password
+        attributes: { exclude: ["password"] }, // Do not return password
       });
 
       if (!user) {
@@ -270,7 +269,7 @@ const AuthController = {
     }
   },
 
-  // Cập nhật thông tin cá nhân
+  // Update profile
   updateProfile: async (req, res) => {
     try {
       const userId = req.user.userId;

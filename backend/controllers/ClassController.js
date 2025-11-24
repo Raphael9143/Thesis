@@ -260,7 +260,7 @@ const ClassController = {
 
       res.json({
         success: true,
-        message: "Class status updated!",
+        message: "Class status updated",
         data: {
           class: {
             id: foundClass.id,
@@ -323,7 +323,7 @@ const ClassController = {
       if (notFound.length > 0) {
         return res.status(400).json({
           success: false,
-          message: `Các email sau không hợp lệ hoặc không phải student: ${notFound.join(
+          message: `The following emails are invalid or not students: ${notFound.join(
             ", "
           )}`,
         });
@@ -376,7 +376,7 @@ const ClassController = {
 
       res.status(201).json({
         success: true,
-        message: "Students added to class!",
+        message: "Students added to class",
         data: {
           added: created.map((cs) => ({
             id: cs.id,
@@ -506,7 +506,7 @@ const ClassController = {
           );
           return res.status(400).json({
             success: false,
-            message: `Các email sau không hợp lệ hoặc không phải student: ${notFound.join(
+            message: `The following emails are invalid or not students: ${notFound.join(
               ", "
             )}`,
           });
@@ -519,7 +519,7 @@ const ClassController = {
       }
       res.status(201).json({
         success: true,
-        message: "Class created!",
+        message: "Class created",
         data: {
           class: {
             id: newClass.id,

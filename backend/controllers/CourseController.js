@@ -4,7 +4,7 @@ const ClassCourse = require("../models/ClassCourse");
 const Class = require("../models/Class");
 
 const CourseController = {
-  // Lấy danh sách tất cả môn học
+  // Get list of all courses
   getAllCourses: async (req, res) => {
     try {
       const courses = await Course.findAll();
@@ -14,7 +14,7 @@ const CourseController = {
       res.status(500).json({ success: false, message: "Server error" });
     }
   },
-  // Tạo môn học mới
+  // Create a new course
   createCourse: async (req, res) => {
     try {
       const {
@@ -28,7 +28,7 @@ const CourseController = {
       if (!course_name || !course_code || !class_id) {
         return res.status(400).json({
           success: false,
-          message: "course_name, course_code và class_id là bắt buộc.",
+          message: "course_name, course_code and class_id are required.",
         });
       }
       // Chỉ cho phép TEACHER tạo môn học
@@ -36,30 +36,28 @@ const CourseController = {
       if (!user || user.role !== "TEACHER") {
         return res.status(403).json({
           success: false,
-          message: "Chỉ giáo viên mới được tạo môn học.",
+          message: "Only teachers can create courses.",
         });
       }
       // Kiểm tra class tồn tại
       const foundClass = await Class.findByPk(class_id);
       if (!foundClass) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Class không tồn tại." });
+        return res.status(404).json({ success: false, message: "Class does not exist." });
       }
       // Kiểm tra giáo viên đứng lớp có đúng không
       if (foundClass.teacher_id !== user.id) {
         return res.status(403).json({
           success: false,
-          message: "Bạn không phải giáo viên chủ nhiệm của lớp này.",
+          message: "You are not the homeroom teacher for this class.",
         });
       }
       const created_by = req.user.userId;
       // Validate status cho Course
       let courseStatus = status || "ACTIVE";
-      if (!["ACTIVE", "INACTIVE"].includes(courseStatus)) {
+      if (!["ACTIVE", "DRAFT", "INACTIVE"].includes(courseStatus)) {
         return res.status(400).json({
           success: false,
-          message: "Chỉ cho phép status là ACTIVE hoặc INACTIVE.",
+          message: "Only status ACTIVE or INACTIVE are allowed.",
         });
       }
       const newCourse = await Course.create({
@@ -140,7 +138,7 @@ const CourseController = {
       }
       let updated = false;
       if (status !== undefined) {
-        if (!["ACTIVE", "INACTIVE"].includes(status)) {
+        if (!["ACTIVE", "DRAFT", "INACTIVE"].includes(status)) {
           return res.status(400).json({
             success: false,
             message: "Chỉ cho phép status là ACTIVE hoặc INACTIVE.",
@@ -158,11 +156,7 @@ const CourseController = {
         updated = true;
       }
       if (updated) await course.save();
-      res.json({
-        success: true,
-        message: "Cập nhật thành công!",
-        data: { course },
-      });
+      res.json({ success: true, message: "Update successful", data: { course } });
     } catch (error) {
       console.error("Update class_course error:", error);
       res.status(500).json({ success: false, message: "Server error" });
@@ -175,12 +169,12 @@ const CourseController = {
       if (!status) {
         return res
           .status(400)
-          .json({ success: false, message: "Trường status là bắt buộc." });
+          .json({ success: false, message: "Status is required." });
       }
-      if (!["ACTIVE", "INACTIVE"].includes(status)) {
+      if (!["ACTIVE", "DRAFT", "INACTIVE"].includes(status)) {
         return res.status(400).json({
           success: false,
-          message: "Chỉ cho phép status là ACTIVE hoặc INACTIVE.",
+          message: "Only ACTIVE, DRAFT, INACTIVE are accepted.",
         });
       }
       const course = await Course.findByPk(id);
@@ -194,14 +188,14 @@ const CourseController = {
       if (user.role !== "ADMIN" && course.created_by !== user.userId) {
         return res.status(403).json({
           success: false,
-          message: "Bạn không có quyền cập nhật status của course này.",
+          message: "You don't have permission to perform this action",
         });
       }
       course.status = status;
       await course.save();
       res.json({
         success: true,
-        message: "Cập nhật status thành công!",
+        message: "Course status updated!",
         data: course,
       });
     } catch (error) {
@@ -224,7 +218,7 @@ const CourseController = {
       if (user.role !== "ADMIN" && course.created_by !== user.userId) {
         return res.status(403).json({
           success: false,
-          message: "Bạn không có quyền xóa môn học này.",
+          message: "You don't have permission to delete this course.",
         });
       }
       await course.destroy();
