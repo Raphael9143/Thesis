@@ -204,6 +204,13 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
                 onChange={(e) => setStudentEmailsInput(e.target.value)}
                 placeholder="Type to search student emails"
               />
+              <button
+                className="btn btn-primary btn-sm"
+                onClick={() => addEmail(studentEmailsInput)}
+                style={{ fontSize: 12 }}
+              >
+                <span>Add</span>
+              </button>
             </div>
           </div>
           {suggestions.length > 0 && (
@@ -235,26 +242,21 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
         </div>
 
         <div className="create-class-actions">
-          <button type="submit" className="btn btn-primary btn-sm">
-            Publish
-          </button>
-          <button type="button" className="btn btn-signin" onClick={(e) => onSubmit(e, 'draft')}>
-            Save Draft
+          <button type="button" className="btn btn-signin btn-sm" onClick={onClose}>
+            <i className="fa-solid fa-arrow-left"></i>
+            <span>Cancel</span>
           </button>
           <button
             type="button"
-            className="btn btn-signin"
-            onClick={() => {
-              setName('');
-              setDescription('');
-              setSelectedStudentEmails([]);
-              setMaxStudents(30);
-            }}
+            className="btn btn-outline btn-sm"
+            onClick={(e) => onSubmit(e, 'draft')}
           >
-            Reset
+            <i className="fa-solid fa-file-pen"></i>
+            <span>Draft</span>
           </button>
-          <button type="button" className="btn btn-signin" onClick={onClose}>
-            Cancel
+          <button type="submit" className="btn btn-primary btn-sm">
+            <i className="fa-solid fa-upload"></i>
+            <span>Publish</span>
           </button>
         </div>
       </form>

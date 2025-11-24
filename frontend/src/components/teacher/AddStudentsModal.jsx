@@ -38,14 +38,6 @@ const AddStudentsModal = ({ open, onClose, classId, onAdded }) => {
 
   const studentEmails = useMemo(() => studentEmailsList || [], [studentEmailsList]);
 
-  const suggestions = useMemo(() => {
-    const q = studentEmailsInput.trim().toLowerCase();
-    if (!q) return [];
-    return studentEmails
-      .filter((e) => e.toLowerCase().includes(q) && !selectedStudentEmails.includes(e))
-      .slice(0, 10);
-  }, [studentEmailsInput, studentEmails, selectedStudentEmails]);
-
   const addEmail = (email) => {
     if (!email) return;
     if (!studentEmails.includes(email)) {
@@ -107,20 +99,6 @@ const AddStudentsModal = ({ open, onClose, classId, onAdded }) => {
             style={{ width: '100%' }}
           />
         </div>
-        {suggestions.length > 0 && (
-          <div className="suggestions">
-            {suggestions.map((s) => (
-              <button
-                key={s}
-                className="btn btn-signin btn-sm"
-                onClick={() => addEmail(s)}
-                style={{ margin: 4 }}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        )}
         {selectedStudentEmails.length > 0 && (
           <div className="selected-emails">
             {selectedStudentEmails.map((e) => (
