@@ -24,7 +24,7 @@ export default function CreateCourseModal({ open, onClose, defaultClassId = null
     }
   }, [open]);
 
-  const onSubmit = async (e) => {
+  const onSubmit = async (e, status = 'ACTIVE') => {
     if (e?.preventDefault) e.preventDefault();
     if (!courseName || !defaultClassId) {
       setNotifyMsg('course_name and class_id are required');
@@ -42,9 +42,12 @@ export default function CreateCourseModal({ open, onClose, defaultClassId = null
         semester,
         class_id: defaultClassId,
       };
+      if (typeof status !== 'undefined' && status !== null && status !== '')
+        payload.status = status;
+
       const res = await userAPI.createCourse(payload);
       if (res?.success) {
-        setNotifyMsg('Course created');
+        setNotifyMsg(status === 'DRAFT' ? 'Course saved as draft' : 'Course created');
         setNotifyType('success');
         setNotifyOpen(true);
         onCreated?.(res.data);
@@ -96,22 +99,27 @@ export default function CreateCourseModal({ open, onClose, defaultClassId = null
         </div>
 
         <div className="create-class-actions">
-          <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
-            {submitting ? 'Publishing...' : 'Publish'}
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={onClose}
+            disabled={submitting}
+          >
+            <i className="fa-solid fa-arrow-left"></i>
+            <span>Cancel</span>
           </button>
           <button
             type="button"
-            className="btn btn-signin"
-            onClick={() => {
-              setCourseName('');
-              setDescription('');
-              setSemester('');
-            }}
+            className="btn btn-outline btn-sm"
+            onClick={(e) => onSubmit(e, 'DRAFT')}
+            disabled={submitting}
           >
-            Reset
+            <i className="fa-solid fa-file-pen"></i>
+            <span>Draft</span>
           </button>
-          <button type="button" className="btn btn-signin" onClick={onClose}>
-            Cancel
+          <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
+            <i className="fa-solid fa-upload"></i>
+            <span>Publish</span>
           </button>
         </div>
 
