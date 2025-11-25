@@ -68,7 +68,7 @@ function HistoryTable({ history }) {
                 <td>{s.attempt_number != null ? s.attempt_number : '-'}</td>
                 <td>{ts}</td>
                 <td>{s.score != null ? s.score : 'Not Graded'}</td>
-                <td>{s.auto_grader_score != null ? s.auto_grader_score : '-'}</td>
+                <td>{s.auto_grader_score != null ? s.auto_grader_score / 10 : '-'}</td>
                 <td>
                   {s.attachment ? (
                     <a

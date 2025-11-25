@@ -259,7 +259,7 @@ export default function SubmitWork() {
           {autoScore != null && (
             <div style={{ marginBottom: 12 }}>
               <div style={{ color: '#2e7d32', fontSize: 56, fontWeight: 700, textAlign: 'center' }}>
-                {autoScore}
+                {autoScore / 10}
               </div>
               <div style={{ color: '#2e7d32', fontSize: 14, marginTop: 6, textAlign: 'center' }}>
                 {typeof autoScore === 'number' ? 'points' : ''}
