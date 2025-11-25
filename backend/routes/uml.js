@@ -136,6 +136,55 @@ router.post("/serialize/association", UseController.serializeAssociation);
  */
 router.post("/serialize/operation", UseController.serializeOperation);
 
+
+/**
+ * @swagger
+ * /api/uml/deserialize/query-operation:
+ *   post:
+ *     summary: Deserialize only query operations from a .use class block or operation text
+ *     tags:
+ *       - UML
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: payload
+ *         description: Provide `text` containing a class block or a single operation line.
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             text:
+ *               type: string
+ *             class:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Query operations extracted from the class or operation text
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             class:
+ *               type: string
+ *             query_operations:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                   signature:
+ *                     type: string
+ *                   returnType:
+ *                     type: string
+ *                   body:
+ *                     type: string
+ */
+// Deserialize only query operations from a class block or operation text
+router.post("/serialize/query-operation", UseController.serializeQueryOperation);
+
 // Serialize single enum JSON to a .use enum block
 /**
  * @swagger
@@ -277,6 +326,54 @@ router.post("/deserialize/association", UseController.deserializeAssociation);
  *         description: Invalid request body
  */
 router.post("/deserialize/operation", UseController.deserializeOperation);
+
+/**
+ * @swagger
+ * /api/uml/deserialize/query-operation:
+ *   post:
+ *     summary: Deserialize only query operations from a .use class block or operation text
+ *     tags:
+ *       - UML
+ *     consumes:
+ *       - application/json
+ *     parameters:
+ *       - in: body
+ *         name: payload
+ *         description: Provide `text` containing a class block or a single operation line.
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             text:
+ *               type: string
+ *             class:
+ *               type: string
+ *     responses:
+ *       200:
+ *         description: Query operations extracted from the class or operation text
+ *         schema:
+ *           type: object
+ *           properties:
+ *             success:
+ *               type: boolean
+ *             class:
+ *               type: string
+ *             query_operations:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name:
+ *                     type: string
+ *                   signature:
+ *                     type: string
+ *                   returnType:
+ *                     type: string
+ *                   body:
+ *                     type: string
+ */
+// Deserialize only query operations from a class block or operation text
+router.post("/deserialize/query-operation", UseController.deserializeQueryOperation);
 
 // Deserialize constraints block
 /**
