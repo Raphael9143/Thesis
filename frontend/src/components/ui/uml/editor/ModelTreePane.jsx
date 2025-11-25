@@ -150,8 +150,6 @@ export default function ModelTreePane({
           } else {
             normalized = ensureType(payload);
           }
-
-          console.log('Updating constraint payload', normalized);
           onUpdateNode && onUpdateNode(selected.key, normalized);
         }
       } else if (selected.key.startsWith('enum:')) {
@@ -168,7 +166,50 @@ export default function ModelTreePane({
         const body = { text: detailText, class: cls };
         const res = await deserializeOperation(body);
         const payload = res?.data?.data || res?.data || res;
-        if (payload) onUpdateNode && onUpdateNode(selected.key, payload);
+        if (payload) {
+          // Some backends return an envelope like { success:true, class: 'Bank', ops: [...] }
+          // Unwrap that so we pass the actual operation objects/array to the editor.
+          let effective = payload;
+          if (payload && typeof payload === 'object' && (payload.ops || payload.operations)) {
+            effective = payload.ops || payload.operations || [];
+            // ensure each op carries the owner class so the editor can infer target class
+            if (Array.isArray(effective) && payload.class) {
+              effective = effective.map((it) => ({ ...(it || {}), class: payload.class }));
+            }
+          }
+
+          // Normalize payloads: backend may return USE text (string), an array
+          // of strings, or a JSON object/array. Convert string forms into
+          // operation objects so the editor can append them correctly.
+          const parseOpFromString = (txt) => {
+            if (!txt || typeof txt !== 'string') return null;
+            // look for simple operation declarations like: name(params)
+            const lines = txt
+              .split('\n')
+              .map((l) => l.trim())
+              .filter(Boolean);
+            const ops = [];
+            const opRegex = /([A-Za-z_][\w]*)\s*\([^)]*\)/;
+            for (const line of lines) {
+              const m = line.match(opRegex);
+              if (m) ops.push({ name: m[1], raw: line });
+            }
+            if (ops.length === 1) return ops[0];
+            if (ops.length > 1) return ops;
+            // fallback: return a single op with the first non-empty line as name
+            return { name: (lines[0] || '').slice(0, 50), raw: txt };
+          };
+
+          let normalized = effective;
+          if (Array.isArray(effective)) {
+            // map string items to op objects
+            normalized = effective.map((p) => (typeof p === 'string' ? parseOpFromString(p) : p));
+          } else if (typeof effective === 'string') {
+            normalized = parseOpFromString(effective);
+          }
+
+          onUpdateNode && onUpdateNode(selected.key, normalized);
+        }
       } else {
         // fallback: save text as notes
         onUpdateNode && onUpdateNode(selected.key, detailText);
