@@ -41,7 +41,6 @@
   margin-left: 0;
 }
 .uml-tree-subchildren.open {
-  max-height: 800px;
   opacity: 1;
 }
 .uml-left-panel {
@@ -421,6 +420,24 @@
 }
 
 .uml-tree-edit-btn:hover {
+  color: var(--brand);
+}
+
+.uml-tree-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #666;
+  cursor: pointer;
+}
+
+.btn-ghost i:hover {
   color: var(--brand);
 }
 

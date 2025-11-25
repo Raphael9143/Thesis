@@ -42,6 +42,9 @@ export default function ModelTreePane({
 
   const toggleOpen = (key) => setOpenKeys((o) => ({ ...o, [key]: !o[key] }));
 
+  // add-mode state: { type: 'inv'|'cond'|'op'|'qop', className: string|null }
+  const [addMode, setAddMode] = useState(null);
+
   // Build lists preserving original indices so updates can target the correct entry
   const invariantList = constraints
     .map((c, i) => ({ c, idx: i }))
@@ -128,14 +131,40 @@ export default function ModelTreePane({
         // deserialize constraint text -> JSON shape expected by backend
         const res = await deserializeConstraint({ text: detailText });
         const payload = res?.data?.data || res?.data || res;
-        if (payload) onUpdateNode && onUpdateNode(selected.key, payload);
+        if (payload) {
+          // If backend returned an array of constraint objects, ensure each has a type
+          const ensureType = (item) => {
+            if (!item) return item;
+            if (selected.key.startsWith('inv:') && (!item.type || item.type === '')) {
+              item.type = 'invariant';
+            }
+            if (selected.key.startsWith('cond:') && (!item.type || item.type === '')) {
+              item.type = 'precondition';
+            }
+            return item;
+          };
+
+          let normalized = payload;
+          if (Array.isArray(payload)) {
+            normalized = payload.map(ensureType);
+          } else {
+            normalized = ensureType(payload);
+          }
+
+          console.log('Updating constraint payload', normalized);
+          onUpdateNode && onUpdateNode(selected.key, normalized);
+        }
       } else if (selected.key.startsWith('enum:')) {
         const res = await deserializeEnum({ text: detailText });
         const payload = res?.data?.data || res?.data || res;
         if (payload) onUpdateNode && onUpdateNode(selected.key, payload);
       } else if (selected.key.startsWith('op:') || selected.key.startsWith('qop:')) {
         // pass class context as available in payload when deserializing operation
-        const cls = selected.payload && selected.payload.class;
+        // For operation create/edit, if we're in addMode use the chosen class from addMode
+        const cls =
+          addMode &&
+          addMode.type &&
+          (addMode.className || (selected.payload && selected.payload.class));
         const body = { text: detailText, class: cls };
         const res = await deserializeOperation(body);
         const payload = res?.data?.data || res?.data || res;
@@ -153,7 +182,15 @@ export default function ModelTreePane({
       // show raw text in detailText if deserialize failed
       console.error('Deserialize failed', e);
       // still call onUpdateNode with raw text to preserve behavior
-      onUpdateNode && onUpdateNode(selected.key, detailText);
+      if (onUpdateNode) {
+        if (selected.key.startsWith('inv:')) {
+          onUpdateNode(selected.key, { raw: detailText, type: 'invariant' });
+        } else if (selected.key.startsWith('cond:')) {
+          onUpdateNode(selected.key, { raw: detailText, type: 'precondition' });
+        } else {
+          onUpdateNode(selected.key, detailText);
+        }
+      }
       // keep modal closed; leave editing state managed by modal
     }
   };
@@ -274,6 +311,13 @@ export default function ModelTreePane({
             isOpen={!!openKeys['invariants']}
             onToggle={() => toggleOpen('invariants')}
             count={constraints.filter((c) => c.type === 'invariant').length}
+            onAdd={() => {
+              // prepare to add a new invariant
+              setSelected({ key: 'inv:new', payload: null });
+              setDetailText('');
+              setAddMode({ type: 'inv', className: null });
+              setModalOpen(true);
+            }}
           >
             {invariantList.map((entry) => (
               <TreeLeaf
@@ -290,6 +334,12 @@ export default function ModelTreePane({
             isOpen={!!openKeys['prepost']}
             onToggle={() => toggleOpen('prepost')}
             count={prepostList.length}
+            onAdd={() => {
+              setSelected({ key: 'cond:new', payload: null });
+              setDetailText('');
+              setAddMode({ type: 'cond', className: null });
+              setModalOpen(true);
+            }}
           >
             {prepostList.map((entry) => (
               <TreeLeaf
@@ -306,6 +356,13 @@ export default function ModelTreePane({
             isOpen={!!openKeys['ops']}
             onToggle={() => toggleOpen('ops')}
             count={classes.flatMap((c) => c.operations || []).length}
+            onAdd={() => {
+              // start add operation flow - deserialize will determine class
+              setSelected({ key: 'op:add', payload: null });
+              setDetailText('');
+              setAddMode({ type: 'op' });
+              setModalOpen(true);
+            }}
           >
             {classes
               .flatMap((c) => (c.operations || []).map((op, i) => ({ c: c.name, op, i })))
@@ -326,6 +383,13 @@ export default function ModelTreePane({
             isOpen={!!openKeys['qops']}
             onToggle={() => toggleOpen('qops')}
             count={classes.flatMap((c) => c.query_operations || []).length}
+            onAdd={() => {
+              // query op add - let backend infer class
+              setSelected({ key: 'qop:add', payload: null });
+              setDetailText('');
+              setAddMode({ type: 'qop' });
+              setModalOpen(true);
+            }}
           >
             {classes
               .flatMap((c) => (c.query_operations || []).map((op, i) => ({ c: c.name, op, i })))
@@ -373,6 +437,7 @@ export default function ModelTreePane({
                 onClick={() => {
                   setDetailText(readOnlyText || '');
                   setModalOpen(true);
+                  setAddMode(null);
                 }}
               >
                 <i
@@ -380,6 +445,7 @@ export default function ModelTreePane({
                   onClick={() => {
                     setDetailText(readOnlyText || '');
                     setModalOpen(true);
+                    setAddMode(null);
                   }}
                 />
               </span>
@@ -389,23 +455,41 @@ export default function ModelTreePane({
           <div className="uml-model-tree-empty">Select a node to view/edit details</div>
         )}
 
-        <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={'Edit'}>
+        <Modal
+          open={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setAddMode(null);
+          }}
+          title={addMode ? 'Add' : 'Edit'}
+        >
+          {/* No class selector for add op/qop — backend deserializer detects the owner class */}
           <textarea
             ref={textareaRef}
             className="uml-model-tree-detail-text edit"
             rows={12}
-            value={detailText || readOnlyText}
+            value={addMode ? detailText : detailText || readOnlyText}
             onChange={(e) => setDetailText(e.target.value)}
             onKeyDown={handleTabKey}
             style={{ width: '100%' }}
           />
           <div className="uml-model-tree-detail-actions">
-            <button className="btn btn-outline btn-sm" onClick={() => setModalOpen(false)}>
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => {
+                setModalOpen(false);
+                setAddMode(null);
+              }}
+            >
               Cancel
             </button>
             <button
               className="btn btn-primary btn-sm"
-              onClick={handleSave}
+              onClick={async () => {
+                // Do not inject class into the selected key; deserializer infers class
+                await handleSave();
+                setAddMode(null);
+              }}
               disabled={deserializing}
             >
               Save

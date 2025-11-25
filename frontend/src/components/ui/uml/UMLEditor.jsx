@@ -718,6 +718,54 @@ export default function UMLEditor({ initialModel = null }) {
         }
         return;
       }
+      // support adding operation via key 'op:add:{className}' or 'qop:add:{className}'
+      if (key.startsWith('op:add') || key.startsWith('qop:add')) {
+        const parts = key.split(':');
+        const classNameFromKey = parts[2];
+        const isQ = key.startsWith('qop:add');
+        const prop = isQ ? 'query_operations' : 'operations';
+
+        // Helper to extract class name from a payload item
+        const inferClass = (item) =>
+          item && (item.context || item.ownerClass || item.contextName || item.class || item.owner);
+
+        if (classNameFromKey) {
+          // original behavior: target specific class
+          const target = classNameFromKey;
+          setClasses((s) =>
+            s.map((c) => {
+              if (c.name !== target) return c;
+              const ops = Array.isArray(c[prop]) ? [...c[prop]] : [];
+              if (Array.isArray(text)) ops.push(...text);
+              else ops.push(text || {});
+              return { ...c, [prop]: ops };
+            })
+          );
+          return;
+        }
+
+        // No class provided in key: infer class from payload
+        setClasses((s) => {
+          const next = s.map((c) => ({ ...c }));
+          if (Array.isArray(text)) {
+            text.forEach((item) => {
+              const cls = inferClass(item) || (next[0] && next[0].name);
+              if (!cls) return;
+              const idx = next.findIndex((nc) => nc.name === cls);
+              if (idx === -1) return;
+              next[idx][prop] = [...(next[idx][prop] || []), item];
+            });
+          } else {
+            const cls = inferClass(text) || (next[0] && next[0].name);
+            if (cls) {
+              const idx = next.findIndex((nc) => nc.name === cls);
+              if (idx !== -1) next[idx][prop] = [...(next[idx][prop] || []), text];
+            }
+          }
+          return next;
+        });
+        return;
+      }
       if (key.startsWith('op:')) {
         const parts = key.split(':');
         const className = parts[1];
@@ -791,8 +839,12 @@ export default function UMLEditor({ initialModel = null }) {
           return ns;
         });
       } else {
-        // append
-        setConstraints((s) => [...(s || []), text]);
+        // append; if backend returned an array, spread items so tree gets individual entries
+        if (Array.isArray(text)) {
+          setConstraints((s) => [...(s || []), ...text]);
+        } else {
+          setConstraints((s) => [...(s || []), text]);
+        }
       }
       return;
     }
