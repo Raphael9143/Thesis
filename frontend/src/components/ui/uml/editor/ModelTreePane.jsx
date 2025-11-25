@@ -27,6 +27,7 @@ export default function ModelTreePane({
     serializeClass,
     serializeAssociation,
     serializeOperation,
+    serializeQueryOperation,
     serializeConstraint,
     serializeEnum,
     loading: serializing,
@@ -35,6 +36,7 @@ export default function ModelTreePane({
     deserializeClass,
     deserializeAssociation,
     deserializeOperation,
+    deserializeQueryOperation,
     deserializeConstraint,
     deserializeEnum,
     loading: deserializing,
@@ -91,7 +93,10 @@ export default function ModelTreePane({
             typeof text === 'string' ? text : text.useText || JSON.stringify(text, null, 2)
           );
         } else if (key.startsWith('op:') || key.startsWith('qop:')) {
-          const res = await serializeOperation(payload);
+          // use query-specific serializer when showing a query op
+          const res = key.startsWith('qop:')
+            ? await serializeQueryOperation(payload)
+            : await serializeOperation(payload);
           if (serializeTokenRef.current !== myToken) return; // stale
           const text = res?.data?.data || res?.data || res;
           setReadOnlyText(
@@ -164,14 +169,20 @@ export default function ModelTreePane({
           addMode.type &&
           (addMode.className || (selected.payload && selected.payload.class));
         const body = { text: detailText, class: cls };
-        const res = await deserializeOperation(body);
+        const res = selected.key.startsWith('qop:')
+          ? await deserializeQueryOperation(body)
+          : await deserializeOperation(body);
         const payload = res?.data?.data || res?.data || res;
         if (payload) {
           // Some backends return an envelope like { success:true, class: 'Bank', ops: [...] }
           // Unwrap that so we pass the actual operation objects/array to the editor.
           let effective = payload;
-          if (payload && typeof payload === 'object' && (payload.ops || payload.operations)) {
-            effective = payload.ops || payload.operations || [];
+          if (
+            payload &&
+            typeof payload === 'object' &&
+            (payload.ops || payload.operations || payload.query_operations)
+          ) {
+            effective = payload.ops || payload.operations || payload.query_operations || [];
             // ensure each op carries the owner class so the editor can infer target class
             if (Array.isArray(effective) && payload.class) {
               effective = effective.map((it) => ({ ...(it || {}), class: payload.class }));
