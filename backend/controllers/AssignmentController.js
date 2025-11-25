@@ -65,21 +65,29 @@ const AssignmentController = {
           .status(404)
           .json({ success: false, message: "Course not found." });
 
-      // File upload is optional
+      // Uploaded files may be provided via conditionalUpload.any() (req.files)
+      // Accept field names: 'attachment' (frontend), legacy 'file', or 'model_file'.
       let attachment = null;
-      if (req.file) attachment = "/uploads/assignments/" + req.file.filename;
-
-      // Optional teacher-provided answer (.use file).
-      // Middleware may provide the uploaded files in `req.files` (conditionalUpload.any)
       let answerAttachment = null;
       let answerUseModelId = null;
       const providedFiles = req.files || (req.file ? [req.file] : []);
       if (providedFiles && providedFiles.length) {
+        // prefer explicit main file fieldnames
+        const mainFile =
+          providedFiles.find((f) =>
+            ["attachment", "file", "model_file"].includes(f.fieldname)
+          ) ||
+          // otherwise pick the first file that is not clearly an answer or attachments list
+          providedFiles.find((f) => f.fieldname !== "answer" && f.fieldname !== "attachments");
+        if (mainFile) attachment = "/uploads/assignments/" + mainFile.filename;
+
+        // find teacher answer file: prefer fieldname 'answer', else any .use
         let answerFile = providedFiles.find((f) => f.fieldname === "answer");
-        if (!answerFile)
-          answerFile = providedFiles.find((f) =>
-            (f.originalname || "").toLowerCase().endsWith(".use")
-          );
+        if (!answerFile) {
+          answerFile = providedFiles.find((f) => {
+            return (f.originalname || "").toLowerCase().endsWith(".use");
+          });
+        }
         if (answerFile) {
           answerAttachment = "/uploads/assignments/" + answerFile.filename;
           try {
@@ -285,18 +293,21 @@ const AssignmentController = {
         });
       }
 
-      // handle file
-      if (req.file)
-        assignment.attachment = "/uploads/assignments/" + req.file.filename;
+      // handle uploaded files (support various field names)
+      const updateFiles = req.files || (req.file ? [req.file] : []);
+      if (updateFiles && updateFiles.length) {
+        const mainFile =
+          updateFiles.find((f) => ["attachment", "file", "model_file"].includes(f.fieldname)) ||
+          updateFiles.find((f) => f.fieldname !== "answer" && f.fieldname !== "attachments");
+        if (mainFile) assignment.attachment = "/uploads/assignments/" + mainFile.filename;
 
-      // If teacher uploaded/updated an answer file, persist it and link to assignment
-      const providedFiles = req.files || (req.file ? [req.file] : []);
-      if (providedFiles && providedFiles.length) {
-        let answerFile = providedFiles.find((f) => f.fieldname === "answer");
-        if (!answerFile)
-          answerFile = providedFiles.find((f) =>
-            (f.originalname || "").toLowerCase().endsWith(".use")
-          );
+        // handle answer update similarly
+        let answerFile = updateFiles.find((f) => f.fieldname === "answer");
+        if (!answerFile) {
+          answerFile = updateFiles.find((f) => {
+            return (f.originalname || "").toLowerCase().endsWith(".use");
+          });
+        }
         if (answerFile) {
           const answerAttachment = "/uploads/assignments/" + answerFile.filename;
           try {

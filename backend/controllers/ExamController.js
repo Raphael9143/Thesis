@@ -63,20 +63,24 @@ const ExamController = {
           message: "Invalid type. Allowed: SINGLE or GROUP",
         });
 
-      // handle uploaded single attachment
+      // Uploaded files may be provided via conditionalUpload.any() (req.files)
+      // Accept field names: 'attachment', 'file', or 'model_file'.
       let attachment = null;
-      if (req.file) attachment = "/uploads/exams/" + req.file.filename;
-
-      // Optional teacher-provided answer file
       let answerAttachment = null;
       let answerUseModelId = null;
       const providedFiles = req.files || (req.file ? [req.file] : []);
       if (providedFiles && providedFiles.length) {
+        const mainFile =
+          providedFiles.find((f) => ["attachment", "file", "model_file"].includes(f.fieldname)) ||
+          providedFiles.find((f) => f.fieldname !== "answer" && f.fieldname !== "attachments");
+        if (mainFile) attachment = "/uploads/exams/" + mainFile.filename;
+
         let answerFile = providedFiles.find((f) => f.fieldname === "answer");
-        if (!answerFile)
-          answerFile = providedFiles.find((f) =>
-            (f.originalname || "").toLowerCase().endsWith(".use")
-          );
+        if (!answerFile) {
+          answerFile = providedFiles.find((f) => {
+            return (f.originalname || "").toLowerCase().endsWith(".use");
+          });
+        }
         if (answerFile) {
           answerAttachment = "/uploads/exams/" + answerFile.filename;
           try {
@@ -329,17 +333,20 @@ const ExamController = {
         });
       }
 
-      // handle uploaded file
-      if (req.file) exam.attachment = "/uploads/exams/" + req.file.filename;
+      // handle uploaded files (support various field names)
+      const updateFiles = req.files || (req.file ? [req.file] : []);
+      if (updateFiles && updateFiles.length) {
+        const mainFile =
+          updateFiles.find((f) => ["attachment", "file", "model_file"].includes(f.fieldname)) ||
+          updateFiles.find((f) => f.fieldname !== "answer" && f.fieldname !== "attachments");
+        if (mainFile) exam.attachment = "/uploads/exams/" + mainFile.filename;
 
-      // If teacher uploaded/updated an answer file, persist UseModel and link
-      const providedFiles = req.files || (req.file ? [req.file] : []);
-      if (providedFiles && providedFiles.length) {
-        let answerFile = providedFiles.find((f) => f.fieldname === "answer");
-        if (!answerFile)
-          answerFile = providedFiles.find((f) =>
-            (f.originalname || "").toLowerCase().endsWith(".use")
-          );
+        let answerFile = updateFiles.find((f) => f.fieldname === "answer");
+        if (!answerFile) {
+          answerFile = updateFiles.find((f) => {
+            return (f.originalname || "").toLowerCase().endsWith(".use");
+          });
+        }
         if (answerFile) {
           const answerAttachment = "/uploads/exams/" + answerFile.filename;
           try {
