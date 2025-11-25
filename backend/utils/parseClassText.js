@@ -14,8 +14,9 @@ function parseClassText(useText) {
   const classRe =
     /^\s*(abstract\s+)?class\s+([A-Za-z0-9_]+)(?:\s+<\s+([^{\n]+))?/i;
   const attrRe = /^\s*([A-Za-z0-9_]+)\s*:\s*([A-Za-z0-9_<>]+)\s*$/;
+  // allow qualified operation names (Class::op) and parameterized return types like Set(Account)
   const opRe =
-    /^\s*([A-Za-z0-9_]+)\s*\(([^)]*)\)\s*(?::\s*([A-Za-z0-9_<>]+))?/;
+    /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?/;
 
   const lines = useText.split(/\r?\n/).map((l) => l.trim());
   const cls = {
@@ -24,6 +25,7 @@ function parseClassText(useText) {
     superclasses: [],
     attributes: [],
     operations: [],
+    query_operations: [],
   };
 
   let mode = "header";
@@ -56,11 +58,30 @@ function parseClassText(useText) {
     } else if (mode === "operations") {
       const match = line.match(opRe);
       if (match) {
-        cls.operations.push({
-          name: match[1],
-          signature: match[2],
-          returnType: match[3] || null,
-        });
+        const name = match[1];
+        const signature = match[2];
+        const returnType = match[3] ? String(match[3]).trim() : null;
+        // detect inline body after '=' on the same line
+        let inlineBody = null;
+        const eqIdx = line.indexOf("=");
+        if (eqIdx >= 0) inlineBody = line.slice(eqIdx + 1).trim();
+
+        // Heuristic to detect query operations:
+        // - inline body present (e.g. '= expr')
+        // - contains navigation '->'
+        // - starts with 'if' or an opening parenthesis
+        const looksLikeQuery =
+          Boolean(inlineBody) || /->/.test(line) || /^\s*if\b/i.test(line) || /^\s*\(/.test(line);
+
+        const opObj = {
+          name,
+          signature,
+          returnType,
+        };
+        if (inlineBody) opObj.body = inlineBody;
+
+        if (looksLikeQuery) cls.query_operations.push(opObj);
+        else cls.operations.push(opObj);
       }
     }
   }
