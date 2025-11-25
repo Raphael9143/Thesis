@@ -51,6 +51,10 @@ const AssignmentController = require("../controllers/AssignmentController");
  *                 type: string
  *                 format: binary
  *                 description: "Attachment file (e.g. .use, PDF, image)"
+ *               answer:
+ *                 type: string
+ *                 format: binary
+ *                 description: "Optional teacher answer .use file"
  *     responses:
  *       201:
  *         description: Assignment created
@@ -367,6 +371,16 @@ router.patch(
   "/remove-from-course/:assignmentId",
   auth,
   AssignmentController.removeAssignmentFromCourse
+);
+
+/**
+ * Patch or replace the teacher answer for an assignment
+ */
+router.patch(
+  "/:id/answer",
+  auth,
+  conditionalUpload,
+  AssignmentController.patchAnswer
 );
 
 /**

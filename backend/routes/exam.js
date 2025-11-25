@@ -96,6 +96,11 @@ router.post("/", auth, conditionalExamUpload, ExamController.createExam);
  *               attachment:
  *                 type: string
  *                 format: binary
+ *                 description: "Attachment file (e.g. .use, PDF, image)"
+ *               answer:
+ *                 type: string
+ *                 format: binary
+ *                 description: "Optional teacher answer .use file"
  *               start_date:
  *                 type: string
  *                 format: date-time
@@ -306,5 +311,15 @@ router.get("/:id", ExamController.getExamById);
  *         description: List of exams for the course
  */
 router.get("/course/:id", auth, ExamController.getExamsByCourseId);
+
+/**
+ * Patch or replace the teacher answer for an exam
+ */
+router.patch(
+  "/:id/answer",
+  auth,
+  conditionalExamUpload,
+  ExamController.patchAnswer
+);
 
 module.exports = router;
