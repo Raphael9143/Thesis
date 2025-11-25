@@ -8,6 +8,8 @@ import '../../assets/styles/ui.css';
 import '../../assets/styles/pages/Submit.css';
 import { useNotifications } from '../../contexts/NotificationContext';
 import useAttempt from '../../hooks/useAttempt';
+import Modal from '../../components/ui/Modal';
+import formatFeedback from '../../utils/FormatFeedback';
 
 export default function SubmitWork() {
   const params = useParams();
@@ -28,6 +30,9 @@ export default function SubmitWork() {
   const [code, setCode] = useState('');
   const [file, setFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [scoreModalOpen, setScoreModalOpen] = useState(false);
+  const [autoScore, setAutoScore] = useState(null);
+  const [autoFeedbackText, setAutoFeedbackText] = useState('');
 
   useEffect(() => {
     let mounted = true;
@@ -131,13 +136,22 @@ export default function SubmitWork() {
         } catch {
           // ignore
         }
-        // Navigate back to preview
-        if (isAssignment) {
-          navigate(
-            `/education/student/classes/${classId}/courses/${courseId}/assignments/${assignmentId}`
-          );
-        } else if (isExam) {
-          navigate(`/education/student/classes/${classId}/courses/${courseId}/exams/${examId}`);
+
+        // Show auto-grader result modal if available; keep user on page until they close it
+        const data = res.data || {};
+        if (typeof data.auto_grader_score !== 'undefined' || data.feedback) {
+          setAutoScore(data.auto_grader_score ?? null);
+          setAutoFeedbackText(formatFeedback(data.feedback ?? ''));
+          setScoreModalOpen(true);
+        } else {
+          // If no auto result, navigate back immediately
+          if (isAssignment) {
+            navigate(
+              `/education/student/classes/${classId}/courses/${courseId}/assignments/${assignmentId}`
+            );
+          } else if (isExam) {
+            navigate(`/education/student/classes/${classId}/courses/${courseId}/exams/${examId}`);
+          }
         }
       } else {
         push({ title: 'Error', body: res?.message || 'Failed to submit.' });
@@ -225,6 +239,44 @@ export default function SubmitWork() {
           )}
         </div>
       )}
+
+      <Modal
+        open={scoreModalOpen}
+        onClose={async () => {
+          setScoreModalOpen(false);
+          // after user closes modal, navigate back to preview
+          if (isAssignment) {
+            navigate(
+              `/education/student/classes/${classId}/courses/${courseId}/assignments/${assignmentId}`
+            );
+          } else if (isExam) {
+            navigate(`/education/student/classes/${classId}/courses/${courseId}/exams/${examId}`);
+          }
+        }}
+        title={autoScore != null ? `Auto Grader Result` : 'Auto Grader Result'}
+      >
+        <div style={{ textAlign: 'left' }}>
+          {autoScore != null && (
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ color: '#2e7d32', fontSize: 56, fontWeight: 700, textAlign: 'center' }}>
+                {autoScore}
+              </div>
+              <div style={{ color: '#2e7d32', fontSize: 14, marginTop: 6, textAlign: 'center' }}>
+                {typeof autoScore === 'number' ? 'points' : ''}
+              </div>
+            </div>
+          )}
+
+          <div style={{ whiteSpace: 'pre-wrap', marginBottom: 12 }}>
+            {autoFeedbackText || 'No feedback'}
+          </div>
+
+          <div style={{ color: '#666', fontSize: 13 }}>
+            This is an automated grade for reference only and not your official score. Please be
+            patient and wait for your teacher&apos;s grading.
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
