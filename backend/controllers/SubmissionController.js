@@ -2,6 +2,10 @@ const Submission = require("../models/Submission");
 const Assignment = require("../models/Assignment");
 const AssignmentCourse = require("../models/AssignmentCourse");
 const ClassStudent = require("../models/ClassStudent");
+const fs = require("fs");
+const path = require("path");
+const UseModel = require("../models/UseModel");
+const { gradeUseModels } = require("../utils/grader");
 
 const SubmissionController = {
   // Student submits an assignment or an exam
@@ -218,6 +222,62 @@ const SubmissionController = {
         attachment,
         created_at: new Date(),
       });
+
+      // Auto-grade if an answer exists for this assignment/exam
+      try {
+        let answerText = null;
+        if (assignment_id) {
+          const a = await Assignment.findByPk(assignment_id);
+          if (a && a.answer_use_model_id) {
+            const um = await UseModel.findByPk(a.answer_use_model_id);
+            if (um) answerText = um.raw_text || null;
+          } else if (a && a.answer_attachment) {
+            const rel = a.answer_attachment.replace(/^\//, "");
+            const p = path.resolve(__dirname, "..", rel);
+            try {
+              answerText = fs.readFileSync(p, "utf8");
+            } catch (e) {
+              console.warn("Could not read assignment answer file:", e.message || e);
+            }
+          }
+        } else if (exam_id) {
+          const ex = await require("../models/Exam").findByPk(exam_id);
+          if (ex && ex.answer_use_model_id) {
+            const um = await UseModel.findByPk(ex.answer_use_model_id);
+            if (um) answerText = um.raw_text || null;
+          } else if (ex && ex.answer_attachment) {
+            const rel = ex.answer_attachment.replace(/^\//, "");
+            const p = path.resolve(__dirname, "..", rel);
+            try {
+              answerText = fs.readFileSync(p, "utf8");
+            } catch (e) {
+              console.warn("Could not read exam answer file:", e.message || e);
+            }
+          }
+        }
+
+        if (answerText) {
+          // read submission text
+          let submissionText = null;
+          try {
+            const subRel = (uploadedFile && uploadedFile.path) || null;
+            if (subRel) submissionText = fs.readFileSync(subRel, "utf8");
+          } catch (e) {
+            console.warn("Could not read submission file for grading:", e.message || e);
+          }
+          if (submissionText) {
+            const result = gradeUseModels(answerText, submissionText);
+            if (result && typeof result.score === "number") {
+              submission.score = result.score;
+              submission.feedback = JSON.stringify(result.details || {});
+              submission.updated_at = new Date();
+              await submission.save();
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Auto-grading failed:", e.message || e);
+      }
 
       return res.status(201).json({ success: true, data: submission });
     } catch (error) {
