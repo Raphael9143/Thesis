@@ -111,6 +111,45 @@ router.patch("/:id/grade", auth, SubmissionController.gradeSubmission);
  *     responses:
  *       200:
  *         description: Submission
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     student_id:
+ *                       type: integer
+ *                     assignment_id:
+ *                       type: integer
+ *                       nullable: true
+ *                     exam_id:
+ *                       type: integer
+ *                       nullable: true
+ *                     attachment:
+ *                       type: string
+ *                     score:
+ *                       type: number
+ *                       nullable: true
+ *                     auto_grader_score:
+ *                       type: number
+ *                       nullable: true
+ *                       description: Score produced by the automatic grader
+ *                     auto_grader_output:
+ *                       type: string
+ *                       nullable: true
+ *                       description: Raw output/text produced by the auto-grader
+ *       400:
+ *         description: Bad request
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not found
  */
 router.get("/:id", auth, SubmissionController.getSubmissionById);
 

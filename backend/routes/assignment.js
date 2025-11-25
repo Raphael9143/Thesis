@@ -374,7 +374,54 @@ router.patch(
 );
 
 /**
- * Patch or replace the teacher answer for an assignment
+ * @swagger
+ * /api/assignments/{id}/answer:
+ *   patch:
+ *     summary: Patch or replace the teacher answer for an assignment (teacher or admin)
+ *     tags: [Assignment]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Assignment ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               answer:
+ *                 type: string
+ *                 format: binary
+ *                 description: Optional .use file to set as the teacher answer
+ *               remove:
+ *                 type: boolean
+ *                 description: If true, remove the existing answer linkage
+ *     responses:
+ *       200:
+ *         description: Answer updated or removed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: '#/components/schemas/Assignment'
+ *       400:
+ *         description: Bad request (no file provided or invalid input)
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Assignment not found
  */
 router.patch(
   "/:id/answer",
