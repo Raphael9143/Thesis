@@ -1320,7 +1320,7 @@ const ResearchController = {
           .json({ success: false, message: "Invalid project id" });
 
       const { status } = req.body;
-      const validStatuses = ["ACTIVE", "ARCHIVED", "COMPLETED", "DRAFT"];
+      const validStatuses = ["ACTIVE", "CLOSED", "DRAFT"];
       if (!status || !validStatuses.includes(status))
         return res.status(400).json({
           success: false,
