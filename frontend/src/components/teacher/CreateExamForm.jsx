@@ -27,6 +27,7 @@ export default function CreateExamForm({
   });
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef(null);
+  const answerRef = useRef(null);
 
   useEffect(() => {
     // When modal opens, either populate with exam (edit) or reset to defaults (create)
@@ -180,7 +181,11 @@ export default function CreateExamForm({
 
       // append file under field 'file' if provided
       const files = fileRef.current?.files;
-      if (files && files.length > 0) fd.append('file', files[0]);
+      if (files && files.length > 0) fd.append('attachment', files[0]);
+
+      // optional answer file
+      const answerFiles = answerRef.current?.files;
+      if (answerFiles && answerFiles.length > 0) fd.append('answer', answerFiles[0]);
 
       // append status only when explicitly provided (so updates can keep existing status)
       if (typeof status !== 'undefined' && status !== null && status !== '')
@@ -225,6 +230,7 @@ export default function CreateExamForm({
             end_date_time: '',
           });
           if (fileRef.current) fileRef.current.value = null;
+          if (answerRef.current) answerRef.current.value = null;
         } else {
           push({ title: 'Error', body: res?.message || 'Failed to create exam' });
         }
@@ -318,7 +324,9 @@ export default function CreateExamForm({
           />
         </div>
 
-        <FormField label="Attachment" name="file" type="file" inputRef={fileRef} />
+        <FormField label="Attachment" name="attachment" type="file" inputRef={fileRef} />
+
+        <FormField label="Answer (optional .use)" name="answer" type="file" inputRef={answerRef} />
 
         <div className="create-lecture-form__actions">
           {exam ? (

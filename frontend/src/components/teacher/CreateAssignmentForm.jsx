@@ -27,6 +27,7 @@ export default function CreateAssignmentForm({
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef(null); // required .use file
   const attachmentsRef = useRef(null); // optional additional files
+  const answerRef = useRef(null); // optional answer .use file
 
   useEffect(() => {
     // When modal opens, either populate with assignment (edit) or reset to defaults (create)
@@ -93,7 +94,6 @@ export default function CreateAssignmentForm({
     const courseId = (form.course_id ?? '').toString().trim();
     const title = (form.title ?? '').toString().trim();
     const type = (form.type ?? 'SINGLE').toString().trim();
-    console.log(type);
     if (status === 'published' && (!courseId || !title || !type)) {
       push({ title: 'Validation', body: 'Course, title and type are required to publish.' });
       return;
@@ -149,7 +149,15 @@ export default function CreateAssignmentForm({
         }
       }
       // append main .use file only if provided
-      if (useFile) fd.append('file', useFile);
+      if (useFile) fd.append('attachment', useFile);
+      console.log(files);
+
+      // optional answer file (teacher-provided model)
+      const answerFiles = answerRef.current?.files;
+      if (answerFiles && answerFiles.length > 0) {
+        const a = answerFiles[0];
+        if (a) fd.append('answer', a);
+      }
 
       // optional attachments
       const atts = attachmentsRef.current?.files;
@@ -185,6 +193,7 @@ export default function CreateAssignmentForm({
           });
           if (fileRef.current) fileRef.current.value = null;
           if (attachmentsRef.current) attachmentsRef.current.value = null;
+          if (answerRef.current) answerRef.current.value = null;
         } else {
           push({ title: 'Error', body: res?.message || 'Failed to update assignment' });
         }
@@ -214,6 +223,7 @@ export default function CreateAssignmentForm({
           });
           if (fileRef.current) fileRef.current.value = null;
           if (attachmentsRef.current) attachmentsRef.current.value = null;
+          if (answerRef.current) answerRef.current.value = null;
         } else {
           push({ title: 'Error', body: res?.message || 'Failed to create assignment' });
         }
@@ -313,9 +323,16 @@ export default function CreateAssignmentForm({
 
         <FormField
           label="Model"
-          name="file"
+          name="attachment"
           type="file"
           inputRef={fileRef}
+          inputProps={{ accept: '.use' }}
+        />
+        <FormField
+          label="Answer (optional .use)"
+          name="answer"
+          type="file"
+          inputRef={answerRef}
           inputProps={{ accept: '.use' }}
         />
 
