@@ -49,6 +49,11 @@ const Submission = sequelize.define(
       type: DataTypes.FLOAT,
       allowNull: true,
     },
+    auto_grader_score: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+      comment: "Score produced by the automatic grader (0-100)",
+    },
     feedback: {
       type: DataTypes.TEXT,
       allowNull: true,
