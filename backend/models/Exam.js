@@ -33,6 +33,15 @@ const Exam = sequelize.define(
       type: DataTypes.STRING(255),
       allowNull: true,
     },
+    // Optional teacher-provided answer: stored file path (uploads) and reference to UseModel
+    answer_attachment: {
+      type: DataTypes.STRING(1024),
+      allowNull: true,
+    },
+    answer_use_model_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: true,
+    },
     status: {
       type: DataTypes.ENUM("draft", "published", "archived"),
       allowNull: false,
@@ -68,9 +77,16 @@ const Exam = sequelize.define(
 );
 
 const Course = require("./Course");
+const UseModel = require("./UseModel");
 Exam.belongsTo(Course, {
   foreignKey: "course_id",
   as: "course",
+});
+
+// link to persisted teacher answer use model (optional)
+Exam.belongsTo(UseModel, {
+  foreignKey: "answer_use_model_id",
+  as: "answerUseModel",
 });
 
 module.exports = Exam;
