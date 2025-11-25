@@ -174,6 +174,9 @@ const userAPI = {
   deserializeOperation: (data) => axiosClient.post('uml/deserialize/operation', data),
   deserializeConstraint: (data) => axiosClient.post('uml/deserialize/constraint', data),
   deserializeEnum: (data) => axiosClient.post('uml/deserialize/enum', data),
+  // Query operation serialize/deserialize
+  serializeQueryOperation: (data) => axiosClient.post('uml/serialize/query-operation', data),
+  deserializeQueryOperation: (data) => axiosClient.post('uml/deserialize/query-operation', data),
   // GET /api/use/models
   getUseModels: () => axiosClient.get('use/models'),
   // Researcher projects
