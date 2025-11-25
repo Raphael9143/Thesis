@@ -5,7 +5,7 @@ import fmtDate from '../../utils/FormatDate';
 import toFullUrl from '../../utils/FullURLFile';
 import '../../assets/styles/components/researcher/ContributionComments.css';
 
-export default function ContributionComments({ contributionId }) {
+export default function ContributionComments({ contributionId, projectStatus }) {
   const { push } = useNotifications();
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -34,6 +34,10 @@ export default function ContributionComments({ contributionId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (projectStatus === 'CLOSED') {
+      push({ title: 'Error', body: 'Project is closed — commenting is disabled' });
+      return;
+    }
     if (!commentText.trim()) {
       push({ title: 'Error', body: 'Please enter a comment' });
       return;
@@ -104,17 +108,21 @@ export default function ContributionComments({ contributionId }) {
         <h4>Add a Comment</h4>
         <textarea
           className="contribution-comment-textarea"
-          placeholder="Write your comment here..."
+          placeholder={
+            projectStatus === 'CLOSED'
+              ? 'Project closed — commenting disabled'
+              : 'Write your comment here...'
+          }
           value={commentText}
           onChange={(e) => setCommentText(e.target.value)}
-          disabled={submitting}
+          disabled={submitting || projectStatus === 'CLOSED'}
           rows={3}
         />
         <div className="contribution-comment-form-button">
           <button
             type="submit"
             className="btn btn-primary btn-sm"
-            disabled={submitting || !commentText.trim()}
+            disabled={submitting || !commentText.trim() || projectStatus === 'CLOSED'}
           >
             {submitting ? 'Commenting...' : 'Comment'}
           </button>

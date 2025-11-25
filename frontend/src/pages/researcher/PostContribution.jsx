@@ -23,6 +23,7 @@ export default function PostContribution() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [projectStatus, setProjectStatus] = useState(null);
 
   useTitle('Contribute to Project');
 
@@ -40,6 +41,12 @@ export default function PostContribution() {
           setModelName(model.name || '');
           setModelContent(model.raw_text || '');
         }
+        try {
+          const prjRes = await userAPI.getResearchProject(projectId);
+          if (mounted && prjRes?.success) setProjectStatus(prjRes.data?.status || null);
+        } catch {
+          // ignore project fetch errors here
+        }
       } catch (err) {
         if (!mounted) return;
         setError(err?.response?.data?.message || err.message || 'Failed to load model');
@@ -50,10 +57,14 @@ export default function PostContribution() {
     return () => {
       mounted = false;
     };
-  }, [modelId]);
+  }, [modelId, projectId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (projectStatus === 'CLOSED') {
+      push({ title: 'Error', body: 'Project is closed — cannot submit contributions' });
+      return;
+    }
     if (!title.trim()) {
       push({ title: 'Error', body: 'Please enter a title' });
       return;
@@ -150,7 +161,11 @@ export default function PostContribution() {
           </div>
 
           <div className="post-contribution-actions">
-            <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
+            <button
+              type="submit"
+              className="btn btn-primary btn-sm"
+              disabled={submitting || projectStatus === 'CLOSED'}
+            >
               {submitting ? 'Submitting...' : 'Submit'}
             </button>
             <button

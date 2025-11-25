@@ -21,6 +21,7 @@ export default function ContributionDetail() {
 
   const [contribution, setContribution] = useState(null);
   const [originalModel, setOriginalModel] = useState(null);
+  const [projectStatus, setProjectStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reviewNotes, setReviewNotes] = useState('');
@@ -47,6 +48,8 @@ export default function ContributionDetail() {
             try {
               const projectRes = await userAPI.getResearchProject(res.data.research_project_id);
               if (projectRes?.success && projectRes.data?.main_use_model_id) {
+                // capture project status so child components can block actions when closed
+                setProjectStatus(projectRes.data?.status || null);
                 const modelRes = await userAPI.getUseModelById(projectRes.data.main_use_model_id);
                 if (modelRes?.success && modelRes.data) {
                   setOriginalModel(modelRes.data);
@@ -249,11 +252,15 @@ export default function ContributionDetail() {
               setReviewNotes={setReviewNotes}
               submitting={submitting}
               handleReview={handleReview}
+              validationError={contribution.validation_error}
               currentUserId={currentUserId}
+              projectStatus={projectStatus}
             />
           )}
 
-          {activeTab === 'details' && <ContributionComments contributionId={contributionId} />}
+          {activeTab === 'details' && (
+            <ContributionComments contributionId={contributionId} projectStatus={projectStatus} />
+          )}
         </div>
       </Card>
     </Section>

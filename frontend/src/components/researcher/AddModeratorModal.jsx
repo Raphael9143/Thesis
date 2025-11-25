@@ -4,7 +4,7 @@ import FormField from '../ui/FormField';
 import NotificationPopup from '../ui/NotificationPopup';
 import userAPI from '../../../services/userAPI';
 
-export default function AddModeratorModal({ open, onClose, onAdded, projectId }) {
+export default function AddModeratorModal({ open, onClose, onAdded, projectId, projectStatus }) {
   const [email, setEmail] = useState('');
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyMsg, setNotifyMsg] = useState('');
@@ -20,6 +20,12 @@ export default function AddModeratorModal({ open, onClose, onAdded, projectId })
 
   const onSubmit = async (e) => {
     if (e?.preventDefault) e.preventDefault();
+    if (projectStatus === 'CLOSED') {
+      setNotifyMsg('Project is closed — cannot add moderator');
+      setNotifyType('error');
+      setNotifyOpen(true);
+      return;
+    }
     if (!email.trim()) {
       setNotifyMsg('Please enter an email address');
       setNotifyType('error');
@@ -74,7 +80,6 @@ export default function AddModeratorModal({ open, onClose, onAdded, projectId })
           required={true}
           placeholder="moderator@example.com"
         />
-
         <div className="create-project-modal-actions">
           <button
             type="button"
@@ -84,7 +89,12 @@ export default function AddModeratorModal({ open, onClose, onAdded, projectId })
           >
             Cancel
           </button>
-          <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
+          <button
+            type="submit"
+            className="btn btn-primary btn-sm"
+            disabled={submitting || projectStatus === 'CLOSED'}
+            title={projectStatus === 'CLOSED' ? 'Project is closed' : ''}
+          >
             {submitting ? 'Adding...' : 'Add Moderator'}
           </button>
         </div>

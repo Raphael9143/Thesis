@@ -4,7 +4,7 @@ import FormField from '../ui/FormField';
 import NotificationPopup from '../ui/NotificationPopup';
 import userAPI from '../../../services/userAPI';
 
-export default function AddContributorsModal({ open, onClose, onAdded, projectId }) {
+export default function AddContributorsModal({ open, onClose, onAdded, projectId, projectStatus }) {
   const [emailsText, setEmailsText] = useState('');
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyMsg, setNotifyMsg] = useState('');
@@ -29,6 +29,12 @@ export default function AddContributorsModal({ open, onClose, onAdded, projectId
 
   const onSubmit = async (e) => {
     if (e?.preventDefault) e.preventDefault();
+    if (projectStatus === 'CLOSED') {
+      setNotifyMsg('Project is closed — cannot add contributors');
+      setNotifyType('error');
+      setNotifyOpen(true);
+      return;
+    }
     const emails = parseEmails(emailsText);
     if (!emails.length) {
       setNotifyMsg('Please enter at least one email address');
@@ -94,7 +100,12 @@ export default function AddContributorsModal({ open, onClose, onAdded, projectId
           >
             Cancel
           </button>
-          <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
+          <button
+            type="submit"
+            className="btn btn-primary btn-sm"
+            disabled={submitting || projectStatus === 'CLOSED'}
+            title={projectStatus === 'CLOSED' ? 'Project is closed' : ''}
+          >
             {submitting ? 'Adding...' : 'Add Contributors'}
           </button>
         </div>

@@ -70,6 +70,9 @@ export default function ResearcherProjectDetail() {
 
   useTitle(titleText);
 
+  const isClosed = project?.status === 'CLOSED';
+  // Buttons are hidden when closed; no extra titles needed here
+
   const handleToggleStar = async () => {
     if (starLoading) return;
     setStarLoading(true);
@@ -187,30 +190,34 @@ export default function ResearcherProjectDetail() {
             {activeTab === 'project' && (
               <>
                 <div className="project-detail-actions">
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() =>
-                      navigate(`/researcher/projects/${projectId}/contribute/${model?.id || ''}`)
-                    }
-                    disabled={!model?.id}
-                    title={!model?.id ? 'No model available' : 'Post contribution'}
-                  >
-                    <i className="fa fa-code-branch project-detail-moderator-icon" />
-                    Contribute
-                  </button>
-                  {isOwner && (
+                  {!isClosed && (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() =>
+                        navigate(`/researcher/projects/${projectId}/contribute/${model?.id || ''}`)
+                      }
+                      disabled={!model?.id}
+                      title={!model?.id ? 'No model available' : 'Post contribution'}
+                    >
+                      <i className="fa fa-code-branch project-detail-moderator-icon" />
+                      Contribute
+                    </button>
+                  )}
+                  {isOwner && !isClosed && (
                     <button
                       className="btn btn-primary btn-sm"
                       onClick={() => setAddModeratorOpen(true)}
+                      title="Add moderator"
                     >
                       <i className="fa fa-user-plus project-detail-moderator-icon" />
                       Add Moderator
                     </button>
                   )}
-                  {(isOwner || isModerator) && (
+                  {(isOwner || isModerator) && !isClosed && (
                     <button
                       className="btn btn-primary btn-sm"
                       onClick={() => setAddContribOpen(true)}
+                      title="Add contributors"
                     >
                       <i className="fa fa-user-plus project-detail-moderator-icon" />
                       Add Contributors
@@ -298,12 +305,14 @@ export default function ResearcherProjectDetail() {
         onClose={() => setAddModeratorOpen(false)}
         onAdded={fetchMembers}
         projectId={projectId}
+        projectStatus={project?.status}
       />
       <AddContributorsModal
         open={addContribOpen}
         onClose={() => setAddContribOpen(false)}
         onAdded={fetchMembers}
         projectId={projectId}
+        projectStatus={project?.status}
       />
     </Section>
   );

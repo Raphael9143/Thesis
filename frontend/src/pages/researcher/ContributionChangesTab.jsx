@@ -15,11 +15,13 @@ export default function ContributionChangesTab({
   handleReview,
   validationError,
   currentUserId,
+  projectStatus,
 }) {
   const navigate = useNavigate();
   const canResubmit =
     contribution.contributor_id === currentUserId &&
-    ['PENDING', 'NEEDS_EDIT'].includes(contribution.status);
+    ['PENDING', 'NEEDS_EDIT'].includes(contribution.status) &&
+    projectStatus !== 'CLOSED';
   const renderDiff = () => {
     if (!originalModel || !useModel) {
       return (
@@ -121,6 +123,8 @@ export default function ContributionChangesTab({
                 `/researcher/projects/${contribution.research_project_id}/contributions/${contribution.id}/resubmit`
               )
             }
+            disabled={projectStatus === 'CLOSED'}
+            title={projectStatus === 'CLOSED' ? 'Project is closed — cannot resubmit' : ''}
           >
             <i className="fa fa-edit" /> Resubmit
           </button>
@@ -129,7 +133,7 @@ export default function ContributionChangesTab({
 
       {canResubmit && <DashedDivider />}
 
-      {canReview && contribution.status === 'PENDING' && (
+      {canReview && contribution.status === 'PENDING' && projectStatus !== 'CLOSED' && (
         <div className="contribution-detail-review-form">
           <h3>Add Review Notes</h3>
           <textarea

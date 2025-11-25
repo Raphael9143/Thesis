@@ -71,7 +71,7 @@ export default function ResearcherHome() {
             </p>
             <div className="hero-buttons">
               <button
-                className="btn btn-primary btn-sm"
+                className="btn btn-primary"
                 onClick={() => {
                   setAuthType('login');
                   setShowAuth(true);
@@ -81,7 +81,7 @@ export default function ResearcherHome() {
                 <span>Explore Research</span>
               </button>
               <button
-                className="btn btn-outline btn-sm"
+                className="btn btn-outline"
                 onClick={() => {
                   setAuthType('register');
                   setShowAuth(true);

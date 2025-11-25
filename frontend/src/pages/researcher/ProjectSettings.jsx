@@ -41,27 +41,35 @@ export default function ProjectSettings({ project, isOwner, onProjectUpdate }) {
 
   const handleCloseProject = async () => {
     if (!isOwner) {
-      push({ title: 'Permission denied', body: 'Only the owner can close the project' });
+      push({ title: 'Permission denied', body: 'Only the owner can change project status' });
       return;
     }
-    if (
-      !window.confirm('Are you sure you want to close this project? This action cannot be undone.')
-    ) {
-      return;
-    }
+
+    // If project already closed, treat as reopen
+    const currentlyClosed = project?.status === 'CLOSED';
+    const confirmMsg = currentlyClosed
+      ? 'Reopen this project? This will allow contributions again.'
+      : 'Are you sure you want to close this project? This action will prevent further contributions.';
+
+    if (!window.confirm(confirmMsg)) return;
+
     setClosing(true);
     try {
-      const res = await userAPI.patchResearchProjectStatus(project.id, 'CLOSED');
+      const targetStatus = currentlyClosed ? 'ACTIVE' : 'CLOSED';
+      const res = await userAPI.patchResearchProjectStatus(project.id, targetStatus);
       if (res?.success) {
-        push({ title: 'Success', body: 'Project has been closed' });
-        if (onProjectUpdate) onProjectUpdate({ ...project, status: 'CLOSED' });
+        push({
+          title: 'Success',
+          body: currentlyClosed ? 'Project reopened' : 'Project has been closed',
+        });
+        if (onProjectUpdate) onProjectUpdate({ ...project, status: targetStatus });
       } else {
-        push({ title: 'Error', body: res?.message || 'Failed to close project' });
+        push({ title: 'Error', body: res?.message || 'Failed to update project status' });
       }
     } catch (err) {
       push({
         title: 'Error',
-        body: err?.response?.data?.message || err.message || 'Failed to close project',
+        body: err?.response?.data?.message || err.message || 'Failed to update project status',
       });
     } finally {
       setClosing(false);
@@ -123,19 +131,21 @@ export default function ProjectSettings({ project, isOwner, onProjectUpdate }) {
       <div className="settings-section settings-danger-zone">
         <h3 className="settings-section-title">Danger Zone</h3>
         <p className="settings-section-description">
-          Close this project to prevent further contributions. This action cannot be undone.
+          {project?.status === 'CLOSED'
+            ? 'This project is closed. Reopen to allow contributions and member changes.'
+            : 'Close this project to prevent further contributions. You can reopen it later.'}
         </p>
-        <button
-          className="btn btn-danger btn-sm"
-          onClick={handleCloseProject}
-          disabled={closing || project?.status === 'CLOSED'}
-        >
-          <i className="fa-solid fa-ban"></i>
+        <button className="btn btn-danger btn-sm" onClick={handleCloseProject} disabled={closing}>
+          <i
+            className={`fa-solid ${project?.status === 'CLOSED' ? 'fa-rotate-right' : 'fa-ban'}`}
+          />
           <span>
             {closing
-              ? 'Closing...'
+              ? project?.status === 'CLOSED'
+                ? 'Reopening...'
+                : 'Processing...'
               : project?.status === 'CLOSED'
-                ? 'Project Closed'
+                ? 'Reopen Project'
                 : 'Close Project'}
           </span>
         </button>
