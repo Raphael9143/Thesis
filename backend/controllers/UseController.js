@@ -176,7 +176,10 @@ function buildUseText(modelJson) {
         }
       } catch (e) {
         // fallback: ignore class formatting errors
-        console.error("Error building class text:", e && e.message ? e.message : e);
+        console.error(
+          "Error building class text:",
+          e && e.message ? e.message : e
+        );
       }
     }
   }
@@ -207,7 +210,10 @@ function buildUseText(modelJson) {
     }
   } catch (e) {
     // fallback: ignore constraint formatting errors
-    console.error("Error building constraints text:", e && e.message ? e.message : e);
+    console.error(
+      "Error building constraints text:",
+      e && e.message ? e.message : e
+    );
   }
 
   return lines.join("\n");
@@ -250,7 +256,10 @@ function buildEnumText(enm) {
   const name = enm.name || enm.enumName || "Enum";
   const vals = Array.isArray(enm.values)
     ? enm.values.map((v) => String(v).trim()).filter(Boolean)
-    : String(enm.values || "").split(/,/).map((s) => s.trim()).filter(Boolean);
+    : String(enm.values || "")
+        .split(/,/)
+        .map((s) => s.trim())
+        .filter(Boolean);
   return `enum ${name} { ${vals.join(", ")} }`;
 }
 
@@ -261,7 +270,12 @@ function parseEnumText(text) {
   if (!m) return null;
   const name = m[1];
   const body = (m[2] || "").trim();
-  const values = body.length ? body.split(/,/) .map((s) => s.trim()).filter(Boolean) : [];
+  const values = body.length
+    ? body
+        .split(/,/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
   return { name, values };
 }
 
@@ -290,7 +304,8 @@ function buildClassText(cls) {
   }
 
   // Render imperative operations first (operations[]), then query operations
-  const hasOps = (Array.isArray(cls.operations) && cls.operations.length) ||
+  const hasOps =
+    (Array.isArray(cls.operations) && cls.operations.length) ||
     (Array.isArray(cls.query_operations) && cls.query_operations.length);
   if (hasOps) {
     lines.push("  operations");
@@ -386,7 +401,8 @@ function buildConstraintsText(constraints, rawText, includeHeader = true) {
         lines.push("");
         continue;
       }
-      const ctx = c.context || c.contextName || c.context_name || c.header || "";
+      const ctx =
+        c.context || c.contextName || c.context_name || c.header || "";
       // Accept either `kind` or legacy `type` fields and normalize common variants
       let kindRaw = "";
       if (c && typeof c === "object") kindRaw = c.kind || c.type || "";
@@ -395,7 +411,9 @@ function buildConstraintsText(constraints, rawText, includeHeader = true) {
       else if (kind.indexOf("post") !== -1) kind = "post";
       else if (kind.indexOf("inv") !== -1) kind = "invariant";
       const name = c.name || c.label || "";
-      const expr = (c.expression || c.expr || c.body || c.raw || "").toString().trim();
+      const expr = (c.expression || c.expr || c.body || c.raw || "")
+        .toString()
+        .trim();
 
       if (ctx && /::/.test(ctx)) {
         lines.push(`context ${ctx}`);
@@ -462,17 +480,24 @@ function parseConstraintsText(text) {
     // reuse parseUseContent which extracts 'context' blocks and pre/post/inv
     const parsed = parseUseContent(text);
     // If parsed.constraints found, return them; else return split raw constraints
-    if (Array.isArray(parsed.constraints) && parsed.constraints.length) return parsed.constraints;
+    if (Array.isArray(parsed.constraints) && parsed.constraints.length)
+      return parsed.constraints;
     // fallback: split by blank lines in the constraints section
     const consMatch = text.match(/(?:\r?\n|^)\s*constraints\s*([\s\S]*?)$/i);
     const out = [];
     if (consMatch && consMatch[1]) {
       const block = String(consMatch[1] || "").trim();
-      const parts = block.split(/\r?\n\s*\r?\n/).map((s) => s.trim()).filter(Boolean);
+      const parts = block
+        .split(/\r?\n\s*\r?\n/)
+        .map((s) => s.trim())
+        .filter(Boolean);
       for (const p of parts) out.push({ raw: p, expression: p });
     } else {
       // no explicit constraints header: split whole text
-      const parts = text.split(/\r?\n\s*\r?\n/).map((s) => s.trim()).filter(Boolean);
+      const parts = text
+        .split(/\r?\n\s*\r?\n/)
+        .map((s) => s.trim())
+        .filter(Boolean);
       for (const p of parts) out.push({ raw: p, expression: p });
     }
     return out;
@@ -748,7 +773,8 @@ const UseController = {
         // Attempt to validate/parse the exported text using the USE CLI first,
         // falling back to the local JS parser in utils/parseUse.js.
         const uploadsDir = path.resolve(__dirname, "..", "uploads");
-        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+        if (!fs.existsSync(uploadsDir))
+          fs.mkdirSync(uploadsDir, { recursive: true });
         const tmpName = `uml_export_parse_${Date.now()}.use`;
         const tmpPath = path.join(uploadsDir, tmpName);
         fs.writeFileSync(tmpPath, useText, "utf8");
@@ -764,10 +790,13 @@ const UseController = {
 
           const stderrText = (cliRes && cliRes.stderr) || "";
           const stdoutText = (cliRes && cliRes.stdout) || "";
-          const cliHasStdErr = stderrText && String(stderrText).trim().length > 0;
+          const cliHasStdErr =
+            stderrText && String(stderrText).trim().length > 0;
 
           // If CLI produced a valid model line and no stderr, prefer parsing CLI output
-          const hasModelLine = /(^|\n)\s*model\s+[A-Za-z0-9_]+/i.test(stdoutText);
+          const hasModelLine = /(^|\n)\s*model\s+[A-Za-z0-9_]+/i.test(
+            stdoutText
+          );
           if (!cliHasStdErr && hasModelLine && cliRes && cliRes.stdout) {
             try {
               parsed = parseCliOutput(cliRes.stdout);
@@ -804,12 +833,14 @@ const UseController = {
           if (Array.isArray(parsed.classes)) {
             for (const c of parsed.classes) {
               if (!Array.isArray(c.query_operations)) c.query_operations = [];
-              if (!Array.isArray(c.operations)) c.operations = c.operations || [];
+              if (!Array.isArray(c.operations))
+                c.operations = c.operations || [];
             }
           }
           if (Array.isArray(parsed.associations)) {
             for (const a of parsed.associations) {
-              if (!Array.isArray(a.query_operations)) a.query_operations = a.query_operations || [];
+              if (!Array.isArray(a.query_operations))
+                a.query_operations = a.query_operations || [];
             }
           }
         } catch (e) {
@@ -966,6 +997,52 @@ const UseController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+  // Serialize a query operation (preserves multi-line body) into .use text
+  serializeQueryOperation: async (req, res) => {
+    try {
+      const body = req.body || {};
+      const className = body.class || null;
+      const op = body.op;
+      if (!op || typeof op !== "object") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Operation JSON required" });
+      }
+
+      // If a class name is provided, wrap the op into query_operations of a class
+      if (className) {
+        const cls = { name: className, query_operations: [op] };
+        const text = buildClassText(cls);
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        return res.send(text);
+      }
+
+      // Otherwise serialize as a single query operation line or block.
+      const sig = op.signature !== undefined ? `(${op.signature})` : "()";
+      const ret = op.returnType ? ` : ${op.returnType}` : "";
+      const name = op.name || op.fullName || "op";
+      // If body contains newlines, render multi-line form with '=' then indented body
+      if (op.body && String(op.body).trim() && /\r?\n/.test(String(op.body))) {
+        const bodyLines = String(op.body).split(/\r?\n/);
+        const lines = [];
+        lines.push(`${name}${sig}${ret} = `);
+        for (const l of bodyLines) lines.push("  " + l);
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        return res.send(lines.join("\n"));
+      }
+
+      // Single-line body or no body: emit `name(sig) : type = body` on one line
+      const bodySingle = op.body ? ` = ${String(op.body).trim()}` : "";
+      const line = `${name}${sig}${ret}${bodySingle}`;
+      res.setHeader("Content-Type", "text/plain; charset=utf-8");
+      return res.send(line);
+    } catch (err) {
+      console.error("serializeQueryOperation error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
   // Serialize constraints: accept { constraints: [...], raw_text? }
   serializeConstraints: async (req, res) => {
     try {
@@ -1022,7 +1099,9 @@ const UseController = {
       const noHeaderFlag = body.no_header === true;
       const hasSingle = Array.isArray(constraints) && constraints.length === 1;
       const includeHeader = !(noHeaderFlag || hasSingle);
-      const toSend = normalizedConstraints.length ? normalizedConstraints : constraints;
+      const toSend = normalizedConstraints.length
+        ? normalizedConstraints
+        : constraints;
       const txt = buildConstraintsText(toSend, rawText, includeHeader);
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       return res.send(txt);
@@ -1033,7 +1112,6 @@ const UseController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
-  
 
   // Deserialize an operation: accept either a class block or a single operation line
   deserializeOperation: async (req, res) => {
@@ -1046,23 +1124,53 @@ const UseController = {
           .json({ success: false, message: "Operation .use text required" });
       }
 
-      // If the text contains a 'class' keyword, parse as class and extract operations
+      // If the text contains a 'class' keyword, parse using the same parser
+      // as the `/api/use/parse` endpoint so output shapes are consistent.
       if (/^\s*class\b/i.test(text) || /\bend\b/i.test(text)) {
-        // Try to extract class block using existing parseClassText helper
-        const parsedClass = parseClassText(text);
-        if (!parsedClass)
-          return res
-            .status(400)
-            .json({ success: false, message: "Invalid .use class text" });
+        // prefer the higher-level parser that returns the standard `classes` array
+        const parsed = parseUseContentWithConditionals(text);
+        if (
+          !parsed ||
+          !Array.isArray(parsed.classes) ||
+          !parsed.classes.length
+        ) {
+          // fallback to the simpler class parser
+          const parsedClass = parseClassText(text);
+          if (!parsedClass)
+            return res
+              .status(400)
+              .json({ success: false, message: "Invalid .use class text" });
+          const operations = Array.isArray(parsedClass.operations)
+            ? parsedClass.operations.slice()
+            : [];
+          const queryOps = Array.isArray(parsedClass.query_operations)
+            ? parsedClass.query_operations.slice()
+            : [];
+          const ops = operations.concat(queryOps);
+          return res.json({
+            success: true,
+            class: parsedClass.name || null,
+            ops,
+            operations,
+            query_operations: queryOps,
+          });
+        }
 
-        // return first operation if present, else empty
-        const ops = Array.isArray(parsedClass.operations)
-          ? parsedClass.operations
+        // return the first class found (client sent a class block)
+        const cls = parsed.classes[0] || {};
+        const operations = Array.isArray(cls.operations)
+          ? cls.operations.slice()
           : [];
+        const queryOps = Array.isArray(cls.query_operations)
+          ? cls.query_operations.slice()
+          : [];
+        const ops = operations.concat(queryOps);
         return res.json({
           success: true,
-          class: parsedClass.name || null,
+          class: cls.name || null,
           ops,
+          operations,
+          query_operations: queryOps,
         });
       }
 
@@ -1079,6 +1187,72 @@ const UseController = {
       return res.json({ success: true, data: result });
     } catch (err) {
       console.error("deserializeOperation error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+  // Deserialize and return only query operations (useful when callers need queries separately)
+  deserializeQueryOperation: async (req, res) => {
+    try {
+      const text = (req.body && req.body.text) || "";
+      if (!text || typeof text !== "string") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Operation .use text required" });
+      }
+
+      // If the text is a class block, parse using the same high-level parser
+      // so the returned `query_operations` array matches `/api/use/parse`.
+      if (/^\s*class\b/i.test(text) || /\bend\b/i.test(text)) {
+        const parsed = parseUseContentWithConditionals(text);
+        if (parsed && Array.isArray(parsed.classes) && parsed.classes.length) {
+          const cls = parsed.classes[0] || {};
+          const queryOps = Array.isArray(cls.query_operations)
+            ? cls.query_operations
+            : [];
+          return res.json({
+            success: true,
+            class: cls.name || null,
+            query_operations: queryOps,
+          });
+        }
+
+        // fallback
+        const parsedClass = parseClassText(text);
+        if (!parsedClass)
+          return res
+            .status(400)
+            .json({ success: false, message: "Invalid .use class text" });
+        const queryOps = Array.isArray(parsedClass.query_operations)
+          ? parsedClass.query_operations
+          : [];
+        return res.json({
+          success: true,
+          class: parsedClass.name || null,
+          query_operations: queryOps,
+        });
+      }
+
+      // Otherwise try to parse a single operation line and detect if it's a query
+      const op = parseOperationLine(text);
+      if (!op)
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid operation text" });
+
+      // simple heuristic: inline '=' or '->' indicates a query
+      const isQuery =
+        /=/.test(text) ||
+        /->/.test(text) ||
+        /^\s*if\b/i.test(text) ||
+        /^\s*\(/.test(text);
+      if (!isQuery)
+        return res.json({ success: true, data: { op }, query: false });
+
+      return res.json({ success: true, data: { op }, query: true });
+    } catch (err) {
+      console.error("deserializeQueryOperation error:", err);
       return res
         .status(500)
         .json({ success: false, message: "Internal Server Error" });
@@ -1299,11 +1473,15 @@ const UseController = {
           // Prefer structured constraints produced by parser/CLI; fallback to parsing raw text
           let constraintsArr = [];
           try {
-            if (Array.isArray(parsed.constraints) && parsed.constraints.length) {
+            if (
+              Array.isArray(parsed.constraints) &&
+              parsed.constraints.length
+            ) {
               constraintsArr = parsed.constraints.slice();
             } else {
               // attempt to parse from CLI output first, then raw content
-              const consSource = cliResult && cliResult.stdout ? cliResult.stdout : content;
+              const consSource =
+                cliResult && cliResult.stdout ? cliResult.stdout : content;
               constraintsArr = parseConstraintsText(consSource || "");
             }
           } catch {
@@ -1315,7 +1493,12 @@ const UseController = {
           if (Array.isArray(constraintsArr) && constraintsArr.length) {
             for (const c of constraintsArr) {
               try {
-                const ctx = c.context || c.contextName || c.context_name || c.header || null;
+                const ctx =
+                  c.context ||
+                  c.contextName ||
+                  c.context_name ||
+                  c.header ||
+                  null;
                 let kind = c.kind || c.type || null;
                 if (kind && typeof kind === "string") {
                   const kk = kind.toLowerCase();
@@ -1340,7 +1523,10 @@ const UseController = {
           }
 
           // synchronize: remove existing constraints for this model and bulk-insert
-          await UseConstraint.destroy({ where: { use_model_id: modelRow.id }, transaction: t });
+          await UseConstraint.destroy({
+            where: { use_model_id: modelRow.id },
+            transaction: t,
+          });
           if (toCreate.length) {
             await UseConstraint.bulkCreate(toCreate, { transaction: t });
           }
@@ -1414,7 +1600,8 @@ const UseController = {
           // find current index in lines array (we're in a for..of, so rebuild index)
           const startIdx = lines.indexOf(line);
           const opsLines = lines.slice(startIdx + 1);
-          const sr = /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
+          const sr =
+            /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
           const opStartIdx = [];
           for (let j = 0; j < opsLines.length; j++) {
             if (!opsLines[j] || !opsLines[j].trim()) continue;
@@ -1446,7 +1633,13 @@ const UseController = {
               opName = partsQ.slice(1).join("::");
             }
             const signature = (m[2] || "").trim();
-            const returnType = m[3] ? m[3].trim() : null;
+            let returnType = m[3] ? m[3].trim() : null;
+            // If returnType was trimmed or lost generic parameters, try to extract
+            // a parenthesized type like `Set(Account)` directly from the header.
+            if (header && (!returnType || !/\w+\s*\(/.test(returnType))) {
+              const gm = header.match(/:\s*([A-Za-z0-9_]+\s*\([^)]*\))/);
+              if (gm) returnType = (gm[1] || "").trim();
+            }
             const inlineBody = m[4] !== undefined ? String(m[4]).trim() : null;
             let bodyText = null;
             if (inlineBody && inlineBody.length) {
@@ -1519,7 +1712,8 @@ const UseController = {
           mode = "operations";
           // gather operations block from remaining lines
           const opsLines = lines.slice(i + 1);
-          const sr = /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
+          const sr =
+            /^\s*([A-Za-z0-9_:]+)\s*\(([^)]*)\)\s*(?::\s*([^=\n]+))?\s*(?:=\s*(.*))?$/;
           const opStartIdx = [];
           for (let j = 0; j < opsLines.length; j++) {
             if (!opsLines[j] || !opsLines[j].trim()) continue;
@@ -1532,7 +1726,8 @@ const UseController = {
           }
           for (let k = 0; k < opStartIdx.length; k++) {
             const s = opStartIdx[k];
-            const e = k + 1 < opStartIdx.length ? opStartIdx[k + 1] : opsLines.length;
+            const e =
+              k + 1 < opStartIdx.length ? opStartIdx[k + 1] : opsLines.length;
             const chunk = opsLines.slice(s, e);
             const header = (chunk[0] || "").trim();
             const rest = chunk.slice(1).join("\n").trim();
@@ -1551,7 +1746,11 @@ const UseController = {
               opName = partsQ.slice(1).join("::");
             }
             const signature = (m[2] || "").trim();
-            const returnType = m[3] ? m[3].trim() : null;
+            let returnType = m[3] ? m[3].trim() : null;
+            if (header && (!returnType || !/\w+\s*\(/.test(returnType))) {
+              const gm = header.match(/:\s*([A-Za-z0-9_]+\s*\([^)]*\))/);
+              if (gm) returnType = (gm[1] || "").trim();
+            }
             const inlineBody = m[4] !== undefined ? String(m[4]).trim() : null;
             let bodyText = null;
             if (inlineBody && inlineBody.length) {
