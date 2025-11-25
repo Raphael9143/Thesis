@@ -3,6 +3,8 @@ const Course = require("../models/Course");
 const ClassCourse = require("../models/ClassCourse");
 const Class = require("../models/Class");
 const ClassStudent = require("../models/ClassStudent");
+const fs = require("fs");
+const UseModel = require("../models/UseModel");
 
 const ExamController = {
   // Create an exam (only teachers allowed)
@@ -61,9 +63,37 @@ const ExamController = {
           message: "Invalid type. Allowed: SINGLE or GROUP",
         });
 
-  // handle uploaded single attachment
+      // handle uploaded single attachment
       let attachment = null;
       if (req.file) attachment = "/uploads/exams/" + req.file.filename;
+
+      // Optional teacher-provided answer file
+      let answerAttachment = null;
+      let answerUseModelId = null;
+      const providedFiles = req.files || (req.file ? [req.file] : []);
+      if (providedFiles && providedFiles.length) {
+        let answerFile = providedFiles.find((f) => f.fieldname === "answer");
+        if (!answerFile)
+          answerFile = providedFiles.find((f) =>
+            (f.originalname || "").toLowerCase().endsWith(".use")
+          );
+        if (answerFile) {
+          answerAttachment = "/uploads/exams/" + answerFile.filename;
+          try {
+            const raw = fs.readFileSync(answerFile.path, "utf8");
+            const um = await UseModel.create({
+              name: (title || "") + " answer",
+              file_path: answerAttachment,
+              owner_id: req.user.userId,
+              raw_text: raw,
+              created_at: new Date(),
+            });
+            answerUseModelId = um.id;
+          } catch (e) {
+            console.warn("Could not persist exam answer use model:", e.message || e);
+          }
+        }
+      }
 
       // validate submission_limit if provided
       let sl = 1;
@@ -97,6 +127,8 @@ const ExamController = {
         end_date: end_date || null,
         type: type || "SINGLE",
         attachment: attachment || null,
+        answer_attachment: answerAttachment || null,
+        answer_use_model_id: answerUseModelId || null,
         submission_limit: sl,
         status: st,
       });
@@ -122,7 +154,14 @@ const ExamController = {
         return res
           .status(404)
           .json({ success: false, message: "Exam not found." });
-      res.json({ success: true, data: exam });
+      const examObj = exam.toJSON();
+      // Hide answer fields from students
+      if (req.user && req.user.role === "STUDENT") {
+        delete examObj.answer_attachment;
+        delete examObj.answer_use_model_id;
+        delete examObj.answerUseModel;
+      }
+      res.json({ success: true, data: examObj });
     } catch (error) {
       console.error("Get exam error:", error);
       res
@@ -235,6 +274,14 @@ const ExamController = {
         data.push(obj);
       }
 
+      // If student, strip answer fields from each exam
+      if (req.user && req.user.role === "STUDENT") {
+        for (const e of data) {
+          delete e.answer_attachment;
+          delete e.answer_use_model_id;
+          delete e.answerUseModel;
+        }
+      }
       res.json({ success: true, data });
     } catch (error) {
       console.error("Get exams by course id error:", error);
@@ -284,6 +331,33 @@ const ExamController = {
 
       // handle uploaded file
       if (req.file) exam.attachment = "/uploads/exams/" + req.file.filename;
+
+      // If teacher uploaded/updated an answer file, persist UseModel and link
+      const providedFiles = req.files || (req.file ? [req.file] : []);
+      if (providedFiles && providedFiles.length) {
+        let answerFile = providedFiles.find((f) => f.fieldname === "answer");
+        if (!answerFile)
+          answerFile = providedFiles.find((f) =>
+            (f.originalname || "").toLowerCase().endsWith(".use")
+          );
+        if (answerFile) {
+          const answerAttachment = "/uploads/exams/" + answerFile.filename;
+          try {
+            const raw = fs.readFileSync(answerFile.path, "utf8");
+            const um = await UseModel.create({
+              name: (exam.title || "") + " answer",
+              file_path: answerAttachment,
+              owner_id: req.user.userId,
+              raw_text: raw,
+              created_at: new Date(),
+            });
+            exam.answer_attachment = answerAttachment;
+            exam.answer_use_model_id = um.id;
+          } catch (e) {
+            console.warn("Could not persist exam answer use model:", e.message || e);
+          }
+        }
+      }
 
       // If updating times, validate both exist and ordering
       if (
@@ -545,6 +619,104 @@ const ExamController = {
       res
         .status(500)
         .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
+  // Patch or replace the teacher answer for an exam (teacher or admin)
+  patchAnswer: async (req, res) => {
+    try {
+      if (!req.user)
+        return res
+          .status(403)
+          .json({ success: false, message: "Authentication required." });
+      const { id } = req.params;
+      const exam = await Exam.findByPk(id);
+      if (!exam)
+        return res
+          .status(404)
+          .json({ success: false, message: "Exam not found." });
+
+      // permission: ADMIN or creator or homeroom teacher
+      const classCourse = await ClassCourse.findOne({
+        where: { course_id: exam.course_id },
+      });
+      let classObj = null;
+      if (classCourse) classObj = await Class.findByPk(classCourse.class_id);
+
+      if (req.user.role === "ADMIN") {
+        // allowed
+      } else if (req.user.role === "TEACHER") {
+        const isCreator = exam.created_by === req.user.userId;
+        const isClassTeacher = classObj && classObj.teacher_id === req.user.userId;
+        if (!isCreator && !isClassTeacher)
+          return res.status(403).json({ success: false, message: "Forbidden" });
+      } else {
+        return res.status(403).json({ success: false, message: "Forbidden" });
+      }
+
+      // If body has delete/remove flag, remove answer linkage
+      const remove = req.body && (
+        req.body.remove === "1" || req.body.delete === "1" || req.body.remove === true
+      );
+      if (remove) {
+        exam.answer_attachment = null;
+        exam.answer_use_model_id = null;
+        await exam.save();
+        return res.json({ success: true, message: "Answer removed", data: exam });
+      }
+
+      // Otherwise expect an uploaded file in field 'answer'
+      const providedFiles = req.files || (req.file ? [req.file] : []);
+      if (!providedFiles || providedFiles.length === 0)
+        return res.status(400).json({ success: false, message: "No answer file provided." });
+      let answerFile = providedFiles.find((f) => f.fieldname === "answer");
+      if (!answerFile)
+        answerFile = providedFiles.find((f) =>
+          (f.originalname || "").toLowerCase().endsWith(".use")
+        );
+      if (!answerFile)
+        return res.status(400).json({ success: false, message: "No .use answer file found." });
+
+      const answerAttachment = "/uploads/exams/" + answerFile.filename;
+      try {
+        const raw = fs.readFileSync(answerFile.path, "utf8");
+        if (exam.answer_use_model_id) {
+          const existing = await UseModel.findByPk(exam.answer_use_model_id);
+          if (existing) {
+            existing.raw_text = raw;
+            existing.file_path = answerAttachment;
+            existing.updated_at = new Date();
+            await existing.save();
+          } else {
+            const um = await UseModel.create({
+              name: (exam.title || "") + " answer",
+              file_path: answerAttachment,
+              owner_id: req.user.userId,
+              raw_text: raw,
+              created_at: new Date(),
+            });
+            exam.answer_use_model_id = um.id;
+          }
+        } else {
+          const um = await UseModel.create({
+            name: (exam.title || "") + " answer",
+            file_path: answerAttachment,
+            owner_id: req.user.userId,
+            raw_text: raw,
+            created_at: new Date(),
+          });
+          exam.answer_use_model_id = um.id;
+        }
+        exam.answer_attachment = answerAttachment;
+        await exam.save();
+        return res.json({ success: true, message: "Answer updated", data: exam });
+      } catch (e) {
+        console.error("Persisting exam answer failed:", e);
+        return res.status(500).json({ success: false, message: "Could not persist answer" });
+      }
+    } catch (error) {
+      console.error("Patch exam answer error:", error);
+      return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
   },
 

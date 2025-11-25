@@ -5,6 +5,8 @@ const ClassCourse = require("../models/ClassCourse");
 const Class = require("../models/Class");
 const User = require("../models/User");
 const ClassStudent = require("../models/ClassStudent");
+const fs = require("fs");
+const UseModel = require("../models/UseModel");
 
 const AssignmentController = {
   // Create assignment (teachers only). Single file under field 'attachment' is optional.
@@ -67,6 +69,35 @@ const AssignmentController = {
       let attachment = null;
       if (req.file) attachment = "/uploads/assignments/" + req.file.filename;
 
+      // Optional teacher-provided answer (.use file).
+      // Middleware may provide the uploaded files in `req.files` (conditionalUpload.any)
+      let answerAttachment = null;
+      let answerUseModelId = null;
+      const providedFiles = req.files || (req.file ? [req.file] : []);
+      if (providedFiles && providedFiles.length) {
+        let answerFile = providedFiles.find((f) => f.fieldname === "answer");
+        if (!answerFile)
+          answerFile = providedFiles.find((f) =>
+            (f.originalname || "").toLowerCase().endsWith(".use")
+          );
+        if (answerFile) {
+          answerAttachment = "/uploads/assignments/" + answerFile.filename;
+          try {
+            const raw = fs.readFileSync(answerFile.path, "utf8");
+            const um = await UseModel.create({
+              name: (title || "") + " answer",
+              file_path: answerAttachment,
+              owner_id: req.user.userId,
+              raw_text: raw,
+              created_at: new Date(),
+            });
+            answerUseModelId = um.id;
+          } catch (e) {
+            console.warn("Could not persist answer use model:", e.message || e);
+          }
+        }
+      }
+
       const allowedStatuses = ["draft", "published", "archived"];
       if (status && !allowedStatuses.includes(status)) {
         return res
@@ -100,6 +131,8 @@ const AssignmentController = {
         description: description || null,
         created_by: req.user.userId,
         attachment: attachment,
+        answer_attachment: answerAttachment || null,
+        answer_use_model_id: answerUseModelId || null,
         status: status || "draft",
         type: type || "SINGLE",
         start_date: start_date || null,
@@ -147,6 +180,14 @@ const AssignmentController = {
       });
 
       const data = assignments.map((a) => a.toJSON());
+      // If student, strip answer fields from assignments
+      if (req.user && req.user.role === "STUDENT") {
+        for (const d of data) {
+          delete d.answer_attachment;
+          delete d.answer_use_model_id;
+          delete d.answerUseModel;
+        }
+      }
       res.json({ success: true, data });
     } catch (error) {
       console.error("Get all assignments error:", error);
@@ -189,6 +230,13 @@ const AssignmentController = {
       });
 
       const data = assignments.map((a) => a.toJSON());
+      if (req.user && req.user.role === "STUDENT") {
+        for (const d of data) {
+          delete d.answer_attachment;
+          delete d.answer_use_model_id;
+          delete d.answerUseModel;
+        }
+      }
       res.json({ success: true, data });
     } catch (error) {
       console.error("Get assignments by class error:", error);
@@ -240,6 +288,33 @@ const AssignmentController = {
       // handle file
       if (req.file)
         assignment.attachment = "/uploads/assignments/" + req.file.filename;
+
+      // If teacher uploaded/updated an answer file, persist it and link to assignment
+      const providedFiles = req.files || (req.file ? [req.file] : []);
+      if (providedFiles && providedFiles.length) {
+        let answerFile = providedFiles.find((f) => f.fieldname === "answer");
+        if (!answerFile)
+          answerFile = providedFiles.find((f) =>
+            (f.originalname || "").toLowerCase().endsWith(".use")
+          );
+        if (answerFile) {
+          const answerAttachment = "/uploads/assignments/" + answerFile.filename;
+          try {
+            const raw = fs.readFileSync(answerFile.path, "utf8");
+            const um = await UseModel.create({
+              name: (assignment.title || "") + " answer",
+              file_path: answerAttachment,
+              owner_id: req.user.userId,
+              raw_text: raw,
+              created_at: new Date(),
+            });
+            assignment.answer_attachment = answerAttachment;
+            assignment.answer_use_model_id = um.id;
+          } catch (e) {
+            console.warn("Could not persist answer use model:", e.message || e);
+          }
+        }
+      }
 
       // Handle updates to start/end dates: if either is provided, ensure both exist and are valid
       if (
@@ -327,6 +402,105 @@ const AssignmentController = {
       res
         .status(500)
         .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
+  // Patch or replace the teacher answer for an assignment (teacher or admin)
+  patchAnswer: async (req, res) => {
+    try {
+      if (!req.user)
+        return res
+          .status(403)
+          .json({ success: false, message: "Authentication required." });
+      const { id } = req.params;
+      const assignment = await Assignment.findByPk(id);
+      if (!assignment)
+        return res
+          .status(404)
+          .json({ success: false, message: "Assignment not found." });
+
+      // permission: ADMIN or creator or homeroom teacher
+      const classCourse = await ClassCourse.findOne({
+        where: { course_id: assignment.course_id },
+      });
+      let classObj = null;
+      if (classCourse) classObj = await Class.findByPk(classCourse.class_id);
+
+      if (req.user.role === "ADMIN") {
+        // allowed
+      } else if (req.user.role === "TEACHER") {
+        const isCreator = assignment.created_by === req.user.userId;
+        const isClassTeacher = classObj && classObj.teacher_id === req.user.userId;
+        if (!isCreator && !isClassTeacher)
+          return res.status(403).json({ success: false, message: "Forbidden" });
+      } else {
+        return res.status(403).json({ success: false, message: "Forbidden" });
+      }
+
+      // If body has delete/remove flag, remove answer linkage
+      const remove = req.body && (
+        req.body.remove === "1" || req.body.delete === "1" || req.body.remove === true
+      );
+      if (remove) {
+        assignment.answer_attachment = null;
+        assignment.answer_use_model_id = null;
+        await assignment.save();
+        return res.json({ success: true, message: "Answer removed", data: assignment });
+      }
+
+      // Otherwise expect an uploaded file in field 'answer'
+      const providedFiles = req.files || (req.file ? [req.file] : []);
+      if (!providedFiles || providedFiles.length === 0)
+        return res.status(400).json({ success: false, message: "No answer file provided." });
+      let answerFile = providedFiles.find((f) => f.fieldname === "answer");
+      if (!answerFile)
+        answerFile = providedFiles.find((f) =>
+          (f.originalname || "").toLowerCase().endsWith(".use")
+        );
+      if (!answerFile)
+        return res.status(400).json({ success: false, message: "No .use answer file found." });
+
+      const answerAttachment = "/uploads/assignments/" + answerFile.filename;
+      try {
+        const raw = fs.readFileSync(answerFile.path, "utf8");
+        if (assignment.answer_use_model_id) {
+          // update existing UseModel
+          const existing = await UseModel.findByPk(assignment.answer_use_model_id);
+          if (existing) {
+            existing.raw_text = raw;
+            existing.file_path = answerAttachment;
+            existing.updated_at = new Date();
+            await existing.save();
+          } else {
+            const um = await UseModel.create({
+              name: (assignment.title || "") + " answer",
+              file_path: answerAttachment,
+              owner_id: req.user.userId,
+              raw_text: raw,
+              created_at: new Date(),
+            });
+            assignment.answer_use_model_id = um.id;
+          }
+        } else {
+          const um = await UseModel.create({
+            name: (assignment.title || "") + " answer",
+            file_path: answerAttachment,
+            owner_id: req.user.userId,
+            raw_text: raw,
+            created_at: new Date(),
+          });
+          assignment.answer_use_model_id = um.id;
+        }
+        assignment.answer_attachment = answerAttachment;
+        await assignment.save();
+        return res.json({ success: true, message: "Answer updated", data: assignment });
+      } catch (e) {
+        console.error("Persisting answer failed:", e);
+        return res.status(500).json({ success: false, message: "Could not persist answer" });
+      }
+    } catch (error) {
+      console.error("Patch answer error:", error);
+      return res.status(500).json({ success: false, message: "Internal Server Error" });
     }
   },
 
@@ -504,6 +678,12 @@ const AssignmentController = {
       }
 
       const obj = assignment.toJSON();
+      // Hide answer fields from students
+      if (req.user && req.user.role === "STUDENT") {
+        delete obj.answer_attachment;
+        delete obj.answer_use_model_id;
+        delete obj.answerUseModel;
+      }
       res.json({ success: true, data: obj });
     } catch (error) {
       console.error("Get assignment by id error:", error);
@@ -624,6 +804,13 @@ const AssignmentController = {
         data.push(obj);
       }
 
+      if (req.user && req.user.role === "STUDENT") {
+        for (const d of data) {
+          delete d.answer_attachment;
+          delete d.answer_use_model_id;
+          delete d.answerUseModel;
+        }
+      }
       res.json({ success: true, data });
     } catch (error) {
       console.error("Get assignments by course error:", error);
