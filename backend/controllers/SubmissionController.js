@@ -268,7 +268,8 @@ const SubmissionController = {
           if (submissionText) {
             const result = gradeUseModels(answerText, submissionText);
             if (result && typeof result.score === "number") {
-              submission.score = result.score;
+              // Save auto-grader result separately from teacher score
+              submission.auto_grader_score = result.score;
               submission.feedback = JSON.stringify(result.details || {});
               submission.updated_at = new Date();
               await submission.save();
@@ -392,6 +393,7 @@ const SubmissionController = {
         attempt_number: submission.attempt_number,
         attachment: submission.attachment,
         score: submission.score,
+        auto_grader_score: submission.auto_grader_score,
         feedback: submission.feedback,
         created_at: submission.created_at,
         updated_at: submission.updated_at,
@@ -968,6 +970,7 @@ const SubmissionController = {
           attempt_number: latest.attempt_number,
           submission_time: latest.submission_time,
           score: latest.score,
+          auto_grader_score: latest.auto_grader_score,
           feedback: latest.feedback,
           has_submission: true,
         },
@@ -1063,6 +1066,7 @@ const SubmissionController = {
           attempt_number: latest.attempt_number,
           submission_time: latest.submission_time,
           score: latest.score,
+          auto_grader_score: latest.auto_grader_score,
           feedback: latest.feedback,
           has_submission: true,
         },
