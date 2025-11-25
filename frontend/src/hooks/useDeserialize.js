@@ -47,6 +47,20 @@ export default function useDeserialize() {
     }
   };
 
+  const deserializeQueryOperation = async (data) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await userAPI.deserializeQueryOperation(data);
+      return res;
+    } catch (e) {
+      setError(e);
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const deserializeConstraint = async (data) => {
     setLoading(true);
     setError(null);
@@ -79,6 +93,7 @@ export default function useDeserialize() {
     deserializeClass,
     deserializeAssociation,
     deserializeOperation,
+    deserializeQueryOperation,
     deserializeConstraint,
     deserializeEnum,
     loading,

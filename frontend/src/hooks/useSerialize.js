@@ -47,6 +47,20 @@ export default function useSerialize() {
     }
   };
 
+  const serializeQueryOperation = async (data) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await userAPI.serializeQueryOperation(data);
+      return res;
+    } catch (e) {
+      setError(e);
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const serializeConstraint = async (data) => {
     setLoading(true);
     setError(null);
@@ -79,6 +93,7 @@ export default function useSerialize() {
     serializeClass,
     serializeAssociation,
     serializeOperation,
+    serializeQueryOperation,
     serializeConstraint,
     serializeEnum,
     loading,
