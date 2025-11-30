@@ -5,7 +5,7 @@ export default function formatFeedback(feedback) {
     try {
       obj = JSON.parse(feedback);
     } catch (err) {
-      // not JSON, return raw string
+      console.warn('Feedback is not JSON:', err);
       return String(feedback);
     }
   }
@@ -13,10 +13,7 @@ export default function formatFeedback(feedback) {
   if (typeof obj === 'object' && obj !== null) {
     // Prefer a simple pretty format: one key per line, humanized key names
     const lines = [];
-    const humanize = (k) =>
-      k
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, (m) => m.toUpperCase());
+    const humanize = (k) => k.replace(/_/g, ' ').replace(/\b\w/g, (m) => m.toUpperCase());
     for (const key of Object.keys(obj)) {
       const val = obj[key];
       lines.push(`${humanize(key)}: ${val}`);
