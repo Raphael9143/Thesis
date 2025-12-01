@@ -394,6 +394,94 @@ const ClassController = {
         .json({ success: false, message: "Internal Server Error" });
     }
   },
+  // Student join class by class code
+  joinClassByCode: async (req, res) => {
+    try {
+      const { code } = req.body;
+      const user = req.user;
+
+      if (!code || typeof code !== "string") {
+        return res
+          .status(400)
+          .json({ success: false, message: "Class code is required." });
+      }
+
+      // Only students can join via code
+      const role = (user.role || "").toUpperCase();
+      if (role !== "STUDENT") {
+        return res.status(403).json({
+          success: false,
+          message: "Only students can join a class by code.",
+        });
+      }
+
+      // Find class by code
+      const foundClass = await Class.findOne({ where: { code } });
+      if (!foundClass) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Class not found." });
+      }
+
+      // Check class status (only allow joining when active)
+      if (foundClass.status && foundClass.status !== "active") {
+        return res.status(400).json({
+          success: false,
+          message: "Class is not open for joining.",
+        });
+      }
+
+      // Check if already a member
+      const existing = await ClassStudent.findOne({
+        where: { class_id: foundClass.id, student_id: user.userId },
+      });
+      if (existing) {
+        return res.status(400).json({
+          success: false,
+          message: "You are already a member of this class.",
+        });
+      }
+
+      // Check max students
+      if (foundClass.max_students !== null && foundClass.max_students > 0) {
+        const currentCount = await ClassStudent.count({ where: { class_id: foundClass.id } });
+        if (currentCount >= foundClass.max_students) {
+          return res.status(400).json({
+            success: false,
+            message: "Class has reached maximum number of students.",
+          });
+        }
+      }
+
+      // Create class student entry
+      const now = new Date();
+      const created = await ClassStudent.create({
+        class_id: foundClass.id,
+        student_id: user.userId,
+        role: "student",
+        joined_at: now,
+      });
+
+      // Update current_students count
+      const updatedCount = await ClassStudent.count({ where: { class_id: foundClass.id } });
+      foundClass.current_students = updatedCount;
+      await foundClass.save();
+
+      res.json({
+        success: true,
+        message: "Joined class successfully.",
+        data: {
+          class_id: foundClass.id,
+          class_name: foundClass.name,
+          class_code: foundClass.code,
+          joined_at: created.joined_at,
+        },
+      });
+    } catch (error) {
+      console.error("Join class by code error:", error);
+      res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+  },
   // Update class information
   updateClass: async (req, res) => {
     try {

@@ -395,6 +395,38 @@ router.post("/", auth, requireRole("TEACHER"), ClassController.createClass);
 
 /**
  * @swagger
+ * /api/class/join:
+ *   post:
+ *     summary: Student join a class using class code
+ *     tags: [Class]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - code
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 example: "UML101"
+ *     responses:
+ *       200:
+ *         description: Joined class
+ *       400:
+ *         description: Bad request or already a member
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Not found
+ */
+router.post("/join", auth, ClassController.joinClassByCode);
+
+/**
+ * @swagger
  * /api/class:
  *   get:
  *     summary: Get all classes (admin only)
