@@ -1,11 +1,12 @@
 import React from 'react';
+import { test, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import useMultiplicityPositions from '../useMultiplicityPositions';
 
 const utils = {
   perpOffset: (p) => ({ x: p.x + 1, y: p.y + 1 }),
   offsetAlong: (c, t) => ({ x: (c.x + t.x) / 2, y: (c.y + t.y) / 2 }),
-  intersectBorder: (rect, center, target) => ({ x: center.x + 5, y: center.y + 5 }),
+  intersectBorder: (rect, center) => ({ x: center.x + 5, y: center.y + 5 }),
 };
 
 function Host({ onReady }) {

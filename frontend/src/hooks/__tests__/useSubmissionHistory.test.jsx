@@ -1,6 +1,6 @@
 import React from 'react';
+import { test, expect, vi } from 'vitest';
 import { render, waitFor } from '@testing-library/react';
-import { vi } from 'vitest';
 
 vi.mock('../../../services/userAPI', () => ({
   default: {

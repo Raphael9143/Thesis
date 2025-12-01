@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
+import { test, expect } from 'vitest';
 import { vi } from 'vitest';
 
 vi.mock('../../../services/userAPI', () => ({
@@ -8,7 +9,7 @@ vi.mock('../../../services/userAPI', () => ({
       success: true,
       data: { remaining_attempts: id % 2 === 0 ? 3 : 1 },
     })),
-    getExamRemainingAttempts: vi.fn(async (id) => ({
+    getExamRemainingAttempts: vi.fn(async () => ({
       success: true,
       data: { remaining_attempts: 0 },
     })),

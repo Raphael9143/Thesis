@@ -1,14 +1,15 @@
 import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
+import { test, expect } from 'vitest';
 import { vi } from 'vitest';
 
 vi.mock('../../../services/userAPI', () => ({
   default: {
-    getAssignmentRemainingAttempts: vi.fn(async (id) => ({
+    getAssignmentRemainingAttempts: vi.fn(async () => ({
       success: true,
       data: { remaining_attempts: 2 },
     })),
-    getExamRemainingAttempts: vi.fn(async (id) => ({
+    getExamRemainingAttempts: vi.fn(async () => ({
       success: true,
       data: { remaining_attempts: 1 },
     })),
@@ -31,7 +32,7 @@ test('fetches assignment attempts on mount', async () => {
   render(<Capture type="assignment" id={5} onReady={(a) => (api = a)} />);
   await waitFor(() => expect(api).toBeDefined());
   await waitFor(() => expect(api.loading).toBe(false));
-  expect(api.attempts).toEqual({ remaining_attempts: 2 } || api.attempts);
+  expect(api.attempts).toEqual({ remaining_attempts: 2 });
   expect(userAPI.getAssignmentRemainingAttempts).toHaveBeenCalledWith(5);
 });
 

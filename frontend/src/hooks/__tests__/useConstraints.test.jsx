@@ -1,4 +1,5 @@
 import React from 'react';
+import { test, expect } from 'vitest';
 import { render, waitFor, act } from '@testing-library/react';
 import useConstraints from '../useConstraints';
 

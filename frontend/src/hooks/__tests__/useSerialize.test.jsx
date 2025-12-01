@@ -1,6 +1,6 @@
 import React from 'react';
+import { test, expect, vi } from 'vitest';
 import { render, waitFor, act } from '@testing-library/react';
-import { vi } from 'vitest';
 
 // mock userAPI for this file (provide default export)
 vi.mock('../../../services/userAPI', () => ({

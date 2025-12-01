@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
 import NotificationPopup from '../../components/ui/NotificationPopup';
+import { useNotifications } from '../../contexts/NotificationContext';
 import userAPI from '../../../services/userAPI';
 import generateRandomCode from '../../utils/generateRandomCode';
 import '../../assets/styles/components/teacher/CreateClassModal.css';
@@ -15,6 +16,7 @@ export default function CreateCourseModal({ open, onClose, defaultClassId = null
   const [notifyMsg, setNotifyMsg] = useState('');
   const [notifyType, setNotifyType] = useState('info');
   const [submitting, setSubmitting] = useState(false);
+  const { push } = useNotifications();
 
   useEffect(() => {
     if (!open) {
@@ -47,9 +49,22 @@ export default function CreateCourseModal({ open, onClose, defaultClassId = null
 
       const res = await userAPI.createCourse(payload);
       if (res?.success) {
+        const createdName = courseName || codeToUse;
+
         setNotifyMsg(status === 'DRAFT' ? 'Course saved as draft' : 'Course created');
         setNotifyType('success');
         setNotifyOpen(true);
+
+        try {
+          push({
+            title: status === 'DRAFT' ? 'Course draft saved' : 'Course created',
+            body: `${createdName} was ${status === 'DRAFT' ? 'saved as draft' : 'created'}.`,
+            data: { type: 'course', id: res?.data?.id },
+          });
+        } catch (err) {
+          console.warn('Push notification failed', err);
+        }
+
         onCreated?.(res.data);
         onClose?.();
       } else {

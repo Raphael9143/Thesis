@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
 import NotificationPopup from '../../components/ui/NotificationPopup';
+import { useNotifications } from '../../contexts/NotificationContext';
 import userAPI from '../../../services/userAPI';
 import generateRandomCode from '../../utils/generateRandomCode';
 import '../../assets/styles/components/teacher/CreateClassModal.css';
@@ -19,6 +20,7 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyMsg, setNotifyMsg] = useState('');
   const [notifyType, setNotifyType] = useState('info');
+  const { push } = useNotifications();
 
   useEffect(() => {
     let mounted = true;
@@ -100,9 +102,24 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
 
       const res = await userAPI.createClass(payload);
       if (res?.success) {
+        // capture created name before we reset form state
+        const createdName = name || codeToUse;
+
+        // local UI popup
         setNotifyMsg('Successfully created class');
         setNotifyType('success');
         setNotifyOpen(true);
+
+        // push a notification via NotificationContext so user sees a toast/push
+        try {
+          push({
+            title: 'Class created',
+            body: `Class ${createdName} was created successfully.`,
+            data: { type: 'class', id: res?.data?.id },
+          });
+        } catch (err) {
+          console.warn('Push notification failed', err);
+        }
 
         const emailsToNotify = [...selectedStudentEmails];
 
@@ -117,8 +134,8 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
         (async () => {
           const failures = [];
           const teacherName = sessionStorage.getItem('full_name') || 'Your teacher';
-          const title = `Added to class ${name || codeToUse}`;
-          const body = `You have been added to class ${name || codeToUse} by ${teacherName}. Please check your classes.`;
+          const title = `Added to class ${createdName}`;
+          const body = `You have been added to class ${createdName} by ${teacherName}. Please check your classes.`;
 
           for (const email of emailsToNotify) {
             try {
