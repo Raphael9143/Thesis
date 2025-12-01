@@ -33,6 +33,9 @@ const userAPI = {
   getAllClasses: () => axiosClient.get('class'),
   getClassById: (id) => axiosClient.get(`class/${id}`),
   createClass: (data) => axiosClient.post('class', data),
+  // Join a class by code (student)
+  // POST /api/class/join { code: "UML101" }
+  joinClass: (code) => axiosClient.post('class/join', { code }),
   updateClass: (id, data) => axiosClient.put(`class/${id}`, data),
   deleteClass: (id) => axiosClient.delete(`class/${id}`),
   // Patch class status (e.g., set to 'active' or 'draft')
