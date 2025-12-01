@@ -6,24 +6,26 @@ import { useNavigate } from 'react-router-dom';
 import userAPI from '../../../services/userAPI';
 import '../../assets/styles/ui.css';
 import useTitle from '../../hooks/useTitle';
+import JoinClassModal from '../../components/student/JoinClassModal';
 
 export default function StudentClassesPage() {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
   // title handled by useTitle
 
   useEffect(() => {
     let mounted = true;
-    (async () => {
-      // page title handled by useTitle
+    const fetchClasses = async () => {
       setLoading(true);
       try {
         const res = await userAPI.getStudentEnrolledClasses();
         if (!mounted) return;
         if (res?.success && res.data && Array.isArray(res.data.classes)) {
           setClasses(res.data.classes);
+          setError(null);
         } else {
           setError(res?.message || 'Failed to load classes');
         }
@@ -34,7 +36,10 @@ export default function StudentClassesPage() {
       } finally {
         if (mounted) setLoading(false);
       }
-    })();
+    };
+
+    fetchClasses();
+
     return () => {
       mounted = false;
     };
@@ -45,6 +50,16 @@ export default function StudentClassesPage() {
   return (
     <Section>
       <Card>
+        <div className="create-class-header">
+          <button
+            type="button"
+            className="btn btn-primary btn-sm"
+            onClick={() => setJoinModalOpen(true)}
+          >
+            <i className="fa-solid fa-door-open" />
+            <span>Join class</span>
+          </button>
+        </div>
         {loading && <div>Loading classes...</div>}
         {error && <div className="text-error">{error}</div>}
         {!loading && !error && classes.length === 0 && <div>No classes found.</div>}
@@ -65,6 +80,26 @@ export default function StudentClassesPage() {
           </div>
         )}
       </Card>
+      <JoinClassModal
+        open={joinModalOpen}
+        onClose={() => setJoinModalOpen(false)}
+        onJoined={async () => {
+          // After joining, re-fetch enrolled classes from server to ensure consistency
+          setJoinModalOpen(false);
+          setLoading(true);
+          try {
+            const res = await userAPI.getStudentEnrolledClasses();
+            if (res?.success && res.data && Array.isArray(res.data.classes)) {
+              setClasses(res.data.classes);
+              setError(null);
+            }
+          } catch (err) {
+            console.error('Failed to refresh classes after join', err);
+          } finally {
+            setLoading(false);
+          }
+        }}
+      />
     </Section>
   );
 }
