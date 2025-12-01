@@ -93,31 +93,8 @@ const SubmissionController = {
         targetType = "assignment";
         targetId = assignment_id;
 
-        // Check if assignment is GROUP type
-        if (assignment.type === "GROUP") {
-          const GroupMember = require("../models/GroupMember");
-          const groupMember = await GroupMember.findOne({
-            where: {
-              student_id: req.user.userId,
-              assignment_group_id: { [Op.ne]: null },
-            },
-            include: [
-              {
-                model: require("../models/AssignmentGroup"),
-                as: "assignmentGroup",
-                where: { assignment_id: assignment_id },
-                required: true,
-              },
-            ],
-          });
-          if (!groupMember) {
-            return res.status(403).json({
-              success: false,
-              message: "You must be in a group to submit this GROUP assignment.",
-            });
-          }
-          assignmentGroupId = groupMember.assignment_group_id;
-        }
+        // For GROUP assignments we no longer require membership enforcement here.
+        // assignmentGroupId remains null and submissions are accepted from any student.
       } else {
         // exam_id path
         const exam = await require("../models/Exam").findByPk(exam_id);
@@ -151,31 +128,8 @@ const SubmissionController = {
         targetType = "exam";
         targetId = exam_id;
 
-        // Check if exam is GROUP type
-        if (exam.type === "GROUP") {
-          const GroupMember = require("../models/GroupMember");
-          const groupMember = await GroupMember.findOne({
-            where: {
-              student_id: req.user.userId,
-              exam_group_id: { [Op.ne]: null },
-            },
-            include: [
-              {
-                model: require("../models/ExamGroup"),
-                as: "examGroup",
-                where: { exam_id: exam_id },
-                required: true,
-              },
-            ],
-          });
-          if (!groupMember) {
-            return res.status(403).json({
-              success: false,
-              message: "You must be in a group to submit this GROUP exam.",
-            });
-          }
-          examGroupId = groupMember.exam_group_id;
-        }
+        // For GROUP exams we no longer require membership enforcement here.
+        // examGroupId remains null and submissions are accepted from any student.
       }
 
       // Attachment (single file) is required and must be a .use file
@@ -270,7 +224,13 @@ const SubmissionController = {
             if (result && typeof result.score === "number") {
               // Save auto-grader result separately from teacher score
               submission.auto_grader_score = result.score;
-              submission.feedback = JSON.stringify(result.details || {});
+              // Prefer textual feedback if present (new grader returns `feedback` string).
+              if (result.feedback && typeof result.feedback === "string") {
+                submission.feedback = result.feedback;
+              } else {
+                // fallback for older format
+                submission.feedback = JSON.stringify(result.details || {});
+              }
               submission.updated_at = new Date();
               await submission.save();
             }

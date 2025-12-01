@@ -16,7 +16,6 @@ const examRoutes = require("./exam");
 const useRoutes = require("./use");
 const umlRoutes = require("./uml");
 const researchRoutes = require("./research");
-const groupRoutes = require("./group");
 
 const { specs, swaggerUi } = require("../config/swagger");
 
@@ -82,8 +81,7 @@ app.use("/api/use", useRoutes);
 app.use("/api/uml", umlRoutes);
 // Research Project routes
 app.use("/api/research", researchRoutes);
-// Group routes (for group assignments/exams)
-app.use("/api/groups", groupRoutes);
+// Note: group routes removed — group APIs and models deprecated
 
 app.use("/uploads", express.static("uploads"));
 // Multer error handler: give clearer message instead of stacktrace

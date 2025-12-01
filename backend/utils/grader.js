@@ -63,11 +63,25 @@ function extractComponentSets(parsed) {
 function componentSimilarity(parsedA, parsedB) {
   const A = extractComponentSets(parsedA || {});
   const B = extractComponentSets(parsedB || {});
-  const classScore = jaccardScore(A.classes, B.classes);
+  // For class names, require name-level matching: proportion of answer classes
+  // that exactly appear in submission classes (case-insensitive).
+  let classScore = 0;
+  if (A.classes && A.classes.length > 0) {
+    const aSet = new Set(A.classes || []);
+    const bSet = new Set(B.classes || []);
+    let matches = 0;
+    for (const name of aSet) {
+      if (bSet.has(name)) matches++;
+    }
+    classScore = matches / A.classes.length;
+  } else {
+    // fallback to jaccard when answer has no class names
+    classScore = jaccardScore(A.classes, B.classes);
+  }
   const opScore = jaccardScore(A.operations, B.operations);
   const invScore = jaccardScore(A.constraints, B.constraints);
-  // weights: classes 40%, ops 40%, constraints 20%
-  const weights = { classes: 0.4, ops: 0.4, inv: 0.2 };
+  // weights: give stronger importance to class name matches
+  const weights = { classes: 0.6, ops: 0.3, inv: 0.1 };
   // if no constraints in either, redistribute weight
   let invWeight = weights.inv;
   let total = weights.classes + weights.ops + invWeight;
@@ -92,16 +106,12 @@ function gradeUseModels(answerText, submissionText) {
     const parsedA = parseUseContentWithConditionals(answerText || "");
     const parsedS = parseUseContentWithConditionals(submissionText || "");
     const comp = componentSimilarity(parsedA, parsedS);
-    const txt = textSimilarity(answerText || "", submissionText || "");
-    // combine: components (60%) + text similarity (40%)
-    const score = Math.round((comp * 0.6 + txt * 0.4) * 100);
-    const details = {
-      component_similarity: Number(comp.toFixed(3)),
-      text_similarity: Number(txt.toFixed(3)),
-    };
-    return { score, details };
+    // Use only component similarity. Scale to 10-point scale.
+    const scoreOutOf10 = Math.round(comp * 10);
+    const feedback = `Component Similarity: ${scoreOutOf10}/10`;
+    return { score: scoreOutOf10, feedback };
   } catch (e) {
-    return { score: null, details: { error: e.message || String(e) } };
+    return { score: null, feedback: String(e.message || e) };
   }
 }
 
