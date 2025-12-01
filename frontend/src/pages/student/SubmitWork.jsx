@@ -9,7 +9,6 @@ import '../../assets/styles/pages/Submit.css';
 import { useNotifications } from '../../contexts/NotificationContext';
 import useAttempt from '../../hooks/useAttempt';
 import Modal from '../../components/ui/Modal';
-import formatFeedback from '../../utils/FormatFeedback';
 
 export default function SubmitWork() {
   const params = useParams();
@@ -141,7 +140,8 @@ export default function SubmitWork() {
         const data = res.data || {};
         if (typeof data.auto_grader_score !== 'undefined' || data.feedback) {
           setAutoScore(data.auto_grader_score ?? null);
-          setAutoFeedbackText(formatFeedback(data.feedback ?? ''));
+          console.log(data);
+          setAutoFeedbackText(data.feedback ?? '');
           setScoreModalOpen(true);
         } else {
           // If no auto result, navigate back immediately
@@ -259,7 +259,7 @@ export default function SubmitWork() {
           {autoScore != null && (
             <div style={{ marginBottom: 12 }}>
               <div style={{ color: '#2e7d32', fontSize: 56, fontWeight: 700, textAlign: 'center' }}>
-                {autoScore / 10}
+                {autoScore}
               </div>
               <div style={{ color: '#2e7d32', fontSize: 14, marginTop: 6, textAlign: 'center' }}>
                 {typeof autoScore === 'number' ? 'points' : ''}
