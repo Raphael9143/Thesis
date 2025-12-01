@@ -40,12 +40,37 @@ const AddStudentsModal = ({ open, onClose, classId, onAdded }) => {
 
   const addEmail = (email) => {
     if (!email) return;
-    if (!studentEmails.includes(email)) {
-      push({ title: 'Error', body: 'Email not found or not a student' });
+    // support comma-separated lists
+    if (email.includes(',')) {
+      const parts = email
+        .split(',')
+        .map((p) => p.trim())
+        .filter(Boolean);
+      const invalids = [];
+      const toAdd = [];
+      for (const p of parts) {
+        if (selectedStudentEmails.includes(p)) continue;
+        if (studentEmails && studentEmails.length > 0 && !studentEmails.includes(p)) {
+          invalids.push(p);
+          continue;
+        }
+        toAdd.push(p);
+      }
+      if (toAdd.length > 0) setSelectedStudentEmails((s) => [...s, ...toAdd]);
+      if (invalids.length > 0)
+        push({ title: 'Error', body: `Invalid emails: ${invalids.join(', ')}` });
+      setStudentEmailsInput('');
       return;
     }
-    if (!selectedStudentEmails.includes(email)) {
-      setSelectedStudentEmails((s) => [...s, email]);
+
+    const e = email.trim();
+    if (!e) return;
+    if (studentEmails && studentEmails.length > 0 && !studentEmails.includes(e)) {
+      push({ title: 'Error', body: `Email not found or not a student: ${e}` });
+      return;
+    }
+    if (!selectedStudentEmails.includes(e)) {
+      setSelectedStudentEmails((s) => [...s, e]);
     }
     setStudentEmailsInput('');
   };
@@ -57,14 +82,27 @@ const AddStudentsModal = ({ open, onClose, classId, onAdded }) => {
       push({ title: 'Error', body: 'Class not specified' });
       return;
     }
-    if (selectedStudentEmails.length === 0) {
+
+    // Prefer parsing the raw input field (CSV) if present.
+    // Otherwise fall back to selectedStudentEmails
+    let emailsToSend = [];
+    if (studentEmailsInput && studentEmailsInput.trim()) {
+      emailsToSend = studentEmailsInput
+        .split(',')
+        .map((p) => p.trim())
+        .filter(Boolean);
+    } else {
+      emailsToSend = selectedStudentEmails.slice();
+    }
+
+    if (emailsToSend.length === 0) {
       push({ title: 'Error', body: 'Please enter at least one student email' });
       return;
     }
     setLoading(true);
     try {
       const res = await userAPI.addStudentsToClass(classId, {
-        studentEmails: selectedStudentEmails,
+        studentEmails: emailsToSend,
       });
       if (res?.success) {
         push({ title: 'Success', body: 'Students added to class' });

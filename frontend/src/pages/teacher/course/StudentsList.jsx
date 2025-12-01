@@ -99,7 +99,11 @@ export default function StudentsList() {
       const ok = window.confirm('Remove this student from the class?');
       if (!ok) return;
       // send delete request with student id array
-      const res = await userAPI.removeStudentsFromClass(id, { studentIds: [s.id] });
+      // send both camelCase and snake_case keys to satisfy backend expectations
+      const res = await userAPI.removeStudentsFromClass(id, {
+        studentIds: [s.id],
+        student_ids: [s.id],
+      });
       if (res?.success) {
         // remove from UI list
         setStudents((prev) =>

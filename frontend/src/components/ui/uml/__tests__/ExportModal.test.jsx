@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import ExportModal from '../ExportModal';
 
@@ -33,6 +33,6 @@ describe('ExportModal', () => {
     const copyBtn = screen.getByTitle('Copy to clipboard');
     fireEvent.click(copyBtn);
 
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(content);
+    await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith(content));
   });
 });
