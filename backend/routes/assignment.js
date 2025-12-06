@@ -39,7 +39,9 @@ const AssignmentController = require("../controllers/AssignmentController");
  *                 example: "2025-10-01T23:59:00Z"
  *               type:
  *                 type: string
- *                 enum: [SINGLE, GROUP]
+ *                 enum:
+ *                   - SINGLE
+ *                   - GROUP
  *                 example: SINGLE
  *               title:
  *                 type: string
@@ -200,10 +202,15 @@ router.get("/course/:id", auth, AssignmentController.getAssignmentsByCourseId);
  *                 type: string
  *               status:
  *                 type: string
- *                 enum: [draft, published, archived]
+ *                 enum:
+ *                   - draft
+ *                   - published
+ *                   - archived
  *               type:
  *                 type: string
- *                 enum: [SINGLE, GROUP]
+ *                 enum:
+ *                   - SINGLE
+ *                   - GROUP
  *               attachment:
  *                 type: string
  *                 format: binary
@@ -228,10 +235,15 @@ router.get("/course/:id", auth, AssignmentController.getAssignmentsByCourseId);
  *                 type: string
  *               status:
  *                 type: string
- *                 enum: [draft, published, archived]
+ *                 enum:
+ *                   - draft
+ *                   - published
+ *                   - archived
  *               type:
  *                 type: string
- *                 enum: [SINGLE, GROUP]
+ *                 enum:
+ *                   - SINGLE
+ *                   - GROUP
  *               attachment:
  *                 type: string
  *               start_date:
@@ -311,7 +323,10 @@ router.put(
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [draft, published, archived]
+ *                 enum:
+ *                   - draft
+ *                   - published
+ *                   - archived
  *     responses:
  *       200:
  *         description: Assignment status updated

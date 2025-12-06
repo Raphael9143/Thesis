@@ -18,7 +18,7 @@ const SubmissionController = {
         });
       }
 
-  const { assignment_id, exam_id } = req.body;
+      const { assignment_id, exam_id } = req.body;
 
       // Require either assignment_id or exam_id (but not both)
       if (!assignment_id && !exam_id) {
@@ -45,8 +45,6 @@ const SubmissionController = {
       let maxAttempts = 1;
       let targetType = null; // 'assignment' | 'exam'
       let targetId = null;
-      let assignmentGroupId = null;
-      let examGroupId = null;
 
       if (assignment_id) {
         const assignment = await Assignment.findByPk(assignment_id);
@@ -152,14 +150,12 @@ const SubmissionController = {
       const existingAttempts = await Submission.count({ where: whereCount });
 
       if (existingAttempts >= maxAttempts) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message:
-              `Maximum attempts reached (${maxAttempts}). ` +
-              `No more submissions allowed for this ${targetType}.`,
-          });
+        return res.status(400).json({
+          success: false,
+          message:
+            `Maximum attempts reached (${maxAttempts}). ` +
+            `No more submissions allowed for this ${targetType}.`,
+        });
       }
 
       const attempt_number = existingAttempts + 1;
@@ -168,8 +164,6 @@ const SubmissionController = {
       const submission = await Submission.create({
         assignment_id: assignment_id || null,
         exam_id: exam_id || null,
-        assignment_group_id: assignmentGroupId,
-        exam_group_id: examGroupId,
         student_id: req.user.userId,
         submission_time: new Date(),
         attempt_number,
@@ -191,7 +185,10 @@ const SubmissionController = {
             try {
               answerText = fs.readFileSync(p, "utf8");
             } catch (e) {
-              console.warn("Could not read assignment answer file:", e.message || e);
+              console.warn(
+                "Could not read assignment answer file:",
+                e.message || e
+              );
             }
           }
         } else if (exam_id) {
@@ -211,16 +208,38 @@ const SubmissionController = {
         }
 
         if (answerText) {
-          // read submission text
+          // read submission text; try direct path then fallback to uploads folder by filename
           let submissionText = null;
           try {
             const subRel = (uploadedFile && uploadedFile.path) || null;
-            if (subRel) submissionText = fs.readFileSync(subRel, "utf8");
+            if (subRel && fs.existsSync(subRel)) {
+              submissionText = fs.readFileSync(subRel, "utf8");
+            } else if (uploadedFile && uploadedFile.filename) {
+              const alt = path.resolve(
+                __dirname,
+                "..",
+                "uploads",
+                "submissions",
+                uploadedFile.filename
+              );
+              if (fs.existsSync(alt))
+                submissionText = fs.readFileSync(alt, "utf8");
+            }
           } catch (e) {
-            console.warn("Could not read submission file for grading:", e.message || e);
+            console.warn(
+              "Could not read submission file for grading:",
+              e.message || e
+            );
           }
           if (submissionText) {
             const result = gradeUseModels(answerText, submissionText);
+            console.info(
+              "Auto-grader result for",
+              targetType || "unknown",
+              targetId,
+              "=>",
+              result
+            );
             if (result && typeof result.score === "number") {
               // Save auto-grader result separately from teacher score
               submission.auto_grader_score = result.score;
@@ -760,9 +779,7 @@ const SubmissionController = {
               .json({ success: false, message: "Forbidden" });
         }
       } else {
-        return res
-          .status(403)
-          .json({ success: false, message: "Forbidden" });
+        return res.status(403).json({ success: false, message: "Forbidden" });
       }
 
       const submissions = await Submission.findAll({
@@ -829,9 +846,7 @@ const SubmissionController = {
               .json({ success: false, message: "Forbidden" });
         }
       } else {
-        return res
-          .status(403)
-          .json({ success: false, message: "Forbidden" });
+        return res.status(403).json({ success: false, message: "Forbidden" });
       }
 
       const submissions = await Submission.findAll({
@@ -897,9 +912,7 @@ const SubmissionController = {
               .json({ success: false, message: "Forbidden" });
         }
       } else {
-        return res
-          .status(403)
-          .json({ success: false, message: "Forbidden" });
+        return res.status(403).json({ success: false, message: "Forbidden" });
       }
 
       const latest = await Submission.findOne({
@@ -993,9 +1006,7 @@ const SubmissionController = {
               .json({ success: false, message: "Forbidden" });
         }
       } else {
-        return res
-          .status(403)
-          .json({ success: false, message: "Forbidden" });
+        return res.status(403).json({ success: false, message: "Forbidden" });
       }
 
       const latest = await Submission.findOne({
