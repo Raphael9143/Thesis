@@ -6,7 +6,10 @@ import useBoxMeasurements from '../../../hooks/useBoxMeasurements';
 import useBoxDrag from '../../../hooks/useBoxDrag';
 import useConstraints from '../../../hooks/useConstraints';
 import useLinkDrag from '../../../hooks/useLinkDrag';
+import useRoleDrag from '../../../hooks/useRoleDrag';
+import { offsetAlong, pushOutward, intersectBorder } from '../../../utils/umlUtils';
 import UMLCanvas from './UMLCanvas';
+import UMLRoles from './UMLRoles';
 import userAPI from '../../../../services/userAPI';
 import ClassBox from './editor/ClassBox';
 import EnumBox from './editor/EnumBox';
@@ -48,6 +51,16 @@ export default function UMLEditor({ initialModel = null }) {
     BOX_MIN_H,
   });
   const { startDrag } = useBoxDrag({ setPositions, containerRef, positionsRef });
+
+  const { rolePositions, setRolePositions, startRoleDrag, roleActiveKey, rolePreviewTarget } =
+    useRoleDrag({
+      boxRefs,
+      containerRef,
+      initialPositions: {},
+    });
+
+  // Track which roles have been manually positioned by the user
+  const userPositionedRolesRef = useRef(new Set());
 
   useEffect(() => {
     // initialize positions in a grid similar to preview
@@ -119,6 +132,46 @@ export default function UMLEditor({ initialModel = null }) {
   useEffect(() => {
     positionsRef.current = positions;
   }, [positions]);
+
+  // Calculate role positions based on association parts and class positions
+  useEffect(() => {
+    const rp = {};
+    associations.forEach((a, i) => {
+      const parts = Array.isArray(a.parts) ? a.parts : [];
+      const centers = parts.map((p) => ({
+        name: p.class,
+        center: centerOf(p.class),
+        rect: getRect(p.class),
+        raw: p,
+      }));
+      centers.forEach((c, idx) => {
+        if (!c.center) return;
+
+        // Calculate target point: for binary association use the other end,
+        // for n-ary use centroid of all other ends
+        const others = centers.filter((x) => x !== c && x.center);
+        let targetCenter;
+        if (others.length === 0) {
+          // Fallback: offset to the right
+          targetCenter = { x: c.center.x + 20, y: c.center.y };
+        } else if (others.length === 1) {
+          // Binary: use the other endpoint
+          targetCenter = others[0].center;
+        } else {
+          // N-ary: use centroid of all other endpoints
+          const sumX = others.reduce((acc, o) => acc + o.center.x, 0);
+          const sumY = others.reduce((acc, o) => acc + o.center.y, 0);
+          targetCenter = { x: sumX / others.length, y: sumY / others.length };
+        }
+
+        const p = c.rect
+          ? intersectBorder(c.rect, c.center, targetCenter)
+          : offsetAlong(c.center, targetCenter, 14);
+        rp[`${i}:${idx}`] = pushOutward(p, c.center, 18);
+      });
+    });
+    setRolePositions(rp);
+  }, [positions, associations, centerOf, getRect, setRolePositions]);
 
   const onToolDragStart = (ev, type) => ev.dataTransfer.setData('application/uml', type);
   const onCanvasDragOver = (e) => e.preventDefault();
@@ -910,6 +963,20 @@ export default function UMLEditor({ initialModel = null }) {
               classes={classes}
               centerOf={centerOf}
               getRect={getRect}
+              roleActiveKey={roleActiveKey}
+              rolePositions={rolePositions}
+              rolePreviewTarget={rolePreviewTarget}
+            />
+
+            {/* Role labels */}
+            <UMLRoles
+              rolePositions={rolePositions}
+              associations={associations}
+              startRoleDrag={(key, ownerName, e) => {
+                userPositionedRolesRef.current.add(key);
+                startRoleDrag(key, ownerName, e);
+              }}
+              roleActiveKey={roleActiveKey}
             />
 
             {/* render boxes with existing UML CSS classes */}

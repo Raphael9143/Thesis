@@ -337,13 +337,43 @@ export default function UMLCanvas({
         });
       })()}
 
+      {/* Draw dashed lines from role labels to their owning classes */}
+      {rolePositions &&
+        Object.entries(rolePositions).map(([key, pos]) => {
+          const [idxStr, partIdxStr] = key.split(':');
+          const assoc = associations[Number(idxStr)];
+          if (!assoc) return null;
+          const partIdx = Number(partIdxStr);
+          const part = assoc.parts?.[partIdx];
+          if (!part) return null;
+          const ownerName = part.class;
+          const ownerCenter = centerOf(ownerName);
+          const ownerRect = getRect(ownerName);
+          if (!ownerCenter || !ownerRect) return null;
+          const borderPoint = intersectBorder(ownerRect, ownerCenter, pos);
+          return (
+            <line
+              key={`role-line-${key}`}
+              x1={pos.x}
+              y1={pos.y}
+              x2={borderPoint.x}
+              y2={borderPoint.y}
+              stroke="#999"
+              strokeWidth={1}
+              strokeDasharray="4 3"
+              opacity={0.6}
+            />
+          );
+        })}
+
       {roleActiveKey &&
         rolePositions[roleActiveKey] &&
         (() => {
-          const [idxStr, side] = roleActiveKey.split(':');
+          const [idxStr, partIdxStr] = roleActiveKey.split(':');
           const assoc = associations[Number(idxStr)];
           if (!assoc) return null;
-          const part = side === 'left' ? assoc.parts?.[0] : assoc.parts?.[1];
+          const partIdx = Number(partIdxStr);
+          const part = assoc.parts?.[partIdx];
           const ownerName = part?.class;
           const from = rolePositions[roleActiveKey];
           const targetName = rolePreviewTarget || ownerName;
