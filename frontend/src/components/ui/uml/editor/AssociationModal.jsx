@@ -188,7 +188,7 @@ export default function AssociationModal({
               <input
                 className="uml-modal-input"
                 placeholder="role"
-                value={p.role || p.class || classes[0]?.name || ''}
+                value={p.role !== undefined ? p.role : ''}
                 onChange={(e) => updatePart(i, { role: e.target.value })}
                 required
               />
