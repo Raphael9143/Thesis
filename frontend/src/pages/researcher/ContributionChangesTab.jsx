@@ -146,21 +146,21 @@ export default function ContributionChangesTab({
           />
           <div className="contribution-detail-review-actions">
             <button
-              className="btn btn-success"
+              className="btn btn-success btn-sm"
               onClick={() => handleReview('ACCEPT')}
               disabled={submitting}
             >
               <i className="fa fa-check" /> Accept
             </button>
             <button
-              className="btn btn-warning"
+              className="btn btn-warning btn-sm"
               onClick={() => handleReview('NEEDS_EDIT')}
               disabled={submitting}
             >
               <i className="fa fa-edit" /> Request Edits
             </button>
             <button
-              className="btn btn-danger"
+              className="btn btn-danger btn-sm"
               onClick={() => handleReview('REJECT')}
               disabled={submitting}
             >
