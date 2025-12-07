@@ -1,50 +1,85 @@
 .modal-backdrop {
-	position: fixed;
-	inset: 0;
-	background: rgba(0, 0, 0, .4);
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 16px;
-	z-index: 50
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 50;
 }
 
 .modal-container {
-	background: #fff;
-	border-radius: 16px;
-	box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
-	width: 40vw;
-	max-width: 60vw;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  width: 40vw;
+  max-width: 60vw;
+  /* ensure modal never exceeds viewport height and allow internal scrolling */
+  max-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 14px 16px;
-	border-bottom: 1px solid var(--border)
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
 }
 
 .modal-title {
-	margin: 0;
+  margin: 0;
+  color: #111;
+  text-align: center;
+}
+
+/* Target the calendar icon specifically in WebKit browsers */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  /* Change background color (this styles the area behind the icon) */
+  /* Invert the icon's color (useful for dark backgrounds) */
 	color: #111;
-	text-align: center;
+  filter: invert(1); 
+  /* Optional: make it a pointer */
+  cursor: pointer;
+}
+
+
+/* Fallback for some browsers where the indicator is affected by color */
+input[type='date'],
+input[type='time'] {
+  caret-color: #111;
+}
+
+/* Replace native picker icon with a consistent dark SVG icon to avoid white/invisible native indicators */
+.modal-body input[type="date"],
+.modal-body input[type="time"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 20px 20px;
 }
 
 .modal-close:hover {
-	background: #f3f4f6
+  background: #f3f4f6;
 }
 
 .modal-body {
-	padding: 16px;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+  padding: 24px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow-y: auto;
+  /* allow body to take remaining space when container has limited height */
+  flex: 1 1 auto;
 }
 
 .modal-footer {
-	display: flex;
-	gap: 8px;
-	justify-content: flex-end;
-	width: 100%;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  width: 100%;
 }

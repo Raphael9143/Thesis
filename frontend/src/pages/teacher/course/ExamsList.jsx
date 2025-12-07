@@ -148,7 +148,7 @@ export default function ExamsList() {
       <Card>
         <div className="class-detail__panel">
           <div className="flex-between">
-            <h4 className="no-margin">Exams</h4>
+            <h4 className="no-margin"></h4>
             <div className="create-button-section">
               <button className="btn btn-primary btn-sm" onClick={() => setExamModalOpen(true)}>
                 <i className="fa-solid fa-file-pen"></i>

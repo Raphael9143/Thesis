@@ -193,6 +193,10 @@ const userAPI = {
   createAdminUser: (data) => axiosClient.post('admin/users', data),
   // DELETE /api/admin/users/:id
   deleteAdminUser: (id) => axiosClient.delete(`admin/users/${id}`),
+  // PATCH /api/admin/users/:id/disable
+  disableAdminUser: (id) => axiosClient.patch(`admin/users/${id}/disable`),
+  // PATCH /api/admin/users/:id/enable
+  enableAdminUser: (id) => axiosClient.patch(`admin/users/${id}/enable`),
 
   // Researcher projects
   // GET /api/research/projects/mine

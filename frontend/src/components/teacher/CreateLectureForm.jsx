@@ -24,29 +24,22 @@ export default function CreateLectureForm({
   const fileRef = useRef(null);
 
   useEffect(() => {
-    // When modal opens, populate for edit or reset for create
-    if (open) {
-      if (lecture) {
-        setForm({
-          course_id: lecture.course_id || defaultCourseId || '',
-          class_id: lecture.class_id || defaultClassId || '',
-          title: lecture.title || '',
-        });
-        if (fileRef.current) fileRef.current.value = null;
-      } else {
-        setForm({ course_id: defaultCourseId || '', class_id: defaultClassId || '', title: '' });
-        if (fileRef.current) fileRef.current.value = null;
-      }
+    if (!open) return;
+    if (lecture) {
+      setForm({
+        course_id: lecture.course_id || defaultCourseId || '',
+        class_id: lecture.class_id || defaultClassId || '',
+        title: lecture.title || '',
+      });
+    } else {
+      setForm({ course_id: defaultCourseId || '', class_id: defaultClassId || '', title: '' });
     }
+    if (fileRef.current) fileRef.current.value = null;
   }, [defaultCourseId, defaultClassId, open, lecture]);
 
   const update = (e) => {
-    try {
-      const title = e.target.value;
-      setForm((s) => ({ ...s, title }));
-    } catch (err) {
-      console.warn('[CreateLectureForm] update received non-event payload', e, '\nerror: ', err);
-    }
+    const title = e?.target?.value ?? '';
+    setForm((s) => ({ ...s, title }));
   };
 
   const doSubmit = async (status) => {
@@ -61,21 +54,15 @@ export default function CreateLectureForm({
       fd.append('course_id', form.course_id);
       if (form.class_id) fd.append('class_id', form.class_id);
       fd.append('title', form.title);
-      // only append status/publish_date when explicitly provided
       if (typeof status !== 'undefined' && status !== null && status !== '') {
         fd.append('status', status);
         if (status === 'published') fd.append('publish_date', new Date().toISOString());
       }
 
-      // append files if any
-      const files = fileRef.current?.files;
-      if (files && files.length > 0) {
-        for (let i = 0; i < files.length; i++) {
-          fd.append('attachments', files[i]);
-        }
-      }
+      // Only a single file is supported — take the first one
+      const file = fileRef.current?.files?.[0];
+      if (file) fd.append('attachment', file);
 
-      // Use centralized API service; pass multipart headers so boundary is set
       let res;
       if (lecture && lecture.id) {
         res = await userAPI.updateLecture(lecture.id, fd, {
@@ -92,7 +79,6 @@ export default function CreateLectureForm({
         if (lecture) onUpdated?.(res.data);
         else onCreated?.(res.data);
         onClose?.();
-        // reset form
         setForm({ course_id: defaultCourseId || '', class_id: defaultClassId || '', title: '' });
         if (fileRef.current) fileRef.current.value = null;
       } else {
@@ -119,8 +105,8 @@ export default function CreateLectureForm({
         />
 
         <div className="form-group">
-          <label htmlFor="attachments">Attachments (files)</label>
-          <input id="attachments" name="attachments" type="file" ref={fileRef} multiple />
+          <label htmlFor="attachment">Attachment</label>
+          <input id="attachment" name="attachment" type="file" ref={fileRef} />
         </div>
 
         <div className="create-lecture-form__actions">

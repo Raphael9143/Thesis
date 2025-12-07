@@ -153,7 +153,7 @@ export default function AssignmentsList() {
       <Card>
         <div className="class-detail__panel">
           <div className="flex-between">
-            <h4 className="no-margin">Assignments</h4>
+            <h4 className="no-margin"></h4>
             <div className="create-button-section">
               <button
                 className="btn btn-primary btn-sm"

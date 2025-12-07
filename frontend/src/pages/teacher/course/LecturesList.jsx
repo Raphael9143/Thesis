@@ -150,7 +150,7 @@ export default function LecturesList() {
       <Card>
         <div className="class-detail__panel">
           <div className="flex-between">
-            <h4 className="no-margin">Lectures</h4>
+            <h4 className="no-margin"></h4>
             <div className="create-button-section">
               <button className="btn btn-primary btn-sm" onClick={() => setLectureModalOpen(true)}>
                 <i className="fa-solid fa-book"></i>

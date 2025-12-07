@@ -105,6 +105,7 @@ export default function AdminUsers() {
                     <th>Name</th>
                     <th>Email</th>
                     <th>Role</th>
+                    <th>Status</th>
                     <th>Created</th>
                     <th>Actions</th>
                   </tr>
@@ -118,6 +119,7 @@ export default function AdminUsers() {
                       <td>
                         <span className={`role-badge role-${u.role?.toLowerCase()}`}>{u.role}</span>
                       </td>
+                      <td>{u.status || '-'}</td>
                       <td>{new Date(u.createdAt).toLocaleDateString()}</td>
                       <td>
                         <button
@@ -127,6 +129,65 @@ export default function AdminUsers() {
                         >
                           View
                         </button>
+                        {u.status === 'BANNED' ? (
+                          <button
+                            className="btn btn-sm"
+                            onClick={async () => {
+                              if (!window.confirm('Enable this user?')) return;
+                              try {
+                                const res = await userAPI.enableAdminUser(u.id);
+                                if (res?.success) {
+                                  push({ title: 'Success', body: 'User enabled' });
+                                  loadUsers(page, roleFilter);
+                                } else {
+                                  push({
+                                    title: 'Error',
+                                    body: res?.message || 'Failed to enable user',
+                                  });
+                                }
+                              } catch (err) {
+                                console.error('Enable user error', err);
+                                push({
+                                  title: 'Error',
+                                  body:
+                                    err?.response?.data?.message || err.message || 'Server error',
+                                });
+                              }
+                            }}
+                            style={{ marginRight: 8 }}
+                          >
+                            Enable
+                          </button>
+                        ) : (
+                          <button
+                            className="btn btn-sm"
+                            onClick={async () => {
+                              if (!window.confirm('Disable this user? (soft-ban)')) return;
+                              try {
+                                const res = await userAPI.disableAdminUser(u.id);
+                                if (res?.success) {
+                                  push({ title: 'Success', body: 'User disabled' });
+                                  loadUsers(page, roleFilter);
+                                } else {
+                                  push({
+                                    title: 'Error',
+                                    body: res?.message || 'Failed to disable user',
+                                  });
+                                }
+                              } catch (err) {
+                                console.error('Disable user error', err);
+                                push({
+                                  title: 'Error',
+                                  body:
+                                    err?.response?.data?.message || err.message || 'Server error',
+                                });
+                              }
+                            }}
+                            style={{ marginRight: 8, color: '#d32f2f' }}
+                          >
+                            Disable
+                          </button>
+                        )}
                         <button
                           className="btn btn-sm btn-outline"
                           onClick={() => handleDelete(u.id)}
