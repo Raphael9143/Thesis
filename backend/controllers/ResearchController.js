@@ -387,6 +387,9 @@ const ResearchController = {
           .status(401)
           .json({ success: false, message: "Unauthorized" });
       const { title, description } = req.body;
+      // Accept project type: USE or OCL (default USE)
+      const typeInput = (req.body.type || "").toString().toUpperCase();
+      const type = ["USE", "OCL"].includes(typeInput) ? typeInput : "USE";
       // visibility: optional, must be PUBLIC or PRIVATE; default PRIVATE
       const visibilityInput = (req.body.visibility || "").toString().toUpperCase();
       const visibility = ["PUBLIC", "PRIVATE"].includes(visibilityInput)
@@ -397,37 +400,44 @@ const ResearchController = {
           .status(400)
           .json({ success: false, message: "title required" });
 
-      // Create empty .use file for the project
-      const fs = require("fs");
-      const path = require("path");
-      const uploadsDir = path.resolve(__dirname, "..", "uploads", "research");
-      if (!fs.existsSync(uploadsDir)) {
-        fs.mkdirSync(uploadsDir, { recursive: true });
+      let mainUseModelId = null;
+      if (type === "USE") {
+        // Create empty .use file for the project and UseModel only for USE-type projects
+        const fs = require("fs");
+        const path = require("path");
+        const uploadsDir = path.resolve(__dirname, "..", "uploads", "research");
+        if (!fs.existsSync(uploadsDir)) {
+          fs.mkdirSync(uploadsDir, { recursive: true });
+        }
+        const sanitizedTitle = title.replace(/[^a-z0-9]/gi, "_").toLowerCase();
+        const timestamp = Date.now();
+        const fileName = `${sanitizedTitle}_${timestamp}.use`;
+        const filePath = path.join(uploadsDir, fileName);
+        const emptyUseContent = "model EmptyModel\n";
+        fs.writeFileSync(filePath, emptyUseContent, "utf8");
+        const publicPath = `/uploads/research/${fileName}`;
+
+        // Create empty UseModel as main model for this project
+        const UseModel = require("../models/UseModel");
+        const emptyModel = await UseModel.create({
+          name: `${title} - Main Model`,
+          file_path: publicPath,
+          raw_text: emptyUseContent,
+          owner_id: req.user.userId,
+        });
+        mainUseModelId = emptyModel.id;
       }
-      const sanitizedTitle = title.replace(/[^a-z0-9]/gi, "_").toLowerCase();
-      const timestamp = Date.now();
-      const fileName = `${sanitizedTitle}_${timestamp}.use`;
-      const filePath = path.join(uploadsDir, fileName);
-      const emptyUseContent = "model EmptyModel\n";
-      fs.writeFileSync(filePath, emptyUseContent, "utf8");
-      const publicPath = `/uploads/research/${fileName}`;
 
-      // Create empty UseModel as main model for this project
-      const UseModel = require("../models/UseModel");
-      const emptyModel = await UseModel.create({
-        name: `${title} - Main Model`,
-        file_path: publicPath,
-        raw_text: emptyUseContent,
-        owner_id: req.user.userId,
-      });
-
-      const proj = await ResearchProject.create({
+      const projData = {
         title,
         description: description || null,
         owner_id: req.user.userId,
-        main_use_model_id: emptyModel.id,
         visibility,
-      });
+        type,
+      };
+      if (mainUseModelId) projData.main_use_model_id = mainUseModelId;
+
+      const proj = await ResearchProject.create(projData);
 
       // create owner membership
       await ResearchProjectMember.create({
