@@ -244,4 +244,36 @@ router.put(
   ConstraintController.updateAnswerStatus
 );
 
+// Delete an answer
+/**
+ * @swagger
+ * /api/constraints/answers/{answerId}:
+ *   delete:
+ *     summary: Delete an answer by id
+ *     tags:
+ *       - Constraints
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: answerId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: Answer deleted
+ *       '401':
+ *         description: Unauthorized
+ *       '403':
+ *         description: Forbidden
+ *       '404':
+ *         description: Answer not found
+ */
+router.delete(
+  "/answers/:answerId",
+  auth,
+  ConstraintController.deleteAnswer
+);
+
 module.exports = router;

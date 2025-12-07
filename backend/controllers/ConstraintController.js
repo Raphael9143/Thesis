@@ -241,6 +241,36 @@ const ConstraintController = {
       res.status(500).json({ success: false, message: "Server error" });
     }
   },
+  // Delete an answer. Contributor can delete their own; project owner/moderator can delete any
+  deleteAnswer: async (req, res) => {
+    try {
+      const { answerId } = req.params;
+      const userId = req.user && req.user.userId;
+      if (!userId) return res.status(401).json({ success: false, message: 'Unauthorized' });
+
+      const ans = await ConstraintAnswer.findByPk(answerId);
+      if (!ans) return res.status(404).json({ success: false, message: 'Answer not found' });
+
+      // If contributor owns it, allow deletion
+      if (ans.contributor_id === userId) {
+        await ans.destroy();
+        return res.json({ success: true, message: 'Answer deleted' });
+      }
+
+      // Otherwise check project owner/moderator rights
+      const question = await ConstraintQuestion.findByPk(ans.question_id);
+      if (!question) return res.status(404).json({ success: false, message: 'Question not found' });
+
+      const allowed = await isProjectModeratorOrOwner(question.research_project_id, userId);
+      if (!allowed) return res.status(403).json({ success: false, message: 'Forbidden' });
+
+      await ans.destroy();
+      return res.json({ success: true, message: 'Answer deleted' });
+    } catch (err) {
+      console.error('deleteAnswer error:', err);
+      res.status(500).json({ success: false, message: 'Server error' });
+    }
+  },
 };
 
 module.exports = ConstraintController;
