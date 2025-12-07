@@ -10,10 +10,11 @@ export default function ClassCard({
   onClick,
   badge,
   id,
-  resourceType, // 'class' or 'course'
+  resourceType, // 'class' or 'course' or 'project'
   description,
   className,
   maxDescriptionChars = 26,
+  onToggleStatus,
 }) {
   const role =
     typeof window !== 'undefined' && sessionStorage.getItem('role')
@@ -59,7 +60,9 @@ export default function ClassCard({
 
         {code && role === 'teacher' && <div className="class-card__code">{code}</div>}
 
-        {status && role === 'teacher' && status.toString().toLowerCase() === 'draft' ? (
+        {status &&
+        status.toString().toLowerCase() === 'draft' &&
+        (onToggleStatus || role === 'teacher') ? (
           <div
             className={`class-card__badge class-card__badge--clickable ${
               statusLoading ? 'is-loading' : ''
@@ -69,10 +72,16 @@ export default function ClassCard({
               if (!id || statusLoading) return;
               try {
                 setStatusLoading(true);
-                if (resourceType === 'course') {
-                  await userAPI.patchCourseStatus(id, 'active');
+                if (onToggleStatus) {
+                  // delegate status change to parent (e.g., projects list)
+                  await onToggleStatus(id);
                 } else {
-                  await userAPI.patchClassStatus(id, 'active');
+                  // fallback behavior for teacher/course/class
+                  if (resourceType === 'course') {
+                    await userAPI.patchCourseStatus(id, 'active');
+                  } else {
+                    await userAPI.patchClassStatus(id, 'active');
+                  }
                 }
                 setStatus('active');
               } catch (err) {

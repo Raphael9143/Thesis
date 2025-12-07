@@ -75,6 +75,39 @@ export default function ResearcherProjects() {
                 onClick={() =>
                   navigate(`/researcher/projects/${p.id}/details`, { state: { project: p } })
                 }
+                id={p.id}
+                resourceType="project"
+                onToggleStatus={async (projectId) => {
+                  try {
+                    const target = 'ACTIVE';
+                    const res = await userAPI.patchResearchProjectStatus(projectId, target);
+                    if (res?.success) {
+                      setProjects((prev) =>
+                        prev.map((pr) => (pr.id === projectId ? { ...pr, status: target } : pr))
+                      );
+                      push({
+                        title: 'Success',
+                        body: 'Project status updated to ACTIVE',
+                        type: 'success',
+                      });
+                    } else {
+                      push({
+                        title: 'Error',
+                        body: res?.message || 'Failed to update project status',
+                        type: 'error',
+                      });
+                    }
+                  } catch (err) {
+                    push({
+                      title: 'Error',
+                      body:
+                        err?.response?.data?.message ||
+                        err.message ||
+                        'Failed to update project status',
+                      type: 'error',
+                    });
+                  }
+                }}
               />
             ))}
           </div>
