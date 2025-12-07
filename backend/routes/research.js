@@ -991,6 +991,43 @@ router.get(
   ResearchController.getContributionComments
 );
 
+// DELETE /api/research/contributions/:contributionId/comments/:commentId - delete a comment
+/**
+ * @swagger
+ * /api/research/contributions/{contributionId}/comments/{commentId}:
+ *   delete:
+ *     summary: Delete a comment on a contribution
+ *     tags:
+ *       - Research
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: contributionId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: path
+ *         name: commentId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: Comment deleted
+ *       '401':
+ *         description: Unauthorized
+ *       '403':
+ *         description: Forbidden
+ *       '404':
+ *         description: Not found
+ */
+router.delete(
+  "/contributions/:contributionId/comments/:commentId",
+  auth,
+  ResearchController.deleteContributionComment
+);
+
 // Get contribution history for a project (public access)
 /**
  * @swagger

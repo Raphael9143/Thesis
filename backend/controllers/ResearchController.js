@@ -125,11 +125,16 @@ const ResearchController = {
         map.set(p.id, { ...p, myRole: "OWNER" });
       }
       for (const m of memberships) {
-        const proj = m.project && m.project.get ? m.project.get({ plain: true }) : m.project;
+        const proj =
+          m.project && m.project.get
+            ? m.project.get({ plain: true })
+            : m.project;
         if (!proj) continue;
         const existing = map.get(proj.id);
-        if (!existing) map.set(proj.id, { ...proj, myRole: m.role || "CONTRIBUTOR" });
-        else if (existing.myRole !== "OWNER") existing.myRole = m.role || existing.myRole;
+        if (!existing)
+          map.set(proj.id, { ...proj, myRole: m.role || "CONTRIBUTOR" });
+        else if (existing.myRole !== "OWNER")
+          existing.myRole = m.role || existing.myRole;
       }
 
       // Normalize shape: drop camelCase ownerId/mainUseModelId; rename myRole -> my_role
@@ -391,7 +396,9 @@ const ResearchController = {
       const typeInput = (req.body.type || "").toString().toUpperCase();
       const type = ["USE", "OCL"].includes(typeInput) ? typeInput : "USE";
       // visibility: optional, must be PUBLIC or PRIVATE; default PRIVATE
-      const visibilityInput = (req.body.visibility || "").toString().toUpperCase();
+      const visibilityInput = (req.body.visibility || "")
+        .toString()
+        .toUpperCase();
       const visibility = ["PUBLIC", "PRIVATE"].includes(visibilityInput)
         ? visibilityInput
         : "PRIVATE";
@@ -480,12 +487,10 @@ const ResearchController = {
           where: { research_project_id: projectId, user_id: req.user.userId },
         });
         if (!membership)
-          return res
-            .status(403)
-            .json({
-              success: false,
-              message: "You are not a member of this project",
-            });
+          return res.status(403).json({
+            success: false,
+            message: "You are not a member of this project",
+          });
       }
 
       // Accept file upload only (req.file or req.files)
@@ -617,11 +622,11 @@ const ResearchController = {
           .status(400)
           .json({ success: false, message: "Invalid project id" });
 
-      const where = { 
+      const where = {
         contributor_id: req.user.userId,
-        research_project_id: projectId 
+        research_project_id: projectId,
       };
-      
+
       // Optional filter by status
       if (req.query.status) {
         where.status = req.query.status.toUpperCase();
@@ -780,9 +785,7 @@ const ResearchController = {
 
       const members = await ResearchProjectMember.findAll({
         where: { research_project_id: projectId },
-        include: [
-          { model: User, as: "user", attributes: ["id", "full_name"] },
-        ],
+        include: [{ model: User, as: "user", attributes: ["id", "full_name"] }],
         order: [["joined_at", "ASC"]],
       });
 
@@ -883,7 +886,9 @@ const ResearchController = {
           .json({ success: false, message: "Contribution not found" });
 
       // Check project visibility
-      const project = await ResearchProject.findByPk(contrib.research_project_id);
+      const project = await ResearchProject.findByPk(
+        contrib.research_project_id
+      );
       if (!project)
         return res
           .status(404)
@@ -967,6 +972,77 @@ const ResearchController = {
     }
   },
 
+  deleteContributionComment: async (req, res) => {
+    try {
+      if (!req.user || !req.user.userId)
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized" });
+
+      const contributionId = parseInt(req.params.contributionId, 10);
+      const commentId = parseInt(req.params.commentId, 10);
+      if (!contributionId || !commentId)
+        return res.status(400).json({ success: false, message: "Invalid id" });
+
+      const ContributionComment = require("../models/ContributionComment");
+      const comment = await ContributionComment.findByPk(commentId);
+      if (!comment)
+        return res
+          .status(404)
+          .json({ success: false, message: "Comment not found" });
+
+      if (comment.contribution_id !== contributionId)
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: "Comment does not belong to contribution",
+          });
+
+      const userId = req.user.userId;
+      // If author, allow deletion
+      if (comment.user_id === userId) {
+        await comment.destroy();
+        return res.json({ success: true, message: "Comment deleted" });
+      }
+
+      // Otherwise check project owner/moderator
+      const contrib = await ResearchContribution.findByPk(contributionId);
+      if (!contrib)
+        return res
+          .status(404)
+          .json({ success: false, message: "Contribution not found" });
+
+      const project = await ResearchProject.findByPk(
+        contrib.research_project_id
+      );
+      if (!project)
+        return res
+          .status(404)
+          .json({ success: false, message: "Project not found" });
+
+      if (project.owner_id === userId) {
+        await comment.destroy();
+        return res.json({ success: true, message: "Comment deleted" });
+      }
+
+      const member = await ResearchProjectMember.findOne({
+        where: { research_project_id: project.id, user_id: userId },
+      });
+      if (member && (member.role === "OWNER" || member.role === "MODERATOR")) {
+        await comment.destroy();
+        return res.json({ success: true, message: "Comment deleted" });
+      }
+
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    } catch (err) {
+      console.error("deleteContributionComment error:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  },
+
   // Get contribution history for a specific project (public access)
   getContributionHistory: async (req, res) => {
     try {
@@ -978,7 +1054,7 @@ const ResearchController = {
 
       // Get all contributions sorted from newest to oldest
       const User = require("../models/User");
-      
+
       // Pagination
       const page = parseInt(req.query.page, 10) || 1;
       const limit = parseInt(req.query.limit, 10) || 10;
@@ -1033,12 +1109,10 @@ const ResearchController = {
       if (contrib.contributor_id !== req.user.userId)
         return res.status(403).json({ success: false, message: "Forbidden" });
       if (!["PENDING", "NEEDS_EDIT"].includes(contrib.status))
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "Cannot update in current status",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "Cannot update in current status",
+        });
 
       // Accept new file/raw_text
       let filePath = null;
@@ -1066,7 +1140,8 @@ const ResearchController = {
           .status(404)
           .json({ success: false, message: "file not found" });
 
-      const content = rawText || (filePath ? fs.readFileSync(filePath, "utf8") : null) || "";
+      const content =
+        rawText || (filePath ? fs.readFileSync(filePath, "utf8") : null) || "";
       const researchDir = path.resolve(__dirname, "..", "uploads", "research");
       if (!fs.existsSync(researchDir)) {
         fs.mkdirSync(researchDir, { recursive: true });
@@ -1077,7 +1152,9 @@ const ResearchController = {
       const publicPath = "/uploads/research/" + filename;
 
       // Get project to determine model name
-      const project = await ResearchProject.findByPk(contrib.research_project_id);
+      const project = await ResearchProject.findByPk(
+        contrib.research_project_id
+      );
       if (!project)
         return res
           .status(404)
@@ -1217,8 +1294,7 @@ const ResearchController = {
           .json({ success: false, message: "User not found" });
 
       const current = user.star_projects || [];
-      const want =
-        typeof req.body?.star === "boolean" ? req.body.star : null;
+      const want = typeof req.body?.star === "boolean" ? req.body.star : null;
 
       let next = current.slice();
       const idx = next.indexOf(projectId);
@@ -1334,7 +1410,8 @@ const ResearchController = {
       if (!status || !validStatuses.includes(status))
         return res.status(400).json({
           success: false,
-          message: "Invalid status. Must be one of: ACTIVE, ARCHIVED, COMPLETED, DRAFT",
+          message:
+            "Invalid status. Must be one of: ACTIVE, ARCHIVED, COMPLETED, DRAFT",
         });
 
       const project = await ResearchProject.findByPk(projectId);
@@ -1570,13 +1647,19 @@ const ResearchController = {
         const requesterMembership = await ResearchProjectMember.findOne({
           where: { research_project_id: projectId, user_id: req.user.userId },
         });
-        if (requesterMembership && ["OWNER", "MODERATOR"].includes(requesterMembership.role))
+        if (
+          requesterMembership &&
+          ["OWNER", "MODERATOR"].includes(requesterMembership.role)
+        )
           allowed = true;
       }
       if (!allowed)
         return res
           .status(403)
-          .json({ success: false, message: "Only owner or moderator can add contributors" });
+          .json({
+            success: false,
+            message: "Only owner or moderator can add contributors",
+          });
 
       const User = require("../models/User");
 
