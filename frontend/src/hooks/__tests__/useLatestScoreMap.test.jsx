@@ -8,7 +8,7 @@ vi.mock('../../../services/userAPI', () => ({
       success: true,
       data: { has_submission: true, score: id },
     })),
-    getExamLatestScore: vi.fn(async (id) => ({
+    getExamLatestScore: vi.fn(async () => ({
       success: true,
       data: { has_submission: false, score: null },
     })),

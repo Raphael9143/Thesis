@@ -4,7 +4,7 @@ import { render, waitFor } from '@testing-library/react';
 
 vi.mock('../../../services/userAPI', () => ({
   default: {
-    getAssignmentSubmissionHistory: vi.fn(async (id) => ({
+    getAssignmentSubmissionHistory: vi.fn(async () => ({
       success: true,
       data: [{ id: 1, created_at: '2020-01-01' }],
     })),

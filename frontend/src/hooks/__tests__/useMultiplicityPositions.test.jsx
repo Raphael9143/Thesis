@@ -12,7 +12,7 @@ const utils = {
 function Host({ onReady }) {
   const associations = [{ parts: [{ class: 'A' }, { class: 'B' }] }];
   const centerOf = (n) => ({ x: n === 'A' ? 10 : 50, y: 20 });
-  const getRect = (n) => ({ left: 0, top: 0, width: 10, height: 10 });
+  const getRect = () => ({ left: 0, top: 0, width: 10, height: 10 });
   const mp = useMultiplicityPositions(associations, centerOf, getRect, utils);
   React.useEffect(() => {
     if (onReady) onReady(mp);
