@@ -1,4 +1,5 @@
 const Researcher = require("../models/Researcher");
+const User = require("../models/User");
 
 const ResearcherController = {
   // Get current researcher profile
@@ -11,7 +12,15 @@ const ResearcherController = {
           .status(404)
           .json({ success: false, message: "Researcher not found!" });
       }
-      res.json({ success: true, data: researcher });
+      // Also include fields from auth/profile (user fields)
+      const user = await User.findByPk(researcherId, {
+        attributes: { exclude: ["password"] },
+      });
+      const merged = user
+        ? { ...user.get({ plain: true }), ...researcher.get({ plain: true }) }
+        : researcher.get({ plain: true });
+
+      res.json({ success: true, data: merged });
     } catch (error) {
       console.error("Get researcher profile error:", error);
       res.status(500).json({ success: false, message: "Server error" });
