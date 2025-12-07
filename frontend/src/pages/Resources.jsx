@@ -6,12 +6,14 @@ import userAPI from '../../services/userAPI';
 import toFullUrl from '../utils/FullURLFile';
 import FilePreview from '../components/ui/FilePreview';
 import { useNotifications } from '../contexts/NotificationContext';
+import useTitle from '../hooks/useTitle';
 
 export default function ResourcesPage() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { push } = useNotifications();
+  useTitle('Resources');
 
   useEffect(() => {
     let mounted = true;
@@ -44,7 +46,6 @@ export default function ResourcesPage() {
   return (
     <Section>
       <Card>
-        <h4 style={{ marginTop: 0 }}>Resources</h4>
         {loading && <div>Loading models...</div>}
         {error && <div className="text-error">{error}</div>}
         {!loading && !error && items.length === 0 && <div>No stored models.</div>}
