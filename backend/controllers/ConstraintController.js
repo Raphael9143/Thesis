@@ -1,6 +1,6 @@
-const path = require("path");
 const ConstraintQuestion = require("../models/ConstraintQuestion");
 const ConstraintAnswer = require("../models/ConstraintAnswer");
+const User = require("../models/User");
 const ResearchProject = require("../models/ResearchProject");
 const ResearchProjectMember = require("../models/ResearchProjectMember");
 
@@ -37,12 +37,12 @@ const ConstraintController = {
         return res.status(403).json({ success: false, message: "Forbidden" });
 
       let filePath = null;
-      if (req.file) {
-        // multer put file in req.file
-        filePath = path.join(
-          "/uploads/constraints_contribute",
-          req.file.filename
-        );
+      // multer conditionalUpload uses upload.any(), which places files in req.files (array).
+      // Accept either req.file (single) or first element of req.files (array).
+      const uploadedFile = req.file || (req.files && req.files.length ? req.files[0] : null);
+      if (uploadedFile) {
+        // Use URL-style forward slashes for stored public path (avoid Windows backslashes)
+        filePath = `/uploads/constraints_contribute/${uploadedFile.filename}`;
       }
 
       const q = await ConstraintQuestion.create({
@@ -111,11 +111,16 @@ const ConstraintController = {
           .status(404)
           .json({ success: false, message: "Question not found" });
 
-      const ans = await ConstraintAnswer.create({
+      const created = await ConstraintAnswer.create({
         question_id: questionId,
         contributor_id: userId,
         ocl_text,
         comment_text: comment_text || null,
+      });
+
+      // Return the created answer including contributor basic info
+      const ans = await ConstraintAnswer.findByPk(created.id, {
+        include: [{ model: User, as: "contributor", attributes: ["id", "full_name"] }],
       });
 
       res.status(201).json({ success: true, data: ans });
@@ -132,6 +137,7 @@ const ConstraintController = {
       const answers = await ConstraintAnswer.findAll({
         where: { question_id: questionId },
         order: [["created_at", "ASC"]],
+        include: [{ model: User, as: "contributor", attributes: ["id", "full_name"] }],
       });
       res.json({ success: true, data: answers });
     } catch (err) {
@@ -174,9 +180,64 @@ const ConstraintController = {
 
       ans.status = status;
       await ans.save();
-      res.json({ success: true, data: ans });
+
+      const ansWithContributor = await ConstraintAnswer.findByPk(ans.id, {
+        include: [{ model: User, as: "contributor", attributes: ["id", "full_name"] }],
+      });
+      res.json({ success: true, data: ansWithContributor });
     } catch (err) {
       console.error("updateAnswerStatus error:", err);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  },
+
+  // Count distinct participants (contributors) who answered a question
+  countParticipantsForQuestion: async (req, res) => {
+    try {
+      const { questionId } = req.params;
+      const question = await ConstraintQuestion.findByPk(questionId);
+      if (!question)
+        return res.status(404).json({ success: false, message: "Question not found" });
+
+      const participantCount = await ConstraintAnswer.count({
+        where: { question_id: questionId },
+        distinct: true,
+        col: "contributor_id",
+      });
+
+      res.json({
+        success: true,
+        data: {
+          question_id: parseInt(questionId, 10),
+          participant_count: participantCount,
+        },
+      });
+    } catch (err) {
+      console.error("countParticipantsForQuestion error:", err);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  },
+  // Count total number of answers for a question
+  countAnswersForQuestion: async (req, res) => {
+    try {
+      const { questionId } = req.params;
+      const question = await ConstraintQuestion.findByPk(questionId);
+      if (!question)
+        return res.status(404).json({ success: false, message: "Question not found" });
+
+      const answerCount = await ConstraintAnswer.count({
+        where: { question_id: questionId },
+      });
+
+      res.json({
+        success: true,
+        data: {
+          question_id: parseInt(questionId, 10),
+          answer_count: answerCount,
+        },
+      });
+    } catch (err) {
+      console.error("countAnswersForQuestion error:", err);
       res.status(500).json({ success: false, message: "Server error" });
     }
   },

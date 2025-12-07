@@ -148,6 +148,56 @@ router.post(
  */
 router.get("/questions/:questionId/answers", ConstraintController.listAnswers);
 
+// Count participants for a question
+/**
+ * @swagger
+ * /api/constraints/questions/{questionId}/participants/count:
+ *   get:
+ *     summary: Count distinct users who submitted answers for a question
+ *     tags:
+ *       - Constraints
+ *     parameters:
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: Participant count
+ *       '404':
+ *         description: Question not found
+ */
+router.get(
+  "/questions/:questionId/participants/count",
+  ConstraintController.countParticipantsForQuestion
+);
+
+// Count total answers for a question
+/**
+ * @swagger
+ * /api/constraints/questions/{questionId}/answers/count:
+ *   get:
+ *     summary: Count total answers submitted for a question
+ *     tags:
+ *       - Constraints
+ *     parameters:
+ *       - in: path
+ *         name: questionId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       '200':
+ *         description: Answer count
+ *       '404':
+ *         description: Question not found
+ */
+router.get(
+  "/questions/:questionId/answers/count",
+  ConstraintController.countAnswersForQuestion
+);
+
 // Update answer status (approve/reject)
 /**
  * @swagger
