@@ -32,7 +32,9 @@ export default function LeftSidebar({
           width={28}
           alt="UML"
         />
-        <div className="leftsidebar__brandText">OCL Education</div>
+        <div className="leftsidebar__brandText">
+          {role !== 'admin' ? 'OCL Education' : 'Admin Page'}
+        </div>
         <button
           className="leftsidebar__collapseBtn"
           onClick={onToggleCollapse}
@@ -43,32 +45,51 @@ export default function LeftSidebar({
       </div>
 
       <nav className="leftsidebar__nav">
-        <button className="leftsidebar__link" onClick={() => goto('/education/home')}>
+        <button
+          className="leftsidebar__link"
+          onClick={() => {
+            if (role === 'admin') goto('/education/admin/dashboard');
+            else goto('/education/home');
+          }}
+        >
           <i className="fa fa-tachometer-alt" aria-hidden />
           <span>Dashboard</span>
         </button>
-        <button
-          className="leftsidebar__link"
-          onClick={() =>
-            goto(role === 'student' ? '/education/student/classes' : '/education/teacher/classes')
-          }
-        >
-          <i className="fa fa-book" aria-hidden />
-          <span>Classes</span>
-        </button>
-        <button className="leftsidebar__link" onClick={() => goto('/education/resources')}>
-          <i className="fa fa-folder-open" aria-hidden />
-          <span>Resources</span>
-        </button>
+
+        {role === 'admin' ? (
+          <button className="leftsidebar__link" onClick={() => goto('/education/admin/users')}>
+            <i className="fa fa-users" aria-hidden />
+            <span>Users</span>
+          </button>
+        ) : (
+          <button
+            className="leftsidebar__link"
+            onClick={() =>
+              goto(role === 'student' ? '/education/student/classes' : '/education/teacher/classes')
+            }
+          >
+            <i className="fa fa-book" aria-hidden />
+            <span>Classes</span>
+          </button>
+        )}
+
+        {role !== 'admin' && (
+          <button className="leftsidebar__link" onClick={() => goto('/education/resources')}>
+            <i className="fa fa-folder-open" aria-hidden />
+            <span>Resources</span>
+          </button>
+        )}
       </nav>
 
       <div className="leftsidebar__bottom">
         {isLoggedIn && (
           <button
             className="leftsidebar__link"
-            onClick={() =>
-              goto(role === 'student' ? '/education/student/profile' : '/education/teacher/profile')
-            }
+            onClick={() => {
+              if (role === 'admin') goto('/education/admin/profile');
+              else if (role === 'student') goto('/education/student/profile');
+              else goto('/education/teacher/profile');
+            }}
           >
             <i className="fa fa-user" aria-hidden />
             <span>Profile</span>
