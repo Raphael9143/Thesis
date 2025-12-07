@@ -196,7 +196,8 @@ export default function UMLPage() {
               navigate('/uml/editor', { state: { model } });
             }}
           >
-            Edit
+            <i className="fa-solid fa-pen-to-square"></i>
+            <span>Edit</span>
           </button>
         </div>
       </div>

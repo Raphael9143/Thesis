@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Section from '../../../components/ui/Section';
 import Card from '../../../components/ui/Card';
 import userAPI from '../../../../services/userAPI';
@@ -19,7 +19,11 @@ export default function StudentSubmissions() {
   const [exams, setExams] = useState([]);
   const [gradeModalOpen, setGradeModalOpen] = useState(false);
   const [selectedForGrade, setSelectedForGrade] = useState(null);
-  const navigate = useNavigate();
+  // preview handled in modal instead of navigation
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewFilename, setPreviewFilename] = useState(null);
+  const [previewFilePath, setPreviewFilePath] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { push } = useNotifications();
@@ -201,13 +205,10 @@ export default function StudentSubmissions() {
                       <a
                         className="score-btn"
                         onClick={() => {
-                          navigate('/file/preview', {
-                            state: {
-                              url: toFullUrl(it.attachment),
-                              filename: it.attachment,
-                              filePath: it.attachment,
-                            },
-                          });
+                          setPreviewUrl(toFullUrl(it.attachment));
+                          setPreviewFilename(it.attachment);
+                          setPreviewFilePath(it.attachment);
+                          setPreviewOpen(true);
                         }}
                       >
                         Preview
@@ -236,6 +237,9 @@ export default function StudentSubmissions() {
           submission={selectedForGrade}
           onGraded={onGraded}
         />
+        <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="File preview">
+          <FilePreview url={previewUrl} filename={previewFilename} filePath={previewFilePath} />
+        </Modal>
         {/* Model/file preview moved to dedicated page /file/preview */}
       </Card>
     </Section>

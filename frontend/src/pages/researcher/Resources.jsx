@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Section from '../../components/ui/Section';
 import Card from '../../components/ui/Card';
 import FilePreview from '../../components/ui/FilePreview';
+import Modal from '../../components/ui/Modal';
 import userAPI from '../../../services/userAPI';
 import toFullUrl from '../../utils/FullURLFile';
 import { useNotifications } from '../../contexts/NotificationContext';
@@ -10,6 +11,10 @@ import useTitle from '../../hooks/useTitle';
 import '../../assets/styles/ui.css';
 
 export default function ResearcherResources() {
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewFilename, setPreviewFilename] = useState(null);
+  const [previewFilePath, setPreviewFilePath] = useState(null);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -73,8 +78,10 @@ export default function ResearcherResources() {
                     {m.file_path ? (
                       <a
                         onClick={() => {
-                          const fp = encodeURIComponent(m.file_path);
-                          window.open(`/file/preview?file=${fp}`, '_blank');
+                          setPreviewUrl(toFullUrl(m.file_path));
+                          setPreviewFilename(m.file_path);
+                          setPreviewFilePath(m.file_path);
+                          setPreviewOpen(true);
                         }}
                         style={{ cursor: 'pointer' }}
                       >
@@ -99,6 +106,9 @@ export default function ResearcherResources() {
           </table>
         )}
         {/* Preview now opens in a dedicated page /file/preview */}
+        <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="File preview">
+          <FilePreview url={previewUrl} filename={previewFilename} filePath={previewFilePath} />
+        </Modal>
       </Card>
     </Section>
   );

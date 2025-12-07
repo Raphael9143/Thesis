@@ -24,6 +24,10 @@ export default function SubmissionsView() {
   const [submissions, setSubmissions] = useState([]);
   const [gradeModalOpen, setGradeModalOpen] = useState(false);
   const [selectedForGrade, setSelectedForGrade] = useState(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewFilename, setPreviewFilename] = useState(null);
+  const [previewFilePath, setPreviewFilePath] = useState(null);
 
   const { push } = useNotifications();
 
@@ -124,9 +128,10 @@ export default function SubmissionsView() {
                           <a
                             className="score-btn"
                             onClick={() => {
-                              // open preview in a new browser tab
-                              const fp = encodeURIComponent(s.attachment);
-                              window.open(`/file/preview?file=${fp}`, '_blank');
+                              setPreviewUrl(toFullUrl(s.attachment));
+                              setPreviewFilename(s.attachment);
+                              setPreviewFilePath(s.attachment);
+                              setPreviewOpen(true);
                             }}
                           >
                             Preview
@@ -166,6 +171,9 @@ export default function SubmissionsView() {
                 );
               }}
             />
+            <Modal open={previewOpen} onClose={() => setPreviewOpen(false)} title="File preview">
+              <FilePreview url={previewUrl} filename={previewFilename} filePath={previewFilePath} />
+            </Modal>
             {/* Preview now opens on a dedicated page via /file/preview */}
           </div>
         )}
