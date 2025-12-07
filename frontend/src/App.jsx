@@ -24,6 +24,7 @@ import NotFound from './pages/NotFound';
 import './App.css';
 import TeacherProfile from './pages/teacher/Profile';
 import StudentProfile from './pages/student/Profile';
+import AdminProfile from './pages/admin/Profile';
 import StudentClassesPage from './pages/student/Classes';
 import ClassesPage from './pages/teacher/Classes';
 import ClassDetailTeacherPage from './pages/teacher/ClassDetail';
@@ -51,6 +52,10 @@ import RequireAuth from './components/routing/RequireAuth';
 import RequireRole from './components/routing/RequireRole';
 import Unauthorized from './pages/Unauthorized';
 import ResourcesPage from './pages/Resources';
+import AdminLayout from './layouts/AdminLayout';
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminUsers from './pages/admin/Users';
+import AdminUserDetail from './pages/admin/UserDetail';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -283,6 +288,23 @@ const router = createBrowserRouter(
             </RequireRole>
           }
         />
+
+        {/* Admin routes */}
+        <Route
+          path="/education/admin"
+          element={
+            <RequireRole allowed={['admin']}>
+              <AdminLayout />
+            </RequireRole>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="users/:id" element={<AdminUserDetail />} />
+          <Route path="profile" element={<AdminProfile />} />
+        </Route>
+
         <Route
           path="/education/student/classes/:classId/courses/:courseId/exams/:examId/submit"
           element={

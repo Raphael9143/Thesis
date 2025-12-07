@@ -4,7 +4,6 @@ import Section from '../components/ui/Section';
 import Card from '../components/ui/Card';
 import NotificationPopup from '../components/ui/NotificationPopup';
 import userAPI from '../../services/userAPI';
-import AdminHome from './admin/Home';
 import TeacherHome from './teacher/Home';
 import StudentHome from './student/Home';
 import ResearcherHomePage from './researcher/Home';
@@ -38,6 +37,13 @@ export default function Home() {
 
   useTitle('Dashboard');
 
+  // Redirect admin to admin dashboard
+  useEffect(() => {
+    if (role === 'admin' && location.pathname.startsWith('/education')) {
+      navigate('/education/admin/dashboard', { replace: true });
+    }
+  }, [role, location.pathname, navigate]);
+
   // Determine if we're in education portal or researcher dashboard
   const isEducationPortal = location.pathname.startsWith('/education');
   const isResearcherDashboard = location.pathname.startsWith('/researcher');
@@ -65,7 +71,6 @@ export default function Home() {
 
     // Education portal shows role-specific content
     if (isEducationPortal) {
-      if (role === 'admin') return <AdminHome />;
       if (role === 'teacher') return <TeacherHome />;
       if (role === 'student') return <StudentHome />;
     }
