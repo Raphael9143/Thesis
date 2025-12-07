@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
 import NotificationPopup from '../../components/ui/NotificationPopup';
@@ -12,59 +12,59 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
   const [description, setDescription] = useState('');
   const [year, setYear] = useState(new Date().getFullYear());
   const [maxStudents, setMaxStudents] = useState(30);
-  const [studentEmailsInput, setStudentEmailsInput] = useState('');
+  // const [studentEmailsInput, setStudentEmailsInput] = useState('');
   const [selectedStudentEmails, setSelectedStudentEmails] = useState([]);
 
-  const [studentEmailsList, setStudentEmailsList] = useState([]);
+  // const [studentEmailsList, setStudentEmailsList] = useState([]);
 
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyMsg, setNotifyMsg] = useState('');
   const [notifyType, setNotifyType] = useState('info');
   const { push } = useNotifications();
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await userAPI.getStudentEmails();
-        if (!mounted) return;
-        if (res?.success && Array.isArray(res.data)) {
-          setStudentEmailsList(res.data);
-        }
-      } catch (err) {
-        console.error('Failed to load student emails', err);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  // useEffect(() => {
+  //   let mounted = true;
+  //   (async () => {
+  //     try {
+  //       const res = await userAPI.getStudentEmails();
+  //       if (!mounted) return;
+  //       if (res?.success && Array.isArray(res.data)) {
+  //         setStudentEmailsList(res.data);
+  //       }
+  //     } catch (err) {
+  //       console.error('Failed to load student emails', err);
+  //     }
+  //   })();
+  //   return () => {
+  //     mounted = false;
+  //   };
+  // }, []);
 
-  const studentEmails = useMemo(() => studentEmailsList || [], [studentEmailsList]);
+  // const studentEmails = useMemo(() => studentEmailsList || [], [studentEmailsList]);
 
-  const suggestions = useMemo(() => {
-    const q = studentEmailsInput.trim().toLowerCase();
-    if (!q) return [];
-    return studentEmails
-      .filter((e) => e.toLowerCase().includes(q) && !selectedStudentEmails.includes(e))
-      .slice(0, 10);
-  }, [studentEmailsInput, studentEmails, selectedStudentEmails]);
+  // const suggestions = useMemo(() => {
+  //   const q = studentEmailsInput.trim().toLowerCase();
+  //   if (!q) return [];
+  //   return studentEmails
+  //     .filter((e) => e.toLowerCase().includes(q) && !selectedStudentEmails.includes(e))
+  //     .slice(0, 10);
+  // }, [studentEmailsInput, studentEmails, selectedStudentEmails]);
 
-  const addEmail = (email) => {
-    if (!email) return;
-    if (!studentEmails.includes(email)) {
-      setNotifyMsg('Email not found or not a student');
-      setNotifyType('error');
-      setNotifyOpen(true);
-      return;
-    }
-    if (!selectedStudentEmails.includes(email)) {
-      setSelectedStudentEmails((s) => [...s, email]);
-    }
-    setStudentEmailsInput('');
-  };
+  // const addEmail = (email) => {
+  //   if (!email) return;
+  //   if (!studentEmails.includes(email)) {
+  //     setNotifyMsg('Email not found or not a student');
+  //     setNotifyType('error');
+  //     setNotifyOpen(true);
+  //     return;
+  //   }
+  //   if (!selectedStudentEmails.includes(email)) {
+  //     setSelectedStudentEmails((s) => [...s, email]);
+  //   }
+  //   setStudentEmailsInput('');
+  // };
 
-  const removeEmail = (email) => setSelectedStudentEmails((s) => s.filter((x) => x !== email));
+  // const removeEmail = (email) => setSelectedStudentEmails((s) => s.filter((x) => x !== email));
 
   useEffect(() => {
     if (!open) {
@@ -75,7 +75,7 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
       setYear(new Date().getFullYear());
       setMaxStudents(30);
       setSelectedStudentEmails([]);
-      setStudentEmailsInput('');
+      // setStudentEmailsInput('');
     }
   }, [open]);
 
@@ -211,9 +211,9 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
           </div>
         </div>
 
-        <div className="create-class-student-emails">
-          <label className="font-600">Student emails</label>
-          <div className="input-row">
+        {/* <div className="create-class-student-emails"> */}
+        {/* <label className="font-600">Student emails</label> */}
+        {/* <div className="input-row">
             <div className="input-group">
               <input
                 className="auth-input"
@@ -229,8 +229,8 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
                 <span>Add</span>
               </button>
             </div>
-          </div>
-          {suggestions.length > 0 && (
+          </div> */}
+        {/* {suggestions.length > 0 && (
             <div className="suggestions">
               {suggestions.map((s) => (
                 <button
@@ -243,8 +243,8 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
                 </button>
               ))}
             </div>
-          )}
-          {selectedStudentEmails.length > 0 && (
+          )} */}
+        {/* {selectedStudentEmails.length > 0 && (
             <div className="selected-emails">
               {selectedStudentEmails.map((e) => (
                 <div key={e} className="email-chip">
@@ -256,7 +256,7 @@ export default function CreateClassModal({ open, onClose, onCreated }) {
               ))}
             </div>
           )}
-        </div>
+        </div> */}
 
         <div className="create-class-actions">
           <button type="button" className="btn btn-outline btn-sm" onClick={onClose}>
