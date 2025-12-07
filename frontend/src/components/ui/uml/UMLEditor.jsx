@@ -652,7 +652,6 @@ export default function UMLEditor({ initialModel = null }) {
     setExporting(true);
     try {
       const modelJson = buildModelJson();
-      console.log(JSON.stringify(modelJson));
       const res = await userAPI.convertUmlJson(modelJson); // backend expects raw model JSON body
       const data = res?.data ?? res;
       // Accept either plain string or structured object

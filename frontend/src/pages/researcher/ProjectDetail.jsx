@@ -103,7 +103,6 @@ export default function ResearcherProjectDetail() {
     setStarLoading(true);
     try {
       const res = await userAPI.toggleResearchProjectStar(projectId);
-      console.log('Toggle star response:', res);
       if (res?.success && res.data?.starred_ids) {
         const starredIds = res.data.starred_ids;
         const newStarred = starredIds.includes(Number(projectId));

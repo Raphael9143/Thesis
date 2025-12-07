@@ -150,7 +150,6 @@ export default function CreateAssignmentForm({
       }
       // append main .use file only if provided
       if (useFile) fd.append('attachment', useFile);
-      console.log(files);
 
       // optional answer file (teacher-provided model)
       const answerFiles = answerRef.current?.files;
