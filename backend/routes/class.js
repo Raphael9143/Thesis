@@ -469,6 +469,7 @@ router.get("/", auth, ClassController.getAllClasses);
  *           type: integer
  *         required: true
 *         description: Class ID
+ *     description: Returns class information. Students cannot view classes with status `draft`.
  *     responses:
  *       200:
 *         description: Class information

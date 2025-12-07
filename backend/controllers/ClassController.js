@@ -41,6 +41,7 @@ const ClassController = {
           .status(404)
           .json({ success: false, message: "Class not found." });
       }
+      
       // Count number of students
       const count = await ClassStudent.count({ where: { class_id } });
       res.json({ success: true, class_id, student_count: count });
@@ -652,6 +653,10 @@ const ClassController = {
         return res
           .status(404)
           .json({ success: false, message: "Class not found." });
+      }
+      // Students should not be able to view classes in draft status
+      if ((user.role || '').toUpperCase() === 'STUDENT' && (foundClass.status || '').toLowerCase() === 'draft') {
+        return res.status(403).json({ success: false, message: "You don't have permission to view this class." });
       }
       // Only admin, homeroom teacher, or a student member of the class can view
       if (

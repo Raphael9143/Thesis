@@ -11,6 +11,7 @@ const CourseController = require("../controllers/CourseController");
  *     tags: [Course]
  *     security:
  *       - bearerAuth: []
+ *     description: Returns courses visible to the caller. Students will not receive courses with status `DRAFT`.
  *     responses:
  *       200:
  *         description: List of courses
@@ -108,6 +109,7 @@ router.post("/", auth, CourseController.createCourse);
  *           type: integer
  *         required: true
  *         description: Class ID
+ *     description: Returns courses mapped to the class. Students will not receive courses with status `DRAFT`.
  *     responses:
  *       200:
  *         description: List of courses for the class

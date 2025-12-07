@@ -7,6 +7,12 @@ const CourseController = {
   // Get list of all courses
   getAllCourses: async (req, res) => {
     try {
+      const user = req.user || {};
+      // Students must not see DRAFT courses
+      if ((user.role || '').toUpperCase() === 'STUDENT') {
+        const courses = await Course.findAll({ where: { status: 'ACTIVE' } });
+        return res.json({ success: true, data: courses });
+      }
       const courses = await Course.findAll();
       res.json({ success: true, data: courses });
     } catch (error) {
@@ -95,7 +101,11 @@ const CourseController = {
           .json({ success: false, message: "Class not found." });
       }
       // Retrieve courses via N-N relationship
-      const courses = await foundClass.getCourses();
+      const user = req.user || {};
+      let courses = await foundClass.getCourses();
+      if ((user.role || '').toUpperCase() === 'STUDENT') {
+        courses = courses.filter((c) => (c.status || '').toUpperCase() === 'ACTIVE');
+      }
       res.json({ success: true, data: courses });
     } catch (error) {
       console.error("Get courses by class error:", error);
@@ -241,6 +251,10 @@ const CourseController = {
           .status(404)
           .json({ success: false, message: "Course not found." });
       }
+      const user = req.user || {};
+      if ((user.role || '').toUpperCase() === 'STUDENT' && (course.status || '').toUpperCase() === 'DRAFT') {
+        return res.status(403).json({ success: false, message: 'You do not have permission to view this course.' });
+      }
       res.json({ success: true, data: course });
     } catch (error) {
       console.error("Get course by id error:", error);
@@ -257,6 +271,10 @@ const CourseController = {
         return res
           .status(404)
           .json({ success: false, message: "Course not found." });
+      }
+      const user = req.user || {};
+      if ((user.role || '').toUpperCase() === 'STUDENT' && (course.status || '').toUpperCase() === 'DRAFT') {
+        return res.status(403).json({ success: false, message: 'You do not have permission to view this course.' });
       }
       res.json({ success: true, data: course });
     } catch (error) {
