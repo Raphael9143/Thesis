@@ -33,6 +33,21 @@ router.get('/stats', AdminController.stats);
  *           type: string
  *         description: Filter by role (STUDENT|TEACHER|ADMIN|RESEARCHER)
  *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: Filter by status (ACTIVE|BANNED)
+ *       - in: query
+ *         name: email
+ *         schema:
+ *           type: string
+ *         description: Exact email filter
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Keyword search on full_name or email
+ *       - in: query
  *         name: page
  *         schema:
  *           type: integer
@@ -96,6 +111,44 @@ router.post('/users', AdminController.createUser);
  *         description: User returned
  */
 router.get('/users/:id', AdminController.getUser);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}/disable:
+ *   patch:
+ *     summary: Disable (ban) a user
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User disabled
+ */
+router.patch('/users/:id/disable', AdminController.disableUser);
+
+/**
+ * @swagger
+ * /api/admin/users/{id}/enable:
+ *   patch:
+ *     summary: Enable (unban) a user
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User enabled
+ */
+router.patch('/users/:id/enable', AdminController.enableUser);
 
 /**
  * @swagger
