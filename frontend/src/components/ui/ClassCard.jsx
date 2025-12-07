@@ -70,6 +70,9 @@ export default function ClassCard({
             onClick={async (e) => {
               e.stopPropagation();
               if (!id || statusLoading) return;
+              // confirm before activating a draft
+              if (!window.confirm('Activate this draft? This will make it active. Continue?'))
+                return;
               try {
                 setStatusLoading(true);
                 if (onToggleStatus) {
