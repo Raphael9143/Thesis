@@ -13,6 +13,7 @@ export default function ContributionComments({ contributionId, projectStatus }) 
   const [submitting, setSubmitting] = useState(false);
 
   const currentUserId = Number(sessionStorage.getItem('userId'));
+  const role = (sessionStorage.getItem('role') || '').toString().toLowerCase();
 
   const fetchComments = useCallback(async () => {
     setLoading(true);
@@ -64,6 +65,21 @@ export default function ContributionComments({ contributionId, projectStatus }) 
     }
   };
 
+  const handleDeleteComment = async (commentId) => {
+    if (!commentId) return;
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+    try {
+      const res = await userAPI.deleteContributionComment(contributionId, commentId);
+      if (res?.success) {
+        push({ title: 'Success', body: 'Comment deleted' });
+        await fetchComments();
+      }
+    } catch (err) {
+      console.error('Delete comment error:', err);
+      push({ title: 'Error', body: err?.response?.data?.message || 'Failed to delete comment' });
+    }
+  };
+
   return (
     <div className="contribution-comments-container">
       <h3>Comments ({comments.length})</h3>
@@ -96,6 +112,22 @@ export default function ContributionComments({ contributionId, projectStatus }) 
                     )}
                   </span>
                   <span className="contribution-comment-date">{fmtDate(comment.created_at)}</span>
+                  {(comment.user_id === currentUserId ||
+                    role === 'admin' ||
+                    role === 'researcher') && (
+                    <span
+                      role="button"
+                      aria-label="Delete comment"
+                      title="Delete comment"
+                      style={{ marginLeft: 8, color: 'red', cursor: 'pointer' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteComment(comment.id);
+                      }}
+                    >
+                      <i className="fa-solid fa-trash" />
+                    </span>
+                  )}
                 </div>
                 <div className="contribution-comment-text">{comment.comment_text}</div>
               </div>

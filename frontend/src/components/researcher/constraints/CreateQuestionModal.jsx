@@ -54,8 +54,6 @@ export default function CreateQuestionModal({ open, onClose, projectId, onCreate
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
-      console.log('Create question response', formData, res);
-
       if (res?.success) {
         setNotifyMsg('Question created');
         setNotifyType('success');
@@ -103,17 +101,19 @@ export default function CreateQuestionModal({ open, onClose, projectId, onCreate
           inputProps={{ className: 'file-input-no-border' }}
         />
 
-        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+        <div style={{ display: 'flex', gap: 8, marginTop: 12, justifyContent: 'center' }}>
           <button
             type="button"
             className="btn btn-outline btn-sm"
             onClick={onClose}
             disabled={submitting}
           >
-            Cancel
+            <i className="fa-solid fa-xmark"></i>
+            <span>Cancel</span>
           </button>
           <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
-            {submitting ? 'Creating...' : 'Create Question'}
+            <i className="fa-solid fa-upload"></i>
+            <span>Create</span>
           </button>
         </div>
       </form>

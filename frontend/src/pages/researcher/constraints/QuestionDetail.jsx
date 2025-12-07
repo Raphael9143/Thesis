@@ -8,6 +8,7 @@ import userAPI from '../../../../services/userAPI';
 import toFullUrl from '../../../utils/FullURLFile';
 import fmtDate from '../../../utils/FormatDate';
 import useTitle from '../../../hooks/useTitle';
+import { useNotifications } from '../../../contexts/NotificationContext';
 import '../../..//assets/styles/pages/ProjectDetail.css';
 
 export default function QuestionDetail() {
@@ -27,7 +28,11 @@ export default function QuestionDetail() {
   useTitle(titleText);
   const [commentText, setCommentText] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [projectStatus, setProjectStatus] = useState(null);
+  const [isOwner, setIsOwner] = useState(false);
+  const [isModerator, setIsModerator] = useState(false);
   const currentUserId = Number(sessionStorage.getItem('userId'));
+  const { push } = useNotifications();
 
   useEffect(() => {
     let mounted = true;
@@ -40,6 +45,27 @@ export default function QuestionDetail() {
             const found = (res.data || []).find((q) => String(q.id) === String(questionId));
             setQuestion(found || null);
           }
+        }
+        // fetch project status and members to determine permissions
+        try {
+          const [pr, membersRes] = await Promise.all([
+            userAPI.getResearchProject(projectId),
+            userAPI.getResearchProjectMembers(projectId),
+          ]);
+          if (mounted && pr?.success) setProjectStatus(pr.data?.status || null);
+          if (mounted && membersRes?.success) {
+            const membersData = membersRes.data;
+            const cur = Number(sessionStorage.getItem('userId'));
+            setIsOwner(Boolean(membersData?.owner && membersData.owner.id === cur));
+            setIsModerator(
+              Boolean(
+                Array.isArray(membersData?.moderators) &&
+                  membersData.moderators.some((m) => m.id === cur)
+              )
+            );
+          }
+        } catch (err) {
+          console.warn('Project fetch error', err);
         }
       } catch (err) {
         console.error('Fetch question error', err);
@@ -155,6 +181,7 @@ export default function QuestionDetail() {
   }, [question?.uml_use_file_path]);
 
   const handleSubmit = async () => {
+    if (projectStatus === 'CLOSED') return;
     if (!oclText.trim()) return;
     setSubmitting(true);
     try {
@@ -184,6 +211,28 @@ export default function QuestionDetail() {
     }
   };
 
+  const handleDeleteAnswer = async (answerId) => {
+    if (!window.confirm('Delete this answer? This action cannot be undone.')) return;
+    try {
+      const res = await userAPI.deleteConstraintAnswer(answerId);
+      if (res?.success) {
+        try {
+          push({ title: 'Answer deleted', body: 'The answer was removed.' });
+        } catch (e) {
+          console.warn('Notification push failed', e);
+        }
+        await fetchAnswers();
+      }
+    } catch (err) {
+      console.error('Delete answer error', err);
+      try {
+        push({ title: 'Error', body: err?.response?.data?.message || 'Failed to delete answer' });
+      } catch (e) {
+        console.warn('Notification push failed', e);
+      }
+    }
+  };
+
   return (
     <Section>
       <Card>
@@ -204,22 +253,29 @@ export default function QuestionDetail() {
 
                 <div style={{ marginTop: 16 }}>
                   <h3>Submit OCL</h3>
-                  <textarea
-                    value={oclText}
-                    onChange={(e) => setOclText(e.target.value)}
-                    rows={8}
-                    style={{ width: '100%', fontFamily: 'monospace' }}
-                    placeholder="Enter OCL text here"
-                  />
-                  <div style={{ marginTop: 8 }}>
-                    <button
-                      className="btn btn-primary btn-sm"
-                      onClick={handleSubmit}
-                      disabled={submitting}
-                    >
-                      {submitting ? 'Submitting...' : 'Submit OCL'}
-                    </button>
-                  </div>
+                  {projectStatus === 'CLOSED' ? (
+                    <div className="text-muted">Project is closed - answering disabled.</div>
+                  ) : (
+                    <>
+                      <textarea
+                        value={oclText}
+                        onChange={(e) => setOclText(e.target.value)}
+                        rows={8}
+                        style={{ width: '100%', fontFamily: 'monospace' }}
+                        placeholder="Enter OCL text here"
+                      />
+                      <div style={{ marginTop: 8 }}>
+                        <button
+                          className="btn btn-primary btn-sm"
+                          onClick={handleSubmit}
+                          disabled={submitting}
+                        >
+                          <i className="fa-solid fa-upload"></i>
+                          <span>Submit</span>
+                        </button>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div style={{ marginTop: 24 }}>
@@ -250,6 +306,20 @@ export default function QuestionDetail() {
                               <span className="contribution-comment-date">
                                 {fmtDate(a.created_at)}
                               </span>
+                              {(isOwner || isModerator) && (
+                                <span
+                                  role="button"
+                                  aria-label="Delete answer"
+                                  title="Delete answer"
+                                  style={{ marginLeft: 8, color: 'red', cursor: 'pointer' }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteAnswer(a.id);
+                                  }}
+                                >
+                                  <i className="fa-solid fa-trash" />
+                                </span>
+                              )}
                             </div>
                             <div className="contribution-comment-text">
                               <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>
@@ -260,21 +330,24 @@ export default function QuestionDetail() {
                               )}
                             </div>
 
-                            {(a.status === 'PENDING' || a.status === 'REJECTED') && (
+                            {a.status === 'PENDING' && (
                               <div style={{ marginTop: 8 }}>
                                 <button
                                   className="btn btn-outline btn-sm"
                                   onClick={() => handleUpdateAnswerStatus(a.id, 'APPROVED')}
                                 >
-                                  Approve
+                                  <i className="fa-solid fa-check"></i>
+                                  <span>Approve</span>
                                 </button>
-                                <button
-                                  className="btn btn-outline btn-sm"
-                                  style={{ marginLeft: 8 }}
-                                  onClick={() => handleUpdateAnswerStatus(a.id, 'REJECTED')}
+                                <span
+                                  role="button"
+                                  aria-label="Reject answer"
+                                  title="Reject answer"
+                                  style={{ marginLeft: 8, color: 'red', cursor: 'pointer' }}
+                                  onClick={() => handleDeleteAnswer(a.id)}
                                 >
-                                  Reject
-                                </button>
+                                  <i className="fa-solid fa-trash" />
+                                </span>
                               </div>
                             )}
                           </div>
@@ -289,7 +362,7 @@ export default function QuestionDetail() {
 
               <div className="question-detail-side">
                 {question?.uml_use_file_path && (
-                  <div style={{ marginBottom: 12 }}>
+                  <div style={{ marginBottom: 12, width: '90%' }}>
                     <h3>Model</h3>
                     {filePreviewInvalid ? (
                       <div className="text-error">{filePreviewError}</div>

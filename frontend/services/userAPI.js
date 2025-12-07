@@ -259,6 +259,9 @@ const userAPI = {
   // POST /api/research/contributions/{id}/comments - Add comment { comment_text }
   addContributionComment: (id, data) =>
     axiosClient.post(`research/contributions/${id}/comments`, data),
+  // DELETE /api/research/contributions/{contributionId}/comments/{commentId}
+  deleteContributionComment: (contributionId, commentId) =>
+    axiosClient.delete(`research/contributions/${contributionId}/comments/${commentId}`),
   // POST /api/research/contributions/{id}/resubmit - Resubmit contribution { path, rawText }
   resubmitContribution: (id, data) => axiosClient.patch(`research/contributions/${id}`, data),
 
@@ -278,10 +281,10 @@ const userAPI = {
   // PUT /api/constraints/answers/:answerId/status { status }
   updateConstraintAnswerStatus: (answerId, status) =>
     axiosClient.put(`constraints/answers/${answerId}/status`, { status }),
-  // GET /api/constraints/questions/{id}/participants/count -> { success, data: { question_id, participant_count } }
+  // DELETE /api/constraints/answers/{id}
+  deleteConstraintAnswer: (answerId) => axiosClient.delete(`constraints/answers/${answerId}`),
   getQuestionParticipantCount: (questionId) =>
     axiosClient.get(`constraints/questions/${questionId}/participants/count`),
-  // GET /api/constraints/questions/{id}/answers/count -> { success, data: { question_id, answer_count } }
   getQuestionAnswerCount: (questionId) =>
     axiosClient.get(`constraints/questions/${questionId}/answers/count`),
 };
