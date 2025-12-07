@@ -80,12 +80,7 @@ const User = sequelize.define(
       allowNull: true,
     },
     status: {
-      type: DataTypes.ENUM(
-        "ACTIVE",
-        "INACTIVE",
-        "BANNED",
-        "PENDING_VERIFICATION"
-      ),
+      type: DataTypes.ENUM("ACTIVE", "BANNED"),
       allowNull: false,
       defaultValue: "ACTIVE",
     },

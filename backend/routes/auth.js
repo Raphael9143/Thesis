@@ -76,7 +76,9 @@ const auth = require("../middlewares/auth");
  *           type: string
  *         status:
  *           type: string
- *           enum: [ACTIVE, INACTIVE, BANNED, PENDING_VERIFICATION]
+ *           enum:
+ *             - ACTIVE
+ *             - BANNED
  *         created_at:
  *           type: string
  *           format: date-time
