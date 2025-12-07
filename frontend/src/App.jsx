@@ -39,7 +39,6 @@ import StudentExamsList from './pages/student/course/ExamsList';
 import StudentsList from './pages/teacher/course/StudentsList';
 import StudentSubmissions from './pages/teacher/course/StudentSubmissions';
 import Submissions from './pages/teacher/course/Submissions';
-import SubmissionsView from './pages/teacher/course/SubmissionsView';
 import ClassCoursesTeacherPage from './pages/teacher/ClassCourses';
 import ClassDetailStudentPage from './pages/student/ClassDetail';
 import ClassCoursesStudentPage from './pages/student/ClassCourses';
@@ -160,22 +159,6 @@ const router = createBrowserRouter(
             element={
               <RequireRole allowed={['teacher']}>
                 <Submissions />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="submissions/assignment/:assignmentId"
-            element={
-              <RequireRole allowed={['teacher']}>
-                <SubmissionsView />
-              </RequireRole>
-            }
-          />
-          <Route
-            path="submissions/exam/:examId"
-            element={
-              <RequireRole allowed={['teacher']}>
-                <SubmissionsView />
               </RequireRole>
             }
           />

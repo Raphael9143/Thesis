@@ -135,6 +135,12 @@ const userAPI = {
   createAssignment: (data, config) => axiosClient.post('assignments', data, config),
   // Update assignment (id, data FormData or JSON)
   updateAssignment: (id, data, config) => axiosClient.put(`assignments/${id}`, data, config),
+  // Patch assignment (partial update)
+  patchAssignment: (id, data, config) => axiosClient.patch(`assignments/${id}`, data, config),
+  // Patch assignment answer (teacher sets official answer).
+  // Payload: { answer: string($binary) } or multipart with file
+  patchAssignmentAnswer: (id, data, config) =>
+    axiosClient.patch(`assignments/${id}/answer`, data, config),
   // Delete assignment
   deleteAssignment: (id) => axiosClient.delete(`assignments/${id}`),
   // Patch assignment status
@@ -144,6 +150,11 @@ const userAPI = {
   createExam: (data, config) => axiosClient.post('exams', data, config),
   // Update exam (id, data FormData or JSON)
   updateExam: (id, data, config) => axiosClient.put(`exams/${id}`, data, config),
+  // Patch exam (partial update)
+  patchExam: (id, data, config) => axiosClient.patch(`exams/${id}`, data, config),
+  // Patch exam answer (teacher sets official answer).
+  // Payload: { answer: string($binary) } or multipart with file
+  patchExamAnswer: (id, data, config) => axiosClient.patch(`exams/${id}/answer`, data, config),
   // Delete exam
   deleteExam: (id) => axiosClient.delete(`exams/${id}`),
   // Patch exam status (e.g., publish)

@@ -71,7 +71,7 @@ input[type='time'] {
   padding: 24px 64px;
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   overflow-y: auto;
   /* allow body to take remaining space when container has limited height */
   flex: 1 1 auto;

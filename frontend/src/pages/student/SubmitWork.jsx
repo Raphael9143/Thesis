@@ -140,7 +140,6 @@ export default function SubmitWork() {
         const data = res.data || {};
         if (typeof data.auto_grader_score !== 'undefined' || data.feedback) {
           setAutoScore(data.auto_grader_score ?? null);
-          console.log(data);
           setAutoFeedbackText(data.feedback ?? '');
           setScoreModalOpen(true);
         } else {

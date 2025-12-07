@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Section from '../../../components/ui/Section';
 import Card from '../../../components/ui/Card';
+import Tabs from '../../../components/ui/Tabs';
 import userAPI from '../../../../services/userAPI';
 import '../../../assets/styles/ui.css';
 import useTitle from '../../../hooks/useTitle';
@@ -26,6 +27,8 @@ export default function StudentSubmissions() {
   const [previewFilePath, setPreviewFilePath] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [detailTab, setDetailTab] = useState('problem'); // 'problem' | 'submission'
   const { push } = useNotifications();
 
   useTitle('Student submissions');
@@ -123,6 +126,29 @@ export default function StudentSubmissions() {
     }
   };
 
+  const openDetailFor = async (it) => {
+    setDetailTab('problem');
+    setLoading(true);
+    try {
+      // fetch full resource (assignment/exam) so we have answer_attachment
+      const itemKind = it.kind || kind || 'assignment';
+      let rres;
+      if (itemKind === 'assignment') rres = await userAPI.getAssignmentById(it.id);
+      else rres = await userAPI.getExamById(it.id);
+      if (rres?.success) {
+        setSelectedItem(rres.data);
+      } else {
+        // fallback to the summary item
+        setSelectedItem(it);
+      }
+    } catch (err) {
+      console.warn('Failed to load full resource for detail view', err);
+      setSelectedItem(it);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onGraded = async () => {
     // refresh the student's assignment/exam list after grading
     try {
@@ -147,20 +173,14 @@ export default function StudentSubmissions() {
   return (
     <Section>
       <Card>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-          <button
-            className={`btn ${kind === 'assignments' ? 'btn-primary' : 'btn-signin'}`}
-            onClick={() => setKind('assignments')}
-          >
-            Assignments
-          </button>
-          <button
-            className={`btn ${kind === 'exams' ? 'btn-primary' : 'btn-signin'}`}
-            onClick={() => setKind('exams')}
-          >
-            Exams
-          </button>
-        </div>
+        <Tabs
+          tabs={[
+            { value: 'assignments', label: 'Assignments' },
+            { value: 'exams', label: 'Exams' },
+          ]}
+          activeTab={kind}
+          onChange={(v) => setKind(v)}
+        />
 
         {loading && <div>Loading {kind}...</div>}
         {error && <div className="text-error">{error}</div>}
@@ -169,7 +189,7 @@ export default function StudentSubmissions() {
           <div>No {kind} found for this student in this course.</div>
         )}
 
-        {!loading && !error && items.length > 0 && (
+        {!loading && !error && !selectedItem && items.length > 0 && (
           <table className="table students-table">
             <thead>
               <tr>
@@ -186,7 +206,16 @@ export default function StudentSubmissions() {
               {items.map((it, idx) => (
                 <tr key={`${it.kind}-${it.id}-${idx}`}>
                   <td style={{ width: 48 }}>{idx + 1}</td>
-                  <td>{it.title}</td>
+                  <td>
+                    <a
+                      className="score-btn"
+                      onClick={() => {
+                        openDetailFor(it);
+                      }}
+                    >
+                      {it.title}
+                    </a>
+                  </td>
                   <td>{it.due_date ? new Date(it.due_date).toLocaleString() : '-'}</td>
                   <td>
                     {typeof it.submissions_count !== 'undefined'
@@ -231,6 +260,42 @@ export default function StudentSubmissions() {
             </tbody>
           </table>
         )}
+        {selectedItem && (
+          <Card>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0 }}>{selectedItem.title}</h3>
+              <div>
+                <button className="btn btn-signin" onClick={() => setSelectedItem(null)}>
+                  Back
+                </button>
+              </div>
+            </div>
+            <Tabs
+              tabs={[
+                { value: 'problem', label: 'Problem' },
+                { value: 'answer', label: 'Answer' },
+              ]}
+              activeTab={detailTab}
+              onChange={setDetailTab}
+            />
+
+            {detailTab === 'problem' && (
+              <div className="preview-body mb-8">
+                <div dangerouslySetInnerHTML={{ __html: selectedItem.description || '' }} />
+                {selectedItem.attachment && (
+                  <div className="mt-8 file-preview-wrapper">
+                    <FilePreview
+                      url={selectedItem.attachment}
+                      filename={selectedItem.attachment}
+                      filePath={selectedItem.attachment}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </Card>
+        )}
+
         <GradeSubmissionModal
           open={gradeModalOpen}
           onClose={() => setGradeModalOpen(false)}

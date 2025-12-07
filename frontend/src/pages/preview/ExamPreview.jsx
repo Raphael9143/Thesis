@@ -14,6 +14,7 @@ import { formatAvailable, formatDue } from '../../utils/previewMeta';
 import SubmitWork from '../student/SubmitWork';
 import DashedDivider from '../../components/ui/DashedDivider';
 import SubmissionHistory from '../../components/ui/SubmissionHistory';
+import { useNotifications } from '../../contexts/NotificationContext';
 
 export default function ExamPreview() {
   const { id, examId } = useParams();
@@ -24,7 +25,10 @@ export default function ExamPreview() {
   const { setTitle: setPageTitle } = usePageInfo();
   const role = (typeof window !== 'undefined' && sessionStorage.getItem('role')) || null;
   // Removed inline submission state (now handled on dedicated submit page)
-  const [contentTab, setContentTab] = useState('problem'); // 'problem' | 'history'
+  const [contentTab, setContentTab] = useState('problem'); // 'problem' | 'history' | 'answer'
+  const { push } = useNotifications();
+  const answerRef = React.useRef(null);
+  const [savingAnswer, setSavingAnswer] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -92,7 +96,6 @@ export default function ExamPreview() {
         </Card>
       </Section>
     );
-  console.log(toFullUrl(exam.attachment));
   return (
     <Section>
       <Card>
@@ -137,6 +140,16 @@ export default function ExamPreview() {
               onChange={setContentTab}
             />
           )}
+          {role === 'teacher' && (
+            <Tabs
+              tabs={[
+                { value: 'problem', label: 'Problem' },
+                { value: 'answer', label: 'Answer' },
+              ]}
+              activeTab={contentTab}
+              onChange={setContentTab}
+            />
+          )}
 
           {contentTab === 'problem' && (
             <>
@@ -156,6 +169,72 @@ export default function ExamPreview() {
                 ) : (
                   <div>No model file attached.</div>
                 )}
+              </div>
+            </>
+          )}
+          {role === 'teacher' && contentTab === 'answer' && (
+            <>
+              <div>
+                <h2>Answer (teacher)</h2>
+              </div>
+              <div className="preview-body">
+                <div className="meta-small">Current answer:</div>
+                {exam.answer_attachment ? (
+                  <div className="file-preview-wrapper mt-8">
+                    <FilePreview
+                      url={toFullUrl(exam.answer_attachment)}
+                      filename={exam.answer_attachment}
+                      filePath={exam.answer_attachment}
+                    />
+                  </div>
+                ) : (
+                  <div>No answer uploaded yet.</div>
+                )}
+
+                <div className="mt-8">
+                  <label className="form-group">
+                    <div className="form-group label">Replace answer (.use)</div>
+                    <input type="file" ref={answerRef} accept=".use" style={{ border: 'none' }} />
+                  </label>
+                </div>
+
+                <div className="create-lecture-form__actions mt-8">
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={async () => {
+                      const files = answerRef.current?.files;
+                      if (!files || files.length === 0) {
+                        push({ title: 'Validation', body: 'Please choose a file to upload.' });
+                        return;
+                      }
+                      const f = files[0];
+                      setSavingAnswer(true);
+                      try {
+                        const fd = new FormData();
+                        fd.append('answer', f);
+                        const res = await userAPI.patchExamAnswer(resourceId, fd, {
+                          headers: { 'Content-Type': 'multipart/form-data' },
+                        });
+                        if (res && res.success) {
+                          push({ title: 'Success', body: 'Answer updated.' });
+                          setExam(res.data);
+                        } else {
+                          push({ title: 'Error', body: res?.message || 'Failed to update answer' });
+                        }
+                      } catch (err) {
+                        console.error('patch answer error', err);
+                        push({ title: 'Error', body: err?.message || 'Server error' });
+                      } finally {
+                        setSavingAnswer(false);
+                      }
+                    }}
+                    disabled={savingAnswer}
+                  >
+                    <i className="fa-solid fa-save"></i>
+                    <span>{savingAnswer ? 'Saving...' : 'Save Answer'}</span>
+                  </button>
+                </div>
               </div>
             </>
           )}
