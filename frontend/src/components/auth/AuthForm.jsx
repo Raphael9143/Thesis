@@ -26,14 +26,12 @@ export default function AuthForm({
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [gender, setGender] = useState('');
   const [role, setRole] = useState(initialRole || roles[0].value);
-  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { push } = useNotifications() || { push: () => {} };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage('');
     setLoading(true);
     try {
       let data;
@@ -52,23 +50,37 @@ export default function AuthForm({
         });
       }
       if (!data.success) {
-        setMessage(
-          data.message ||
+        push({
+          title: type === 'login' ? 'Login Failed' : 'Registration Failed',
+          body:
+            data.message ||
             (type === 'login'
               ? 'Wrong email or password!'
-              : 'Failed to register, please try again!')
-        );
+              : 'Failed to register, please try again!'),
+          type: 'error',
+        });
         return;
       }
       if (type === 'login' && roles.length === 2) {
         const userRole = (data.data?.user?.role ?? '').toString().toLowerCase();
-        if (role === 'student' && userRole !== 'student') {
-          setMessage("This account isn't a student account!");
-          return;
-        }
-        if (role === 'teacher' && userRole !== 'teacher') {
-          setMessage("This account isn't a teacher account!");
-          return;
+        // Allow admin to login from any portal
+        if (userRole !== 'admin') {
+          if (role === 'student' && userRole !== 'student') {
+            push({
+              title: 'Login Failed',
+              body: "This account isn't a student account!",
+              type: 'error',
+            });
+            return;
+          }
+          if (role === 'teacher' && userRole !== 'teacher') {
+            push({
+              title: 'Login Failed',
+              body: "This account isn't a teacher account!",
+              type: 'error',
+            });
+            return;
+          }
         }
       }
       sessionStorage.setItem('isLogin', 'true');
@@ -102,17 +114,22 @@ export default function AuthForm({
         }
       }
       if (onSuccess) onSuccess(data);
-      // push an example notification: login success
+      // push notification: login/register success
       try {
         push({
-          title: 'Login successfully',
-          body: ``,
+          title: type === 'login' ? 'Login Successfully' : 'Registration Successfully',
+          body: type === 'login' ? 'Welcome back!' : 'Your account has been created.',
+          type: 'success',
         });
       } catch (err) {
         console.error('push notification error', err);
       }
     } catch (err) {
-      setMessage(err?.response?.data?.message || 'Server error!');
+      push({
+        title: 'Error',
+        body: err?.response?.data?.message || 'Server error!',
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }
@@ -207,7 +224,6 @@ export default function AuthForm({
           </p>
         )}
       </form>
-      {message && <div className="message">{message}</div>}
     </div>
   );
 }

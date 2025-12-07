@@ -1,9 +1,9 @@
 .profile {
-	display: grid;
+	display: flex;
+	flex-direction: column;
 	width: 100%;
-	grid-template-columns: 1fr 1fr;
 	gap: 24px;
-	align-items: start;
+	align-items: stretch;
 }
 
 .teacher-profile__header {
@@ -87,6 +87,35 @@
 	overflow: hidden;
 }
 
+/* Top row containing avatar card and a side description card */
+.profile-top {
+	display: flex;
+	gap: 20px;
+	width: 100%;
+}
+
+.profile-top .profile-card:first-child {
+	/* avatar card: ~40% of the width */
+	flex: 0 0 40%;
+	min-width: 220px;
+}
+
+.profile-top .description-card {
+	/* description: ~60% of the width */
+	flex: 0 0 60%;
+}
+
+.description-card .profile-body {
+	/* allow description to take remaining space */
+	padding: 24px;
+}
+
+.profile-description {
+	color: #374151;
+	line-height: 1.5;
+	margin-top: 8px;
+}
+
 .profile-header {
 	background: linear-gradient(90deg, #c0d9ff, #ffe4b3);
 	height: 70px;
@@ -99,15 +128,21 @@
 
 .profile-info {
 	display: grid;
-	grid-template-columns: 7fr 3fr;
-	gap: 15px;
+ 	grid-template-columns: auto;
+	row-gap: 12px;
+	column-gap: 15px;
+ 	align-items: center;
 }
 
-.profile-pic {
-	border-radius: 50%;
-	width: 70px;
-	height: 70px;
-	object-fit: cover;
+.editing-info {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.save-profile-buttons {
+	display: flex;
+	gap: 8px;
 }
 
 .profile-info h3 {
@@ -123,6 +158,62 @@
 	display: flex;
 	align-items: center;
 	gap: 24px;
+}
+
+.profile-avatar {
+	border-radius: 50%;
+	width: 72px;
+	height: 72px;
+	object-fit: cover;
+	border: 3px solid rgba(255, 255, 255, 0.9);
+	box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.6);
+}
+
+.profile-name {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 600;
+}
+
+.profile-role {
+	margin: 4px 0 0;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: #6b7280;
+}
+
+.profile-details {
+	margin-top: 12px;
+}
+
+.detail-row {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	font-size: 14px;
+	padding: 6px 0;
+	border-bottom: 1px solid #f3f4f6;
+}
+
+.detail-row:last-child {
+	border-bottom: none;
+}
+
+.detail-label {
+	color: #6b7280;
+}
+
+.detail-value {
+	color: #111827;
+	font-weight: 500;
+}
+
+.info-profile-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
 }
 
 .edit-actions-btns {
@@ -182,4 +273,45 @@
 	-webkit-text-fill-color: #374151;
 	background: #f3f4f6;
 	/* slate-100 */
+}
+
+/* Small tweak for section wrapper so profile cards don't stretch too wide */
+.section > .profile {
+	max-width: 980px;
+	margin: 0 auto;
+}
+
+.mini-cards-section {
+	margin-top: 8px;
+}
+
+.mini-cards-title {
+	margin: 0 0 8px;
+	font-size: 14px;
+	font-weight: 600;
+	color: #374151;
+}
+
+.mini-cards-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: 10px;
+}
+
+.mini-card {
+	border-radius: 12px;
+	border: 1px solid #e5e7eb;
+	padding: 10px 12px;
+	background: #f9fafb;
+}
+
+.mini-card-title {
+	font-size: 14px;
+	font-weight: 600;
+	margin: 0 0 4px;
+}
+
+.mini-card-meta {
+	font-size: 12px;
+	color: #6b7280;
 }

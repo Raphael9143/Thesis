@@ -182,9 +182,24 @@ const userAPI = {
   deserializeQueryOperation: (data) => axiosClient.post('uml/deserialize/query-operation', data),
   // GET /api/use/models
   getUseModels: () => axiosClient.get('use/models'),
+  // Admin endpoints
+  // GET /api/admin/stats
+  getAdminStats: () => axiosClient.get('admin/stats'),
+  // GET /api/admin/users
+  getAdminUsers: (params) => axiosClient.get('admin/users', { params }),
+  // GET /api/admin/users/:id
+  getAdminUser: (id) => axiosClient.get(`admin/users/${id}`),
+  // POST /api/admin/users
+  createAdminUser: (data) => axiosClient.post('admin/users', data),
+  // DELETE /api/admin/users/:id
+  deleteAdminUser: (id) => axiosClient.delete(`admin/users/${id}`),
+
   // Researcher projects
   // GET /api/research/projects/mine
   getResearchProjectsMine: () => axiosClient.get('research/projects/mine'),
+  // Researcher profile (specific researcher metadata)
+  getResearcherProfile: () => axiosClient.get('researcher/profile'),
+  updateResearcherProfile: (data) => axiosClient.patch('researcher/profile', data),
   searchProjects: (query, page = 1, limit = 10) =>
     axiosClient.get('research/projects/search', { params: { q: query, page, limit } }),
   // GET /api/research/projects/starred - Get all starred projects
