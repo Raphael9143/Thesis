@@ -12,6 +12,8 @@ import { useNotifications } from '../../contexts/NotificationContext';
 import AddModeratorModal from '../../components/researcher/AddModeratorModal';
 import AddContributorsModal from '../../components/researcher/AddContributorsModal';
 import ContributionHistory from './ContributionHistory';
+import QuestionsList from './constraints/QuestionsList';
+import CreateQuestionModal from '../../components/researcher/constraints/CreateQuestionModal';
 import ProjectSettings from './ProjectSettings';
 import Tabs from '../../components/ui/Tabs';
 import '../../assets/styles/pages/ProjectDetail.css';
@@ -32,20 +34,22 @@ export default function ResearcherProjectDetail() {
   const [starLoading, setStarLoading] = useState(false);
   const [addModeratorOpen, setAddModeratorOpen] = useState(false);
   const [addContribOpen, setAddContribOpen] = useState(false);
+  const [createQuestionOpen, setCreateQuestionOpen] = useState(false);
+  const [questionsRefresh, setQuestionsRefresh] = useState(0);
   // inline preview handled by FilePreview; no modal state required
 
   // Determine active tab from URL
   const activeTab = useMemo(() => {
     const path = location.pathname;
-    if (path.includes('/contributions')) return 'contributions';
     if (path.includes('/settings')) return 'settings';
+    if (path.includes('/contributions')) return 'contributions';
     return 'project';
   }, [location.pathname]);
 
   const handleTabChange = (tab) => {
     const routes = {
       project: `/researcher/projects/${projectId}/details`,
-      contributions: `/researcher/projects/${projectId}/contributions?page=1`,
+      contributions: `/researcher/projects/${projectId}/contributions`,
       settings: `/researcher/projects/${projectId}/settings`,
     };
     navigate(routes[tab]);
@@ -67,6 +71,27 @@ export default function ResearcherProjectDetail() {
     const currentUserId = sessionStorage.getItem('userId');
     return members.moderators.some((m) => m.id === Number(currentUserId));
   }, [members]);
+
+  const tabs = useMemo(() => {
+    if (project?.type === 'OCL') {
+      return isOwner
+        ? [
+            { value: 'project', label: 'Project' },
+            { value: 'settings', label: 'Settings' },
+          ]
+        : [{ value: 'project', label: 'Project' }];
+    }
+    return isOwner
+      ? [
+          { value: 'project', label: 'Project' },
+          { value: 'contributions', label: 'Contributions' },
+          { value: 'settings', label: 'Settings' },
+        ]
+      : [
+          { value: 'project', label: 'Project' },
+          { value: 'contributions', label: 'Contributions' },
+        ];
+  }, [project?.type, isOwner]);
 
   useTitle(titleText);
 
@@ -170,27 +195,12 @@ export default function ResearcherProjectDetail() {
         {error && <div className="text-error">{error}</div>}
         {!loading && !error && (
           <>
-            <Tabs
-              tabs={
-                isOwner
-                  ? [
-                      { value: 'project', label: 'Project' },
-                      { value: 'contributions', label: 'Contributions' },
-                      { value: 'settings', label: 'Settings' },
-                    ]
-                  : [
-                      { value: 'project', label: 'Project' },
-                      { value: 'contributions', label: 'Contributions' },
-                    ]
-              }
-              activeTab={activeTab}
-              onChange={handleTabChange}
-            />
+            <Tabs tabs={tabs} activeTab={activeTab} onChange={handleTabChange} />
 
             {activeTab === 'project' && (
               <>
                 <div className="project-detail-actions">
-                  {!isClosed && (
+                  {!isClosed && project?.type !== 'OCL' && (
                     <button
                       className="btn btn-primary btn-sm"
                       onClick={() =>
@@ -201,6 +211,16 @@ export default function ResearcherProjectDetail() {
                     >
                       <i className="fa fa-code-branch project-detail-moderator-icon" />
                       Contribute
+                    </button>
+                  )}
+                  {!isClosed && project?.type === 'OCL' && (isOwner || isModerator) && (
+                    <button
+                      className="btn btn-primary btn-sm"
+                      onClick={() => setCreateQuestionOpen(true)}
+                      title="Create OCL question"
+                    >
+                      <i className="fa fa-question-circle project-detail-moderator-icon" />
+                      Create OCL Question
                     </button>
                   )}
                   {isOwner && !isClosed && (
@@ -234,30 +254,36 @@ export default function ResearcherProjectDetail() {
                     />
                   </a>
                 </div>
-                <div className="project-detail-content">
-                  <div className="project-detail-model-section">
-                    <h2 className="no-margin">Model</h2>
-                    {model ? (
-                      <div className="project-detail-model-preview">
-                        <FilePreview
-                          url={toFullUrl(model.file_path)}
-                          filename={model.file_path}
-                          filePath={model.file_path}
-                        />
-                        {model.file_path && (
-                          <div className="project-detail-model-download">
-                            <a href={toFullUrl(model.file_path)} download>
-                              Download
-                            </a>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="project-detail-model-preview">
-                        No model found for this project.
-                      </div>
-                    )}
-                  </div>
+                <div className={`project-detail-content ${project?.type === 'OCL' ? 'ocl' : ''}`}>
+                  {project?.type !== 'OCL' ? (
+                    <div className="project-detail-model-section">
+                      <h2 className="no-margin">Model</h2>
+                      {model ? (
+                        <div className="project-detail-model-preview">
+                          <FilePreview
+                            url={toFullUrl(model.file_path)}
+                            filename={model.file_path}
+                            filePath={model.file_path}
+                          />
+                          {model.file_path && (
+                            <div className="project-detail-model-download">
+                              <a href={toFullUrl(model.file_path)} download>
+                                Download
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="project-detail-model-preview">
+                          No model found for this project.
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="project-detail-model-section">
+                      <QuestionsList refreshKey={questionsRefresh} />
+                    </div>
+                  )}
 
                   <div className="project-detail-about-section">
                     <div className="project-detail-about-title">About</div>
@@ -280,6 +306,8 @@ export default function ResearcherProjectDetail() {
                 </div>
               </>
             )}
+
+            {/* Contributions tab removed for OCL projects — questions are shown on Project tab */}
 
             {activeTab === 'contributions' && (
               <div className="project-detail-contributions">
@@ -313,6 +341,20 @@ export default function ResearcherProjectDetail() {
         onAdded={fetchMembers}
         projectId={projectId}
         projectStatus={project?.status}
+      />
+      <CreateQuestionModal
+        open={createQuestionOpen}
+        onClose={() => setCreateQuestionOpen(false)}
+        projectId={projectId}
+        onCreated={() => {
+          // bump refresh key to reload questions
+          setQuestionsRefresh((s) => s + 1);
+          try {
+            push({ title: 'Question created', body: 'New OCL question created' });
+          } catch {
+            /* ignore */
+          }
+        }}
       />
     </Section>
   );

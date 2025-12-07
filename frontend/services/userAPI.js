@@ -261,6 +261,29 @@ const userAPI = {
     axiosClient.post(`research/contributions/${id}/comments`, data),
   // POST /api/research/contributions/{id}/resubmit - Resubmit contribution { path, rawText }
   resubmitContribution: (id, data) => axiosClient.patch(`research/contributions/${id}`, data),
+
+  // Constraint (OCL) questions & answers
+  // POST /api/constraints/questions (multipart/form-data or json)
+  createConstraintQuestion: (formData, config) =>
+    axiosClient.post('constraints/questions', formData, config),
+  // GET /api/constraints/projects/:projectId/questions
+  listQuestionsForProject: (projectId, params) =>
+    axiosClient.get(`constraints/projects/${projectId}/questions`, { params }),
+  // POST /api/constraints/questions/:questionId/answers
+  submitConstraintAnswer: (questionId, data) =>
+    axiosClient.post(`constraints/questions/${questionId}/answers`, data),
+  // GET /api/constraints/questions/:questionId/answers
+  listAnswersForQuestion: (questionId, params) =>
+    axiosClient.get(`constraints/questions/${questionId}/answers`, { params }),
+  // PUT /api/constraints/answers/:answerId/status { status }
+  updateConstraintAnswerStatus: (answerId, status) =>
+    axiosClient.put(`constraints/answers/${answerId}/status`, { status }),
+  // GET /api/constraints/questions/{id}/participants/count -> { success, data: { question_id, participant_count } }
+  getQuestionParticipantCount: (questionId) =>
+    axiosClient.get(`constraints/questions/${questionId}/participants/count`),
+  // GET /api/constraints/questions/{id}/answers/count -> { success, data: { question_id, answer_count } }
+  getQuestionAnswerCount: (questionId) =>
+    axiosClient.get(`constraints/questions/${questionId}/answers/count`),
 };
 
 export default userAPI;

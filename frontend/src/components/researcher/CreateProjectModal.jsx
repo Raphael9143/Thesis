@@ -8,6 +8,7 @@ import '../../assets/styles/components/researcher/CreateProjectModal.css';
 export default function CreateProjectModal({ open, onClose, onCreated }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [type, setType] = useState('USE');
   const [notifyOpen, setNotifyOpen] = useState(false);
   const [notifyMsg, setNotifyMsg] = useState('');
   const [notifyType, setNotifyType] = useState('info');
@@ -35,6 +36,7 @@ export default function CreateProjectModal({ open, onClose, onCreated }) {
       const payload = {
         title: title.trim(),
         description: description.trim() || '',
+        type: type || 'USE',
       };
 
       const res = await userAPI.createResearchProject(payload);
@@ -94,6 +96,15 @@ export default function CreateProjectModal({ open, onClose, onCreated }) {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           textarea
+        />
+        <FormField
+          label="Project Type"
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          options={[
+            { value: 'USE', label: 'USE (standard project)' },
+            { value: 'OCL', label: 'OCL (constraint questions)' },
+          ]}
         />
 
         <div className="create-project-modal-actions">

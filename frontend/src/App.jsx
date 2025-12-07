@@ -12,6 +12,8 @@ import ResearcherHome from './pages/ResearcherHome';
 import ResearcherLayout from './layouts/ResearcherLayout';
 import ResearcherProjects from './pages/researcher/Projects';
 import ResearcherProjectDetail from './pages/researcher/ProjectDetail';
+import QuestionsList from './pages/researcher/constraints/QuestionsList';
+import QuestionDetail from './pages/researcher/constraints/QuestionDetail';
 import PostContribution from './pages/researcher/PostContribution';
 import ContributionDetail from './pages/researcher/ContributionDetail';
 import ResubmitContribution from './pages/researcher/ResubmitContribution';
@@ -86,6 +88,8 @@ const router = createBrowserRouter(
           <Route path="projects/:projectId/details" element={<ResearcherProjectDetail />} />
           <Route path="projects/:projectId/contributions" element={<ResearcherProjectDetail />} />
           <Route path="projects/:projectId/settings" element={<ResearcherProjectDetail />} />
+          <Route path="projects/:projectId/questions" element={<QuestionsList />} />
+          <Route path="projects/:projectId/questions/:questionId" element={<QuestionDetail />} />
           <Route path="projects/:projectId/contribute/:modelId" element={<PostContribution />} />
           <Route
             path="projects/:projectId/contributions/:contributionId"

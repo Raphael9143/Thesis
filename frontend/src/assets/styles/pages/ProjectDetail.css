@@ -53,6 +53,26 @@
   text-align: left;
 }
 
+/* OCL project layout: left column ~70%, right column ~30% */
+.project-detail-content .project-detail-model-section {
+  flex: 0 0 64%;
+  min-width: 360px;
+  border-right: 1px solid #e5e7eb;
+  padding-right: 16px;
+}
+
+.project-detail-content .project-detail-about-section {
+  flex: 0 0 32%;
+  min-width: 240px;
+  border-left: 1px solid #f3f4f6;
+  padding-left: 16px;
+  padding-top: 3rem;
+}
+
+#use-file {
+  border: none;
+  border-radius: 0px;
+}
 .project-detail-about-title {
   font-weight: 700;
   margin-bottom: 8px;
@@ -64,4 +84,59 @@
 
 .project-detail-contributions {
   margin-top: 16px;
+}
+
+/* Make question detail content left-aligned */
+.question-detail,
+.question-detail * {
+  text-align: left;
+}
+
+/* Remove default border for file inputs where requested */
+.file-input-no-border {
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 4px 0 !important;
+}
+
+/* Question detail grid sizing and styles */
+.question-detail-grid {
+  display: flex;
+  gap: 16px;
+}
+.question-detail-main {
+  flex: 0 0 40%;
+}
+.question-detail-side {
+  flex: 0 0 60%;
+  min-width: 220px;
+}
+
+/* vertical divider between question main and side */
+.question-detail-divider {
+  width: 1px;
+  background: #e5e7eb;
+  margin: 0 12px;
+  align-self: stretch;
+}
+
+.question-title {
+  margin: 0 0 8px 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.question-text h3,
+.question-detail-main h3 {
+  margin: 8px 0 6px 0;
+  font-size: 1rem;
+}
+
+.question-text div {
+  color: #111827;
+}
+
+.answers-list > div {
+  background: #fff;
 }
