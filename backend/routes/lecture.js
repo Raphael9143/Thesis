@@ -26,10 +26,10 @@ const conditionalLectureUpload = require("../middlewares/conditionalUpload")(
  *                 type: integer
  *               title:
  *                 type: string
- *               attachments:
- *                 type: array
- *                 items:
- *                   type: object
+ *               attachment:
+ *                 type: string
+ *                 format: binary
+ *                 description: Single file upload field name `attachment` (multipart/form-data)
  *               publish_date:
  *                 type: string
  *                 format: date-time
@@ -159,10 +159,10 @@ router.patch("/:id/status", auth, LectureController.updateLectureStatus);
  *             properties:
  *               title:
  *                 type: string
- *               attachments:
- *                 type: array
- *                 items:
- *                   type: string
+ *               attachment:
+ *                 type: string
+ *                 format: binary
+ *                 description: Single file upload field name `attachment` (multipart/form-data)
  *               publish_date:
  *                 type: string
  *                 format: date-time

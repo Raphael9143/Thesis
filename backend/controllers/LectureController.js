@@ -46,10 +46,14 @@ const LectureController = {
             "You are not the homeroom teacher for any class of this course.",
         });
 
-      // Single attachment handling: prefer uploaded file, else use body. Store as string path.
+      // Single attachment handling: support multer.any() -> req.files (array)
+      // Prefer a file field named 'attachment', fall back to 'attachments' or first uploaded file.
       let attachment = null;
-      if (req.file) {
-        attachment = `/uploads/lectures/${req.file.filename}`;
+      if (Array.isArray(req.files) && req.files.length > 0) {
+        let file = req.files.find((f) => f.fieldname === 'attachment');
+        if (!file) file = req.files.find((f) => f.fieldname === 'attachments');
+        if (!file) file = req.files[0];
+        if (file) attachment = `/uploads/lectures/${file.filename}`;
       } else if (req.body.attachment) {
         // client may provide existing path
         attachment = req.body.attachment;
@@ -120,9 +124,12 @@ const LectureController = {
           .status(400)
           .json({ success: false, message: "Invalid status" });
 
-      // Single attachment update: replace or keep existing
-      if (req.file) {
-        lecture.attachment = `/uploads/lectures/${req.file.filename}`;
+      // Single attachment update: support req.files array
+      if (Array.isArray(req.files) && req.files.length > 0) {
+        let file = req.files.find((f) => f.fieldname === 'attachment');
+        if (!file) file = req.files.find((f) => f.fieldname === 'attachments');
+        if (!file) file = req.files[0];
+        if (file) lecture.attachment = `/uploads/lectures/${file.filename}`;
       } else if (req.body.attachment !== undefined) {
         // explicit set (could be null/empty)
         lecture.attachment = req.body.attachment || null;
