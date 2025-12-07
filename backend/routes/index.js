@@ -16,6 +16,7 @@ const examRoutes = require("./exam");
 const useRoutes = require("./use");
 const umlRoutes = require("./uml");
 const researchRoutes = require("./research");
+const constraintRoutes = require("./constraint");
 const adminRoutes = require("./admin");
 
 const { specs, swaggerUi } = require("../config/swagger");
@@ -82,6 +83,8 @@ app.use("/api/use", useRoutes);
 app.use("/api/uml", umlRoutes);
 // Research Project routes
 app.use("/api/research", researchRoutes);
+// Constraint contribution routes
+app.use("/api/constraints", constraintRoutes);
 // Admin routes (site-wide administration)
 app.use("/api/admin", adminRoutes);
 

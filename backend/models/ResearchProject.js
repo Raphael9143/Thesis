@@ -48,6 +48,13 @@ const ResearchProject = sequelize.define(
       field: "visibility",
       comment: "Project visibility: PUBLIC can be viewed by anyone, PRIVATE only by members",
     },
+    type: {
+      type: DataTypes.ENUM("USE", "OCL"),
+      allowNull: false,
+      defaultValue: "USE",
+      field: "type",
+      comment: "Project contribution type: USE (model file) or OCL (constraint questions)",
+    },
     created_at: {
       type: DataTypes.DATE,
       allowNull: false,

@@ -13,6 +13,8 @@ const ResearchProject = require("./ResearchProject");
 const ResearchProjectMember = require("./ResearchProjectMember");
 const ResearchContribution = require("./ResearchContribution");
 const ContributionComment = require("./ContributionComment");
+const ConstraintQuestion = require("./ConstraintQuestion");
+const ConstraintAnswer = require("./ConstraintAnswer");
 
 UseModel.hasMany(UseEnum, {
   foreignKey: "use_model_id",
@@ -210,6 +212,45 @@ User.hasMany(ContributionComment, {
   as: "contributionComments",
 });
 
+// Constraint question/answer feature associations
+ResearchProject.hasMany(ConstraintQuestion, {
+  foreignKey: "research_project_id",
+  as: "constraintQuestions",
+  onDelete: "CASCADE",
+});
+ConstraintQuestion.belongsTo(ResearchProject, {
+  foreignKey: "research_project_id",
+  as: "project",
+});
+
+ConstraintQuestion.belongsTo(User, {
+  foreignKey: "created_by",
+  as: "creator",
+});
+User.hasMany(ConstraintQuestion, {
+  foreignKey: "created_by",
+  as: "createdConstraintQuestions",
+});
+
+ConstraintQuestion.hasMany(ConstraintAnswer, {
+  foreignKey: "question_id",
+  as: "answers",
+  onDelete: "CASCADE",
+});
+ConstraintAnswer.belongsTo(ConstraintQuestion, {
+  foreignKey: "question_id",
+  as: "question",
+});
+
+ConstraintAnswer.belongsTo(User, {
+  foreignKey: "contributor_id",
+  as: "contributor",
+});
+User.hasMany(ConstraintAnswer, {
+  foreignKey: "contributor_id",
+  as: "constraintAnswers",
+});
+
 module.exports = {
   UseModel,
   UseEnum,
@@ -219,4 +260,6 @@ module.exports = {
   UseAssociation,
   UseAssociationPart,
   UseConstraint,
+  ConstraintQuestion,
+  ConstraintAnswer,
 };
