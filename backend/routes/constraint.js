@@ -67,6 +67,12 @@ router.post(
  *         required: true
  *         schema:
  *           type: integer
+ *      - in: query
+ *        name: page
+ *        required: false
+ *        description: Page number (1-based). Page size is fixed to 10.
+ *        schema:
+ *          type: integer
  *     responses:
  *       '200':
  *         description: A list of questions
