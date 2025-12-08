@@ -8,6 +8,7 @@ export default function CodeEditor({
   disabled = false,
   rows = 12,
   className = '',
+  maxHeight = '640px',
 }) {
   const [lineCount, setLineCount] = useState(1);
   const numbersRef = useRef(null);
@@ -84,7 +85,14 @@ export default function CodeEditor({
 
   return (
     <div className={`code-editor-wrapper ${className}`.trim()}>
-      <div className="code-editor-container">
+      <div
+        className={`code-editor-container${maxHeight ? ' limited-height' : ''}`}
+        style={
+          maxHeight
+            ? { maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight }
+            : {}
+        }
+      >
         <div className="line-numbers" ref={numbersRef} aria-hidden="true">
           {Array.from({ length: lineCount }).map((_, idx) => (
             <div key={idx} className="line-number">
