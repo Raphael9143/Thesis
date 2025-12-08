@@ -214,10 +214,6 @@ export default function ContributionDetail() {
 
           <div className="contribution-detail-meta">
             <div className="contribution-detail-meta-item">
-              <i className="fa fa-user" />
-              <span>Contributor ID: {contribution.contributor_id}</span>
-            </div>
-            <div className="contribution-detail-meta-item">
               <i className="fa fa-calendar" />
               <span>Submitted: {fmtDate(contribution.created_at)}</span>
             </div>
