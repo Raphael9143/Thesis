@@ -558,22 +558,31 @@ const ResearchController = {
   // List contributions for a project (optional filter by status)
   listContributions: async (req, res) => {
     try {
-      if (!req.user || !req.user.userId)
-        return res
-          .status(401)
-          .json({ success: false, message: "Unauthorized" });
       const projectId = parseInt(req.params.projectId, 10);
       if (!projectId)
         return res
           .status(400)
           .json({ success: false, message: "Invalid project id" });
 
-      // membership required
-      const isMember = await ResearchProjectMember.findOne({
-        where: { research_project_id: projectId, user_id: req.user.userId },
-      });
-      if (!isMember)
-        return res.status(403).json({ success: false, message: "Forbidden" });
+      // Check project visibility: if PRIVATE require authentication + membership
+      const project = await ResearchProject.findByPk(projectId);
+      if (!project)
+        return res
+          .status(404)
+          .json({ success: false, message: "Project not found" });
+
+      if (project.visibility === "PRIVATE") {
+        if (!req.user || !req.user.userId)
+          return res
+            .status(401)
+            .json({ success: false, message: "Unauthorized" });
+
+        const isMember = await ResearchProjectMember.findOne({
+          where: { research_project_id: projectId, user_id: req.user.userId },
+        });
+        if (!isMember)
+          return res.status(403).json({ success: false, message: "Forbidden" });
+      }
 
       const where = { research_project_id: projectId };
       if (req.query.status) where.status = req.query.status.toUpperCase();
@@ -825,10 +834,6 @@ const ResearchController = {
   // Get contribution detail
   getContribution: async (req, res) => {
     try {
-      if (!req.user || !req.user.userId)
-        return res
-          .status(401)
-          .json({ success: false, message: "Unauthorized" });
       const id = parseInt(req.params.id, 10);
       if (!id)
         return res.status(400).json({ success: false, message: "Invalid id" });
@@ -839,15 +844,27 @@ const ResearchController = {
       if (!contrib)
         return res.status(404).json({ success: false, message: "Not found" });
 
-      // membership check
-      const isMember = await ResearchProjectMember.findOne({
-        where: {
-          research_project_id: contrib.research_project_id,
-          user_id: req.user.userId,
-        },
-      });
-      if (!isMember)
-        return res.status(403).json({ success: false, message: "Forbidden" });
+      // Allow public viewing of contribution details when the project is PUBLIC.
+      const project = await ResearchProject.findByPk(contrib.research_project_id);
+      if (!project)
+        return res.status(404).json({ success: false, message: "Project not found" });
+
+      if (project.visibility === "PRIVATE") {
+        // require authentication + membership
+        if (!req.user || !req.user.userId)
+          return res
+            .status(401)
+            .json({ success: false, message: "Unauthorized" });
+
+        const isMember = await ResearchProjectMember.findOne({
+          where: {
+            research_project_id: contrib.research_project_id,
+            user_id: req.user.userId,
+          },
+        });
+        if (!isMember)
+          return res.status(403).json({ success: false, message: "Forbidden" });
+      }
 
       return res.json({ success: true, data: contrib });
     } catch (err) {
