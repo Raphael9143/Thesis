@@ -8,7 +8,13 @@ export default function ProjectMembers({ members }) {
         Contributors
       </div>
       {members ? (
-        <div>
+        <div
+          style={{
+            maxHeight: '480px',
+            overflowY: 'auto',
+            paddingRight: 8,
+          }}
+        >
           <div style={{ marginBottom: 12 }}>
             {members.owner ? <UserRow user={members.owner} role="Owner" /> : <div>-</div>}
           </div>
