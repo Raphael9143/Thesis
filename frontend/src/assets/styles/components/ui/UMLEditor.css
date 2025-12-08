@@ -293,7 +293,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 100;
+  /* ensure UML modals appear above role labels and preview overlays */
+  z-index: 2000;
 }
 .uml-modal {
   background: #fff;
@@ -443,7 +444,7 @@
 
 .uml-model-tree-detail-actions {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.5rem;
   margin-top: 2rem;
 }

@@ -364,9 +364,11 @@ export default function ModelTreePane({
             onToggle={() => toggleOpen('invariants')}
             count={constraints.filter((c) => c.type === 'invariant').length}
             onAdd={() => {
-              // prepare to add a new invariant
+              // prepare to add a new invariant with a helpful draft template
               setSelected({ key: 'inv:new', payload: null });
-              setDetailText('');
+              setDetailText(
+                `context ClassName inv InvariantName:\n    <OCL constraint expression>`
+              );
               setAddMode({ type: 'inv', className: null });
               setModalOpen(true);
             }}
@@ -387,8 +389,11 @@ export default function ModelTreePane({
             onToggle={() => toggleOpen('prepost')}
             count={prepostList.length}
             onAdd={() => {
+              // pre/post conditions draft (defaults to a precondition template)
               setSelected({ key: 'cond:new', payload: null });
-              setDetailText('');
+              setDetailText(
+                `context ClassName pre PreconditionName:\n    <OCL constraint expression>`
+              );
               setAddMode({ type: 'cond', className: null });
               setModalOpen(true);
             }}
@@ -409,9 +414,11 @@ export default function ModelTreePane({
             onToggle={() => toggleOpen('ops')}
             count={classes.flatMap((c) => c.operations || []).length}
             onAdd={() => {
-              // start add operation flow - deserialize will determine class
+              // start add operation flow - provide a simple operation draft
               setSelected({ key: 'op:add', payload: null });
-              setDetailText('');
+              setDetailText(
+                `class ClassName\n  operations\n    operationName(param1: Type): ReturnType\n    -- implementation or OCL expression\nend`
+              );
               setAddMode({ type: 'op' });
               setModalOpen(true);
             }}
@@ -436,9 +443,11 @@ export default function ModelTreePane({
             onToggle={() => toggleOpen('qops')}
             count={classes.flatMap((c) => c.query_operations || []).length}
             onAdd={() => {
-              // query op add - let backend infer class
+              // query operation draft
               setSelected({ key: 'qop:add', payload: null });
-              setDetailText('');
+              setDetailText(
+                `class ClassName\n  operations\n    operationName(param1: Type): ReturnType =\n      -- implementation or OCL expression\nend`
+              );
               setAddMode({ type: 'qop' });
               setModalOpen(true);
             }}
@@ -533,7 +542,8 @@ export default function ModelTreePane({
                 setAddMode(null);
               }}
             >
-              Cancel
+              <i className="fa fa-times" />
+              <span>Cancel</span>
             </button>
             <button
               className="btn btn-primary btn-sm"
@@ -544,7 +554,8 @@ export default function ModelTreePane({
               }}
               disabled={deserializing}
             >
-              Save
+              <i className="fa fa-save" />
+              <span>Save</span>
             </button>
           </div>
         </Modal>
