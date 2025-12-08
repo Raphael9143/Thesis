@@ -142,7 +142,8 @@ export default function ResubmitContribution() {
 
           <div className="post-contribution-actions">
             <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
-              {submitting ? 'Resubmitting...' : 'Resubmit'}
+              <i className="fa fa-upload" />
+              <span>Resubmit</span>
             </button>
             <button
               type="button"
@@ -150,7 +151,8 @@ export default function ResubmitContribution() {
               onClick={handleCancel}
               disabled={submitting}
             >
-              Cancel
+              <i className="fa fa-times" />
+              <span>Cancel</span>
             </button>
           </div>
         </form>
