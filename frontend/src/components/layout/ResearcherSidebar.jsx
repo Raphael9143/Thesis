@@ -11,7 +11,9 @@ export default function ResearcherSidebar({ collapsed = false, onToggleCollapse 
     sessionStorage.removeItem('isLogin');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('role');
-    goto('/');
+    const currentPath = window.location.pathname || '';
+    if (currentPath.startsWith('/education')) goto('/education');
+    else goto('/');
   };
 
   const goToEducation = () => {

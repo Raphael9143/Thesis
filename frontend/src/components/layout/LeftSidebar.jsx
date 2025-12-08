@@ -18,7 +18,10 @@ export default function LeftSidebar({
     sessionStorage.removeItem('isLogin');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('role');
-    goto('/');
+    // Redirect to education login if currently in education area, otherwise to research home
+    const currentPath = window.location.pathname || '';
+    if (currentPath.startsWith('/education')) goto('/education');
+    else goto('/');
   };
 
   return (
