@@ -22,6 +22,8 @@ export default function ContributionDetail() {
   const [contribution, setContribution] = useState(null);
   const [originalModel, setOriginalModel] = useState(null);
   const [projectStatus, setProjectStatus] = useState(null);
+  const [isOwner, setIsOwner] = useState(false);
+  const [isModerator, setIsModerator] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [reviewNotes, setReviewNotes] = useState('');
@@ -43,10 +45,14 @@ export default function ContributionDetail() {
           setContribution(res.data);
           setReviewNotes(res.data.review_notes || '');
 
-          // Fetch original project model for comparison
+          // Fetch original model and project members to determine permissions
           if (res.data.research_project_id) {
             try {
-              const projectRes = await userAPI.getResearchProject(res.data.research_project_id);
+              const [projectRes, membersRes] = await Promise.all([
+                userAPI.getResearchProject(res.data.research_project_id),
+                userAPI.getResearchProjectMembers(res.data.research_project_id),
+              ]);
+
               if (projectRes?.success && projectRes.data?.main_use_model_id) {
                 // capture project status so child components can block actions when closed
                 setProjectStatus(projectRes.data?.status || null);
@@ -55,8 +61,20 @@ export default function ContributionDetail() {
                   setOriginalModel(modelRes.data);
                 }
               }
+
+              if (membersRes?.success && membersRes.data) {
+                const membersData = membersRes.data;
+                const cur = Number(sessionStorage.getItem('userId'));
+                setIsOwner(Boolean(membersData?.owner && membersData.owner.id === cur));
+                setIsModerator(
+                  Boolean(
+                    Array.isArray(membersData?.moderators) &&
+                      membersData.moderators.some((m) => m.id === cur)
+                  )
+                );
+              }
             } catch (modelErr) {
-              console.error('Failed to fetch original model:', modelErr);
+              console.error('Failed to fetch original model or members:', modelErr);
             }
           }
         } else {
@@ -75,13 +93,11 @@ export default function ContributionDetail() {
     }
   }, [contributionId]);
 
-  // Check if current user is moderator or owner (will need project data for this)
+  // Only moderators or the project owner can review contributions
   const canReview = useMemo(() => {
-    // For now, we'll allow review if user is not the contributor
-    // In a full implementation, you'd check if user is project owner/moderator
     if (!contribution) return false;
-    return contribution.contributor_id !== currentUserId;
-  }, [contribution, currentUserId]);
+    return isOwner || isModerator;
+  }, [contribution, isOwner, isModerator]);
 
   const handleReview = async (action) => {
     if (submitting) return;

@@ -22,6 +22,7 @@ export default function ContributionChangesTab({
     contribution.contributor_id === currentUserId &&
     ['PENDING', 'NEEDS_EDIT'].includes(contribution.status) &&
     projectStatus !== 'CLOSED';
+  console.log(canReview);
   const renderDiff = () => {
     if (!originalModel || !useModel) {
       return (
@@ -131,49 +132,44 @@ export default function ContributionChangesTab({
         </div>
       )}
 
-      {canResubmit && <DashedDivider />}
-
       {canReview && contribution.status === 'PENDING' && projectStatus !== 'CLOSED' && (
-        <div className="contribution-detail-review-form">
-          <h3>Add Review Notes</h3>
-          <textarea
-            className="contribution-detail-textarea"
-            placeholder="Add review notes (required for requesting edits or rejection)..."
-            value={reviewNotes}
-            onChange={(e) => setReviewNotes(e.target.value)}
-            disabled={submitting}
-            rows={5}
-          />
-          <div className="contribution-detail-review-actions">
-            <button
-              className="btn btn-success btn-sm"
-              onClick={() => handleReview('ACCEPT')}
+        <>
+          <DashedDivider />
+          <div className="contribution-detail-review-form">
+            <h3>Add Review Notes</h3>
+            <textarea
+              className="contribution-detail-textarea"
+              placeholder="Add review notes (required for requesting edits or rejection)..."
+              value={reviewNotes}
+              onChange={(e) => setReviewNotes(e.target.value)}
               disabled={submitting}
-            >
-              <i className="fa fa-check" /> Accept
-            </button>
-            <button
-              className="btn btn-warning btn-sm"
-              onClick={() => handleReview('NEEDS_EDIT')}
-              disabled={submitting}
-            >
-              <i className="fa fa-edit" /> Request Edits
-            </button>
-            <button
-              className="btn btn-danger btn-sm"
-              onClick={() => handleReview('REJECT')}
-              disabled={submitting}
-            >
-              <i className="fa fa-times" /> Reject
-            </button>
+              rows={5}
+            />
+            <div className="contribution-detail-review-actions">
+              <button
+                className="btn btn-success btn-sm"
+                onClick={() => handleReview('ACCEPT')}
+                disabled={submitting}
+              >
+                <i className="fa fa-check" /> Accept
+              </button>
+              <button
+                className="btn btn-warning btn-sm"
+                onClick={() => handleReview('NEEDS_EDIT')}
+                disabled={submitting}
+              >
+                <i className="fa fa-edit" /> Request Edits
+              </button>
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => handleReview('REJECT')}
+                disabled={submitting}
+              >
+                <i className="fa fa-times" /> Reject
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-
-      {!canReview && contribution.status === 'PENDING' && (
-        <div className="contribution-detail-info">
-          <i className="fa fa-info-circle" /> You cannot review your own contribution
-        </div>
+        </>
       )}
 
       {contribution.status !== 'PENDING' && (
