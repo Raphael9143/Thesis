@@ -57,6 +57,7 @@ import AdminLayout from './layouts/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminUsers from './pages/admin/Users';
 import AdminUserDetail from './pages/admin/UserDetail';
+import SubmissionsView from './pages/teacher/course/SubmissionsView';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -144,6 +145,9 @@ const router = createBrowserRouter(
           <Route index path="lectures" element={<LecturesList />} />
           <Route path="assignments" element={<AssignmentsList />} />
           <Route path="exams" element={<ExamsList />} />
+          <Route path="lectures/:lectureId" element={<LecturePreview />} />
+          <Route path="assignments/:assignmentId" element={<AssignmentPreview />} />
+          <Route path="exams/:examId" element={<ExamPreview />} />
           <Route
             path="students"
             element={
@@ -159,6 +163,22 @@ const router = createBrowserRouter(
             element={
               <RequireRole allowed={['teacher']}>
                 <Submissions />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="submissions/assignment/:assignmentId"
+            element={
+              <RequireRole allowed={['teacher']}>
+                <SubmissionsView />
+              </RequireRole>
+            }
+          />
+          <Route
+            path="submissions/exam/:examId"
+            element={
+              <RequireRole allowed={['teacher']}>
+                <SubmissionsView />
               </RequireRole>
             }
           />
