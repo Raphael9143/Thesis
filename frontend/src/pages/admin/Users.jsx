@@ -131,7 +131,7 @@ export default function AdminUsers() {
                         </button>
                         {u.status === 'BANNED' ? (
                           <button
-                            className="btn btn-sm"
+                            className="btn btn-sm btn-outline"
                             onClick={async () => {
                               if (!window.confirm('Enable this user?')) return;
                               try {
@@ -160,7 +160,7 @@ export default function AdminUsers() {
                           </button>
                         ) : (
                           <button
-                            className="btn btn-sm"
+                            className="btn btn-sm btn-outline"
                             onClick={async () => {
                               if (!window.confirm('Disable this user? (soft-ban)')) return;
                               try {
