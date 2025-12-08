@@ -386,6 +386,13 @@ export default function UMLEditor({ initialModel = null }) {
     ensureAttrBuffer(clsName);
   };
 
+  // start adding value inline for an enum
+  const startAddingEnum = (enumName) => {
+    setNewEnumInputs((n) => ({ ...n, [enumName]: { value: '', adding: true } }));
+    setEditingName(enumName);
+    ensureEnumBuffer(enumName);
+  };
+
   // ensure a staged buffer exists for editing a class's attributes
   const ensureAttrBuffer = (clsName) => {
     setAttrEditBuffers((prev) => {
@@ -687,6 +694,7 @@ export default function UMLEditor({ initialModel = null }) {
     updateEnumValue,
     deleteEnumValue,
     commitAddingEnumValue,
+    startAddingEnum,
     classes,
     enums,
     editingName,
@@ -1039,6 +1047,7 @@ export default function UMLEditor({ initialModel = null }) {
                   onCommitEdit={() => commitEdit(en.name, 'enum')}
                   onCancelEdit={() => cancelEdit(en.name, 'enum')}
                   newEnum={newEnum}
+                  startAddingEnum={startAddingEnum}
                   onUpdateValue={(idx, val) => {
                     if (idx === 'new') updateNewEnumInput(en.name, val);
                     else updateEnumValue(en.name, idx, val);
@@ -1047,6 +1056,7 @@ export default function UMLEditor({ initialModel = null }) {
                   onCommitAddValue={() => commitAddingEnumValue(en.name)}
                   onCancelAddValue={() => cancelAddingEnumValue(en.name)}
                   onDeleteEnum={(name) => deleteEnum(name)}
+                  enumEditBuffers={enumEditBuffers}
                   classes={classes}
                 />
               );

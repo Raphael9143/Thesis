@@ -17,7 +17,18 @@ export default function EnumBox({
   onCommitAddValue,
   onCancelAddValue,
   onDeleteEnum,
+  startAddingEnum,
+  enumEditBuffers,
 }) {
+  const staged = (enumEditBuffers && enumEditBuffers[en.name]) || null;
+  let values;
+  if (editingName === en.name && staged) {
+    values = staged;
+  } else if (Array.isArray(en.values)) {
+    values = en.values;
+  } else {
+    values = [];
+  }
   return (
     <div
       key={en.name}
@@ -43,6 +54,14 @@ export default function EnumBox({
               onClick={(e) => {
                 e.stopPropagation();
                 onCommitEdit && onCommitEdit(en.name);
+              }}
+            />
+            <i
+              className="fa fa-plus uml-icon-btn"
+              title="Add value"
+              onClick={(e) => {
+                e.stopPropagation();
+                startAddingEnum && startAddingEnum(en.name);
               }}
             />
             <i
@@ -81,7 +100,7 @@ export default function EnumBox({
       <hr className="uml-seperate" />
       <div className="uml-box-body">
         <div className="uml-attributes">
-          {(Array.isArray(en.values) ? en.values : []).map((v, idx) => (
+          {values.map((v, idx) => (
             <div className="uml-attr" key={idx}>
               {editingName === en.name ? (
                 <input
@@ -113,23 +132,29 @@ export default function EnumBox({
                 placeholder="value"
                 value={newEnum.value}
                 onChange={(e) => onUpdateValue('new', e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.stopPropagation();
+                    onCommitAddValue && onCommitAddValue(en.name);
+                  }
+                }}
               />
-              <button
+              <i
+                className="fa fa-plus uml-icon-btn"
+                title="Add value"
                 onClick={(e) => {
                   e.stopPropagation();
                   onCommitAddValue && onCommitAddValue(en.name);
                 }}
-              >
-                Add
-              </button>
-              <button
+              />
+              <i
+                className="fa fa-times uml-icon-btn"
+                title="Cancel"
                 onClick={(e) => {
                   e.stopPropagation();
                   onCancelAddValue && onCancelAddValue(en.name);
                 }}
-              >
-                Cancel
-              </button>
+              />
             </div>
           )}
         </div>
