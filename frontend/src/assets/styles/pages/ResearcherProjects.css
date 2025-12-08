@@ -3,3 +3,7 @@
   justify-content: flex-end;
   margin-bottom: 16px;
 }
+
+@media (max-width: 760px) {
+  .create-button-section { justify-content: flex-start; }
+}

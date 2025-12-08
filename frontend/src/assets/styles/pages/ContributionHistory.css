@@ -30,3 +30,9 @@
   color: #6b7280;
   margin-top: 8px;
 }
+
+@media (max-width: 760px) {
+  .project-detail-empty { padding: 24px; }
+  .contributions-list { gap: 10px; }
+  .contributions-pagination { text-align: center; }
+}

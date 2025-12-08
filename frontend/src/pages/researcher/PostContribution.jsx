@@ -162,19 +162,21 @@ export default function PostContribution() {
 
           <div className="post-contribution-actions">
             <button
-              type="submit"
-              className="btn btn-primary btn-sm"
-              disabled={submitting || projectStatus === 'CLOSED'}
-            >
-              {submitting ? 'Submitting...' : 'Submit'}
-            </button>
-            <button
               type="button"
               className="btn btn-outline btn-sm"
               onClick={handleCancel}
               disabled={submitting}
             >
-              Cancel
+              <i className="fa fa-times"></i>
+              <span>Cancel</span>
+            </button>
+            <button
+              type="submit"
+              className="btn btn-primary btn-sm"
+              disabled={submitting || projectStatus === 'CLOSED'}
+            >
+              <i className="fa fa-paper-plane"></i>
+              <span>Submit</span>
             </button>
           </div>
         </form>

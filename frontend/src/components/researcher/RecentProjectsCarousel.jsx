@@ -1,8 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../assets/styles/components/researcher/RecentProjectsCarousel.css';
 
 export default function RecentProjectsCarousel({ projects, onJoinClick }) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(3);
+
+  // Determine how many cards are visible based on window width
+  useEffect(() => {
+    const calc = () => {
+      const w = typeof window !== 'undefined' ? window.innerWidth : 1200;
+      if (w <= 760) return 1;
+      if (w <= 900) return 2;
+      return 3;
+    };
+    const update = () => setVisibleCount(calc());
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
   if (!projects || projects.length === 0) {
     return null;
@@ -23,8 +38,8 @@ export default function RecentProjectsCarousel({ projects, onJoinClick }) {
     return { ...project, _decoded: decoded, _truncated: truncated, _truncateClass: 'truncate' };
   });
 
-  // Max slides so we always have at least 3 cards visible
-  const maxSlideIndex = extendedProjects.length - 3;
+  // Max slides so we always have at least `visibleCount` cards visible
+  const maxSlideIndex = Math.max(0, extendedProjects.length - visibleCount);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => {
@@ -56,29 +71,25 @@ export default function RecentProjectsCarousel({ projects, onJoinClick }) {
           <div className="carousel-wrapper">
             <div
               className="carousel-track"
-              style={{ transform: `translateX(-${currentSlide * (100 / 3)}%)` }}
+              style={{ transform: `translateX(-${currentSlide * (100 / visibleCount)}%)` }}
             >
               {processedProjects.map((project, index) => (
                 <div key={`${project.id}-${index}`} className="carousel-slide">
                   <div className="project-card">
                     <div className="project-card-header">
-                      <h3 className="project-card-title">{project.title || 'Untitled Project'}</h3>
+                      <h3 className="project-card-title truncate">
+                        {project.title || 'Untitled Project'}
+                      </h3>
                       <span
                         className={`project-badge project-badge-${project.status?.toLowerCase()}`}
                       >
                         {project.status || 'Active'}
                       </span>
                     </div>
-                    <p
-                      className={`project-card-description ${project._truncateClass || ''}`}
-                      title={project._decoded}
-                    >
-                      {project._truncated}
-                    </p>
                     <div className="project-card-meta">
                       <div className="project-meta-item">
                         <i className="fa fa-user"></i>
-                        <span>{project.owner?.full_name || 'Unknown'}</span>
+                        <span className="truncate">{project.owner?.full_name || 'Unknown'}</span>
                       </div>
                       <div className="project-meta-item">
                         <i className="fa fa-calendar"></i>

@@ -140,10 +140,78 @@ textarea:focus {
   }
 }
 
+/* Move hero images below content earlier and make the images layout responsive */
+@media (max-width: 900px) {
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .hero-images {
+    width: 100%;
+    margin-top: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero-images {
+    grid-template-columns: 1fr; /* single column on small screens */
+    gap: 10px;
+  }
+  .hero-images img {
+    width: 100%;
+    height: auto; /* let image scale naturally on small screens */
+    object-fit: cover;
+    border-radius: 8px;
+  }
+}
+
 @media (max-width: 600px) {
   .grid--3 {
     grid-template-columns: 1fr;
   }
+}
+
+/* Responsive typography: scale headings and text on narrower viewports */
+@media (max-width: 900px) {
+  :root { font-size: 15px; }
+  .hero__title { font-size: 28px; }
+  .hero__subtitle { font-size: 15px; }
+  .section-title { font-size: 28px; }
+  .section-subtitle { font-size: 16px; }
+  .btn, .btn-primary, .btn-outline { font-size: 14px; }
+}
+
+@media (max-width: 600px) {
+  :root { font-size: 14px; }
+  .hero__title { font-size: 22px; }
+  .hero__subtitle { font-size: 13px; }
+  .section-title { font-size: 22px; }
+  .section-subtitle { font-size: 14px; }
+  .feature-card p, .project-card-description { font-size: 14px; }
+  .btn, .btn-primary, .btn-outline { font-size: 13px; padding: 10px 12px; }
+}
+
+/* Nav and small-screen adjustments */
+@media (max-width: 900px) {
+  .nav {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .nav__links {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .search input {
+    min-width: 160px;
+  }
+}
+
+@media (max-width: 600px) {
+  .nav__brand { font-size: 16px; }
+  .nav__links { gap: 6px; }
+  .hero { flex-direction: column; align-items: flex-start; }
 }
 
 /* Hero & Search */

@@ -88,3 +88,11 @@
 .text-error {
   color: #c62828;
 }
+
+@media (max-width: 760px) {
+  .code-editor-container { grid-template-columns: 1fr; }
+  .line-numbers { display: none; }
+  .code-editor { padding: 8px; font-size: 13px; }
+  .code-editor-container.limited-height { max-height: 220px; }
+  .editor-controls { text-align: left; }
+}

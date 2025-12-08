@@ -141,3 +141,31 @@
   background: #fff;
   margin: 12px 0;
 }
+
+/* Responsive: stack model and about sections and question grid on small screens */
+@media (max-width: 900px) {
+  .project-detail-content {
+    flex-direction: column;
+  }
+  .project-detail-model-section,
+  .project-detail-about-section {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    padding: 0;
+  }
+  .question-detail-grid {
+    display: block;
+  }
+  .question-detail-main,
+  .question-detail-side {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .question-detail-divider {
+    display: none;
+  }
+  .project-detail-actions {
+    justify-content: flex-start;
+  }
+}

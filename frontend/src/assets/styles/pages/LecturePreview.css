@@ -37,3 +37,19 @@
 .lecture-preview .attachment-item a.btn {
   align-self: flex-start;
 }
+
+/* Responsive: stack preview header on small screens and left-align back button */
+@media (max-width: 760px) {
+  .preview-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .preview-header > div:first-child {
+    width: 100%;
+  }
+  .preview-header button {
+    align-self: flex-start;
+  }
+}

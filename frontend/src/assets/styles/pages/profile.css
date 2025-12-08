@@ -105,6 +105,15 @@
 	flex: 0 0 60%;
 }
 
+@media (max-width: 760px) {
+	.profile-top { flex-direction: column; }
+	.profile-top .profile-card:first-child { flex: 1 1 auto; min-width: 0; }
+	.profile-top .description-card { flex: 1 1 auto; min-width: 0; }
+	.teacher-profile__avatar, .profile-avatar { width: 72px; height: 72px; }
+	.profile-name { font-size: 18px; }
+	.profile-body { padding: 12px; }
+}
+
 .description-card .profile-body {
 	/* allow description to take remaining space */
 	padding: 24px;

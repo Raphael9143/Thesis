@@ -84,3 +84,21 @@ input[type='time'] {
   justify-content: flex-end;
   width: 100%;
 }
+
+/* Mobile adjustments: make modal use most of viewport and keep inner scrolling */
+@media (max-width: 600px) {
+  .modal-container {
+    width: calc(100vw - 32px);
+    max-width: 92vw;
+    padding: 12px;
+    border-radius: 12px;
+  }
+  .modal-body {
+    padding: 12px 16px;
+    align-items: stretch;
+  }
+  .modal-header {
+    padding: 12px 12px;
+    justify-content: flex-start;
+  }
+}

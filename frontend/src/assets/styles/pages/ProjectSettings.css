@@ -103,3 +103,10 @@
 .text-muted {
   color: #6b7280;
 }
+
+@media (max-width: 760px) {
+  .settings-section { padding: 12px; }
+  .settings-radio-option { padding: 12px; gap: 8px; }
+  .settings-section-description { padding: 0 0.6rem; }
+  .btn-danger { width: 100%; }
+}

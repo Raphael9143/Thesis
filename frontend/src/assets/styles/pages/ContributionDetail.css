@@ -360,3 +360,16 @@
   color: #991b1b;
   text-decoration: line-through;
 }
+
+@media (max-width: 900px) {
+  .contribution-detail-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .contribution-detail-meta { padding: 12px; gap: 12px; }
+  .contribution-detail-title { font-size: 22px; }
+  .contribution-detail-review-actions { flex-direction: column; align-items: stretch; }
+  .contribution-detail-review-actions .btn { width: 100%; }
+}
+
+@media (max-width: 760px) {
+  .contribution-diff-line-num { display: none; }
+  .contribution-diff-line-text { padding: 8px; font-size: 13px; }
+}

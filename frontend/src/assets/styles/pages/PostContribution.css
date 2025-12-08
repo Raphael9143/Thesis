@@ -38,3 +38,8 @@
   justify-content: flex-end;
   margin-top: 8px;
 }
+
+@media (max-width: 760px) {
+  .post-contribution-editor .code-editor-container { min-height: 240px; }
+  .post-contribution-actions { justify-content: flex-start; flex-wrap: wrap; }
+}

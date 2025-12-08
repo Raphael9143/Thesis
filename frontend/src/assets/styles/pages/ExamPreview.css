@@ -24,3 +24,19 @@
   font-size: 0.9rem;
   color: var(--color-muted-2);
 }
+
+/* Responsive: stack preview header on small screens and left-align any buttons */
+@media (max-width: 760px) {
+  .preview-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .preview-header > div:first-child {
+    width: 100%;
+  }
+  .preview-header button {
+    align-self: flex-start;
+  }
+}
