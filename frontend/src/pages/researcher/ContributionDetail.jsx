@@ -198,21 +198,16 @@ export default function ContributionDetail() {
   return (
     <Section>
       <Card>
-        <div className="contribution-detail-header">
-          <button className="btn btn-outline btn-sm" onClick={() => navigate(-1)}>
-            <i className="fa fa-arrow-left" />
-            <span>Back</span>
-          </button>
-          <div
-            className="contribution-detail-status-badge"
-            style={{ backgroundColor: getStatusColor(contribution.status) }}
-          >
-            {formatStatus(contribution.status)}
-          </div>
-        </div>
-
         <div className="contribution-detail-content">
-          <h2 className="contribution-detail-title">{contribution.title}</h2>
+          <div className="contribution-detail-header">
+            <h2 className="contribution-detail-title">{contribution.title}</h2>
+            <div
+              className="contribution-detail-status-badge"
+              style={{ backgroundColor: getStatusColor(contribution.status) }}
+            >
+              {formatStatus(contribution.status)}
+            </div>
+          </div>
 
           <div className="contribution-detail-meta">
             <div className="contribution-detail-meta-item">
