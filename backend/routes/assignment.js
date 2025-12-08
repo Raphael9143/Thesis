@@ -501,7 +501,7 @@ router.post("/add-to-class", auth, AssignmentController.addAssignmentToClass);
  * @swagger
  * /api/assignments/{id}:
  *   delete:
- *     summary: Delete an assignment from the database (admin only)
+ *     summary: Delete an assignment from the database (admin or homeroom teacher)
  *     tags: [Assignment]
  *     security:
  *       - bearerAuth: []

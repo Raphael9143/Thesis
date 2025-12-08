@@ -192,6 +192,14 @@ const AuthController = {
         });
       }
 
+      // If account is banned, deny login with a specific message
+      if (user.status && user.status.toUpperCase() === "BANNED") {
+        return res.status(403).json({
+          success: false,
+          message: "Account is banned",
+        });
+      }
+
       // Kiểm tra password
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {

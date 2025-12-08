@@ -601,13 +601,13 @@ const AssignmentController = {
     }
   },
 
-  // Delete assignment (admin only)
+  // Delete assignment (admin or homeroom teacher or creator)
   deleteAssignment: async (req, res) => {
     try {
-      if (!req.user || req.user.role !== "ADMIN")
+      if (!req.user)
         return res.status(403).json({
           success: false,
-          message: "Only admin can delete assignments.",
+          message: "Authentication required.",
         });
       const { id } = req.params;
       const assignment = await Assignment.findByPk(id);
@@ -615,6 +615,26 @@ const AssignmentController = {
         return res
           .status(404)
           .json({ success: false, message: "Assignment not found." });
+
+      // Determine the class linked to the assignment's course (if any)
+      const classCourse = await ClassCourse.findOne({
+        where: { course_id: assignment.course_id },
+      });
+      let classObj = null;
+      if (classCourse) classObj = await Class.findByPk(classCourse.class_id);
+
+      // Permission: ADMIN, or TEACHER who created the assignment, or the homeroom teacher of the linked class
+      if (req.user.role === "ADMIN") {
+        // allowed
+      } else if (req.user.role === "TEACHER") {
+        const isCreator = assignment.created_by === req.user.userId;
+        const isClassTeacher = classObj && classObj.teacher_id === req.user.userId;
+        if (!isCreator && !isClassTeacher)
+          return res.status(403).json({ success: false, message: "Forbidden" });
+      } else {
+        return res.status(403).json({ success: false, message: "Only teachers or admins can delete assignments." });
+      }
+
       await AssignmentCourse.destroy({ where: { assignment_id: id } });
       await assignment.destroy();
       res.json({ success: true, message: "Assignment deleted from database." });
