@@ -164,7 +164,8 @@ export default function ContributionComments({ contributionId, projectStatus }) 
             className="btn btn-primary btn-sm"
             disabled={submitting || !commentText.trim() || projectStatus === 'CLOSED'}
           >
-            {submitting ? 'Commenting...' : 'Comment'}
+            <i className="fa-solid fa-comment"></i>
+            <span>Comment</span>
           </button>
         </div>
       </form>
