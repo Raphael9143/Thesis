@@ -114,10 +114,12 @@ export default function CreateProjectModal({ open, onClose, onCreated }) {
             onClick={onClose}
             disabled={submitting}
           >
-            Cancel
+            <i className="fa fa-times" />
+            <span>Cancel</span>
           </button>
           <button type="submit" className="btn btn-outline btn-sm" disabled={submitting}>
-            {submitting ? 'Saving...' : 'Save as Draft'}
+            <i className="fa fa-save" />
+            <span>Draft</span>
           </button>
           <button
             type="button"
@@ -125,7 +127,8 @@ export default function CreateProjectModal({ open, onClose, onCreated }) {
             onClick={(e) => onSubmit(e, true)}
             disabled={submitting}
           >
-            {submitting ? 'Publishing...' : 'Publish'}
+            <i className="fa fa-upload" />
+            <span>Publish</span>
           </button>
         </div>
       </form>

@@ -285,7 +285,17 @@ export default function QuestionDetail() {
                   {!answersLoading && answers.length > 0 && (
                     <div className="answers-list">
                       {answers.map((a) => (
-                        <div key={a.id} className="contribution-comment-item">
+                        <div
+                          key={a.id}
+                          className={
+                            'contribution-comment-item ' +
+                            ((a.contributor_role || a.contributor?.role || a.user?.role || '')
+                              .toString()
+                              .toLowerCase()
+                              ? `role-${(a.contributor_role || a.contributor?.role || a.user?.role || '').toString().toLowerCase()}`
+                              : '')
+                          }
+                        >
                           <div className="contribution-comment-avatar">
                             {a.user?.avatar_url ? (
                               <img src={toFullUrl(a.user.avatar_url)} alt={a.user?.full_name} />
@@ -298,7 +308,13 @@ export default function QuestionDetail() {
                           <div className="contribution-comment-content">
                             <div className="contribution-comment-header">
                               <span className="contribution-comment-author">
-                                {a.user?.full_name || a.user?.email || 'Unknown'}
+                                {a.contributor_role === 'OWNER' &&
+                                  (a.user?.full_name + ' (Owner)' || 'Anonymous')}
+                                {a.contributor_role === 'MODERATOR' &&
+                                  (a.user?.full_name + ' (Moderator)' || 'Anonymous')}
+                                {a.contributor_role !== 'MODERATOR' &&
+                                  a.contributor_role !== 'OWNER' &&
+                                  (a.user?.full_name || 'Anonymous')}
                                 {Number(a.user_id) === currentUserId && (
                                   <span className="contribution-comment-you"> (You)</span>
                                 )}
@@ -330,7 +346,7 @@ export default function QuestionDetail() {
                               )}
                             </div>
 
-                            {a.status === 'PENDING' && (
+                            {a.status === 'PENDING' && (isOwner || isModerator) && (
                               <div style={{ marginTop: 8 }}>
                                 <button
                                   className="btn btn-outline btn-sm"
@@ -339,15 +355,6 @@ export default function QuestionDetail() {
                                   <i className="fa-solid fa-check"></i>
                                   <span>Approve</span>
                                 </button>
-                                <span
-                                  role="button"
-                                  aria-label="Reject answer"
-                                  title="Reject answer"
-                                  style={{ marginLeft: 8, color: 'red', cursor: 'pointer' }}
-                                  onClick={() => handleDeleteAnswer(a.id)}
-                                >
-                                  <i className="fa-solid fa-trash" />
-                                </span>
                               </div>
                             )}
                           </div>

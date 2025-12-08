@@ -45,6 +45,15 @@
   border: 2px solid #e5e7eb;
 }
 
+/* Role-based borders */
+.contribution-comment-item.role-owner {
+  border-color: #10b981; /* green-500 */
+}
+
+.contribution-comment-item.role-moderator {
+  border-color: #3b82f6; /* blue-500 */
+}
+
 .contribution-comment-avatar {
   flex-shrink: 0;
   width: 40px;

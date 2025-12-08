@@ -93,7 +93,15 @@ export default function ContributionComments({ contributionId, projectStatus }) 
       {!loading && comments.length > 0 && (
         <div className="contribution-comments-list">
           {comments.map((comment) => (
-            <div key={comment.id} className="contribution-comment-item">
+            <div
+              key={comment.id}
+              className={
+                'contribution-comment-item ' +
+                ((comment.contributor_role || comment.user?.role || '').toString().toLowerCase()
+                  ? `role-${(comment.contributor_role || comment.user?.role || '').toString().toLowerCase()}`
+                  : '')
+              }
+            >
               <div className="contribution-comment-avatar">
                 {comment.user?.avatar_url ? (
                   <img src={toFullUrl(comment.user.avatar_url)} alt={comment.user.full_name} />
