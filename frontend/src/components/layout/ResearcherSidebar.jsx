@@ -4,6 +4,7 @@ import '../../assets/styles/components/layout/LeftSidebar.css';
 
 export default function ResearcherSidebar({ collapsed = false, onToggleCollapse = () => {} }) {
   const navigate = useNavigate();
+  const role = (sessionStorage.getItem('role') || '').toString().toLowerCase();
 
   const goto = (path) => navigate(path);
 
@@ -72,10 +73,12 @@ export default function ResearcherSidebar({ collapsed = false, onToggleCollapse 
       </nav>
 
       <div className="leftsidebar__bottom">
-        <button className="leftsidebar__link" onClick={() => goto('/researcher/profile')}>
-          <i className="fa fa-user" aria-hidden />
-          <span>Profile</span>
-        </button>
+        {role !== 'student' && role !== 'teacher' && (
+          <button className="leftsidebar__link" onClick={() => goto('/researcher/profile')}>
+            <i className="fa fa-user" aria-hidden />
+            <span>Profile</span>
+          </button>
+        )}
         <button className="leftsidebar__link" onClick={goToEducation}>
           <i className="fa fa-graduation-cap" aria-hidden />
           <span>Education</span>
