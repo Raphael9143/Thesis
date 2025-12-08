@@ -12,7 +12,6 @@ import '../../assets/styles/pages/LecturePreview.css';
 import FilePreview from '../../components/ui/FilePreview';
 import toFullUrl from '../../utils/FullURLFile';
 import fmtDate from '../../utils/FormatDate';
-import { formatDue } from '../../utils/previewMeta';
 
 // resolveAttachmentUrls is provided by src/utils/resolveAttachmentUrls.js
 
@@ -142,9 +141,6 @@ export default function LecturePreview() {
               </div>
               <div>
                 <strong>Status:</strong> {lecture.status}
-              </div>
-              <div>
-                <strong>Due</strong> {formatDue(null)} &nbsp; <strong>Available</strong>
               </div>
               <div>
                 {lecture.attachment && (
