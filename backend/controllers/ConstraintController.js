@@ -118,6 +118,30 @@ const ConstraintController = {
         comment_text: comment_text || null,
       });
 
+      // If the project type is OCL, ensure the contributor is added as a member (CONTRIBUTOR)
+      try {
+        const project = await ResearchProject.findByPk(question.research_project_id);
+        if (project && project.type && project.type.toUpperCase() === "OCL") {
+          const existing = await ResearchProjectMember.findOne({
+            where: {
+              research_project_id: project.id,
+              user_id: userId,
+            },
+          });
+          if (!existing) {
+            await ResearchProjectMember.create({
+              research_project_id: project.id,
+              user_id: userId,
+              role: "CONTRIBUTOR",
+              joined_at: new Date(),
+            });
+          }
+        }
+      } catch (e) {
+        // Non-fatal: membership creation failure shouldn't block answer submission
+        console.warn("Could not add contributor membership:", e && e.message ? e.message : e);
+      }
+
       // Return the created answer including contributor basic info
       const ans = await ConstraintAnswer.findByPk(created.id, {
         include: [{ model: User, as: "contributor", attributes: ["id", "full_name"] }],
