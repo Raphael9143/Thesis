@@ -98,7 +98,8 @@ export default function AddContributorsModal({ open, onClose, onAdded, projectId
             onClick={onClose}
             disabled={submitting}
           >
-            Cancel
+            <i className="fa fa-times" />
+            <span>Cancel</span>
           </button>
           <button
             type="submit"
@@ -106,7 +107,8 @@ export default function AddContributorsModal({ open, onClose, onAdded, projectId
             disabled={submitting || projectStatus === 'CLOSED'}
             title={projectStatus === 'CLOSED' ? 'Project is closed' : ''}
           >
-            {submitting ? 'Adding...' : 'Add Contributors'}
+            <i className="fa fa-user-plus" />
+            <span>Add Contributors</span>
           </button>
         </div>
       </form>

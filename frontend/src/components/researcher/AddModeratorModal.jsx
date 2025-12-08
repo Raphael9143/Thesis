@@ -87,7 +87,8 @@ export default function AddModeratorModal({ open, onClose, onAdded, projectId, p
             onClick={onClose}
             disabled={submitting}
           >
-            Cancel
+            <i className="fa fa-times" />
+            <span>Cancel</span>
           </button>
           <button
             type="submit"
@@ -95,7 +96,8 @@ export default function AddModeratorModal({ open, onClose, onAdded, projectId, p
             disabled={submitting || projectStatus === 'CLOSED'}
             title={projectStatus === 'CLOSED' ? 'Project is closed' : ''}
           >
-            {submitting ? 'Adding...' : 'Add Moderator'}
+            <i className="fa fa-user-plus project-detail-moderator-icon" />
+            <span>Add Moderator</span>
           </button>
         </div>
       </form>
