@@ -134,12 +134,45 @@ const ConstraintController = {
   listAnswers: async (req, res) => {
     try {
       const { questionId } = req.params;
+      // Ensure question exists and get project id
+      const question = await ConstraintQuestion.findByPk(questionId);
+      if (!question)
+        return res.status(404).json({ success: false, message: "Question not found" });
+
       const answers = await ConstraintAnswer.findAll({
         where: { question_id: questionId },
         order: [["created_at", "ASC"]],
         include: [{ model: User, as: "contributor", attributes: ["id", "full_name"] }],
       });
-      res.json({ success: true, data: answers });
+
+      // Fetch membership roles for all contributors in a single query
+      const contributorIds = answers.map((a) => a.contributor_id).filter(Boolean);
+      let memberMap = {};
+      if (contributorIds.length) {
+        const members = await ResearchProjectMember.findAll({
+          where: {
+            research_project_id: question.research_project_id,
+            user_id: contributorIds,
+          },
+        });
+        memberMap = members.reduce((m, mem) => {
+          m[mem.user_id] = mem.role;
+          return m;
+        }, {});
+      }
+
+      // Annotate each answer with contributor_role: 'owner'|'moderator'|'contributor'|null
+      const out = answers.map((a) => {
+        const plain = a.get ? a.get({ plain: true }) : a;
+        const role = memberMap[plain.contributor_id];
+        if (role === "OWNER") plain.contributor_role = "OWNER";
+        else if (role === "MODERATOR") plain.contributor_role = "MODERATOR";
+        else if (role) plain.contributor_role = "CONTRIBUTOR";
+        else plain.contributor_role = null;
+        return plain;
+      });
+
+      res.json({ success: true, data: out });
     } catch (err) {
       console.error("listAnswers error:", err);
       res.status(500).json({ success: false, message: "Server error" });
